@@ -3,5 +3,6 @@
 ### TODO
 - [x] Make Network class
 - [x] Test on MNIST
-- [ ] Simplify structure
-- [ ] Test on iai
+- [x] Simplify structure
+- [x] Test on iai
+- [ ] Test on larger scale
