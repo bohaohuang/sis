@@ -80,10 +80,10 @@ class PatchExtractorInria(object):
         cnt_str = '{0:05d}'.format(cnt)
         if appendix is None:
             image_name = '{}{}_img_{}.jpg'.format(city_name, tile_id, cnt_str)
-            label_name = '{}{}_label_{}.jpg'.format(city_name, tile_id, cnt_str)
+            label_name = '{}{}_label_{}.png'.format(city_name, tile_id, cnt_str)
         else:
             image_name = '{}{}_img_{}_{}.jpg'.format(city_name, tile_id, appendix, cnt_str)
-            label_name = '{}{}_label_{}_{}.jpg'.format(city_name, tile_id, appendix, cnt_str)
+            label_name = '{}{}_label_{}_{}.png'.format(city_name, tile_id, appendix, cnt_str)
         file_name = os.path.join(dest_dir, self.name, image_name)
         scipy.misc.imsave(file_name, patch_img)
         file_name = os.path.join(dest_dir, self.name, label_name)
@@ -115,22 +115,14 @@ if __name__ == '__main__':
     from rsrClassData import rsrClassData
     Data = rsrClassData(r'/media/ei-edl01/data/remote_sensing_data')
 
-    (collect_files_train, meta_train) = Data.getCollectionByName('bohao_inria_train')
-    label = collect_files_train[0][1]
-    label_img = scipy.misc.imread(label)
-    print(np.unique(label_img.flatten()))
-    import matplotlib.pyplot as plt
-    plt.hist(label_img.flatten())
-    plt.show()
-
-    '''from random import shuffle
+    from random import shuffle
 
     (collect_files_train, meta_train) = Data.getCollectionByName('bohao_inria_train')
-    shuffle(collect_files_train)
-    pe = PatchExtractorInria(collect_files_train[:10], patch_size=(224, 224), appendix='train_toy')
+    #shuffle(collect_files_train)
+    pe = PatchExtractorInria(collect_files_train, patch_size=(224, 224), appendix='train_noaug')
     pe.extract(r'/media/ei-edl01/user/bh163/data/iai')
 
     (collect_files_valid, meta_valid) = Data.getCollectionByName('bohao_inria_valid')
-    shuffle(collect_files_valid)
-    pe = PatchExtractorInria(collect_files_valid[:10], patch_size=(224, 224), appendix='valid_toy')
-    pe.extract(r'/media/ei-edl01/user/bh163/data/iai')'''
+    #shuffle(collect_files_valid)
+    pe = PatchExtractorInria(collect_files_valid, patch_size=(224, 224), appendix='valid_noaug')
+    pe.extract(r'/media/ei-edl01/user/bh163/data/iai')

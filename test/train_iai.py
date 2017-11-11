@@ -1,12 +1,13 @@
 import os
+import time
 import argparse
 import numpy as np
 import tensorflow as tf
 from network import unet
 from dataReader import image_reader
 
-TRAIN_DATA_DIR = r'/media/ei-edl01/user/bh163/data/iai/PS_(224, 224)-OL_0-AF_train'
-VALID_DATA_DIR = r'/media/ei-edl01/user/bh163/data/iai/PS_(224, 224)-OL_0-AF_valid'
+TRAIN_DATA_DIR = r'/media/ei-edl01/user/bh163/data/iai/PS_(224, 224)-OL_0-AF_train_noaug'
+VALID_DATA_DIR = r'/media/ei-edl01/user/bh163/data/iai/PS_(224, 224)-OL_0-AF_valid_noaug'
 CITY_NAME = 'chicago,kitsap,tyrol-w,vienna'
 TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(6,37)])
 VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,6)])
@@ -117,6 +118,7 @@ def main(flags):
     # set up graph and initialize
     config = tf.ConfigProto()
 
+    start_time = time.time()
     with tf.Session(config=config) as sess:
         init = tf.global_variables_initializer()
         sess.run(init)
@@ -138,6 +140,8 @@ def main(flags):
             coord.join(threads)
             saver.save(sess, '{}/model.ckpt'.format(model.ckdir), global_step=model.global_step)
 
+    duration = time.time() - start_time
+    print('duration {:.2f}'.format(duration/60/60))
 
 if __name__ == '__main__':
     flags = read_flag()
