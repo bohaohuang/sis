@@ -94,6 +94,11 @@ class PatchExtractorInria(object):
     def extract(self, dest_dir):
         if not os.path.exists(os.path.join(dest_dir, self.name)):
             os.makedirs(os.path.join(dest_dir, self.name))
+        else:
+            print('{} already exists, only return the path'.format(
+                os.path.join(dest_dir, self.name)
+            ))
+            return os.path.join(dest_dir, self.name)
 
         for file_tuple in tqdm(self.file_list):
             block = get_block(file_tuple)
@@ -109,6 +114,7 @@ class PatchExtractorInria(object):
                         patch_aug = func(patch)
                         self.save_img_label(patch_aug, dest_dir, city_name, tile_id, cnt,
                                             appendix=func.__name__.replace('_', ''))
+        return os.path.join(dest_dir, self.name)
 
 
 if __name__ == '__main__':

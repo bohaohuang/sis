@@ -11,26 +11,27 @@ class UnetModel(network.Network):
                                                             input_size[1] * 3, 3], name='validation_images')
         self.update_ops = None
 
-    def create_graph(self, x_name, class_num):
+    def create_graph(self, x_name, class_num, start_filter_num=32):
         # TODO add a parameter here: start_filter_num=32
         self.class_num = class_num
+        sfn = start_filter_num
 
         # downsample
-        conv1, pool1 = self.conv_conv_pool(self.inputs[x_name], [32, 32], self.trainable, name='conv1')
-        conv2, pool2 = self.conv_conv_pool(pool1, [64, 64], self.trainable, name='conv2')
-        conv3, pool3 = self.conv_conv_pool(pool2, [128, 128], self.trainable, name='conv3')
-        conv4, pool4 = self.conv_conv_pool(pool3, [256, 256], self.trainable, name='conv4')
-        conv5 = self.conv_conv_pool(pool4, [512, 512], self.trainable, name='conv5', pool=False)
+        conv1, pool1 = self.conv_conv_pool(self.inputs[x_name], [sfn, sfn], self.trainable, name='conv1')
+        conv2, pool2 = self.conv_conv_pool(pool1, [sfn*2, sfn*2], self.trainable, name='conv2')
+        conv3, pool3 = self.conv_conv_pool(pool2, [sfn*4, sfn*4], self.trainable, name='conv3')
+        conv4, pool4 = self.conv_conv_pool(pool3, [sfn*8, sfn*8], self.trainable, name='conv4')
+        conv5 = self.conv_conv_pool(pool4, [sfn*16, sfn*16], self.trainable, name='conv5', pool=False)
 
         # upsample
         up6 = self.upsample_concat(conv5, conv4, name='6')
-        conv6 = self.conv_conv_pool(up6, [256, 256], self.trainable, name='up6', pool=False)
+        conv6 = self.conv_conv_pool(up6, [sfn*8, sfn*8], self.trainable, name='up6', pool=False)
         up7 = self.upsample_concat(conv6, conv3, name='7')
-        conv7 = self.conv_conv_pool(up7, [128, 128], self.trainable, name='up7', pool=False)
+        conv7 = self.conv_conv_pool(up7, [sfn*4, sfn*4], self.trainable, name='up7', pool=False)
         up8 = self.upsample_concat(conv7, conv2, name='8')
-        conv8 = self.conv_conv_pool(up8, [64, 64], self.trainable, name='up8', pool=False)
+        conv8 = self.conv_conv_pool(up8, [sfn*2, sfn*2], self.trainable, name='up8', pool=False)
         up9 = self.upsample_concat(conv8, conv1, name='9')
-        conv9 = self.conv_conv_pool(up9, [32, 32], self.trainable, name='up9', pool=False)
+        conv9 = self.conv_conv_pool(up9, [sfn, sfn], self.trainable, name='up9', pool=False)
 
         self.pred = tf.layers.conv2d(conv9, class_num, (1, 1), name='final', activation=None, padding='same')
 

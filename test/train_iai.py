@@ -3,21 +3,27 @@ import time
 import argparse
 import numpy as np
 import tensorflow as tf
+import utils
 from network import unet
-from dataReader import image_reader
+from dataReader import image_reader, patch_extractor
+from rsrClassData import rsrClassData
 
-TRAIN_DATA_DIR = r'/media/ei-edl01/user/bh163/data/iai/PS_(224, 224)-OL_0-AF_train_noaug'
-VALID_DATA_DIR = r'/media/ei-edl01/user/bh163/data/iai/PS_(224, 224)-OL_0-AF_valid_noaug'
-CITY_NAME = 'chicago,kitsap,tyrol-w,vienna'
-TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(6,37)])
-VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,6)])
+TRAIN_DATA_DIR = 'bohao_inria_train'
+VALID_DATA_DIR = 'bohao_inria_valid'
+CITY_NAME = 'austin,chicago,kitsap,tyrol-w'
+RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
+PATCH_DIR = r'/media/ei-edl01/user/bh163/data/iai'
+TRAIN_PATCH_APPENDIX = 'train_noaug'
+VALID_PATCH_APPENDIX = 'valid_noaug'
+TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(6,7)])
+VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,2)])
 RANDOM_SEED = 1234
 BATCH_SIZE = 10
 LEARNING_RATE = 1e-3
 INPUT_SIZE = (224, 224)
 EPOCHS = 100
 CKDIR = r'./models'
-MODEL_NAME = 'UnetInria_no_aug'
+MODEL_NAME = 'UnetInria_no_aug_test'
 NUM_CLASS = 2
 N_TRAIN = 8000
 GPU = '0'
@@ -30,6 +36,10 @@ def read_flag():
     parser = argparse.ArgumentParser()
     parser.add_argument('--train-data-dir', default=TRAIN_DATA_DIR, help='path to release folder')
     parser.add_argument('--valid-data-dir', default=VALID_DATA_DIR, help='path to release folder')
+    parser.add_argument('--rsr-data-dir', default=RSR_DATA_DIR, help='path to rsrClassData folder')
+    parser.add_argument('--patch-dir', default=PATCH_DIR, help='path to patch directory')
+    parser.add_argument('--train-patch-appendix', default=TRAIN_PATCH_APPENDIX, help='train patch appendix')
+    parser.add_argument('--valid-patch-appendix', default=VALID_PATCH_APPENDIX, help='valid patch appendix')
     parser.add_argument('--train-tile-names', default=TRAIN_TILE_NAMES, help='image tiles')
     parser.add_argument('--valid-tile-names', default=VALID_TILE_NAMES, help='image tiles')
     parser.add_argument('--city-name', type=str, default=CITY_NAME, help='city name (default austin)')
@@ -51,34 +61,6 @@ def read_flag():
     return flags
 
 
-def decode_labels(label, num_images=10):
-    n, h, w, c = label.shape
-    outputs = np.zeros((n, h, w, 3), dtype=np.uint8)
-    label_colors = [(255,255,255),(0,0,255)]
-    for i in range(num_images):
-        pixels = np.zeros((h, w, 3), dtype=np.uint8)
-        for j in range(h):
-            for k in range(w):
-                pixels[j,k] = label_colors[np.int(label[i,j,k,0])]
-        outputs[i] = pixels
-    return outputs
-
-
-def get_pred_labels(pred):
-    n, h, w, c = pred.shape
-    outputs = np.zeros((n, h, w, 1), dtype=np.uint8)
-    for i in range(n):
-        outputs[i] = np.expand_dims(np.argmax(pred[i,:,:,:], axis=2), axis=2)
-    return outputs
-
-
-def image_summary(image, truth, prediction):
-    truth_img = decode_labels(truth, 10)
-    pred_labels = get_pred_labels(prediction)
-    pred_img = decode_labels(pred_labels, 10)
-    return np.concatenate([image, truth_img, pred_img], axis=2)
-
-
 def main(flags):
     # set gpu
     os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
@@ -87,15 +69,31 @@ def main(flags):
     np.random.seed(flags.random_seed)
     tf.set_random_seed(flags.random_seed)
 
-    # TODO add data prepare step here
+    # data prepare step
+    Data = rsrClassData(flags.rsr_data_dir)
+    (collect_files_train, meta_train) = Data.getCollectionByName(flags.train_data_dir)
+    pe_train = patch_extractor.PatchExtractorInria(collect_files_train, patch_size=flags.input_size,
+                                                   appendix=flags.train_patch_appendix)
+    train_data_dir = pe_train.extract(flags.patch_dir)
+    (collect_files_valid, meta_valid) = Data.getCollectionByName(flags.valid_data_dir)
+    pe_valid = patch_extractor.PatchExtractorInria(collect_files_valid, patch_size=flags.input_size,
+                                                   appendix=flags.valid_patch_appendix)
+    valid_data_dir = pe_valid.extract(flags.patch_dir)
+    # get label dict
+    label_dict = {v: k for k, v in meta_train['colormap'].items()}
 
     # image reader
     coord = tf.train.Coordinator()
-    reader_train = image_reader.ImageReader(flags.train_data_dir, flags.input_size, coord)
-    X_batch_op, y_batch_op = reader_train.dequeue(flags.batch_size)
+
+    # load reader
+    with tf.name_scope('image_loader'):
+        reader_train = image_reader.ImageReader(train_data_dir, flags.input_size, coord,
+                                                city_list=flags.city_name, tile_list=flags.train_tile_names)
+        reader_valid = image_reader.ImageReader(valid_data_dir, flags.input_size, coord,
+                                                city_list=flags.city_name, tile_list=flags.valid_tile_names)
+        X_batch_op, y_batch_op = reader_train.dequeue(flags.batch_size)
+        X_batch_op_valid, y_batch_op_valid = reader_valid.dequeue(flags.batch_size * 2)
     reader_train_op = [X_batch_op, y_batch_op]
-    reader_valid = image_reader.ImageReader(flags.valid_data_dir, flags.input_size, coord)
-    X_batch_op_valid, y_batch_op_valid = reader_valid.dequeue(flags.batch_size * 2)
     reader_valid_op = [X_batch_op_valid, y_batch_op_valid]
 
     # define place holder
@@ -118,6 +116,7 @@ def main(flags):
     # set up graph and initialize
     config = tf.ConfigProto()
 
+    # run training
     start_time = time.time()
     with tf.Session(config=config) as sess:
         init = tf.global_variables_initializer()
@@ -134,14 +133,14 @@ def main(flags):
             train_summary_writer = tf.summary.FileWriter(model.ckdir, sess.graph)
 
             model.train('X', 'Y', flags.epochs, flags.n_train, flags.batch_size, sess, train_summary_writer,
-                        train_reader=reader_train_op, valid_reader=reader_valid_op, image_summary=image_summary)
+                        train_reader=reader_train_op, valid_reader=reader_valid_op, image_summary=utils.image_summary)
         finally:
             coord.request_stop()
             coord.join(threads)
             saver.save(sess, '{}/model.ckpt'.format(model.ckdir), global_step=model.global_step)
 
     duration = time.time() - start_time
-    print('duration {:.2f}'.format(duration/60/60))
+    print('duration {:.2f} hours'.format(duration/60/60))
 
 if __name__ == '__main__':
     flags = read_flag()
