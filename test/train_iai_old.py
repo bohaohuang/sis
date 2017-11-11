@@ -1,12 +1,17 @@
 import os
+import sys
 import argparse
+import matplotlib.pyplot as plt
 import numpy as np
+import time
 import tensorflow as tf
+sys.path.append(os.path.realpath(r'/home/lab/Documents/bohao/code/sisl'))
+from utils import image_reader
+from utils import model
 from network import unet
-from dataReader import image_reader
 
-TRAIN_DATA_DIR = r'/media/ei-edl01/user/bh163/data/iai/PS_(224, 224)-OL_0-AF_train'
-VALID_DATA_DIR = r'/media/ei-edl01/user/bh163/data/iai/PS_(224, 224)-OL_0-AF_valid'
+TRAIN_DATA_DIR = r'/media/ei-edl01/user/bh163/data/iai/train_patches_new'
+VALID_DATA_DIR = r'/media/ei-edl01/user/bh163/data/iai/valid_patches_new'
 CITY_NAME = 'chicago,kitsap,tyrol-w,vienna'
 TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(6,37)])
 VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,6)])
@@ -50,31 +55,10 @@ def read_flag():
     return flags
 
 
-def decode_labels(label, num_images=10):
-    n, h, w, c = label.shape
-    outputs = np.zeros((n, h, w, 3), dtype=np.uint8)
-    label_colors = [(255,255,255),(0,0,255)]
-    for i in range(num_images):
-        pixels = np.zeros((h, w, 3), dtype=np.uint8)
-        for j in range(h):
-            for k in range(w):
-                pixels[j,k] = label_colors[np.int(label[i,j,k,0])]
-        outputs[i] = pixels
-    return outputs
-
-
-def get_pred_labels(pred):
-    n, h, w, c = pred.shape
-    outputs = np.zeros((n, h, w, 1), dtype=np.uint8)
-    for i in range(n):
-        outputs[i] = np.expand_dims(np.argmax(pred[i,:,:,:], axis=2), axis=2)
-    return outputs
-
-
 def image_summary(image, truth, prediction):
-    truth_img = decode_labels(truth, 10)
-    pred_labels = get_pred_labels(prediction)
-    pred_img = decode_labels(pred_labels, 10)
+    truth_img = image_reader.decode_labels(truth, 10, ds='iai')
+    pred_labels = image_reader.get_pred_labels(prediction)
+    pred_img = image_reader.decode_labels(pred_labels, 10, ds='iai')
     return np.concatenate([image, truth_img, pred_img], axis=2)
 
 
@@ -85,17 +69,23 @@ def main(flags):
     # environment settings
     np.random.seed(flags.random_seed)
     tf.set_random_seed(flags.random_seed)
-
-    # TODO add data prepare step here
-
     # image reader
-    coord = tf.train.Coordinator()
-    reader_train = image_reader.ImageReader(flags.train_data_dir, flags.input_size, coord)
-    X_batch_op, y_batch_op = reader_train.dequeue(flags.batch_size)
-    reader_train_op = [X_batch_op, y_batch_op]
-    reader_valid = image_reader.ImageReader(flags.valid_data_dir, flags.input_size, coord)
-    X_batch_op_valid, y_batch_op_valid = reader_valid.dequeue(flags.batch_size * 2)
-    reader_valid_op = [X_batch_op_valid, y_batch_op_valid]
+    city_names = flags.city_name.split(',')
+    tile_names = []
+    for city_name in city_names:
+        tile_names.extend(['{}{}'.format(city_name, tile) for tile in flags.train_tile_names.split(',')])
+    image_reader_train = image_reader.ImageReader(flags.train_data_dir, tile_names=tile_names,
+                                                  random_rotation=True, random_flip=True, ds='iai')
+    train_iterator = image_reader_train.data_iterator_iai(flags.batch_size)
+
+    city_names = flags.city_name.split(',')
+    tile_names = []
+    for city_name in city_names:
+        tile_names.extend(['{}{}'.format(city_name, tile) for tile in flags.valid_tile_names.split(',')])
+    image_reader_valid = image_reader.ImageReader(flags.valid_data_dir, tile_names=tile_names,
+                                                  patch_num=flags.valid_size, random_rotation=False, random_flip=False,
+                                                  ds='iai')
+    valid_iterator = image_reader_valid.data_iterator_iai(flags.batch_size * 2)
 
     # define place holder
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
@@ -103,7 +93,8 @@ def main(flags):
     mode = tf.placeholder(tf.bool, name='mode')
 
     # initialize model
-    model = unet.UnetModel({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
+    # TODO customize model name
+    model = unet.UnetModel({'X':X, 'Y':y}, trainable=mode, model_name='UnetInria_no_aug', input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
     model.make_loss('Y')
     model.make_learning_rate(flags.learning_rate,
@@ -127,15 +118,12 @@ def main(flags):
             latest_check_point = tf.train.latest_checkpoint(model.ckdir)
             saver.restore(sess, latest_check_point)
 
-        threads = tf.train.start_queue_runners(coord=coord, sess=sess)
         try:
             train_summary_writer = tf.summary.FileWriter(model.ckdir, sess.graph)
 
             model.train('X', 'Y', flags.epochs, flags.n_train, flags.batch_size, sess, train_summary_writer,
-                        train_reader=reader_train_op, valid_reader=reader_valid_op, image_summary=image_summary)
+                        train_iterator=train_iterator, valid_iterator=valid_iterator, image_summary=image_summary)
         finally:
-            coord.request_stop()
-            coord.join(threads)
             saver.save(sess, '{}/model.ckpt'.format(model.ckdir), global_step=model.global_step)
 
 

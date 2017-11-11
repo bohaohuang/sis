@@ -12,6 +12,7 @@ class UnetModel(network.Network):
         self.update_ops = None
 
     def create_graph(self, x_name, class_num):
+        # TODO add a parameter here: start_filter_num=32
         self.class_num = class_num
 
         # downsample
@@ -64,7 +65,7 @@ class UnetModel(network.Network):
 
     def train(self, x_name, y_name, epoch_num, n_train, batch_size, sess, summary_writer,
               train_iterator=None, train_reader=None, valid_iterator=None, valid_reader=None,
-              image_summary=None):
+              image_summary=None, verb_step=100):
         # define summary operations
         valid_cross_entropy_summary_op = tf.summary.scalar('xent_validation', self.valid_cross_entropy)
         valid_image_summary_op = tf.summary.image('Validation_images_summary', self.valid_images,
@@ -79,7 +80,7 @@ class UnetModel(network.Network):
                                                      feed_dict={self.inputs[x_name]:X_batch,
                                                                 self.inputs[y_name]:y_batch,
                                                                 self.trainable: True})
-                if self.global_step_value % 100 == 0:
+                if self.global_step_value % verb_step == 0:
                     pred_train, step_cross_entropy, step_summary = sess.run([self.pred, self.loss, self.summary],
                                                                             feed_dict={self.inputs[x_name]: X_batch,
                                                                                        self.inputs[y_name]: y_batch,
