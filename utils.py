@@ -4,7 +4,7 @@ import numpy as np
 def decode_labels(label, num_images=10):
     n, h, w, c = label.shape
     outputs = np.zeros((n, h, w, 3), dtype=np.uint8)
-    label_colors = {0: (255, 255, 255), 255: (0, 0, 255)}
+    label_colors = {0: (255, 255, 255), 1: (0, 0, 255)}
     for i in range(num_images):
         pixels = np.zeros((h, w, 3), dtype=np.uint8)
         for j in range(h):

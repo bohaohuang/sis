@@ -8,8 +8,8 @@ from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
 
-TRAIN_DATA_DIR = 'bohao_inria_train'
-VALID_DATA_DIR = 'bohao_inria_valid'
+TRAIN_DATA_DIR = 'dcc_inria_train'
+VALID_DATA_DIR = 'dcc_inria_valid'
 CITY_NAME = 'austin,chicago,kitsap,tyrol-w'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/media/ei-edl01/user/bh163/data/iai'
@@ -23,10 +23,10 @@ LEARNING_RATE = 1e-3
 INPUT_SIZE = (224, 224)
 EPOCHS = 100
 CKDIR = r'./models'
-MODEL_NAME = 'UnetInria_no_aug_test'
+MODEL_NAME = 'UNET_vienna_no_random'
 NUM_CLASS = 2
 N_TRAIN = 8000
-GPU = '0'
+GPU = '1'
 DECAY_STEP = 60
 DECAY_RATE = 0.1
 VALID_SIZE = 1000

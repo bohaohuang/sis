@@ -120,12 +120,12 @@ if __name__ == '__main__':
     #shuffle(collect_files_train)
     pe = PatchExtractorInria(r'/media/ei-edl01/data/remote_sensing_data',
                              collect_files_train, patch_size=(224, 224),
-                             tile_dim=(5000, 5000), appendix='train_noaug_temp')
+                             tile_dim=(5000, 5000), appendix='train_noaug_dcc')
     pe.extract(r'/media/ei-edl01/user/bh163/data/iai')
 
     (collect_files_valid, meta_valid) = Data.getCollectionByName('dcc_inria_valid')
     #shuffle(collect_files_valid)
     pe = PatchExtractorInria(r'/media/ei-edl01/data/remote_sensing_data',
                              collect_files_valid, patch_size=(224, 224),
-                             tile_dim=(5000, 5000), appendix='valid_noaug_temp')
+                             tile_dim=(5000, 5000), appendix='valid_noaug_dcc')
     pe.extract(r'/media/ei-edl01/user/bh163/data/iai')

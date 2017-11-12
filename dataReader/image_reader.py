@@ -8,7 +8,8 @@ def read_images_from_disk(input_queue, input_size):
     label_contents = tf.read_file(input_queue[1])
 
     image = tf.image.decode_jpeg(image_contents, channels=3)
-    label = tf.image.decode_png(label_contents, channels=1)
+    # adhoc decoding for labels
+    label = tf.image.decode_png(label_contents, channels=1)/255
 
     image = tf.image.resize_images(image, input_size)
     label = tf.image.resize_images(label, input_size)
