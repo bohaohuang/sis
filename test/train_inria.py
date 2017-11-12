@@ -13,8 +13,8 @@ VALID_DATA_DIR = 'bohao_inria_valid'
 CITY_NAME = 'austin,chicago,kitsap,tyrol-w'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/media/ei-edl01/user/bh163/data/iai'
-TRAIN_PATCH_APPENDIX = 'train_noaug'
-VALID_PATCH_APPENDIX = 'valid_noaug'
+TRAIN_PATCH_APPENDIX = 'train_noaug_dcc'
+VALID_PATCH_APPENDIX = 'valid_noaug_dcc'
 TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(6,7)])
 VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,2)])
 RANDOM_SEED = 1234
@@ -72,12 +72,14 @@ def main(flags):
     # data prepare step
     Data = rsrClassData(flags.rsr_data_dir)
     (collect_files_train, meta_train) = Data.getCollectionByName(flags.train_data_dir)
-    pe_train = patch_extractor.PatchExtractorInria(collect_files_train, patch_size=flags.input_size,
+    pe_train = patch_extractor.PatchExtractorInria(flags.rsr_data_dir,
+                                                   collect_files_train, patch_size=flags.input_size,
                                                    tile_dim=meta_train['dim_image'][:2],
                                                    appendix=flags.train_patch_appendix)
     train_data_dir = pe_train.extract(flags.patch_dir)
     (collect_files_valid, meta_valid) = Data.getCollectionByName(flags.valid_data_dir)
-    pe_valid = patch_extractor.PatchExtractorInria(collect_files_valid, patch_size=flags.input_size,
+    pe_valid = patch_extractor.PatchExtractorInria(flags.rsr_data_dir,
+                                                   collect_files_valid, patch_size=flags.input_size,
                                                    tile_dim=meta_train['dim_image'][:2],
                                                    appendix=flags.valid_patch_appendix)
     valid_data_dir = pe_valid.extract(flags.patch_dir)
