@@ -48,7 +48,8 @@ def patchify(block, tile_dim, patch_size, overlap=0):
 
 
 class PatchExtractorInria(object):
-    def __init__(self, file_list, patch_size, tile_dim, overlap=0, aug_funcs=None, appendix=''):
+    def __init__(self, base_dir, file_list, patch_size, tile_dim, overlap=0, aug_funcs=None, appendix=''):
+        self.base_dir = base_dir
         self.file_list = file_list
         self.patch_size = patch_size
         self.overlap = overlap
@@ -92,6 +93,7 @@ class PatchExtractorInria(object):
             return os.path.join(dest_dir, self.name)
 
         for file_tuple in tqdm(self.file_list):
+            file_tuple = [os.path.join(self.base_dir, file) for file in file_tuple]
             block = get_block(file_tuple)
             city_name = re.findall('[a-z\-]*(?=[0-9]+\.)', file_tuple[0])[0]
             tile_id = re.findall('[0-9]+(?=\.tif)', file_tuple[0])[0]
@@ -114,12 +116,16 @@ if __name__ == '__main__':
 
     from random import shuffle
 
-    (collect_files_train, meta_train) = Data.getCollectionByName('bohao_inria_train')
+    (collect_files_train, meta_train) = Data.getCollectionByName('dcc_inria_train')
     #shuffle(collect_files_train)
-    pe = PatchExtractorInria(collect_files_train, patch_size=(224, 224), tile_dim=(5000, 5000), appendix='train_noaug')
+    pe = PatchExtractorInria(r'/media/ei-edl01/data/remote_sensing_data',
+                             collect_files_train, patch_size=(224, 224),
+                             tile_dim=(5000, 5000), appendix='train_noaug_temp')
     pe.extract(r'/media/ei-edl01/user/bh163/data/iai')
 
-    (collect_files_valid, meta_valid) = Data.getCollectionByName('bohao_inria_valid')
+    (collect_files_valid, meta_valid) = Data.getCollectionByName('dcc_inria_valid')
     #shuffle(collect_files_valid)
-    pe = PatchExtractorInria(collect_files_valid, patch_size=(224, 224), tile_dim=(5000, 5000), appendix='valid_noaug')
+    pe = PatchExtractorInria(r'/media/ei-edl01/data/remote_sensing_data',
+                             collect_files_valid, patch_size=(224, 224),
+                             tile_dim=(5000, 5000), appendix='valid_noaug_temp')
     pe.extract(r'/media/ei-edl01/user/bh163/data/iai')
