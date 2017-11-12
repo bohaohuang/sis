@@ -12,7 +12,6 @@ class UnetModel(network.Network):
         self.update_ops = None
 
     def create_graph(self, x_name, class_num, start_filter_num=32):
-        # TODO add a parameter here: start_filter_num=32
         self.class_num = class_num
         sfn = start_filter_num
 

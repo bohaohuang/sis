@@ -48,22 +48,13 @@ def patchify(block, tile_dim, patch_size, overlap=0):
 
 
 class PatchExtractorInria(object):
-    def __init__(self, file_list, patch_size, overlap=0, aug_funcs=None, appendix=''):
+    def __init__(self, file_list, patch_size, tile_dim, overlap=0, aug_funcs=None, appendix=''):
         self.file_list = file_list
         self.patch_size = patch_size
         self.overlap = overlap
         self.aug_funcs = aug_funcs
         self.appendix = appendix
-
-        # load first tuple to see the dimension
-        channel_recorder = []
-        for file in self.file_list[0]:
-            file_slice = scipy.misc.imread(file)
-            self.tile_dim = file_slice.shape[:2]
-            if len(file_slice.shape) == 2:
-                file_slice = np.expand_dims(file_slice, axis=2)
-            channel_recorder.append(file_slice.shape[2])
-        self.channel_number = channel_recorder
+        self.tile_dim = tile_dim
 
         # make unique name
         func_name = ''
@@ -125,10 +116,10 @@ if __name__ == '__main__':
 
     (collect_files_train, meta_train) = Data.getCollectionByName('bohao_inria_train')
     #shuffle(collect_files_train)
-    pe = PatchExtractorInria(collect_files_train, patch_size=(224, 224), appendix='train_noaug')
+    pe = PatchExtractorInria(collect_files_train, patch_size=(224, 224), tile_dim=(5000, 5000), appendix='train_noaug')
     pe.extract(r'/media/ei-edl01/user/bh163/data/iai')
 
     (collect_files_valid, meta_valid) = Data.getCollectionByName('bohao_inria_valid')
     #shuffle(collect_files_valid)
-    pe = PatchExtractorInria(collect_files_valid, patch_size=(224, 224), appendix='valid_noaug')
+    pe = PatchExtractorInria(collect_files_valid, patch_size=(224, 224), tile_dim=(5000, 5000), appendix='valid_noaug')
     pe.extract(r'/media/ei-edl01/user/bh163/data/iai')

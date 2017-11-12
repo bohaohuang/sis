@@ -73,10 +73,12 @@ def main(flags):
     Data = rsrClassData(flags.rsr_data_dir)
     (collect_files_train, meta_train) = Data.getCollectionByName(flags.train_data_dir)
     pe_train = patch_extractor.PatchExtractorInria(collect_files_train, patch_size=flags.input_size,
+                                                   tile_dim=meta_train['dim_image'][:2],
                                                    appendix=flags.train_patch_appendix)
     train_data_dir = pe_train.extract(flags.patch_dir)
     (collect_files_valid, meta_valid) = Data.getCollectionByName(flags.valid_data_dir)
     pe_valid = patch_extractor.PatchExtractorInria(collect_files_valid, patch_size=flags.input_size,
+                                                   tile_dim=meta_train['dim_image'][:2],
                                                    appendix=flags.valid_patch_appendix)
     valid_data_dir = pe_valid.extract(flags.patch_dir)
     # get label dict
