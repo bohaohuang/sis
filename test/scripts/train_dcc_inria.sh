@@ -9,8 +9,8 @@ export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/sis
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/rsr
 cd ../
 python train_inria.py \
-                --train-data-dir=bohao_inria_train \
-                --valid-data-dir=bohao_inria_valid \
+                --train-data-dir=dcc_inria_train \
+                --valid-data-dir=dcc_inria_valid \
                 --rsr-data-dir=/work/bh163/data/remote_sensing_data \
                 --patch-dir=/work/bh163/data/iai \
                 --train-patch-appendix=train_noaug_dcc \
