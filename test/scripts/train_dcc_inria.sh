@@ -13,8 +13,8 @@ python train_inria.py \
                 --valid-data-dir=bohao_inria_valid \
                 --rsr-data-dir=/work/bh163/data/remote_sensing_data \
                 --patch-dir=/work/bh163/data/iai \
-                --train-patch-appendix=train_noaug \
-                --valid-patch-appendix=valid_noaug \
+                --train-patch-appendix=train_noaug_dcc \
+                --valid-patch-appendix=valid_noaug_dcc \
                 --epochs=100 \
                 --n-train=8000 \
                 --decay-step=60 \
