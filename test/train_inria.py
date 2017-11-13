@@ -10,20 +10,20 @@ from rsrClassData import rsrClassData
 
 TRAIN_DATA_DIR = 'dcc_inria_train'
 VALID_DATA_DIR = 'dcc_inria_valid'
-CITY_NAME = 'austin,chicago,kitsap,tyrol-w'
+CITY_NAME = 'chicago,kitsap,tyrol-w,vienna'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/media/ei-edl01/user/bh163/data/iai'
 TRAIN_PATCH_APPENDIX = 'train_noaug_dcc'
 VALID_PATCH_APPENDIX = 'valid_noaug_dcc'
-TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(6,7)])
-VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,2)])
+TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(6,37)])
+VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,6)])
 RANDOM_SEED = 1234
 BATCH_SIZE = 10
 LEARNING_RATE = 1e-3
 INPUT_SIZE = (224, 224)
 EPOCHS = 100
 CKDIR = r'./models'
-MODEL_NAME = 'UNET_vienna_no_random'
+MODEL_NAME = 'UNET_austin_no_random'
 NUM_CLASS = 2
 N_TRAIN = 8000
 GPU = '1'
@@ -91,9 +91,9 @@ def main(flags):
 
     # load reader
     with tf.name_scope('image_loader'):
-        reader_train = image_reader.ImageReader(train_data_dir, flags.input_size, coord,
+        reader_train = image_reader.ImageLabelReader(train_data_dir, flags.input_size, coord,
                                                 city_list=flags.city_name, tile_list=flags.train_tile_names)
-        reader_valid = image_reader.ImageReader(valid_data_dir, flags.input_size, coord,
+        reader_valid = image_reader.ImageLabelReader(valid_data_dir, flags.input_size, coord,
                                                 city_list=flags.city_name, tile_list=flags.valid_tile_names)
         X_batch_op, y_batch_op = reader_train.dequeue(flags.batch_size)
         X_batch_op_valid, y_batch_op_valid = reader_valid.dequeue(flags.batch_size * 2)

@@ -3,7 +3,7 @@ import re
 import tensorflow as tf
 
 
-def read_images_from_disk(input_queue, input_size):
+def read_images_labels_from_disk(input_queue, input_size):
     image_contents = tf.read_file(input_queue[0])
     label_contents = tf.read_file(input_queue[1])
 
@@ -17,7 +17,7 @@ def read_images_from_disk(input_queue, input_size):
     return image, label
 
 
-class ImageReader(object):
+class ImageLabelReader(object):
     def __init__(self, data_dir, input_size, coord, city_list, tile_list, data_list='data_list.txt', random=True):
         self.data_dir = data_dir
         self.data_list = data_list
@@ -29,7 +29,7 @@ class ImageReader(object):
         self.images = tf.convert_to_tensor(self.image_list, dtype=tf.string)
         self.labels = tf.convert_to_tensor(self.label_list, dtype=tf.string)
         self.queue = tf.train.slice_input_producer([self.images, self.labels], shuffle=random)
-        self.image, self.label = read_images_from_disk(self.queue, self.input_size)
+        self.image, self.label = read_images_labels_from_disk(self.queue, self.input_size)
 
     def read_image_label_list(self):
         with open(os.path.join(self.data_dir, self.data_list), 'r') as file:
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     coord = tf.train.Coordinator()
     city_list = ['vienna', 'chicago']
     tile_list = ['6', '7', '8']
-    reader = ImageReader(data_dir, input_size, coord, city_list, tile_list)
+    reader = ImageLabelReader(data_dir, input_size, coord, city_list, tile_list)
 
     X_batch_op, y_batch_op = reader.dequeue(5)
 
