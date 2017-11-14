@@ -25,16 +25,16 @@ cd ../
     final_cmd += '--valid-data-dir=dcc_inria_valid '
     final_cmd += '--rsr-data-dir=/work/bh163/data/remote_sensing_data '
     final_cmd += '--patch-dir=/work/bh163/data/iai '
-    final_cmd += 'train-patch-appendix=train_noaug_dcc '
-    final_cmd += 'valid-patch-appendix=valid_noaug_dcc '
-    final_cmd += 'epochs={} '.format(epochs)
-    final_cmd += 'n-train={} '.format(n_train)
-    final_cmd += 'decay-step={} '.format(decay_step)
-    final_cmd += 'batch-size={} '.format(batch_size)
+    final_cmd += '--train-patch-appendix=train_noaug_dcc '
+    final_cmd += '--valid-patch-appendix=valid_noaug_dcc '
+    final_cmd += '--epochs={} '.format(epochs)
+    final_cmd += '--n-train={} '.format(n_train)
+    final_cmd += '--decay-step={} '.format(decay_step)
+    final_cmd += '--batch-size={} '.format(batch_size)
     city_list = ['austin','chicago','kitsap','tyrol-w','vienna']
     city_final = [city for city in city_list if city != leave_one_city]
-    final_cmd += 'city-name={} '.format(','.join(city_final))
-    final_cmd += 'valid-size=1000 '
+    final_cmd += '--city-name={} '.format(','.join(city_final))
+    final_cmd += '--valid-size=1000 '
     final_cmd += '--model=UNET_{}__no_random'.format(uniq_name)
 
     script_name = '{}.sh'.format(uniq_name)
