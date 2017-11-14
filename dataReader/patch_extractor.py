@@ -47,6 +47,24 @@ def patchify(block, tile_dim, patch_size, overlap=0):
             yield crop_image(block, patch_size, (corner_h, corner_w))
 
 
+def un_patchify(blocks, tile_dim, patch_size, overlap=0):
+    _, _, _, c = blocks.shape
+    image = np.zeros((tile_dim[0], tile_dim[1], c))
+    max_h = tile_dim[0] - patch_size[0]
+    max_w = tile_dim[1] - patch_size[1]
+    h_step = np.ceil(tile_dim[0] / (patch_size[0] - overlap))
+    w_step = np.ceil(tile_dim[1] / (patch_size[1] - overlap))
+    patch_grid_h = np.floor(np.linspace(0, max_h, h_step)).astype(np.int32)
+    patch_grid_w = np.floor(np.linspace(0, max_w, w_step)).astype(np.int32)
+
+    cnt = 0
+    for corner_h in patch_grid_h:
+        for corner_w in patch_grid_w:
+            cnt += 1
+            image[corner_h:corner_h+patch_size[0], corner_w:corner_w+patch_size[1], :] += blocks[cnt-1, :, :, :]
+    return image
+
+
 class PatchExtractorInria(object):
     def __init__(self, base_dir, file_list, patch_size, tile_dim, overlap=0, aug_funcs=None, appendix=''):
         self.base_dir = base_dir

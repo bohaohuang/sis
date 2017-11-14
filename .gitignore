@@ -109,7 +109,6 @@ venv.bak/
 
 # repo folders
 ]data*
-]task*
 ]old*
 models*
 temp.py

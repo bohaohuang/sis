@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 from network import network
 
@@ -107,3 +108,14 @@ class UnetModel(network.Network):
                                                feed_dict={self.valid_images:
                                                               image_summary(X_batch_val, y_batch_val, pred_valid)})
                 summary_writer.add_summary(valid_image_summary, self.global_step_value)
+
+    def test(self, x_name, batch_size, sess, test_iterator):
+        result = []
+        for X_batch in test_iterator:
+            pred = sess.run(self.pred, feed_dict={self.inputs[x_name]:X_batch,
+                                                  self.trainable: False})
+            result.append(pred)
+        result = np.vstack(result)
+        return result
+
+

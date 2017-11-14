@@ -19,11 +19,13 @@ TEST_PATCH_APPENDIX = 'valid_noaug_dcc'
 TEST_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1, 6)])
 RANDOM_SEED = 1234
 BATCH_SIZE = 1
-INPUT_SIZE = 2800
-CKDIR = r'./models'
-MODEL_NAME = 'UNET_austin_no_random'
+INPUT_SIZE = 1632
+CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models'
+MODEL_NAME = 'UnetInria_no_aug'
 NUM_CLASS = 2
-GPU = '0'
+GPU = '1'
+
+IMG_SAVE_DIR = r'/media/ei-edl01/user/bh163/figs'
 
 
 def read_flag():
@@ -45,6 +47,37 @@ def read_flag():
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
     return flags
+
+
+def evaluate_on_patch(result, label_img, tile_dim, patch_size):
+    label_img_block = np.expand_dims(label_img, axis=2)
+    label_patches = patch_extractor.patchify(label_img_block, tile_dim, patch_size, overlap=0)
+    error_map = np.zeros(patch_size)
+    for cnt, label in enumerate(label_patches):
+        pred = utils.get_pred_labels(result[cnt, :, :, :])
+        error_map[np.where(pred != label[:, :, 0])] += 1
+    return error_map
+
+
+def error_vs_dist(error_map):
+    dist = []
+    error = []
+    h, w = error_map.shape
+    for i in range(h):
+        for j in range(w):
+            coordinate = np.array([i, j]) - np.array([h/2, w/2])
+            dist.append(np.sqrt(coordinate[0]**2 + coordinate[1]**2))
+            error.append(error_map[i, j])
+
+    dist = np.array(dist)
+    error = np.array(error)
+    dist_uniq = []
+    error_uniq = []
+    for d in np.unique(dist):
+        dist_uniq.append(d)
+        e = np.sum(error[np.where(dist == d)])/len(error[np.where(dist == d)])
+        error_uniq.append(e)
+    return dist_uniq, error_uniq
 
 
 def main(flags):
@@ -85,32 +118,53 @@ def main(flags):
         saver = tf.train.Saver(var_list=tf.global_variables(), max_to_keep=1)
 
         if os.path.exists(model.ckdir) and tf.train.get_checkpoint_state(model.ckdir):
+            print('loading model from {}'.format(model.ckdir))
             latest_check_point = tf.train.latest_checkpoint(model.ckdir)
             saver.restore(sess, latest_check_point)
 
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)
+        tile_cnt = 0
+        error_map = np.zeros(flags.input_size)
+        fig = plt.figure(figsize=(20.0, 12.0))
         try:
             for (image_name, label_name) in collect_files_test:
                 if flags.city_name in image_name:
+                    tile_cnt += 1
+
                     city_name = re.findall('[a-z\-]*(?=[0-9]+\.)', image_name)[0]
                     tile_id = re.findall('[0-9]+(?=\.tif)', image_name)[0]
+                    print('Evaluating {}_{}.tif'.format(city_name, tile_id))
 
                     # load reader
                     iterator_test = image_reader.image_label_iterator(
-                        os.path.join(flags.rsr_data_dir, collect_files_test[0][0]),
+                        os.path.join(flags.rsr_data_dir, image_name),
                         batch_size=flags.batch_size,
                         tile_dim=meta_test['dim_image'][:2],
                         patch_size=flags.input_size,
                         overlap=0)
                     # run
                     result = model.test('X', flags.batch_size, sess, iterator_test)
-                    pred_label_img = utils.get_output_label(result, meta_test['dim_image'],
-                                                            flags.input_size, meta_test['colormap'])
-                    # evaluate
-                    truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
-                    iou = utils.iou_metric(truth_label_img, pred_label_img)
 
-                    print('{}_{}: iou={:.2f}'.format(city_name, tile_id, iou))
+                    # evaluate
+                    label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
+                    error_map += evaluate_on_patch(result, label_img, meta_test['dim_image'][:2], flags.input_size)
+
+                    plt.subplot(230 + tile_cnt)
+                    plt.imshow(error_map/np.max(error_map), cmap='hot')
+                    plt.colorbar()
+                    plt.title('Error Map {}_{}'.format(city_name, tile_id))
+
+            plt.suptitle('Patch Size = {}'.format(flags.input_size))
+            dist, error = error_vs_dist(error_map)
+            plt.subplot(236)
+            plt.plot(dist, error, 'r.')
+            plt.title('Error VS Dist ({})'.format(city_name))
+            plt.xlabel('Dist to center of patch')
+            plt.ylabel('#Errors')
+            save_dir = utils.make_task_img_folder(IMG_SAVE_DIR)
+            plt.savefig(os.path.join(save_dir, 'M-{}_PS-{}'.format(flags.model_name, flags.input_size[0])),
+                        bbox_inches='tight')
+            plt.show()
         finally:
             coord.request_stop()
             coord.join(threads)

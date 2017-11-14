@@ -1,6 +1,9 @@
 import os
 import re
+import scipy.misc
+import numpy as np
 import tensorflow as tf
+from dataReader import patch_extractor
 
 
 def read_images_labels_from_disk(input_queue, input_size):
@@ -17,8 +20,24 @@ def read_images_labels_from_disk(input_queue, input_size):
     return image, label
 
 
+def image_label_iterator(image_dir, batch_size, tile_dim, patch_size, overlap):
+    # this is a iterator for test
+    block = scipy.misc.imread(image_dir)
+    cnt = 0
+    image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 3))
+    for patch in patch_extractor.patchify(block, tile_dim, patch_size, overlap=overlap):
+        cnt += 1
+        image_batch[cnt-1, :, :, :] = patch
+        if cnt == batch_size:
+            cnt = 0
+            yield image_batch
+    # yield the last chunck
+    yield image_batch[:cnt, :, :, :]
+
+
 class ImageLabelReader(object):
     def __init__(self, data_dir, input_size, coord, city_list, tile_list, data_list='data_list.txt', random=True):
+        self.original_dir = ''
         self.data_dir = data_dir
         self.data_list = data_list
         self.input_size = input_size
@@ -47,6 +66,9 @@ class ImageLabelReader(object):
             raise ValueError
         return image_list, label_list
 
+    def set_original_image_label_dir(self, origin_dir):
+        self.original_dir = origin_dir
+
     def dequeue(self, num_elements):
         image_batch, label_batch = tf.train.batch([self.image, self.label], num_elements)
         return image_batch, label_batch
@@ -65,11 +87,13 @@ if __name__ == '__main__':
 
     X_batch_op, y_batch_op = reader.dequeue(5)
 
-    with tf.Session() as sess:
+    '''with tf.Session() as sess:
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)
         X_batch, y_batch = sess.run([X_batch_op, y_batch_op])
         coord.request_stop()
         coord.join(threads)
+
+    print(reader.data_dir)
 
     print(X_batch.shape)
     print(y_batch.shape)
@@ -79,4 +103,22 @@ if __name__ == '__main__':
     plt.imshow(X_batch[2, :, :, :])
     plt.subplot(122)
     plt.imshow(y_batch[2, :, :, 0])
-    plt.show()
+    plt.show()'''
+
+    image_dir = r'/media/ei-edl01/data/remote_sensing_data/inria/image'
+    reader.set_original_image_label_dir(image_dir)
+    iterator = reader.image_label_iterator('austin1.tif', 4, (5000, 5000), (500, 500), 250)
+    for i in range(4):
+        image = next(iterator)
+        print(image.shape)
+
+        import matplotlib.pyplot as plt
+        plt.subplot(221)
+        plt.imshow(image[0, :, :, :])
+        plt.subplot(222)
+        plt.imshow(image[1, :, :, :])
+        plt.subplot(223)
+        plt.imshow(image[2, :, :, :])
+        plt.subplot(224)
+        plt.imshow(image[3, :, :, :])
+        plt.show()

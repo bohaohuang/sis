@@ -20,7 +20,7 @@ VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,6)])
 RANDOM_SEED = 1234
 BATCH_SIZE = 10
 LEARNING_RATE = 1e-3
-INPUT_SIZE = (224, 224)
+INPUT_SIZE = 224
 EPOCHS = 100
 CKDIR = r'./models'
 MODEL_NAME = 'UNET_austin_no_random'
@@ -46,7 +46,7 @@ def read_flag():
     parser.add_argument('--random-seed', type=int, default=RANDOM_SEED, help='tf random seed')
     parser.add_argument('--batch-size', default=BATCH_SIZE, type=int, help='batch size (10)')
     parser.add_argument('--learning-rate', type=float, default=LEARNING_RATE, help='learning rate (1e-3)')
-    parser.add_argument('--input-size', default=INPUT_SIZE, type=int, help='input size (128, 128)')
+    parser.add_argument('--input-size', default=INPUT_SIZE, type=int, help='input size 224')
     parser.add_argument('--epochs', default=EPOCHS, type=int, help='# epochs (1)')
     parser.add_argument('--ckdir', default=CKDIR, help='ckpt dir (models)')
     parser.add_argument('--num-classes', type=int, default=NUM_CLASS, help='# classes (including background)')
@@ -58,6 +58,7 @@ def read_flag():
     parser.add_argument('--model-name', type=str, default=MODEL_NAME, help='Model name')
 
     flags = parser.parse_args()
+    flags.input_size = (flags.input_size, flags.input_size)
     return flags
 
 
@@ -83,8 +84,6 @@ def main(flags):
                                                    tile_dim=meta_train['dim_image'][:2],
                                                    appendix=flags.valid_patch_appendix)
     valid_data_dir = pe_valid.extract(flags.patch_dir)
-    # get label dict
-    label_dict = {v: k for k, v in meta_train['colormap'].items()}
 
     # image reader
     coord = tf.train.Coordinator()
