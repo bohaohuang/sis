@@ -1,6 +1,3 @@
-import os
-
-
 def make_train_scripts(gpu_group='collinslab',
                        gpu=0,
                        patch_size=224,
@@ -11,8 +8,7 @@ def make_train_scripts(gpu_group='collinslab',
                        leave_one_city='austin'):
     uniq_name = 'PS-{}__BS-{}__E-{}__NT-{}__DS-{}__CT-{}'.\
         format(patch_size, batch_size, epochs, n_train, decay_step, leave_one_city)
-    file_str = """
-#!/bin/bash
+    file_str = """#!/bin/bash
 #SBATCH -e {}.err
 #SBATCH --mem=20G
 #SBATCH -c 6
@@ -48,10 +44,10 @@ cd ../
 
 if __name__ == '__main__':
     make_train_scripts(gpu_group='collinslab',
-                       gpu=0,
-                       patch_size=608,
-                       batch_size=4,
+                       gpu=2,
+                       patch_size=224,
+                       batch_size=1,
                        epochs=100,
                        n_train=8000,
                        decay_step=60,
-                       leave_one_city='austin')
+                       leave_one_city='')
