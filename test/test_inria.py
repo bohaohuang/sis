@@ -18,10 +18,10 @@ PATCH_DIR = r'/media/ei-edl01/user/bh163/data/iai'
 TEST_PATCH_APPENDIX = 'valid_noaug_dcc'
 TEST_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1, 6)])
 RANDOM_SEED = 1234
-BATCH_SIZE = 1
-INPUT_SIZE = 2800
+BATCH_SIZE = 2
+INPUT_SIZE = 224
 CKDIR = r'./models'
-MODEL_NAME = 'UNET_austin_no_random'
+MODEL_NAME = 'UnetInria_no_aug'
 NUM_CLASS = 2
 GPU = '0'
 
