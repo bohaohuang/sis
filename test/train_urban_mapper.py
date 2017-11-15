@@ -21,17 +21,16 @@ TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(20,143)])
 VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0,20)])
 RANDOM_SEED = 1234
 BATCH_SIZE = 10
-LEARNING_RATE = 1e-3
+LEARNING_RATE = 1e-4
 INPUT_SIZE = 224
-EPOCHS = 100
+EPOCHS = 15
 CKDIR = r'./models'
 MODEL_NAME = 'UNET_um_no_random_9'
 NUM_CLASS = 2
 N_TRAIN = 8000
 GPU = '1'
-DECAY_STEP = 60
+DECAY_STEP = 10
 DECAY_RATE = 0.1
-VALID_SIZE = 1000
 
 
 def read_flag():
@@ -56,7 +55,6 @@ def read_flag():
     parser.add_argument('--GPU', type=str, default=GPU, help="GPU used for computation.")
     parser.add_argument('--decay-step', type=float, default=DECAY_STEP, help='Learning rate decay step in number of epochs.')
     parser.add_argument('--decay-rate', type=float, default=DECAY_RATE, help='Learning rate decay rate')
-    parser.add_argument('--valid-size', type=int, default=VALID_SIZE, help='#patches to valid')
     parser.add_argument('--model-name', type=str, default=MODEL_NAME, help='Model name')
     parser.add_argument('--pre-trained-model', default=PRE_TRAINED_MODEL, help='Path to pretrained model')
     parser.add_argument('--layers-to-keep', default=LAYERS_TO_KEEP, help='layers to keep, range 1 to 9')

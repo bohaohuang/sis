@@ -164,7 +164,6 @@ def test_unet(rsr_data_dir,
                 truth_label_img = scipy.misc.imread(os.path.join(rsr_data_dir, label_name))
                 iou = iou_metric(truth_label_img, pred_label_img)
                 result_dict['{}{}'.format(city_name, tile_id)] = iou
-                print(result_dict)
             coord.request_stop()
             coord.join(threads)
     return result_dict
