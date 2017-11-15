@@ -35,6 +35,22 @@ class UnetModel(network.Network):
 
         self.pred = tf.layers.conv2d(conv9, class_num, (1, 1), name='final', activation=None, padding='same')
 
+    def load_weights(self, ckpt_dir, layers2load):
+        layers_list = []
+        for layer_id in layers2load:
+            assert 1 <= layer_id <= 9
+            if layer_id <= 5:
+                prefix = 'layerconv'
+            else:
+                prefix = 'layerup'
+            layers_list.append('{}{}'.format(prefix, layer_id))
+
+        load_dict = {}
+        for layer_name in layers_list:
+            feed_layer = layer_name + '/'
+            load_dict[feed_layer] = feed_layer
+        tf.train.init_from_checkpoint(ckpt_dir, load_dict)
+
     def make_learning_rate(self, lr, decay_steps, decay_rate):
         self.learning_rate = tf.train.exponential_decay(lr, self.global_step, decay_steps,
                                                         decay_rate, staircase=True)
@@ -109,7 +125,7 @@ class UnetModel(network.Network):
                                                               image_summary(X_batch_val, y_batch_val, pred_valid)})
                 summary_writer.add_summary(valid_image_summary, self.global_step_value)
 
-    def test(self, x_name, batch_size, sess, test_iterator):
+    def test(self, x_name, sess, test_iterator):
         result = []
         for X_batch in test_iterator:
             pred = sess.run(self.pred, feed_dict={self.inputs[x_name]:X_batch,

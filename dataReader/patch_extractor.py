@@ -128,6 +128,70 @@ class PatchExtractorInria(object):
         return os.path.join(dest_dir, self.name)
 
 
+
+class PatchExtractorUrbanMapper(object):
+    def __init__(self, base_dir, file_list, patch_size, tile_dim, overlap=0, aug_funcs=None, appendix=''):
+        self.base_dir = base_dir
+        self.file_list = file_list
+        self.patch_size = patch_size
+        self.overlap = overlap
+        self.aug_funcs = aug_funcs
+        self.appendix = appendix
+        self.tile_dim = tile_dim
+
+        # make unique name
+        func_name = ''
+        if aug_funcs is not None:
+            for func in aug_funcs:
+                func_name += func.__name__.replace('_', '')
+
+        self.name = 'PS_{}-OL_{}-AF_{}'.format(patch_size, overlap, func_name) + self.appendix
+
+        # TODO check if extracted files already exists
+
+    def save_img_label(self, patch, dest_dir, city_name, tile_id, cnt, appendix=None):
+        patch_img, patch_label = patch[:, :, :3], patch[:, :, -1]
+        cnt_str = '{0:05d}'.format(cnt)
+        if appendix is None:
+            image_name = '{}{}_img_{}.jpg'.format(city_name, tile_id, cnt_str)
+            label_name = '{}{}_label_{}.png'.format(city_name, tile_id, cnt_str)
+        else:
+            image_name = '{}{}_img_{}_{}.jpg'.format(city_name, tile_id, appendix, cnt_str)
+            label_name = '{}{}_label_{}_{}.png'.format(city_name, tile_id, appendix, cnt_str)
+        file_name = os.path.join(dest_dir, self.name, image_name)
+        scipy.misc.imsave(file_name, patch_img)
+        file_name = os.path.join(dest_dir, self.name, label_name)
+        scipy.misc.imsave(file_name, patch_label)
+        with open(os.path.join(dest_dir, self.name, 'data_list.txt'), 'a') as file:
+            file.write('{} {}\n'.format(image_name, label_name))
+
+    def extract(self, dest_dir):
+        if not os.path.exists(os.path.join(dest_dir, self.name)):
+            os.makedirs(os.path.join(dest_dir, self.name))
+        else:
+            print('{} already exists, only return the path'.format(
+                os.path.join(dest_dir, self.name)
+            ))
+            return os.path.join(dest_dir, self.name)
+
+        for file_tuple in tqdm(self.file_list):
+            file_tuple = [os.path.join(self.base_dir, file) for file in file_tuple]
+            block = get_block(file_tuple)
+            city_name = os.path.basename(file_tuple[0])[:3]
+            tile_id = os.path.basename(file_tuple[0])[9:12]
+
+            for cnt, patch in enumerate(patchify(block, self.tile_dim,
+                                                 self.patch_size, overlap=self.overlap)):
+                self.save_img_label(patch, dest_dir, city_name, tile_id, cnt)
+
+                if self.aug_funcs is not None:
+                    for func in self.aug_funcs:
+                        patch_aug = func(patch)
+                        self.save_img_label(patch_aug, dest_dir, city_name, tile_id, cnt,
+                                            appendix=func.__name__.replace('_', ''))
+        return os.path.join(dest_dir, self.name)
+
+
 if __name__ == '__main__':
     from rsrClassData import rsrClassData
     Data = rsrClassData(r'/media/ei-edl01/data/remote_sensing_data')

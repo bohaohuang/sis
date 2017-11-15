@@ -36,10 +36,11 @@ def image_label_iterator(image_dir, batch_size, tile_dim, patch_size, overlap):
 
 
 class ImageLabelReader(object):
-    def __init__(self, data_dir, input_size, coord, city_list, tile_list, data_list='data_list.txt', random=True):
+    def __init__(self, data_dir, input_size, coord, city_list, tile_list, data_list='data_list.txt', random=True, ds_name='inria'):
         self.original_dir = ''
         self.data_dir = data_dir
         self.data_list = data_list
+        self.ds_name = ds_name
         self.input_size = input_size
         self.coord = coord
         self.city_list = city_list
@@ -57,8 +58,12 @@ class ImageLabelReader(object):
         label_list = []
         for file in files:
             file_tuple = file.strip('\n').split(' ')
-            city_name = re.findall('^[a-z\-]*', file_tuple[0])[0]
-            tile_id = re.findall('[0-9]+(?=_img)', file_tuple[0])[0]
+            if self.ds_name == 'inria':
+                city_name = re.findall('^[a-z\-]*', file_tuple[0])[0]
+                tile_id = re.findall('[0-9]+(?=_img)', file_tuple[0])[0]
+            else:
+                city_name = file_tuple[0][:3]
+                tile_id = file_tuple[0][3:6].lstrip('0')
             if city_name in self.city_list and tile_id in self.tile_list:
                 image_list.append(os.path.join(self.data_dir, file_tuple[0]))
                 label_list.append(os.path.join(self.data_dir, file_tuple[1]))

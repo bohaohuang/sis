@@ -21,7 +21,7 @@ RANDOM_SEED = 1234
 BATCH_SIZE = 2
 INPUT_SIZE = 224
 CKDIR = r'./models'
-MODEL_NAME = 'UnetInria_no_aug'
+MODEL_NAME = 'UNET_austin_no_random'
 NUM_CLASS = 2
 GPU = '0'
 
@@ -97,20 +97,20 @@ def main(flags):
 
                     # load reader
                     iterator_test = image_reader.image_label_iterator(
-                        os.path.join(flags.rsr_data_dir, collect_files_test[0][0]),
+                        os.path.join(flags.rsr_data_dir, image_name),
                         batch_size=flags.batch_size,
                         tile_dim=meta_test['dim_image'][:2],
                         patch_size=flags.input_size,
                         overlap=0)
                     # run
-                    result = model.test('X', flags.batch_size, sess, iterator_test)
+                    result = model.test('X', sess, iterator_test)
                     pred_label_img = utils.get_output_label(result, meta_test['dim_image'],
                                                             flags.input_size, meta_test['colormap'])
                     # evaluate
                     truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
                     iou = utils.iou_metric(truth_label_img, pred_label_img)
 
-                    print('{}_{}: iou={:.2f}'.format(city_name, tile_id, iou))
+                    print('{}_{}: iou={:.2f}'.format(city_name, tile_id, iou*100))
         finally:
             coord.request_stop()
             coord.join(threads)

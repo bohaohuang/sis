@@ -8,9 +8,12 @@
 - [X] Test on larger scale
 - [X] Data preprocessor
 - [X] Experiment pipeline
-- [ ] 1 channel test image output
+- [X] 1 channel test image output
 - [ ] Valid data size
 - [X] Read metadata
 - [ ] Data augmentation
 - [X] Select city and tile in image reader
 - [X] Test on cluster and do cross val
+- [ ] Keep track of layer names
+- [ ] Easy layer weights loading function
+- [ ] Clean Tensorboard summaries 

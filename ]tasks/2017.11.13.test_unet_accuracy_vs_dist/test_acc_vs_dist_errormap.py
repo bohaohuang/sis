@@ -143,7 +143,7 @@ def main(flags):
                         patch_size=flags.input_size,
                         overlap=0)
                     # run
-                    result = model.test('X', flags.batch_size, sess, iterator_test)
+                    result = model.test('X', sess, iterator_test)
 
                     # evaluate
                     label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
