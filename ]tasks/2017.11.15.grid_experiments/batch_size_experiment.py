@@ -42,8 +42,8 @@ def read_flag():
 def get_ious(flags):
     ious = np.zeros((4, 5))
 
-    for cnt, batch_size in enumerate([10]):
-        model_name = 'UNET_PS-{}__BS-{}__E-100__NT-8000__DS-60__CT-__no_random'.format(flags.input_size, batch_size)
+    for cnt, batch_size in enumerate([1, 2, 5, 10]):
+        model_name = 'UNET_PS-{}__BS-{}__E-100__NT-8000__DS-60__CT-__no_random'.format(flags.input_size[0], batch_size)
         print(model_name)
 
         result = utils.test_unet(flags.rsr_data_dir,
@@ -58,20 +58,13 @@ def get_ious(flags):
         for i in range(5):
             ious[cnt, i] = result['austin{}'.format(i+1)]
 
-    #np.save('ious.npy', ious)
+    np.save('ious.npy', ious)
 
 
 if __name__ == '__main__':
     flags = read_flag()
-    #get_ious(flags)
-    result = utils.test_unet(flags.rsr_data_dir,
-                             flags.test_data_dir,
-                             flags.input_size,
-                             flags.model_name,
-                             flags.num_classes,
-                             flags.ckdir,
-                             flags.city_name,
-                             flags.batch_size)
+    result = get_ious(flags)
+
     print(result)
 
     ious = np.load('ious.npy')

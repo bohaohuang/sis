@@ -142,6 +142,7 @@ def test_unet(rsr_data_dir,
         if os.path.exists(model.ckdir) and tf.train.get_checkpoint_state(model.ckdir):
             latest_check_point = tf.train.latest_checkpoint(model.ckdir)
             saver.restore(sess, latest_check_point)
+            print('loaded model from {}'.format(latest_check_point))
 
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)
         for (image_name, label_name) in collect_files_test:
