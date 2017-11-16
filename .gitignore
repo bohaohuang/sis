@@ -112,6 +112,7 @@ venv.bak/
 ]old*
 models*
 temp.py
+*.npy
 
 # temp files
 *~

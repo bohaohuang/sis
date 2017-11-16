@@ -1,4 +1,6 @@
 import argparse
+import numpy as np
+import matplotlib.pyplot as plt
 import utils
 
 TEST_DATA_DIR = 'dcc_inria_valid'
@@ -11,7 +13,7 @@ RANDOM_SEED = 1234
 BATCH_SIZE = 2
 INPUT_SIZE = 224
 CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/GridExp'
-MODEL_NAME = 'UNET_austin_no_random'
+MODEL_NAME = 'UnetInria_no_aug'
 NUM_CLASS = 2
 GPU = '0'
 
@@ -37,9 +39,10 @@ def read_flag():
     return flags
 
 
-def main(flags):
+def get_ious(flags):
+    ious = np.zeros((4, 5))
 
-    for batch_size in [1, 2, 5, 10]:
+    for cnt, batch_size in enumerate([10]):
         model_name = 'UNET_PS-{}__BS-{}__E-100__NT-8000__DS-60__CT-__no_random'.format(flags.input_size, batch_size)
         print(model_name)
 
@@ -52,8 +55,24 @@ def main(flags):
                                  flags.city_name,
                                  flags.batch_size)
         print(result)
+        for i in range(5):
+            ious[cnt, i] = result['austin{}'.format(i+1)]
+
+    #np.save('ious.npy', ious)
 
 
 if __name__ == '__main__':
     flags = read_flag()
-    main(flags)
+    #get_ious(flags)
+    result = utils.test_unet(flags.rsr_data_dir,
+                             flags.test_data_dir,
+                             flags.input_size,
+                             flags.model_name,
+                             flags.num_classes,
+                             flags.ckdir,
+                             flags.city_name,
+                             flags.batch_size)
+    print(result)
+
+    ious = np.load('ious.npy')
+    print(ious)
