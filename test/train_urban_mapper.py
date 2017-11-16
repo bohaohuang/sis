@@ -112,7 +112,7 @@ def main(flags):
     # initialize model
     model = unet.UnetModel({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
-    #model.load_weights(flags.pre_trained_model, flags.layers_to_keep_num)
+    model.load_weights(flags.pre_trained_model, flags.layers_to_keep_num)
     model.make_loss('Y')
     model.make_learning_rate(flags.learning_rate,
                              tf.cast(flags.n_train/flags.batch_size * flags.decay_step, tf.int32), flags.decay_rate)
