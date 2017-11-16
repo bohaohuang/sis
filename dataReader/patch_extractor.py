@@ -21,6 +21,15 @@ def flip_vertical(block):
     return block[::-1, :, :]
 
 
+def pad_block(block, pad):
+    padded_block = []
+    _, _, c = block.shape
+    for i in range(c):
+        padded_block.append(np.pad(block[:, :, i],
+                                   ((pad, pad), (pad, pad)), 'symmetric'))
+    return np.dstack(padded_block)
+
+
 def get_block(file_tuple):
     block = []
     for file in file_tuple:
@@ -101,7 +110,7 @@ class PatchExtractorInria(object):
         with open(os.path.join(dest_dir, self.name, 'data_list.txt'), 'a') as file:
             file.write('{} {}\n'.format(image_name, label_name))
 
-    def extract(self, dest_dir):
+    def extract(self, dest_dir, pad=0):
         if not os.path.exists(os.path.join(dest_dir, self.name)):
             os.makedirs(os.path.join(dest_dir, self.name))
         else:
@@ -113,6 +122,8 @@ class PatchExtractorInria(object):
         for file_tuple in tqdm(self.file_list):
             file_tuple = [os.path.join(self.base_dir, file) for file in file_tuple]
             block = get_block(file_tuple)
+            block = pad_block(block, pad)
+            self.tile_dim = block.shape[:2]
             city_name = re.findall('[a-z\-]*(?=[0-9]+\.)', file_tuple[0])[0]
             tile_id = re.findall('[0-9]+(?=\.tif)', file_tuple[0])[0]
 
@@ -126,7 +137,6 @@ class PatchExtractorInria(object):
                         self.save_img_label(patch_aug, dest_dir, city_name, tile_id, cnt,
                                             appendix=func.__name__.replace('_', ''))
         return os.path.join(dest_dir, self.name)
-
 
 
 class PatchExtractorUrbanMapper(object):
@@ -193,7 +203,7 @@ class PatchExtractorUrbanMapper(object):
 
 
 if __name__ == '__main__':
-    from rsrClassData import rsrClassData
+    '''from rsrClassData import rsrClassData
     Data = rsrClassData(r'/media/ei-edl01/data/remote_sensing_data')
 
     from random import shuffle
@@ -210,4 +220,11 @@ if __name__ == '__main__':
     pe = PatchExtractorInria(r'/media/ei-edl01/data/remote_sensing_data',
                              collect_files_valid, patch_size=(224, 224),
                              tile_dim=(5000, 5000), appendix='valid_noaug_dcc')
-    pe.extract(r'/media/ei-edl01/user/bh163/data/iai')
+    pe.extract(r'/media/ei-edl01/user/bh163/data/iai')'''
+
+    img = scipy.misc.imread(r'/media/ei-edl01/data/remote_sensing_data/inria/image/austin1.tif')
+    img = pad_block(img, 0)
+
+    import matplotlib.pyplot as plt
+    plt.imshow(img)
+    plt.show()

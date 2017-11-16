@@ -33,13 +33,13 @@ class Network(object):
 
     def conv_conv_pool(self, input_, n_filters, training, name, conv_strid=(3, 3),
                        pool=True, pool_size=(2, 2), pool_stride=(2, 2),
-                       activation=tf.nn.relu, bn=True):
+                       activation=tf.nn.relu, padding='same', bn=True):
         net = input_
 
         with tf.variable_scope('layer{}'.format(name)):
             for i, F in enumerate(n_filters):
                 net = tf.layers.conv2d(net, F, conv_strid, activation=None,
-                                       padding='same', name='conv_{}'.format(i + 1))
+                                       padding=padding, name='conv_{}'.format(i + 1))
                 if bn:
                     net = tf.layers.batch_normalization(net, training=training, name='bn_{}'.format(i+1))
                 net = activation(net, name='relu_{}'.format(name, i + 1))
@@ -66,6 +66,12 @@ class Network(object):
     def upsample_concat(self, input_a, input_b, name):
         upsample = self.upsampling_2D(input_a, size=(2, 2), name=name)
         return tf.concat([upsample, input_b], axis=-1, name='concat_{}'.format(name))
+
+    def crop_upsample_concat(self, input_a, input_b, margin, name):
+        with tf.variable_scope('crop_upsample_concat'):
+            _, w, h, _ = input_b.get_shape().as_list()
+            input_b_crop = tf.image.resize_image_with_crop_or_pad(input_a, w-margin, h-margin)
+            return self.upsample_concat(input_a, input_b_crop, name)
 
     def fc_fc(self, input_, n_filters, training, name, activation=tf.nn.relu, dropout=True):
         net = input_

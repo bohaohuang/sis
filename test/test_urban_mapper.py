@@ -1,23 +1,20 @@
-import os
 import argparse
 import numpy as np
-import matplotlib.pyplot as plt
 import utils
 
-TEST_DATA_DIR = 'dcc_inria_valid'
-CITY_NAME = 'austin'
+TEST_DATA_DIR = 'dcc_urban_mapper_valid'
+CITY_NAME = 'JAX,TAM'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/media/ei-edl01/user/bh163/data/iai'
-TEST_PATCH_APPENDIX = 'valid_noaug_dcc'
-TEST_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1, 6)])
+TEST_PATCH_APPENDIX = 'valid_noaug_um'
+TEST_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0, 20)])
 RANDOM_SEED = 1234
-BATCH_SIZE = 2
+BATCH_SIZE = 1
 INPUT_SIZE = 224
-CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/GridExp'
-MODEL_NAME = 'UnetInria_no_aug'
+CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper'
+MODEL_NAME = 'UNET_um_no_random_9'
 NUM_CLASS = 2
 GPU = '0'
-IMG_SAVE_DIR = r'/media/ei-edl01/user/bh163/figs'
 
 
 def read_flag():
@@ -41,42 +38,18 @@ def read_flag():
     return flags
 
 
-def get_ious(flags):
-    ious = np.zeros((4, 5))
-
-    for cnt, batch_size in enumerate([1, 2, 5, 10]):
-        model_name = 'UNET_PS-{}__BS-{}__E-100__NT-8000__DS-60__CT-__no_random'.format(flags.input_size[0], batch_size)
-        print(model_name)
-
-        result = utils.test_unet(flags.rsr_data_dir,
-                                 flags.test_data_dir,
-                                 flags.input_size,
-                                 model_name,
-                                 flags.num_classes,
-                                 flags.ckdir,
-                                 flags.city_name,
-                                 flags.batch_size)
-        print(result)
-        for i in range(5):
-            ious[cnt, i] = result['austin{}'.format(i+1)]
-
-    np.save('ious.npy', ious)
+def main(flags):
+    result = utils.test_unet(flags.rsr_data_dir,
+                             flags.test_data_dir,
+                             flags.input_size,
+                             flags.model_name,
+                             flags.num_classes,
+                             flags.ckdir,
+                             flags.city_name,
+                             flags.batch_size,
+                             ds_name='urban_mapper')
 
 
 if __name__ == '__main__':
     flags = read_flag()
-    #result = get_ious(flags)
-
-    ious = np.load('ious.npy')
-    batch_size = np.array([1, 2, 5, 10])
-
-    for i, bs in enumerate(batch_size):
-        plt.plot(ious[i, :], '--', label='batch size {}'.format(bs))
-    plt.xticks(np.arange(5))
-    plt.xlabel('tile id')
-    plt.ylabel('IOU')
-    plt.legend(loc='center right')
-    plt.title('IOU vs Batch Size')
-    save_dir = utils.make_task_img_folder(IMG_SAVE_DIR)
-    plt.savefig(os.path.join(save_dir, 'iou_vs_batch_size.png'))
-    plt.show()
+    main(flags)

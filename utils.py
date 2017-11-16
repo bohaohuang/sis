@@ -48,10 +48,35 @@ def get_pred_labels(pred):
         return outputs
 
 
+def pad_prediction(image, prediction):
+    _, img_w, img_h, _ = image.shape
+    n, pred_img_w, pred_img_h, c = prediction.shape
+
+    if img_w > pred_img_w and img_h > pred_img_h:
+        pad_w = int((img_w - pred_img_w) / 2)
+        pad_h = int((img_h - pred_img_h) / 2)
+        prediction_padded = np.zeros((n, img_w, img_h, c))
+        pad_dim = ((pad_w, pad_w),
+                   (pad_h, pad_h))
+
+        for batch_id in range(n):
+            for channel_id in range(c):
+                prediction_padded[batch_id, :, :, channel_id] = \
+                    np.pad(prediction[batch_id, :, :, channel_id], pad_dim, 'constant')
+        prediction = prediction_padded
+        return prediction
+    else:
+        return prediction
+
+
 def image_summary(image, truth, prediction):
     truth_img = decode_labels(truth, 10)
+
+    prediction = pad_prediction(image, prediction)
+
     pred_labels = get_pred_labels(prediction)
     pred_img = decode_labels(pred_labels, 10)
+
     return np.concatenate([image, truth_img, pred_img], axis=2)
 
 
@@ -84,6 +109,12 @@ def make_task_img_folder(parent_dir):
     return os.path.join(parent_dir, task_fold_name)
 
 
+def get_task_img_folder():
+    IMG_DIR = r'/media/ei-edl01/user/bh163/figs'
+    TASK_DIR = r'/media/ei-edl01/user/bh163/tasks'
+    return make_task_img_folder(IMG_DIR), make_task_img_folder(TASK_DIR)
+
+
 def test_unet(rsr_data_dir,
               test_data_dir,
               input_size,
@@ -92,6 +123,7 @@ def test_unet(rsr_data_dir,
               ckdir,
               city,
               batch_size,
+              ds_name='inria',
               GPU='0',
               random_seed=1234):
     import re
@@ -100,6 +132,14 @@ def test_unet(rsr_data_dir,
     from network import unet
     from dataReader import image_reader
     from rsrClassData import rsrClassData
+
+    def name_has_city(city_list, name):
+        for city in city_list:
+            if city in name:
+                return True
+        return False
+
+    city = city.split(',')
 
     # set gpu
     os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
@@ -146,9 +186,14 @@ def test_unet(rsr_data_dir,
 
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)
         for (image_name, label_name) in collect_files_test:
-            if city in image_name:
-                city_name = re.findall('[a-z\-]*(?=[0-9]+\.)', image_name)[0]
-                tile_id = re.findall('[0-9]+(?=\.tif)', image_name)[0]
+            #if city in image_name:
+            if name_has_city(city, image_name):
+                if ds_name == 'inria':
+                    city_name = re.findall('[a-z\-]*(?=[0-9]+\.)', image_name)[0]
+                    tile_id = re.findall('[0-9]+(?=\.tif)', image_name)[0]
+                else:
+                    city_name = os.path.basename(image_name)[:3]
+                    tile_id = os.path.basename(image_name)[9:12]
 
                 # load reader
                 iterator_test = image_reader.image_label_iterator(
