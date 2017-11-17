@@ -13,7 +13,7 @@ TEST_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0, 20)])
 RANDOM_SEED = 1234
 BATCH_SIZE = 1
 INPUT_SIZE = 224
-CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper'
+CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper_new'
 MODEL_NAME = 'UNET_um_no_random_9'
 NUM_CLASS = 2
 GPU = '0'
@@ -60,40 +60,108 @@ def evaluate_results(flags):
         np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
 
 
-if __name__ == '__main__':
-    flags = read_flag()
-    #evaluate_results(flags)
-
-    results_mean = np.zeros(5)
-    _, task_dir = utils.get_task_img_folder()
-    cnt = 0
-    for layer_id in [6, 7, 8, 9]:
-        cnt += 1
-        model_name = 'UNET_um_no_random_{}'.format(layer_id)
-        result = dict(np.load(os.path.join(task_dir, '{}.npy'.format(model_name))).tolist())
-
-
-        for k, v in result.items():
-            results_mean[cnt-1] += v
-        results_mean[cnt-1] /= len(result)
+def evaluate_no_train(flags):
+    model_name = 'UnetInria_no_aug'
 
     result = utils.test_unet(flags.rsr_data_dir,
                              flags.test_data_dir,
                              flags.input_size,
-                             'UnetInria_no_aug',
+                             model_name,
                              flags.num_classes,
-                             r'/home/lab/Documents/bohao/code/sis/test/models',
+                             flags.ckdir,
                              flags.city_name,
                              flags.batch_size,
                              ds_name='urban_mapper')
-    for k, v in result.items():
-        results_mean[4] += v
-    results_mean[4] /= len(result)
 
-    plt.plot(np.array([6, 7, 8, 9, 10]), results_mean)
-    plt.xticks(np.array([6, 7, 8, 9, 0]))
-    plt.xlabel('layer id')
+    print(result)
+
+    _, task_dir = utils.get_task_img_folder()
+    np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
+
+
+def evaluate_scratch(flags):
+    model_name = 'UNET_um_no_random_scratch'
+
+    result = utils.test_unet(flags.rsr_data_dir,
+                             flags.test_data_dir,
+                             flags.input_size,
+                             model_name,
+                             flags.num_classes,
+                             flags.ckdir,
+                             flags.city_name,
+                             flags.batch_size,
+                             ds_name='urban_mapper')
+
+    print(result)
+
+    _, task_dir = utils.get_task_img_folder()
+    np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
+
+
+if __name__ == '__main__':
+    flags = read_flag()
+    evaluate_results(flags)
+    #evaluate_no_train(flags)
+    #evaluate_scratch(flags)
+
+    result_mean = np.zeros(6)
+    result_std = np.zeros(6)
+
+    img_dir, task_dir = utils.get_task_img_folder()
+
+    # scratch
+    iou = []
+    model_name = 'UNET_um_no_random_scratch'
+    result = dict(np.load(os.path.join(task_dir, '{}.npy'.format(model_name))).tolist())
+
+    for k, v in result.items():
+        iou.append(v)
+    result_mean[0] = np.mean(iou)
+    result_std[0] = np.std(iou)
+
+    # fine tune
+    cnt = 0
+    for layer_id in [6, 7, 8, 9]:
+        iou = []
+        cnt += 1
+        model_name = 'UNET_um_no_random_{}'.format(layer_id)
+        result = dict(np.load(os.path.join(task_dir, '{}.npy'.format(model_name))).tolist())
+
+        for k, v in result.items():
+            iou.append(v)
+        result_mean[cnt] = np.mean(iou)
+        result_std[cnt] = np.std(iou)
+
+    # no train
+    iou = []
+    model_name = 'UnetInria_no_aug'
+    result = dict(np.load(os.path.join(task_dir, '{}.npy'.format(model_name))).tolist())
+
+    for k, v in result.items():
+        iou.append(v)
+    result_mean[-1] = np.mean(iou)
+    result_std[-1] = np.std(iou)
+
+    # show figure
+    N = 6
+    ind = np.arange(N)
+
+    fig = plt.figure(figsize=(12, 4))
+    ax = plt.subplot(121)
+    ax.bar(ind, result_mean, 0.35, color='g', yerr=result_std)
+    plt.xticks(ind, np.array([0, 6, 7, 8, 9, 10]))
+    plt.xlabel('Fine Tune Scheme')
     plt.ylabel('mean IoU')
-    plt.title('Layers Kept in Fine Tuning Comparison')
+    #plt.ylim(ymin=0.7)
+    plt.title('Fine Tune Scheme Comparison')
+
+    ax = plt.subplot(122)
+    ax.bar(ind[:-1], result_mean[:-1], 0.35, color='g')
+    plt.xticks(ind[:-1], np.array([0, 6, 7, 8, 9]))
+    plt.xlabel('Fine Tune Scheme')
+    plt.ylabel('mean IoU')
+    plt.ylim(ymin=0.68, ymax=0.72)
+    plt.title('Fine Tune Scheme Comparison')
+
+    plt.savefig(os.path.join(img_dir, 'ps_vs_iou_urban_mapper.png'))
     plt.show()
-    print(results_mean)

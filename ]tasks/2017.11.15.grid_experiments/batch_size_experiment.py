@@ -42,7 +42,7 @@ def read_flag():
 
 
 def get_ious(flags):
-    for cnt, batch_size in enumerate([1, 2, 5, 10, 16]):
+    for cnt, batch_size in enumerate([1]):
         model_name = 'UNET_PS-{}__BS-{}__E-100__NT-8000__DS-60__CT-__no_random'.format(flags.input_size[0], batch_size)
         print(model_name)
 
@@ -77,6 +77,24 @@ def get_ious_patch_size(flags, patch_size_list):
         np.save(os.path.join(task_dir, '{}_{}.npy'.format(model_name, patch_size)), result)
 
 
+def get_ious_psfixed(flags, patch_size_list):
+    for patch_size in patch_size_list:
+        model_name = 'UNET_PS-224__BS-10__E-100__NT-8000__DS-60__CT-__no_random'
+        print(model_name)
+
+        result = utils.test_unet(flags.rsr_data_dir,
+                                 flags.test_data_dir,
+                                 (patch_size, patch_size),
+                                 model_name,
+                                 flags.num_classes,
+                                 flags.ckdir,
+                                 flags.city_name,
+                                 flags.batch_size)
+        print(result)
+        _, task_dir = utils.get_task_img_folder()
+        np.save(os.path.join(task_dir, '{}_fixed_{}.npy'.format(model_name, patch_size)), result)
+
+
 def get_ious_patch_size_224(flags, patch_size_list):
     for patch_size in patch_size_list:
         model_name = 'UNET_PS-{}__BS-{}__E-100__NT-8000__DS-60__CT-__no_random'.format(patch_size, 1)
@@ -100,9 +118,12 @@ if __name__ == '__main__':
     img_dir, task_dir = utils.get_task_img_folder()
     #get_ious(flags)
 
-    patch_size_list = np.array([352, 1632])
+    #patch_size_list = np.array([352, 1632])
     #get_ious_patch_size(flags, patch_size_list)
-    get_ious_patch_size_224(flags, np.array([352, 480, 608, 1632]))
+    #get_ious_patch_size_224(flags, np.array([352, 480, 608, 1632]))
+
+    #get_ious(flags)
+    #get_ious_psfixed(flags, np.array([224, 352, 480, 608, 1632]))
 
     '''ious = np.zeros((5, 5))
     for cnt, batch_size in enumerate([1, 2, 5, 10, 16]):
@@ -127,3 +148,53 @@ if __name__ == '__main__':
     plt.title('Batch Size Comparison')
     plt.savefig(os.path.join(img_dir, 'bs_vs_iou.png'))
     plt.show()'''
+
+    '''ious = np.zeros((4, 5))
+    for cnt, patch_size in enumerate([352, 480, 608, 1632]):
+        model_name = 'UNET_PS-{}__BS-1__E-100__NT-8000__DS-60__CT-__no_random'.format(patch_size)
+
+        result = dict(np.load(os.path.join(task_dir, '{}_{}.npy'.format(model_name, patch_size))).tolist())
+
+        for i in range(5):
+            ious[cnt, i] = result['austin{}'.format(i + 1)]
+
+    iou_mean = np.mean(ious, axis=1)
+    iou_std = np.std(ious, axis=1)
+
+    N = 4
+    ind = np.arange(N)
+
+    fig, ax = plt.subplots()
+    ax.bar(ind, iou_mean, 0.35, color='g', yerr=iou_std)
+    plt.xticks(ind, np.array([352, 480, 608, 1632]))
+    plt.xlabel('Patch Size')
+    plt.ylabel('mean IoU')
+    plt.ylim(ymax=0.8)
+    plt.title('Patch Size Comparison (Evaluated at Their Sizes)')
+    plt.savefig(os.path.join(img_dir, 'ps_vs_iou_adaptive.png'))
+    plt.show()'''
+
+    ious = np.zeros((5, 5))
+    for cnt, patch_size in enumerate([224, 352, 480, 608, 1632]):
+        model_name = 'UNET_PS-224__BS-10__E-100__NT-8000__DS-60__CT-__no_random'
+
+        result = dict(np.load(os.path.join(task_dir, '{}_fixed_{}.npy'.format(model_name, patch_size))).tolist())
+
+        for i in range(5):
+            ious[cnt, i] = result['austin{}'.format(i + 1)]
+
+    iou_mean = np.mean(ious, axis=1)
+    iou_std = np.std(ious, axis=1)
+
+    N = 5
+    ind = np.arange(N)
+
+    fig, ax = plt.subplots()
+    ax.bar(ind, iou_mean, 0.35, color='g', yerr=iou_std)
+    plt.xticks(ind, np.array([224, 352, 480, 608, 1632]))
+    plt.xlabel('Patch Size')
+    plt.ylabel('mean IoU')
+    plt.ylim(ymin=0.7)
+    plt.title('Patch Size Comparison (Trained at 224)')
+    plt.savefig(os.path.join(img_dir, 'ps_vs_iou_train_224.png'))
+    plt.show()

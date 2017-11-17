@@ -8,8 +8,8 @@ from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
 
-TRAIN_DATA_DIR = 'dcc_inria_train'
-VALID_DATA_DIR = 'dcc_inria_valid'
+TRAIN_DATA_DIR = 'dcc_inria_resample_train'
+VALID_DATA_DIR = 'dcc_inria_resample_valid'
 CITY_NAME = 'chicago,kitsap,tyrol-w,vienna'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/media/ei-edl01/user/bh163/data/iai'

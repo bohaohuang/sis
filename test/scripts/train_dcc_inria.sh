@@ -13,13 +13,13 @@ python train_inria.py \
                 --train-data-dir=dcc_inria_train \
                 --valid-data-dir=dcc_inria_valid \
                 --rsr-data-dir=/work/bh163/data/remote_sensing_data \
-                --patch-dir=/work/bh163/data/iai \
+                --patch-dir=/work/bh163/data/iai/resampled \
                 --train-patch-appendix=train_noaug_dcc \
                 --valid-patch-appendix=valid_noaug_dcc \
                 --epochs=100 \
                 --n-train=8000 \
                 --decay-step=60 \
                 --batch-size=10 \
-                --city-name=chicago,kitsap,tyrol-w,vienna \
+                --city-name=austin,chicago,kitsap,tyrol-w,vienna \
                 --valid-size=1000 \
-                --model=UNET_austin_no_random
+                --model=UnetInria_no_aug_resampled

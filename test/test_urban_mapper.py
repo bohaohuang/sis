@@ -12,7 +12,7 @@ RANDOM_SEED = 1234
 BATCH_SIZE = 1
 INPUT_SIZE = 224
 CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper'
-MODEL_NAME = 'UNET_um_no_random_9'
+MODEL_NAME = 'UNET_um_no_random_8'
 NUM_CLASS = 2
 GPU = '0'
 
@@ -48,7 +48,6 @@ def main(flags):
                              flags.city_name,
                              flags.batch_size,
                              ds_name='urban_mapper')
-
 
 if __name__ == '__main__':
     flags = read_flag()
