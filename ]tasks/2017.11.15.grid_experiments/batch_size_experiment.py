@@ -11,7 +11,7 @@ PATCH_DIR = r'/media/ei-edl01/user/bh163/data/iai'
 TEST_PATCH_APPENDIX = 'valid_noaug_dcc'
 TEST_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1, 6)])
 RANDOM_SEED = 1234
-BATCH_SIZE = 2
+BATCH_SIZE = 1
 INPUT_SIZE = 224
 CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/GridExp'
 MODEL_NAME = 'UnetInria_no_aug'
@@ -42,9 +42,7 @@ def read_flag():
 
 
 def get_ious(flags):
-    ious = np.zeros((4, 5))
-
-    for cnt, batch_size in enumerate([1, 2, 5, 10]):
+    for cnt, batch_size in enumerate([1, 2, 5, 10, 16]):
         model_name = 'UNET_PS-{}__BS-{}__E-100__NT-8000__DS-60__CT-__no_random'.format(flags.input_size[0], batch_size)
         print(model_name)
 
@@ -57,26 +55,75 @@ def get_ious(flags):
                                  flags.city_name,
                                  flags.batch_size)
         print(result)
-        for i in range(5):
-            ious[cnt, i] = result['austin{}'.format(i+1)]
+        _, task_dir = utils.get_task_img_folder()
+        np.save(os.path.join(task_dir, '{}_{}.npy'.format(model_name, flags.input_size)), result)
 
-    np.save('ious.npy', ious)
+
+def get_ious_patch_size(flags, patch_size_list):
+    for patch_size in patch_size_list:
+        model_name = 'UNET_PS-{}__BS-{}__E-100__NT-8000__DS-60__CT-__no_random'.format(patch_size, 1)
+        print(model_name)
+
+        result = utils.test_unet(flags.rsr_data_dir,
+                                 flags.test_data_dir,
+                                 (patch_size, patch_size),
+                                 model_name,
+                                 flags.num_classes,
+                                 flags.ckdir,
+                                 flags.city_name,
+                                 flags.batch_size)
+        print(result)
+        _, task_dir = utils.get_task_img_folder()
+        np.save(os.path.join(task_dir, '{}_{}.npy'.format(model_name, patch_size)), result)
+
+
+def get_ious_patch_size_224(flags, patch_size_list):
+    for patch_size in patch_size_list:
+        model_name = 'UNET_PS-{}__BS-{}__E-100__NT-8000__DS-60__CT-__no_random'.format(patch_size, 1)
+        print(model_name)
+
+        result = utils.test_unet(flags.rsr_data_dir,
+                                 flags.test_data_dir,
+                                 (224, 224),
+                                 model_name,
+                                 flags.num_classes,
+                                 flags.ckdir,
+                                 flags.city_name,
+                                 flags.batch_size)
+        print(result)
+        _, task_dir = utils.get_task_img_folder()
+        np.save(os.path.join(task_dir, '{}_{}.npy'.format(model_name, 224)), result)
 
 
 if __name__ == '__main__':
     flags = read_flag()
-    #result = get_ious(flags)
+    img_dir, task_dir = utils.get_task_img_folder()
+    #get_ious(flags)
 
-    ious = np.load('ious.npy')
-    batch_size = np.array([1, 2, 5, 10])
+    patch_size_list = np.array([352, 1632])
+    #get_ious_patch_size(flags, patch_size_list)
+    get_ious_patch_size_224(flags, np.array([352, 480, 608, 1632]))
 
-    for i, bs in enumerate(batch_size):
-        plt.plot(ious[i, :], '--', label='batch size {}'.format(bs))
-    plt.xticks(np.arange(5))
-    plt.xlabel('tile id')
-    plt.ylabel('IOU')
-    plt.legend(loc='center right')
-    plt.title('IOU vs Batch Size')
-    save_dir = utils.make_task_img_folder(IMG_SAVE_DIR)
-    plt.savefig(os.path.join(save_dir, 'iou_vs_batch_size.png'))
-    plt.show()
+    '''ious = np.zeros((5, 5))
+    for cnt, batch_size in enumerate([1, 2, 5, 10, 16]):
+        model_name = 'UNET_PS-{}__BS-{}__E-100__NT-8000__DS-60__CT-__no_random'.format(flags.input_size[0], batch_size)
+
+        result = dict(np.load(os.path.join(task_dir, '{}.npy'.format(model_name))).tolist())
+
+        for i in range(5):
+            ious[cnt, i] = result['austin{}'.format(i+1)]
+
+    iou_mean = np.mean(ious, axis=1)
+    iou_std = np.std(ious, axis=1)
+
+    N = 5
+    ind = np.arange(N)
+
+    fig, ax = plt.subplots()
+    ax.bar(ind, iou_mean, 0.35, color='g', yerr=iou_std)
+    plt.xticks(ind, np.array([1, 2, 5, 10, 16]))
+    plt.xlabel('Batch Size')
+    plt.ylabel('mean IoU')
+    plt.title('Batch Size Comparison')
+    plt.savefig(os.path.join(img_dir, 'bs_vs_iou.png'))
+    plt.show()'''

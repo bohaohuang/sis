@@ -14,6 +14,7 @@
 - [ ] Data augmentation
 - [X] Select city and tile in image reader
 - [X] Test on cluster and do cross val
-- [ ] Keep track of layer names
-- [ ] Easy layer weights loading function
+- [X] Keep track of layer names
+- [X] Easy layer weights loading function
 - [ ] Clean Tensorboard summaries 
+- [ ] Simplify model.train and model.test
