@@ -13,7 +13,7 @@ TEST_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0, 20)])
 RANDOM_SEED = 1234
 BATCH_SIZE = 1
 INPUT_SIZE = 224
-CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper_new'
+CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper_resampled'
 MODEL_NAME = 'UNET_um_no_random_9'
 NUM_CLASS = 2
 GPU = '0'
@@ -42,7 +42,7 @@ def read_flag():
 
 def evaluate_results(flags):
     for layer_id in [6, 7, 8, 9]:
-        model_name = 'UNET_um_no_random_{}'.format(layer_id)
+        model_name = 'UNET_um_no_random_resampled_{}'.format(layer_id)
 
         result = utils.test_unet(flags.rsr_data_dir,
                                  flags.test_data_dir,
@@ -57,11 +57,11 @@ def evaluate_results(flags):
         print(result)
 
         _, task_dir = utils.get_task_img_folder()
-        np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
+        np.save(os.path.join(task_dir, '{}_resampled.npy'.format(model_name)), result)
 
 
 def evaluate_no_train(flags):
-    model_name = 'UnetInria_no_aug'
+    model_name = 'UnetInria_no_aug_resampled'
 
     result = utils.test_unet(flags.rsr_data_dir,
                              flags.test_data_dir,
@@ -76,7 +76,7 @@ def evaluate_no_train(flags):
     print(result)
 
     _, task_dir = utils.get_task_img_folder()
-    np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
+    np.save(os.path.join(task_dir, '{}_resampled.npy'.format(model_name)), result)
 
 
 def evaluate_scratch(flags):
@@ -100,7 +100,7 @@ def evaluate_scratch(flags):
 
 if __name__ == '__main__':
     flags = read_flag()
-    evaluate_results(flags)
+    #evaluate_results(flags)
     #evaluate_no_train(flags)
     #evaluate_scratch(flags)
 
@@ -124,8 +124,8 @@ if __name__ == '__main__':
     for layer_id in [6, 7, 8, 9]:
         iou = []
         cnt += 1
-        model_name = 'UNET_um_no_random_{}'.format(layer_id)
-        result = dict(np.load(os.path.join(task_dir, '{}.npy'.format(model_name))).tolist())
+        model_name = 'UNET_um_no_random_resampled_{}'.format(layer_id)
+        result = dict(np.load(os.path.join(task_dir, '{}_resampled.npy'.format(model_name))).tolist())
 
         for k, v in result.items():
             iou.append(v)
@@ -134,8 +134,8 @@ if __name__ == '__main__':
 
     # no train
     iou = []
-    model_name = 'UnetInria_no_aug'
-    result = dict(np.load(os.path.join(task_dir, '{}.npy'.format(model_name))).tolist())
+    model_name = 'UnetInria_no_aug_resampled'
+    result = dict(np.load(os.path.join(task_dir, '{}_resampled.npy'.format(model_name))).tolist())
 
     for k, v in result.items():
         iou.append(v)
@@ -160,7 +160,7 @@ if __name__ == '__main__':
     plt.xticks(ind[:-1], np.array([0, 6, 7, 8, 9]))
     plt.xlabel('Fine Tune Scheme')
     plt.ylabel('mean IoU')
-    plt.ylim(ymin=0.68, ymax=0.72)
+    #plt.ylim(ymin=0.68, ymax=0.72)
     plt.title('Fine Tune Scheme Comparison')
 
     plt.savefig(os.path.join(img_dir, 'ps_vs_iou_urban_mapper.png'))

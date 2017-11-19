@@ -160,7 +160,6 @@ class UnetModel_Origin(UnetModel):
 
         self.pred = tf.layers.conv2d(conv9, class_num, (1, 1), name='final', activation=None, padding='same')
 
-
     def make_loss(self, y_name):
         with tf.variable_scope('loss'):
             pred_flat = tf.reshape(tf.nn.softmax(self.pred), [-1, self.class_num])

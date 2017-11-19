@@ -80,8 +80,13 @@ def image_summary(image, truth, prediction):
     return np.concatenate([image, truth_img, pred_img], axis=2)
 
 
-def get_output_label(result, image_dim, input_size, colormap):
-    image_pred = patch_extractor.un_patchify(result, image_dim, input_size)
+def get_output_label(result, image_dim, input_size, colormap, overlap=0,
+                     output_image_dim=None, output_patch_size=None):
+    if output_image_dim is not None and output_patch_size is not None:
+        image_pred = patch_extractor.un_patchify_shrink(result, image_dim, output_image_dim,
+                                                        input_size, output_patch_size, overlap=overlap)
+    else:
+        image_pred = patch_extractor.un_patchify(result, image_dim, input_size, overlap=overlap)
     labels_pred = get_pred_labels(image_pred)
     output_pred = make_output_file(labels_pred, colormap)
     return output_pred

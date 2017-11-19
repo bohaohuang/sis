@@ -20,9 +20,12 @@ def read_images_labels_from_disk(input_queue, input_size):
     return image, label
 
 
-def image_label_iterator(image_dir, batch_size, tile_dim, patch_size, overlap):
+def image_label_iterator(image_dir, batch_size, tile_dim, patch_size, overlap, padding=0):
     # this is a iterator for test
     block = scipy.misc.imread(image_dir)
+    if padding > 0:
+        block = patch_extractor.pad_block(block, padding)
+        tile_dim = (tile_dim[0]+padding*2, tile_dim[1]+padding*2)
     cnt = 0
     image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 3))
     for patch in patch_extractor.patchify(block, tile_dim, patch_size, overlap=overlap):
@@ -32,7 +35,8 @@ def image_label_iterator(image_dir, batch_size, tile_dim, patch_size, overlap):
             cnt = 0
             yield image_batch
     # yield the last chunck
-    yield image_batch[:cnt, :, :, :]
+    if cnt > 0:
+        yield image_batch[:cnt, :, :, :]
 
 
 class ImageLabelReader(object):
