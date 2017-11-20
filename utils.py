@@ -120,6 +120,13 @@ def get_task_img_folder():
     return make_task_img_folder(IMG_DIR), make_task_img_folder(TASK_DIR)
 
 
+def barplot_autolabel(ax, rects, margin=0.05):
+    for rect in rects:
+        height = rect.get_height()
+        ax.text(rect.get_x()+rect.get_width()/2, (1+margin)*height,
+                '{:.3f}'.format(height), ha='center', va='bottom')
+
+
 def test_unet(rsr_data_dir,
               test_data_dir,
               input_size,

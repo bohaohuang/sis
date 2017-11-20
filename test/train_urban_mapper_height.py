@@ -8,30 +8,29 @@ from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
 
-TRAIN_DATA_DIR = 'dcc_inria_resample_train'
-VALID_DATA_DIR = 'dcc_inria_resample_valid'
-CITY_NAME = 'austin,chicago,kitsap,tyrol-w,vienna'
+TRAIN_DATA_DIR = 'dcc_urban_mapper_train'
+VALID_DATA_DIR = 'dcc_urban_mapper_valid'
+CITY_NAME = 'JAX,TAM'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
-#PATCH_DIR = r'/media/ei-edl01/user/bh163/data/iai'
-PATCH_DIR = r'/home/lab/Documents/bohao/data/inria'
-TRAIN_PATCH_APPENDIX = 'train_noaug_dcc_resample'
-VALID_PATCH_APPENDIX = 'valid_noaug_dcc_resmaple'
-TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,37)])
-VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,6)])
+PATCH_DIR = r'/media/ei-edl01/user/bh163/data/iai'
+PRE_TRAINED_MODEL = r'/home/lab/Documents/bohao/code/sis/test/models/UnetInria_no_aug'
+LAYERS_TO_KEEP = '1,2,3,4,5,6,7,8,9'
+TRAIN_PATCH_APPENDIX = 'train_noaug_um'
+VALID_PATCH_APPENDIX = 'valid_noaug_um'
+TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(20,143)])
+VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0,20)])
 RANDOM_SEED = 1234
-BATCH_SIZE = 5
-LEARNING_RATE = 1e-3
-INPUT_SIZE = 572
-EPOCHS = 100
+BATCH_SIZE = 10
+LEARNING_RATE = 1e-4
+INPUT_SIZE = 224
+EPOCHS = 15
 CKDIR = r'./models'
-MODEL_NAME = 'UnetInria_Origin_no_aug_resample'
-DATA_AUG = 'filp,rotate'
+MODEL_NAME = 'UNET_um_no_random_9'
 NUM_CLASS = 2
 N_TRAIN = 8000
 GPU = '1'
-DECAY_STEP = 60
+DECAY_STEP = 10
 DECAY_RATE = 0.1
-VALID_SIZE = 1000
 
 
 def read_flag():
@@ -56,12 +55,13 @@ def read_flag():
     parser.add_argument('--GPU', type=str, default=GPU, help="GPU used for computation.")
     parser.add_argument('--decay-step', type=float, default=DECAY_STEP, help='Learning rate decay step in number of epochs.')
     parser.add_argument('--decay-rate', type=float, default=DECAY_RATE, help='Learning rate decay rate')
-    parser.add_argument('--valid-size', type=int, default=VALID_SIZE, help='#patches to valid')
     parser.add_argument('--model-name', type=str, default=MODEL_NAME, help='Model name')
-    parser.add_argument('--data-aug', type=str, default=DATA_AUG, help='Data augmentation methods')
+    parser.add_argument('--pre-trained-model', default=PRE_TRAINED_MODEL, help='Path to pretrained model')
+    parser.add_argument('--layers-to-keep', default=LAYERS_TO_KEEP, help='layers to keep, range 1 to 9')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
+    flags.layers_to_keep_num = [int(layer_id) for layer_id in flags.layers_to_keep.split(',')]
     return flags
 
 
@@ -76,19 +76,17 @@ def main(flags):
     # data prepare step
     Data = rsrClassData(flags.rsr_data_dir)
     (collect_files_train, meta_train) = Data.getCollectionByName(flags.train_data_dir)
-    pe_train = patch_extractor.PatchExtractorInria(flags.rsr_data_dir,
+    pe_train = patch_extractor.PatchExtractorUrbanMapper(flags.rsr_data_dir,
                                                    collect_files_train, patch_size=flags.input_size,
                                                    tile_dim=meta_train['dim_image'][:2],
-                                                   appendix=flags.train_patch_appendix,
-                                                   overlap=184)
-    train_data_dir = pe_train.extract(flags.patch_dir, pad=184)
+                                                   appendix=flags.train_patch_appendix)
+    train_data_dir = pe_train.extract(flags.patch_dir)
     (collect_files_valid, meta_valid) = Data.getCollectionByName(flags.valid_data_dir)
-    pe_valid = patch_extractor.PatchExtractorInria(flags.rsr_data_dir,
+    pe_valid = patch_extractor.PatchExtractorUrbanMapper(flags.rsr_data_dir,
                                                    collect_files_valid, patch_size=flags.input_size,
-                                                   tile_dim=meta_valid['dim_image'][:2],
-                                                   appendix=flags.valid_patch_appendix,
-                                                   overlap=184)
-    valid_data_dir = pe_valid.extract(flags.patch_dir, pad=184)
+                                                   tile_dim=meta_train['dim_image'][:2],
+                                                   appendix=flags.valid_patch_appendix)
+    valid_data_dir = pe_valid.extract(flags.patch_dir)
 
     # image reader
     coord = tf.train.Coordinator()
@@ -97,10 +95,10 @@ def main(flags):
     with tf.name_scope('image_loader'):
         reader_train = image_reader.ImageLabelReader(train_data_dir, flags.input_size, coord,
                                                      city_list=flags.city_name, tile_list=flags.train_tile_names,
-                                                     data_aug=flags.data_aug)
+                                                     ds_name='urban_mapper')
         reader_valid = image_reader.ImageLabelReader(valid_data_dir, flags.input_size, coord,
                                                      city_list=flags.city_name, tile_list=flags.valid_tile_names,
-                                                     data_aug=flags.data_aug)
+                                                     ds_name='urban_mapper')
         X_batch_op, y_batch_op = reader_train.dequeue(flags.batch_size)
         X_batch_op_valid, y_batch_op_valid = reader_valid.dequeue(flags.batch_size * 2)
     reader_train_op = [X_batch_op, y_batch_op]
@@ -112,8 +110,9 @@ def main(flags):
     mode = tf.placeholder(tf.bool, name='mode')
 
     # initialize model
-    model = unet.UnetModel_Origin({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
+    model = unet.UnetModel({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
+    model.load_weights(flags.pre_trained_model, flags.layers_to_keep_num)
     model.make_loss('Y')
     model.make_learning_rate(flags.learning_rate,
                              tf.cast(flags.n_train/flags.batch_size * flags.decay_step, tf.int32), flags.decay_rate)

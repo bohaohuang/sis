@@ -6,7 +6,35 @@ import tensorflow as tf
 from dataReader import patch_extractor
 
 
-def read_images_labels_from_disk(input_queue, input_size):
+def image_flipping(img, label):
+    """
+    randomly flips images left-right and up-down
+    :param img:
+    :param label:
+    :return:flipped images
+    """
+    label = tf.cast(label, dtype=tf.float32)
+    temp = tf.concat([img, label], axis=2)
+    temp_flipped = tf.image.random_flip_left_right(tf.image.random_flip_up_down(temp))
+    img = tf.slice(temp_flipped, [0, 0, 0], [-1, -1, 3])
+    label = tf.slice(temp_flipped, [0, 0, 3], [-1, -1, 1])
+    return img, label
+
+
+def image_rotating(img, label):
+    """
+    randomly rotate images by 0/90/180/270 degrees
+    :param img:
+    :param label:
+    :return:rotated images
+    """
+    random_times = tf.to_int32(tf.random_uniform([1], minval=0, maxval=4))[0]
+    img = tf.image.rot90(img, random_times)
+    label = tf.image.rot90(label, random_times)
+    return img, label
+
+
+def read_images_labels_from_disk(input_queue, input_size, data_aug=''):
     image_contents = tf.read_file(input_queue[0])
     label_contents = tf.read_file(input_queue[1])
 
@@ -16,6 +44,11 @@ def read_images_labels_from_disk(input_queue, input_size):
 
     image = tf.image.resize_images(image, input_size)
     label = tf.image.resize_images(label, input_size)
+
+    if 'flip' in data_aug:
+        image, label = image_flipping(image, label)
+    if 'rotate' in data_aug:
+        image, label = image_rotating(image, label)
 
     return image, label
 
@@ -40,11 +73,14 @@ def image_label_iterator(image_dir, batch_size, tile_dim, patch_size, overlap, p
 
 
 class ImageLabelReader(object):
-    def __init__(self, data_dir, input_size, coord, city_list, tile_list, data_list='data_list.txt', random=True, ds_name='inria'):
+    def __init__(self, data_dir, input_size, coord, city_list, tile_list,
+                 data_list='data_list.txt', random=True, ds_name='inria',
+                 data_aug=''):
         self.original_dir = ''
         self.data_dir = data_dir
         self.data_list = data_list
         self.ds_name = ds_name
+        self.data_aug = data_aug
         self.input_size = input_size
         self.coord = coord
         self.city_list = city_list
@@ -53,7 +89,7 @@ class ImageLabelReader(object):
         self.images = tf.convert_to_tensor(self.image_list, dtype=tf.string)
         self.labels = tf.convert_to_tensor(self.label_list, dtype=tf.string)
         self.queue = tf.train.slice_input_producer([self.images, self.labels], shuffle=random)
-        self.image, self.label = read_images_labels_from_disk(self.queue, self.input_size)
+        self.image, self.label = read_images_labels_from_disk(self.queue, self.input_size, self.data_aug)
 
     def read_image_label_list(self):
         with open(os.path.join(self.data_dir, self.data_list), 'r') as file:
