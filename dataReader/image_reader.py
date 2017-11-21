@@ -230,7 +230,7 @@ class ImageLabelReaderHeight(object):
             return tf.concat([image_batch, dsm_batch, dtm_batch], axis=3), label_batch
         elif self.height_mode == 'subtract':
             return tf.concat([image_batch, dsm_batch-dtm_batch], axis=3), label_batch
-        elif self.height_mode == 'subtract all':
+        elif self.height_mode == 'subtract_all':
             return tf.concat([image_batch, dsm_batch, dtm_batch,
                               dsm_batch-dtm_batch], axis=3), label_batch
 
