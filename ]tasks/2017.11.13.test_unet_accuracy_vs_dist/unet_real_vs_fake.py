@@ -376,7 +376,7 @@ if __name__ == '__main__':
             result_dict = test_fake_across_city(flags, model_names, (patch_size, patch_size))
             np.save(os.path.join(task_dir, file_name), result_dict)
 
-    for patch_size in [572, 2636]:
+    '''for patch_size in [572, 2636]:
         file_name = '{}_{}_cross.npy'.format(flags.model_name, patch_size)
         if not os.path.exists(os.path.join(task_dir, file_name)):
             model_names = ['UnetInria_Origin_cross_city/UnetInria_austin_Origin_no_aug',
@@ -385,7 +385,7 @@ if __name__ == '__main__':
                            'UnetInria_Origin_cross_city/UnetInria_tyrol-w_Origin_no_aug',
                            'UnetInria_Origin_cross_city/UnetInria_vienna_Origin_no_aug']
             result_dict = test_real_across_city(flags, model_names, (patch_size, patch_size))
-            np.save(os.path.join(task_dir, file_name), result_dict)
+            np.save(os.path.join(task_dir, file_name), result_dict)'''
 
     result_mean = np.zeros((2, 4))
     result_std = np.zeros((2, 4))

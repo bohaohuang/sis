@@ -123,7 +123,7 @@ class UnetModel(network.Network):
             if image_summary is not None:
                 valid_image_summary = sess.run(valid_image_summary_op,
                                                feed_dict={self.valid_images:
-                                                              image_summary(X_batch_val, y_batch_val, pred_valid)})
+                                                              image_summary(X_batch_val[:,:,:,:3], y_batch_val, pred_valid)})
                 summary_writer.add_summary(valid_image_summary, self.global_step_value)
 
     def test(self, x_name, sess, test_iterator):

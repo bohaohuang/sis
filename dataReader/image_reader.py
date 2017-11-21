@@ -96,6 +96,12 @@ def read_images_heights_labels_from_disk(input_queue, input_size, data_aug=''):
         dtm = tf.slice(temp_rotated, [0, 0, 4], [-1, -1, 1])
         label = tf.slice(temp_rotated, [0, 0, 5], [-1, -1, 1])
 
+    # this is necessary for dcc, which uses older version of tf
+    image = tf.image.resize_images(image, input_size)
+    dsm = tf.image.resize_images(dsm, input_size)
+    dtm = tf.image.resize_images(dtm, input_size)
+    label = tf.image.resize_images(label, input_size)
+
     return image, dsm, dtm, label
 
 
