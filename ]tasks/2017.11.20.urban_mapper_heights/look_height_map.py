@@ -9,11 +9,15 @@ dsm = 'JAX_Tile_004_DSM.tif'
 dtm = 'JAX_Tile_004_DTM.tif'
 rgb = 'JAX_Tile_004_RGB.tif'
 
-'''dsm_fig = scipy.misc.imread(os.path.join(data_dir, dsm))
+dsm_fig = scipy.misc.imread(os.path.join(data_dir, dsm))
 dtm_fig = scipy.misc.imread(os.path.join(data_dir, dtm))
 rgb_fig = scipy.misc.imread(os.path.join(data_dir, rgb))
 
-plt.figure(figsize=(12, 8))
+print(dsm_fig.shape)
+print(dtm_fig.shape)
+print(rgb_fig.shape)
+
+'''plt.figure(figsize=(12, 8))
 plt.subplot(221)
 plt.hist(dsm_fig.flatten())
 plt.subplot(222)

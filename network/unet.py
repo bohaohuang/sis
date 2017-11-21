@@ -50,7 +50,7 @@ class UnetModel(network.Network):
             feed_layer = layer_name + '/'
             load_dict[feed_layer] = feed_layer
         #tf.train.init_from_checkpoint(ckpt_dir, load_dict)
-        tf.contrib.framework.init_from_checkpoint(ckpt_dir, load_dict)
+        #tf.contrib.framework.init_from_checkpoint(ckpt_dir, load_dict)
 
     def make_learning_rate(self, lr, decay_steps, decay_rate):
         self.learning_rate = tf.train.exponential_decay(lr, self.global_step, decay_steps,
