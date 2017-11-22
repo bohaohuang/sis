@@ -13,7 +13,7 @@ TEST_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0, 20)])
 RANDOM_SEED = 1234
 BATCH_SIZE = 1
 INPUT_SIZE = 224
-CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper_resampled'
+CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper_resampled/authentic'
 MODEL_NAME = 'UNET_um_no_random_9'
 NUM_CLASS = 2
 GPU = '0'
@@ -100,7 +100,7 @@ def evaluate_scratch(flags):
 
 if __name__ == '__main__':
     flags = read_flag()
-    #evaluate_results(flags)
+    evaluate_results(flags)
     #evaluate_no_train(flags)
     #evaluate_scratch(flags)
 
@@ -148,11 +148,11 @@ if __name__ == '__main__':
 
     fig = plt.figure(figsize=(12, 4))
     ax = plt.subplot(121)
-    ax.bar(ind, result_mean, 0.35, color='g', yerr=result_std)
+    rect1 = ax.bar(ind, result_mean, 0.35, color='g', yerr=result_std)
     plt.xticks(ind, np.array([0, 6, 7, 8, 9, 10]))
     plt.xlabel('Fine Tune Scheme')
     plt.ylabel('mean IoU')
-    #plt.ylim(ymin=0.7)
+    utils.barplot_autolabel(ax, rect1, margin=0.01)
     plt.title('Fine Tune Scheme Comparison')
 
     ax = plt.subplot(122)

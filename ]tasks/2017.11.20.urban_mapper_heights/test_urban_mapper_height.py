@@ -13,8 +13,8 @@ TEST_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0, 16)])
 RANDOM_SEED = 1234
 BATCH_SIZE = 5
 INPUT_SIZE = 572
-CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models'
-MODEL_NAME = 'unet_origin_scratch_um_augfr_4'
+CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper_Height'
+MODEL_NAME = 'unet_origin_scratch_um_augfr_5'
 NUM_CLASS = 2
 GPU = '0'
 
@@ -40,9 +40,7 @@ def read_flag():
     return flags
 
 
-def evaluate_results(flags):
-    model_name = 'unet_origin_scratch_um_augfr_4'
-
+def evaluate_results(flags, model_name, height_model):
     result = utils.test_authentic_unet_height(flags.rsr_data_dir,
                                               flags.test_data_dir,
                                               flags.input_size,
@@ -52,13 +50,63 @@ def evaluate_results(flags):
                                               flags.city_name,
                                               flags.batch_size,
                                               ds_name='urban_mapper',
-                                              height_mode='subtract')
+                                              height_mode=height_model)
 
     print(result)
 
     _, task_dir = utils.get_task_img_folder()
-    #np.save(os.path.join(task_dir, '{}_resampled.npy'.format(model_name)), result)
+    np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
 
 if __name__ == '__main__':
-    flags = read_flag()
-    evaluate_results(flags)
+    '''flags = read_flag()
+    evaluate_results(flags, 'unet_origin_scratch_um_augfr_4', 'subtract')
+
+    _, task_dir = utils.get_task_img_folder()
+    result = dict(np.load(os.path.join(task_dir, '{}.npy'.format('unet_origin_scratch_um_augfr_4'))).tolist())
+
+    iou = []
+    for k, v in result.items():
+        iou.append(v)
+    result_mean = np.mean(iou)
+    print(result_mean)'''
+
+    '''import matplotlib.pyplot as plt
+    plt.plot(np.array([0.327, 0.664, 0.703]), np.array([266773.43, 733870.19, 749905.74]))
+    plt.show()'''
+
+    dir = r'/home/lab/Documents/bohao/data/urban_mapper/PS_(572, 572)-OL_0-AF_valid_augfr_um'
+    file_name = 'JAX006_dsm_00004.png'
+    import scipy.misc
+    import os
+    img = scipy.misc.imread(os.path.join(dir, file_name))
+    print(img[:10, :10])
+    print(img[-10:, -10:])
+
+    dir2 = r'/media/ei-edl01/data/remote_sensing_data/urban_mapper/image'
+    file_name2 = 'JAX_Tile_006_DSM.tif'
+    img2 = scipy.misc.imread(os.path.join(dir2, file_name2))
+    print(img2[:10, :10])
+    print(img2[-10:, -10:])
+
+    np.save('JAX_Tile_006_DSM_small1.npy', img2[:10, :10])
+    np.save('JAX_Tile_006_DSM_small2.npy', img2[-10:, -10:])
+    img3 = np.load('JAX_Tile_006_DSM_small1.npy')
+    print(img3)
+    img4 = np.load('JAX_Tile_006_DSM_small2.npy')
+    print(img4)
+
+    '''scipy.misc.imsave('fig_test.png', img2)
+    img3 = scipy.misc.imread('fig_test.png')
+    print(img3[:10, :10])
+    print(img3[-10:, -10:])
+
+    scipy.misc.imsave('fig_test.jpg', img2)
+    img4 = scipy.misc.imread('fig_test.jpg')
+    print(img4[:10, :10])
+    print(img4[-10:, -10:])
+
+    plt.subplot(121)
+    plt.imshow(img3[250:, :])
+    #plt.subplot(122)
+    #plt.imshow(img4[250:, :])
+    plt.show()'''

@@ -16,8 +16,8 @@ python train_urban_mapper_height.py \
                 --patch-dir=/work/bh163/data/iai \
                 --pre-trained-model=~/code/sis/test/models/UNET_PS-224__BS-10__E-100__NT-8000__DS-60__CT-__no_random \
                 --layers-to-keep=1,2,3,4,5,6,7 \
-                --train-patch-appendix=train_augfr_um \
-                --valid-patch-appendix=valid_augfr_um \
+                --train-patch-appendix=train_augfr_um_npy \
+                --valid-patch-appendix=valid_augfr_um_npy \
                 --epochs=100 \
                 --n-train=8000 \
                 --decay-step=60 \

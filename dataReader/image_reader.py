@@ -132,7 +132,6 @@ def image_height_label_iterator(image_dir, batch_size, tile_dim, patch_size, ove
         if len(img.shape) == 2:
             img = np.expand_dims(img, axis=2)
         block.append(img)
-    #block = np.dstack(block)
     if height_mode == 'all':
         block = np.dstack(block)
         image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 5))
@@ -147,7 +146,6 @@ def image_height_label_iterator(image_dir, batch_size, tile_dim, patch_size, ove
         block = patch_extractor.pad_block(block, padding)
         tile_dim = (tile_dim[0]+padding*2, tile_dim[1]+padding*2)
     cnt = 0
-    #image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 3))
     for patch in patch_extractor.patchify(block, tile_dim, patch_size, overlap=overlap):
         cnt += 1
         image_batch[cnt-1, :, :, :] = patch
@@ -157,6 +155,19 @@ def image_height_label_iterator(image_dir, batch_size, tile_dim, patch_size, ove
     # yield the last chunck
     if cnt > 0:
         yield image_batch[:cnt, :, :, :]
+
+
+def read_batch_from_list(file_list, batch_idx):
+    block = []
+    for idx in batch_idx:
+        if file_list[idx][-3:] != 'npy':
+            img = scipy.misc.imread(file_list[idx])
+        else:
+            img = np.load(file_list[idx])
+        if len(img.shape) == 2:
+            img = np.expand_dims(img, axis=2)
+        block.append(img)
+    return np.stack(block, axis=0)
 
 
 class ImageLabelReader(object):
@@ -269,52 +280,38 @@ class ImageLabelReaderHeight(object):
             return tf.concat([image_batch, dsm_batch, dtm_batch,
                               dsm_batch-dtm_batch], axis=3), label_batch
 
+    def image_height_label_iterator(self, batch_size):
+        assert len(self.image_list) == len(self.dsm_list) == len(self.dtm_list) == len(self.label_list)
+        image_num = len(self.image_list)
+        while True:
+            idx = np.random.permutation(image_num)
+            for i in range(0, image_num, batch_size):
+                batch_idx = idx[i:i+batch_size]
+                if len(batch_idx) < batch_size:
+                    continue
+                image_batch = read_batch_from_list(self.image_list, batch_idx)
+                dsm_batch = read_batch_from_list(self.dsm_list, batch_idx)
+                dtm_batch = read_batch_from_list(self.dtm_list, batch_idx)
+                label_batch = read_batch_from_list(self.label_list, batch_idx)/255
+                if self.height_mode == 'all':
+                    yield np.concatenate([image_batch, dsm_batch, dtm_batch], axis=3), label_batch
+                elif self.height_mode == 'subtract':
+                    yield np.concatenate([image_batch, dsm_batch-dtm_batch], axis=3), label_batch
+                elif self.height_mode == 'subtract_all':
+                    yield np.concatenate([image_batch, dsm_batch, dtm_batch, dsm_batch-dtm_batch], axis=3), label_batch
+
 
 if __name__ == '__main__':
     os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
     os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
-    data_dir = r'/media/ei-edl01/user/bh163/data/iai/PS_(224, 224)-OL_0-AF_train_noaug'
-    input_size = (224, 224)
+    data_dir = r'/home/lab/Documents/bohao/data/urban_mapper/PS_(572, 572)-OL_0-AF_valid_augfr_um'
+    input_size = (572, 572)
     coord = tf.train.Coordinator()
-    city_list = ['vienna', 'chicago']
+    city_list = ['JAX', 'TAM']
     tile_list = ['6', '7', '8']
-    reader = ImageLabelReader(data_dir, input_size, coord, city_list, tile_list)
-
-    X_batch_op, y_batch_op = reader.dequeue(5)
-
-    '''with tf.Session() as sess:
-        threads = tf.train.start_queue_runners(coord=coord, sess=sess)
-        X_batch, y_batch = sess.run([X_batch_op, y_batch_op])
-        coord.request_stop()
-        coord.join(threads)
-
-    print(reader.data_dir)
-
-    print(X_batch.shape)
-    print(y_batch.shape)
-
-    import matplotlib.pyplot as plt
-    plt.subplot(121)
-    plt.imshow(X_batch[2, :, :, :])
-    plt.subplot(122)
-    plt.imshow(y_batch[2, :, :, 0])
-    plt.show()'''
-
-    image_dir = r'/media/ei-edl01/data/remote_sensing_data/inria/image'
-    reader.set_original_image_label_dir(image_dir)
-    iterator = reader.image_label_iterator('austin1.tif', 4, (5000, 5000), (500, 500), 250)
-    for i in range(4):
-        image = next(iterator)
-        print(image.shape)
-
-        import matplotlib.pyplot as plt
-        plt.subplot(221)
-        plt.imshow(image[0, :, :, :])
-        plt.subplot(222)
-        plt.imshow(image[1, :, :, :])
-        plt.subplot(223)
-        plt.imshow(image[2, :, :, :])
-        plt.subplot(224)
-        plt.imshow(image[3, :, :, :])
-        plt.show()
+    reader = ImageLabelReaderHeight(data_dir, input_size, coord, city_list, tile_list, ds_name='urban_mapper')
+    iterator = reader.image_height_label_iterator(5)
+    x_batch, label_batch = next(iterator)
+    print(x_batch.shape)
+    print(label_batch.shape)

@@ -18,3 +18,6 @@
 - [X] Easy layer weights loading function
 - [ ] Clean Tensorboard summaries 
 - [ ] Simplify model.train and model.test
+
+- [ ] Make sure Urban Mapper tif to png is consistent
+- [ ] Take min,max from every dataset, check pixels
