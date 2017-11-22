@@ -124,6 +124,41 @@ def image_label_iterator(image_dir, batch_size, tile_dim, patch_size, overlap, p
         yield image_batch[:cnt, :, :, :]
 
 
+def image_height_label_iterator(image_dir, batch_size, tile_dim, patch_size, overlap, padding=0, height_mode='subtract'):
+    # this is a iterator for test
+    block = []
+    for file in image_dir:
+        img = scipy.misc.imread(file)
+        if len(img.shape) == 2:
+            img = np.expand_dims(img, axis=2)
+        block.append(img)
+    #block = np.dstack(block)
+    if height_mode == 'all':
+        block = np.dstack(block)
+        image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 5))
+    elif height_mode == 'subtract':
+        block = np.dstack([block[0], block[1]-block[2]])
+        image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 4))
+    else:
+        block = np.dstack([block[0], block[1], block[2], block[1]-block[2]])
+        image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 6))
+
+    if padding > 0:
+        block = patch_extractor.pad_block(block, padding)
+        tile_dim = (tile_dim[0]+padding*2, tile_dim[1]+padding*2)
+    cnt = 0
+    #image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 3))
+    for patch in patch_extractor.patchify(block, tile_dim, patch_size, overlap=overlap):
+        cnt += 1
+        image_batch[cnt-1, :, :, :] = patch
+        if cnt == batch_size:
+            cnt = 0
+            yield image_batch
+    # yield the last chunck
+    if cnt > 0:
+        yield image_batch[:cnt, :, :, :]
+
+
 class ImageLabelReader(object):
     def __init__(self, data_dir, input_size, coord, city_list, tile_list,
                  data_list='data_list.txt', random=True, ds_name='inria',

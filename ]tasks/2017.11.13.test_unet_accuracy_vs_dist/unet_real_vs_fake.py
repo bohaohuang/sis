@@ -310,7 +310,7 @@ def test_real_across_city(flags, MODEL_NAME, patch_size):
                             batch_size=flags.batch_size,
                             tile_dim=meta_test['dim_image'][:2],
                             patch_size=patch_size,
-                            overlap=0)
+                            overlap=184, padding=92)
                         # run
                         result = model.test('X', sess, iterator_test)
                         raw_pred = patch_extractor.un_patchify_shrink(result,
@@ -320,8 +320,7 @@ def test_real_across_city(flags, MODEL_NAME, patch_size):
                                                                         patch_size= patch_size,
                                                                         patch_size_output= (patch_size[0] - 184, patch_size[1] - 184),
                                                                         overlap=184)
-
-                        file_name = '{}_{}_{}.npy'.format(m_name, city_name, tile_id)
+                        file_name = '{}_{}_{}.npy'.format(m_name.split('/')[-1], city_name, tile_id)
                         np.save(os.path.join('./temp', file_name), raw_pred)
                 coord.request_stop()
                 coord.join(threads)
@@ -332,7 +331,7 @@ def test_real_across_city(flags, MODEL_NAME, patch_size):
         for tile_num in range(5):
             output = np.zeros((5000, 5000, 2))
             for m_name in MODEL_NAME:
-                raw_pred = np.load(os.path.join('./temp', '{}_{}_{}.npy'.format(m_name, city, tile_num+1)))
+                raw_pred = np.load(os.path.join('./temp', '{}_{}_{}.npy'.format(m_name.split('/')[-1], city, tile_num+1)))
                 output += raw_pred
 
             # combine results
@@ -376,7 +375,7 @@ if __name__ == '__main__':
             result_dict = test_fake_across_city(flags, model_names, (patch_size, patch_size))
             np.save(os.path.join(task_dir, file_name), result_dict)
 
-    '''for patch_size in [572, 2636]:
+    for patch_size in [572, 2636]:
         file_name = '{}_{}_cross.npy'.format(flags.model_name, patch_size)
         if not os.path.exists(os.path.join(task_dir, file_name)):
             model_names = ['UnetInria_Origin_cross_city/UnetInria_austin_Origin_no_aug',
@@ -385,7 +384,7 @@ if __name__ == '__main__':
                            'UnetInria_Origin_cross_city/UnetInria_tyrol-w_Origin_no_aug',
                            'UnetInria_Origin_cross_city/UnetInria_vienna_Origin_no_aug']
             result_dict = test_real_across_city(flags, model_names, (patch_size, patch_size))
-            np.save(os.path.join(task_dir, file_name), result_dict)'''
+            np.save(os.path.join(task_dir, file_name), result_dict)
 
     result_mean = np.zeros((2, 4))
     result_std = np.zeros((2, 4))
@@ -423,14 +422,14 @@ if __name__ == '__main__':
             result_std[cnt, 2] = np.std(iou)
 
     # real, cross city
-    '''iou = []
+    iou = []
     for cnt, patch_size in enumerate([572, 2636]):
         file_name = 'UnetInria_Origin_no_aug_{}_cross.npy'.format(patch_size)
         result = dict(np.load(os.path.join(task_dir, file_name)).tolist())
         for k, v in result.items():
             iou.append(v)
-        result_mean[cnt, 1] = np.mean(iou)
-        result_std[cnt, 1] = np.std(iou)'''
+        result_mean[cnt, 3] = np.mean(iou)
+        result_std[cnt, 3] = np.std(iou)
 
     _, N = result_mean.shape
     ind = np.arange(N)
