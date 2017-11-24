@@ -60,6 +60,10 @@ def read_images_labels_from_disk(input_queue, input_size, data_aug=''):
     if 'rotate' in data_aug:
         image, label = image_rotating(image, label)
 
+    # this is necessary for dcc, which uses older version of tf
+    image = tf.image.resize_images(image, input_size)
+    label = tf.image.resize_images(label, input_size)
+
     return image, label
 
 
