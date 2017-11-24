@@ -9,7 +9,7 @@ export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/sis
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/rsr
 cd ../
 python train_inria_origin_unet.py \
-                --GPU=2 \
+                --GPU=0 \
                 --train-data-dir=dcc_inria_train \
                 --valid-data-dir=dcc_inria_valid \
                 --rsr-data-dir=/work/bh163/data/remote_sensing_data \
@@ -22,4 +22,5 @@ python train_inria_origin_unet.py \
                 --batch-size=5 \
                 --city-name=austin,chicago,kitsap,tyrol-w,vienna \
                 --valid-size=1000 \
-                --model=UnetInria_Origin_no_aug
+                --data-aug=filp,rotate \
+                --model=UnetInria_Origin_fr

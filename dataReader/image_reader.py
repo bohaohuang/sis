@@ -128,7 +128,10 @@ def image_height_label_iterator(image_dir, batch_size, tile_dim, patch_size, ove
     # this is a iterator for test
     block = []
     for file in image_dir:
-        img = scipy.misc.imread(file)
+        if file[-3:] != 'npy':
+            img = scipy.misc.imread(file)
+        else:
+            img = np.load(file)
         if len(img.shape) == 2:
             img = np.expand_dims(img, axis=2)
         block.append(img)

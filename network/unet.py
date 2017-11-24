@@ -170,3 +170,44 @@ class UnetModel_Origin(UnetModel):
             gt = tf.gather(y_flat, indices)
             prediction = tf.gather(pred_flat, indices)
             self.loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=prediction, labels=gt))
+
+
+class UnetModel_Height(UnetModel_Origin):
+    def load_weights(self, ckpt_dir, layers2load, conv1_weight, check_weight=False):
+        layers_list = []
+        for layer_id in layers2load:
+            assert 1 <= layer_id <= 9
+            if layer_id == 1:
+                layers_list.append('layerconv1/conv_1/bias:0')
+                layers_list.append('layerconv1/bn_1')
+                layers_list.append('layerconv1/conv_2')
+                layers_list.append('layerconv1/bn_2')
+                continue
+            elif layer_id <= 5:
+                prefix = 'layerconv'
+            else:
+                prefix = 'layerup'
+            layers_list.append('{}{}'.format(prefix, layer_id))
+
+        load_dict = {}
+        for layer_name in layers_list:
+            feed_layer = layer_name + '/'
+            load_dict[feed_layer] = feed_layer
+        #tf.train.init_from_checkpoint(ckpt_dir, load_dict)
+        tf.contrib.framework.init_from_checkpoint(ckpt_dir, load_dict)
+
+        layerconv1_kernel = tf.trainable_variables()[0]
+        assign_op = layerconv1_kernel.assign(conv1_weight)
+        with tf.Session() as sess:
+            sess.run(assign_op)
+            weight = sess.run(layerconv1_kernel)
+
+        if check_weight:
+            import matplotlib.pyplot as plt
+            _, _, c_num, _ = weight.shape
+            for i in range(c_num):
+                plt.subplot(321+i)
+                plt.imshow(weight[:, :, i, :].reshape((16, 18)))
+                plt.colorbar()
+                plt.title(i)
+            plt.show()

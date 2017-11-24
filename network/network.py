@@ -70,7 +70,7 @@ class Network(object):
     def crop_upsample_concat(self, input_a, input_b, margin, name):
         with tf.variable_scope('crop_upsample_concat'):
             _, w, h, _ = input_b.get_shape().as_list()
-            input_b_crop = tf.image.resize_image_with_crop_or_pad(input_a, w-margin, h-margin)
+            input_b_crop = tf.image.resize_image_with_crop_or_pad(input_b, w-margin, h-margin)
             return self.upsample_concat(input_a, input_b_crop, name)
 
     def fc_fc(self, input_, n_filters, training, name, activation=tf.nn.relu, dropout=True):

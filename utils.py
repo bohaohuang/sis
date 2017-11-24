@@ -444,3 +444,39 @@ def test_authentic_unet_height(rsr_data_dir,
             coord.join(threads)
     return result_dict
 
+
+def get_unet_first_layer_weight(model_dir, additional_num, input_size=(572, 572)):
+    import tensorflow as tf
+    from network import unet
+
+    X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
+    y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
+    mode = tf.placeholder(tf.bool, name='mode')
+
+    model = unet.UnetModel_Origin({'X': X, 'Y': y}, trainable=mode, model_name='test_unet',
+                                  input_size=input_size)
+    model.create_graph('X', 2)
+    trainable_vars = tf.trainable_variables()
+    model.ckdir = model_dir
+
+    with tf.Session() as sess:
+        init = tf.global_variables_initializer()
+        sess.run(init)
+
+        initialize_var = sess.run(trainable_vars[0])
+
+        saver = tf.train.Saver(var_list=tf.global_variables(), max_to_keep=1)
+
+        assert os.path.exists(model.ckdir) and tf.train.get_checkpoint_state(model.ckdir)
+        latest_check_point = tf.train.latest_checkpoint(model.ckdir)
+        saver.restore(sess, latest_check_point)
+
+        pretrained_var = sess.run(trainable_vars[0])
+        h, w, c, o = initialize_var.shape
+
+        filter_kernel = np.zeros((h, w, c+additional_num, o))
+        filter_kernel[:, :, :3, :] = pretrained_var
+        for i in range(additional_num):
+            filter_kernel[:, :, 3+i%c, :] = initialize_var[:, :, i%c, :]
+
+        return filter_kernel

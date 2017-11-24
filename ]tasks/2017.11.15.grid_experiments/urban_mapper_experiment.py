@@ -4,17 +4,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import utils
 
-TEST_DATA_DIR = 'dcc_urban_mapper_valid'
+TEST_DATA_DIR = 'dcc_urban_mapper_height_valid'
 CITY_NAME = 'JAX,TAM'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
-PATCH_DIR = r'/media/ei-edl01/user/bh163/data/iai'
-TEST_PATCH_APPENDIX = 'valid_noaug_um'
-TEST_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0, 20)])
+PATCH_DIR = r'/home/lab/Documents/bohao/data/urban_mapper'
+TEST_PATCH_APPENDIX = 'valid_augfr_um_npy'
+TEST_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0, 16)])
 RANDOM_SEED = 1234
 BATCH_SIZE = 1
 INPUT_SIZE = 224
-CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper_resampled/authentic'
-MODEL_NAME = 'UNET_um_no_random_9'
+CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper_Height_npy'
+MODEL_NAME = 'unet_origin_scratch_um_augfr_4'
 NUM_CLASS = 2
 GPU = '0'
 
@@ -38,6 +38,23 @@ def read_flag():
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
     return flags
+
+
+def evaluate_a_result(flags, model_name, input_size):
+    result = utils.test_authentic_unet(flags.rsr_data_dir,
+                             flags.test_data_dir,
+                             input_size,
+                             model_name,
+                             flags.num_classes,
+                             flags.ckdir,
+                             flags.city_name,
+                             flags.batch_size,
+                             ds_name='urban_mapper')
+
+    print(result)
+
+    _, task_dir = utils.get_task_img_folder()
+    np.save(os.path.join(task_dir, '{}_resampled.npy'.format(model_name)), result)
 
 
 def evaluate_results(flags):
@@ -100,11 +117,23 @@ def evaluate_scratch(flags):
 
 if __name__ == '__main__':
     flags = read_flag()
-    evaluate_results(flags)
+    #evaluate_results(flags)
     #evaluate_no_train(flags)
     #evaluate_scratch(flags)
 
-    result_mean = np.zeros(6)
+    _, task_dir = utils.get_task_img_folder()
+
+    #evaluate_a_result(flags, 'UNET_new_um_7', (572, 572))
+    result = dict(np.load(os.path.join(task_dir, 'UNET_new_um_7_resampled.npy')).tolist())
+
+    mean_iou = []
+
+    for k, v in result.items():
+        mean_iou.append(v)
+
+    print(np.mean(mean_iou))
+
+    '''result_mean = np.zeros(6)
     result_std = np.zeros(6)
 
     img_dir, task_dir = utils.get_task_img_folder()
@@ -164,4 +193,4 @@ if __name__ == '__main__':
     plt.title('Fine Tune Scheme Comparison')
 
     plt.savefig(os.path.join(img_dir, 'ps_vs_iou_urban_mapper.png'))
-    plt.show()
+    plt.show()'''
