@@ -40,7 +40,7 @@ def read_flag():
     return flags
 
 
-def evaluate_results(flags, model_name, height_model):
+def evaluate_results(flags, model_name, height_mode):
     result = utils.test_authentic_unet_height(flags.rsr_data_dir,
                                               flags.test_data_dir,
                                               flags.input_size,
@@ -50,7 +50,7 @@ def evaluate_results(flags, model_name, height_model):
                                               flags.city_name,
                                               flags.batch_size,
                                               ds_name='urban_mapper',
-                                              height_mode=height_model)
+                                              height_mode=height_mode)
 
     print(result)
 
@@ -59,10 +59,19 @@ def evaluate_results(flags, model_name, height_model):
 
 if __name__ == '__main__':
     flags = read_flag()
-    evaluate_results(flags, 'unet_origin_scratch_um_augfr_6', 'subtract_all')
+
+    model_name = 'unet_origin_fix_scratch_um_augfr_4'
+    if int(model_name[-1] == 4):
+        height_mode = 'subtract'
+    elif int(model_name[-1] == 5):
+        height_mode = 'all'
+    else:
+        height_mode = 'subtract_all'
+
+    evaluate_results(flags, model_name, height_mode)
 
     _, task_dir = utils.get_task_img_folder()
-    result = dict(np.load(os.path.join(task_dir, '{}.npy'.format('unet_origin_scratch_um_augfr_6'))).tolist())
+    result = dict(np.load(os.path.join(task_dir, '{}.npy'.format(model_name))).tolist())
 
     iou = []
     for k, v in result.items():

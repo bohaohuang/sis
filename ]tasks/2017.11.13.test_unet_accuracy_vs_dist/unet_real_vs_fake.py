@@ -22,7 +22,7 @@ RANDOM_SEED = 1234
 BATCH_SIZE = 1
 INPUT_SIZE = 572
 CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models'
-MODEL_NAME = 'UnetInria_Origin_no_aug'
+MODEL_NAME = 'UnetInria_Origin_fr'
 NUM_CLASS = 2
 GPU = '1'
 
