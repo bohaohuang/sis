@@ -30,7 +30,7 @@ HEIGHT_MODE = 'subtract'
 DATA_AUG = 'filp,rotate'
 NUM_CLASS = 2
 N_TRAIN = 8000
-GPU = '0'
+GPU = '1'
 DECAY_STEP = 10
 DECAY_RATE = 0.1
 
@@ -197,7 +197,7 @@ if __name__ == '__main__':
     _, task_dir = utils.get_task_img_folder()
 
     height_mode = 'subtract'
-    epochs = 1
+    epochs = 25
     decay_step = 20
     decay_rate = 0.1
     lr_base = 1e-4

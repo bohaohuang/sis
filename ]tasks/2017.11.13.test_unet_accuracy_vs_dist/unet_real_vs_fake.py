@@ -22,7 +22,7 @@ RANDOM_SEED = 1234
 BATCH_SIZE = 1
 INPUT_SIZE = 572
 CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models'
-MODEL_NAME = 'UnetInria_Origin_fr'
+MODEL_NAME = 'UnetInria_Origin_no_aug'
 NUM_CLASS = 2
 GPU = '1'
 
@@ -354,7 +354,7 @@ if __name__ == '__main__':
 
     for city in ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']:
         for patch_size in [572, 2636]:
-            file_name = '{}_{}_{}.npy'.format(flags.model_name, city, patch_size)
+            file_name = '{}_{}_{}.npy'.format('UnetInria_Origin_fr', city, patch_size)
             if not os.path.exists(os.path.join(task_dir, file_name)):
                 result_dict = test_real(flags, (patch_size, patch_size), city)
                 np.save(os.path.join(task_dir, file_name), result_dict)
@@ -414,7 +414,7 @@ if __name__ == '__main__':
     iou = []
     for cnt, patch_size in enumerate([572, 2636]):
         for city in ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']:
-            file_name = '{}_{}_{}.npy'.format(flags.model_name, city, patch_size)
+            file_name = '{}_{}_{}.npy'.format('UnetInria_Origin_fr', city, patch_size)
             result = dict(np.load(os.path.join(task_dir, file_name)).tolist())
             for k, v in result.items():
                 iou.append(v)

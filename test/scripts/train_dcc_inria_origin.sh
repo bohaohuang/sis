@@ -10,17 +10,17 @@ export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/rsr
 cd ../
 python train_inria_origin_unet.py \
                 --GPU=0 \
-                --train-data-dir=dcc_inria_resample_train \
-                --valid-data-dir=dcc_inria_resample_valid \
+                --train-data-dir=dcc_inria_train \
+                --valid-data-dir=dcc_inria_valid \
                 --rsr-data-dir=/work/bh163/data/remote_sensing_data \
                 --patch-dir=/work/bh163/data/iai \
-                --train-patch-appendix=train_noaug_dcc_resample \
-                --valid-patch-appendix=valid_noaug_dcc_resmaple \
+                --train-patch-appendix=train_noaug_dcc \
+                --valid-patch-appendix=valid_noaug_dcc \
                 --epochs=100 \
                 --n-train=8000 \
                 --decay-step=60 \
                 --batch-size=5 \
                 --city-name=austin,chicago,kitsap,tyrol-w,vienna \
                 --valid-size=1000 \
-                --data-aug=filp,rotate \
-                --model=UnetInria_Origin_fr_resample
+                --data-aug=None \
+                --model=UnetInria_Origin_fix_no_aug
