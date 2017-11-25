@@ -8,13 +8,13 @@ from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
 
-TRAIN_DATA_DIR = 'dcc_inria_resample_train'
-VALID_DATA_DIR = 'dcc_inria_resample_valid'
+TRAIN_DATA_DIR = 'dcc_inria_train'
+VALID_DATA_DIR = 'dcc_inria_valid'
 CITY_NAME = 'austin,chicago,kitsap,tyrol-w,vienna'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/home/lab/Documents/bohao/data/inria'
-TRAIN_PATCH_APPENDIX = 'train_noaug_dcc_resample'
-VALID_PATCH_APPENDIX = 'valid_noaug_dcc_resmaple'
+TRAIN_PATCH_APPENDIX = 'train_noaug_dcc'
+VALID_PATCH_APPENDIX = 'valid_noaug_dcc'
 TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,37)])
 VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,6)])
 RANDOM_SEED = 1234
@@ -23,7 +23,7 @@ LEARNING_RATE = 1e-3
 INPUT_SIZE = 572
 EPOCHS = 100
 CKDIR = r'./models'
-MODEL_NAME = 'UnetInria_Origin_fr_resample'
+MODEL_NAME = 'ResUnetInria_fr'
 DATA_AUG = 'filp,rotate'
 NUM_CLASS = 2
 N_TRAIN = 8000
@@ -111,7 +111,7 @@ def main(flags):
     mode = tf.placeholder(tf.bool, name='mode')
 
     # initialize model
-    model = unet.UnetModel_Origin({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
+    model = unet.ResUnetModel({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
     model.make_loss('Y')
     model.make_learning_rate(flags.learning_rate,
