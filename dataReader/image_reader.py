@@ -143,7 +143,10 @@ def image_height_label_iterator(image_dir, batch_size, tile_dim, patch_size, ove
         block = np.dstack(block)
         image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 5))
     elif height_mode == 'subtract':
-        block = np.dstack([block[0], block[1]-block[2]])
+        res = block[1]-block[2]
+        res = 5*res + 50
+
+        block = np.dstack([block[0], res])
         image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 4))
     else:
         block = np.dstack([block[0], block[1], block[2], block[1]-block[2]])
@@ -309,7 +312,7 @@ class ImageLabelReaderHeight(object):
 
 
 if __name__ == '__main__':
-    os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
+    '''os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
     os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
     data_dir = r'/home/lab/Documents/bohao/data/urban_mapper/PS_(572, 572)-OL_0-AF_valid_augfr_um'
@@ -321,4 +324,28 @@ if __name__ == '__main__':
     iterator = reader.image_height_label_iterator(5)
     x_batch, label_batch = next(iterator)
     print(x_batch.shape)
-    print(label_batch.shape)
+    print(label_batch.shape)'''
+
+    data_dir = r'/media/ei-edl01/data/remote_sensing_data/urban_mapper/image'
+    tile_id = 4
+    img_file = 'JAX_Tile_{:03d}_RGB.tif'.format(tile_id)
+    dsm_file = 'JAX_Tile_{:03d}_DSM.tif'.format(tile_id)
+    dtm_file = 'JAX_Tile_{:03d}_DTM.tif'.format(tile_id)
+
+    img = scipy.misc.imread(os.path.join(data_dir, img_file))
+    dsm = scipy.misc.imread(os.path.join(data_dir, dsm_file))
+    dtm = scipy.misc.imread(os.path.join(data_dir, dtm_file))
+
+    res = 5*(dsm-dtm)+50
+    '''res[np.where(res<-2)] = -2
+    res = 35 * np.sqrt(res + 2) + 20'''
+    print(res.shape)
+
+    import matplotlib.pyplot as plt
+    plt.subplot(211)
+    plt.hist(img.flatten())
+    plt.xlim(0, 255)
+    plt.subplot(212)
+    plt.hist(res.flatten())
+    plt.xlim(0, 255)
+    plt.show()
