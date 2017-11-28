@@ -8,5 +8,4 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=/opt/apps/rhel7/cudnn/lib64:$LD_LIBRARY_PATH
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/sis
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/rsr
-cd ../
 python dcc_fine_tune_urban_mapper_height_gridExp.py
