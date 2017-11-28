@@ -438,6 +438,15 @@ def test_authentic_unet_height(rsr_data_dir,
                                                   output_patch_size=(input_size[0]-184, input_size[1]-184))
                 # evaluate
                 truth_label_img = scipy.misc.imread(os.path.join(rsr_data_dir, label_name))
+
+                import matplotlib.pyplot as plt
+                plt.figure(figsize=(10,6))
+                plt.subplot(121)
+                plt.imshow(pred_label_img)
+                plt.subplot(122)
+                plt.imshow(truth_label_img)
+                plt.show()
+
                 iou = iou_metric(truth_label_img, pred_label_img)
                 result_dict['{}{}'.format(city_name, tile_id)] = iou
             coord.request_stop()

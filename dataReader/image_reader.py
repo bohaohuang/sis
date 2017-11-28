@@ -306,7 +306,7 @@ class ImageLabelReaderHeight(object):
                 if self.height_mode == 'all':
                     yield np.concatenate([image_batch, dsm_batch, dtm_batch], axis=3), label_batch
                 elif self.height_mode == 'subtract':
-                    yield np.concatenate([image_batch, dsm_batch-dtm_batch], axis=3), label_batch
+                    yield np.concatenate([image_batch, 5*(dsm_batch-dtm_batch)+50], axis=3), label_batch
                 elif self.height_mode == 'subtract_all':
                     yield np.concatenate([image_batch, dsm_batch, dtm_batch, dsm_batch-dtm_batch], axis=3), label_batch
 

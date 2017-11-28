@@ -207,7 +207,7 @@ if __name__ == '__main__':
         for lr in [0.5]:
             learning_rate = lr * lr_base
 
-            model_name = '{})_rescaled_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
+            model_name = '{}_rescaled_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
                                                                            epochs,
                                                                            decay_step,
                                                                            decay_rate,

@@ -58,7 +58,7 @@ def evaluate_results(flags, model_name, height_mode):
     np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
 
 if __name__ == '__main__':
-    flags = read_flag()
+    '''flags = read_flag()
 
     model_name = 'unet_origin_fix_scratch_um_augfr_4'
     if int(model_name[-1] == 4):
@@ -77,4 +77,23 @@ if __name__ == '__main__':
     for k, v in result.items():
         iou.append(v)
     result_mean = np.mean(iou)
-    print(result_mean)
+    print(result_mean)'''
+
+    data_dir = r'/media/ei-edl01/user/bh163/tasks/2017.11.20.urban_mapper_heights'
+    model_name = 'UnetInria_Origin_fr_resample_EP-25_DS-20_DR-0.1_LY-6_LR-0.5-1.0e-04'
+    iou = dict(np.load(os.path.join(data_dir, model_name+'.npy')).tolist())
+    print(iou['JAX004'])
+    print(iou['JAX005'])
+    print(iou['TAM000'])
+    print(iou['TAM001'])
+    print((iou['JAX004']+iou['JAX005']+iou['TAM000']+iou['TAM001'])/4)
+
+    print()
+    data_dir = r'/media/ei-edl01/user/bh163/tasks/2017.11.15.grid_experiments'
+    model_name = 'UNET_um_no_random_scratch.npy'
+    iou = dict(np.load(os.path.join(data_dir, model_name)).tolist())
+    print(iou['JAX004'])
+    print(iou['JAX005'])
+    print(iou['TAM000'])
+    print(iou['TAM001'])
+    print((iou['JAX004'] + iou['JAX005'] + iou['TAM000'] + iou['TAM001']) / 4)
