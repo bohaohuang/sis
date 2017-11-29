@@ -8,13 +8,13 @@ from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
 
-TRAIN_DATA_DIR = 'dcc_inria_train'
-VALID_DATA_DIR = 'dcc_inria_valid'
+TRAIN_DATA_DIR = 'dcc_inria_resample_train'
+VALID_DATA_DIR = 'dcc_inria_resample_valid'
 CITY_NAME = 'austin,chicago,kitsap,tyrol-w,vienna'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/home/lab/Documents/bohao/data/inria'
-TRAIN_PATCH_APPENDIX = 'train_noaug_dcc'
-VALID_PATCH_APPENDIX = 'valid_noaug_dcc'
+TRAIN_PATCH_APPENDIX = 'train_noaug_dcc_resample'
+VALID_PATCH_APPENDIX = 'valid_noaug_dcc_resample'
 TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,37)])
 VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,6)])
 RANDOM_SEED = 1234
@@ -23,7 +23,7 @@ LEARNING_RATE = 1e-3
 INPUT_SIZE = 572
 EPOCHS = 100
 CKDIR = r'./models'
-MODEL_NAME = 'ResUnetInria_fr'
+MODEL_NAME = 'UnetInria_fr_resample_mean_reduced'
 DATA_AUG = 'filp,rotate'
 NUM_CLASS = 2
 N_TRAIN = 8000
@@ -31,6 +31,7 @@ GPU = '0'
 DECAY_STEP = 60
 DECAY_RATE = 0.1
 VALID_SIZE = 1000
+IMG_MEAN = np.array((109.629784946, 114.94964751, 102.778073453), dtype=np.float32)
 
 
 def read_flag():
@@ -96,12 +97,12 @@ def main(flags):
     with tf.name_scope('image_loader'):
         reader_train = image_reader.ImageLabelReader(train_data_dir, flags.input_size, coord,
                                                      city_list=flags.city_name, tile_list=flags.train_tile_names,
-                                                     data_aug=flags.data_aug)
+                                                     data_aug=flags.data_aug, image_mean=IMG_MEAN)
         reader_valid = image_reader.ImageLabelReader(valid_data_dir, flags.input_size, coord,
                                                      city_list=flags.city_name, tile_list=flags.valid_tile_names,
-                                                     data_aug=flags.data_aug)
+                                                     data_aug=flags.data_aug, image_mean=IMG_MEAN)
         X_batch_op, y_batch_op = reader_train.dequeue(flags.batch_size)
-        X_batch_op_valid, y_batch_op_valid = reader_valid.dequeue(flags.batch_size * 2)
+        X_batch_op_valid, y_batch_op_valid = reader_valid.dequeue(flags.batch_size)
     reader_train_op = [X_batch_op, y_batch_op]
     reader_valid_op = [X_batch_op_valid, y_batch_op_valid]
 
@@ -111,7 +112,7 @@ def main(flags):
     mode = tf.placeholder(tf.bool, name='mode')
 
     # initialize model
-    model = unet.ResUnetModel({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
+    model = unet.UnetModel_Origin({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
     model.make_loss('Y')
     model.make_learning_rate(flags.learning_rate,
