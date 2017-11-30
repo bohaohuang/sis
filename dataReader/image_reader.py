@@ -146,7 +146,7 @@ def image_height_label_iterator(image_dir, batch_size, tile_dim, patch_size, ove
         image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 5))
     elif height_mode == 'subtract':
         res = block[1]-block[2]
-        res = 5*res + 50
+        res = 5*res + 65
 
         block = np.dstack([block[0], res])
         image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 4))
@@ -309,7 +309,7 @@ class ImageLabelReaderHeight(object):
                 if self.height_mode == 'all':
                     yield np.concatenate([image_batch, dsm_batch, dtm_batch], axis=3), label_batch
                 elif self.height_mode == 'subtract':
-                    yield np.concatenate([image_batch, 5*(dsm_batch-dtm_batch)+50], axis=3), label_batch
+                    yield np.concatenate([image_batch, 5*(dsm_batch-dtm_batch)+65], axis=3), label_batch
                 elif self.height_mode == 'subtract_all':
                     yield np.concatenate([image_batch, dsm_batch, dtm_batch, dsm_batch-dtm_batch], axis=3), label_batch
 
