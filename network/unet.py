@@ -219,11 +219,11 @@ class ResUnetModel(UnetModel_Origin):
         sfn = start_filter_num
 
         # downsample
-        conv1, pool1 = self.conv_conv_identity_pool(self.inputs[x_name], [sfn, sfn], self.trainable, name='conv1', padding='valid')
-        conv2, pool2 = self.conv_conv_identity_pool(pool1, [sfn*2, sfn*2], self.trainable, name='conv2', padding='valid')
-        conv3, pool3 = self.conv_conv_identity_pool(pool2, [sfn*4, sfn*4], self.trainable, name='conv3', padding='valid')
-        conv4, pool4 = self.conv_conv_identity_pool(pool3, [sfn*8, sfn*8], self.trainable, name='conv4', padding='valid')
-        conv5 = self.conv_conv_identity_pool(pool4, [sfn*16, sfn*16], self.trainable, name='conv5', pool=False, padding='valid')
+        conv1, pool1 = self.conv_conv_identity_pool(self.inputs[x_name], [sfn, sfn, sfn], self.trainable, name='conv1', padding='valid')
+        conv2, pool2 = self.conv_conv_identity_pool(pool1, [sfn*2, sfn*2, sfn*2], self.trainable, name='conv2', padding='valid')
+        conv3, pool3 = self.conv_conv_identity_pool(pool2, [sfn*4, sfn*4, sfn*4], self.trainable, name='conv3', padding='valid')
+        conv4, pool4 = self.conv_conv_identity_pool(pool3, [sfn*8, sfn*8, sfn*8], self.trainable, name='conv4', padding='valid')
+        conv5 = self.conv_conv_identity_pool(pool4, [sfn*16, sfn*16, sfn*16], self.trainable, name='conv5', pool=False, padding='valid')
 
         # upsample
         up6 = self.crop_upsample_concat(conv5, conv4, 8, name='6')
@@ -236,3 +236,52 @@ class ResUnetModel(UnetModel_Origin):
         conv9 = self.conv_conv_pool(up9, [sfn, sfn], self.trainable, name='up9', pool=False, padding='valid')
 
         self.pred = tf.layers.conv2d(conv9, class_num, (1, 1), name='final', activation=None, padding='same')
+
+    def train(self, x_name, y_name, epoch_num, n_train, n_valid, batch_size, sess, summary_writer,
+              train_iterator=None, train_reader=None, valid_iterator=None, valid_reader=None,
+              image_summary=None, verb_step=100):
+        # define summary operations
+        valid_cross_entropy_summary_op = tf.summary.scalar('xent_validation', self.valid_cross_entropy)
+        valid_image_summary_op = tf.summary.image('Validation_images_summary', self.valid_images,
+                                                  max_outputs=10)
+        for epoch in range(epoch_num):
+            for step in range(0, n_train, batch_size):
+                if train_iterator is not None:
+                    X_batch, y_batch = next(train_iterator)
+                else:
+                    X_batch, y_batch = sess.run(train_reader)
+                _, self.global_step_value = sess.run([self.optimizer, self.global_step],
+                                                     feed_dict={self.inputs[x_name]:X_batch,
+                                                                self.inputs[y_name]:y_batch,
+                                                                self.trainable: True})
+                if self.global_step_value % verb_step == 0:
+                    pred_train, step_cross_entropy, step_summary = sess.run([self.pred, self.loss, self.summary],
+                                                                            feed_dict={self.inputs[x_name]: X_batch,
+                                                                                       self.inputs[y_name]: y_batch,
+                                                                                       self.trainable: False})
+                    summary_writer.add_summary(step_summary, self.global_step_value)
+                    print('Epoch {:d} step {:d}\tcross entropy = {:.3f}'.
+                          format(epoch, self.global_step_value, step_cross_entropy))
+            # validation
+            cross_entropy_valid_mean = []
+            for step in range(0, n_valid, batch_size):
+                if valid_iterator is not None:
+                    X_batch_val, y_batch_val = next(valid_iterator)
+                else:
+                    X_batch_val, y_batch_val = sess.run(valid_reader)
+                pred_valid, cross_entropy_valid = sess.run([self.pred, self.loss],
+                                                           feed_dict={self.inputs[x_name]: X_batch_val,
+                                                                      self.inputs[y_name]: y_batch_val,
+                                                                      self.trainable: False})
+                cross_entropy_valid_mean.append(cross_entropy_valid)
+            cross_entropy_valid_mean = np.mean(cross_entropy_valid_mean)
+            print('Validation cross entropy: {:.3f}'.format(cross_entropy_valid_mean))
+            valid_cross_entropy_summary = sess.run(valid_cross_entropy_summary_op,
+                                                   feed_dict={self.valid_cross_entropy: cross_entropy_valid_mean})
+            summary_writer.add_summary(valid_cross_entropy_summary, self.global_step_value)
+
+            if image_summary is not None:
+                valid_image_summary = sess.run(valid_image_summary_op,
+                                               feed_dict={self.valid_images:
+                                                              image_summary(X_batch_val[:,:,:,:3], y_batch_val, pred_valid)})
+                summary_writer.add_summary(valid_image_summary, self.global_step_value)

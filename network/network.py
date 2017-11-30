@@ -54,24 +54,23 @@ class Network(object):
                                 pool=True, pool_size=(2, 2), pool_stride=(2, 2),
                                 activation=tf.nn.relu, padding='same', bn=True):
         net = input_
-        _, w, h, _ = input_.get_shape().as_list()
 
         with tf.variable_scope('layer{}'.format(name)):
-            for i, F in enumerate(n_filters[:-1]):
+            for i, F in enumerate(n_filters):
                 net = tf.layers.conv2d(net, F, conv_strid, activation=None,
                                        padding=padding, name='conv_{}'.format(i + 1))
                 if bn:
                     net = tf.layers.batch_normalization(net, training=training, name='bn_{}'.format(i+1))
-                net = activation(net, name='relu_{}'.format(name, i + 1))
-            # last layer
-            net = tf.layers.conv2d(net, n_filters[-1], conv_strid, activation=None,
-                                   padding=padding, name='conv_{}'.format(len(n_filters) + 1))
-            if bn:
-                net = tf.layers.batch_normalization(net, training=training, name='bn_{}'.format(len(n_filters) + 1))
-            # stack identity connection
-            identity_crop = tf.image.resize_image_with_crop_or_pad(input_, w-2*len(n_filters), h-2*len(n_filters))
-            net = tf.concat([net, identity_crop], axis=-1, name='concat_{}'.format(name))
-            net = activation(net, name='relu_{}'.format(name, len(n_filters) + 1))
+                if i == 0:
+                    net_2_copy = net
+                    _, w, h, _ = net_2_copy.get_shape().as_list()
+                if i != len(n_filters):
+                    net = activation(net, name='relu_{}'.format(name, i + 1))
+
+            # identity connection
+            identity_connect = tf.image.resize_image_with_crop_or_pad(net_2_copy, w-2*(len(n_filters)-1),
+                                                                      h-2*(len(n_filters)-1))
+            net += identity_connect
 
             if pool is False:
                 return net
