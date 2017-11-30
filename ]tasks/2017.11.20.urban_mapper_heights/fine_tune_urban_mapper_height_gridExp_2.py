@@ -134,7 +134,7 @@ def fine_tune_grid_exp(height_mode,
     mode = tf.placeholder(tf.bool, name='mode')
 
     # initialize model
-    model = unet.UnetModel_Height({'X':X, 'Y':y}, trainable=mode, model_name=model_name, input_size=flags.input_size)
+    model = unet.UnetModel_Height_Appendix({'X':X, 'Y':y}, trainable=mode, model_name=model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
     model.load_weights(flags.pre_trained_model, layers_to_keep_num, kernel)
     model.make_loss('Y')
@@ -186,34 +186,33 @@ def evaluate_results(flags, model_name, height_mode):
                                               flags.batch_size,
                                               ds_name='urban_mapper',
                                               height_mode=height_mode)
-    _, task_dir = utils.get_task_img_folder()
-    np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
+    #_, task_dir = utils.get_task_img_folder()
+    #np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
 
     return result
 
 
 if __name__ == '__main__':
     flags = read_flag()
-    _, task_dir = utils.get_task_img_folder()
 
     height_mode = 'subtract'
     epochs = 25
     decay_step = 20
     decay_rate = 0.1
     lr_base = 1e-4
-    for ly2kp in range(6, 10):
+    for ly2kp in range(7, 8):
         layers_to_keep_num = [i for i in range(1, ly2kp+1)]
         #for lr in [0.5, 0.25, 0.1, 0.075, 0.05, 0.025, 0.01]:
-        for lr in [0.05, 0.025, 0.01]:
+        for lr in [0.5]:
             learning_rate = lr * lr_base
 
-            model_name = '{}_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
-                                                                      epochs,
-                                                                      decay_step,
-                                                                      decay_rate,
-                                                                      ly2kp,
-                                                                      lr,
-                                                                      lr_base)
+            model_name = '{}_rescaled3_appendix_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
+                                                                           epochs,
+                                                                           decay_step,
+                                                                           decay_rate,
+                                                                           ly2kp,
+                                                                           lr,
+                                                                           lr_base)
             print('Finetuneing model: {}'.format(model_name))
 
             fine_tune_grid_exp(height_mode,
@@ -232,5 +231,5 @@ if __name__ == '__main__':
             result_mean = np.mean(iou)
             print('\t Mean IoU on Validation Set: {:.3f}'.format(result_mean))
 
-            with open(os.path.join(task_dir, 'grid_exp_record_2.txt'), 'a') as record_file:
+            with open('grid_exp_record_1129.txt', 'a') as record_file:
                 record_file.write('{} {}\n'.format(model_name, result_mean))
