@@ -200,10 +200,10 @@ if __name__ == '__main__':
     decay_step = 20
     decay_rate = 0.1
     lr_base = 1e-4
-    for ly2kp in range(7, 8):
+    for ly2kp in range(6, 7):
         layers_to_keep_num = [i for i in range(1, ly2kp+1)]
         #for lr in [0.5, 0.25, 0.1, 0.075, 0.05, 0.025, 0.01]:
-        for lr in [0.5]:
+        for lr in [0.075, 0.05]:
             learning_rate = lr * lr_base
 
             model_name = '{}_rescaled3_appendix_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
