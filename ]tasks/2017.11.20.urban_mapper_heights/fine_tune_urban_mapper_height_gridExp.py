@@ -204,10 +204,10 @@ if __name__ == '__main__':
     for ly2kp in range(6, 8):
         layers_to_keep_num = [i for i in range(1, ly2kp+1)]
         #for lr in [0.5, 0.25, 0.1, 0.075, 0.05, 0.025, 0.01]:
-        for lr in [0.75]:
+        for lr in [0.5]:
             learning_rate = lr * lr_base
 
-            model_name = '{}_rescaled_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
+            model_name = '{}_rescaled3_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
                                                                            epochs,
                                                                            decay_step,
                                                                            decay_rate,
