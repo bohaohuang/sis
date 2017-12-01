@@ -8,15 +8,15 @@ from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
 
-TRAIN_DATA_DIR = 'dcc_urban_mapper_height_train'
-VALID_DATA_DIR = 'dcc_urban_mapper_height_valid'
+TRAIN_DATA_DIR = 'dcc_urban_mapper_height_train_mult'
+VALID_DATA_DIR = 'dcc_urban_mapper_height_valid_mult'
 CITY_NAME = 'JAX,TAM'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/home/lab/Documents/bohao/data/urban_mapper'
 PRE_TRAINED_MODEL = r'/home/lab/Documents/bohao/code/sis/test/models/UnetInria_Origin_fr_resample'
 LAYERS_TO_KEEP = '1,2,3,4,5,6,7,8,9'
-TRAIN_PATCH_APPENDIX = 'train_augfr_um_npy'
-VALID_PATCH_APPENDIX = 'valid_augfr_um_npy'
+TRAIN_PATCH_APPENDIX = 'train_augfr_um_npy_mult'
+VALID_PATCH_APPENDIX = 'valid_augfr_um_npy_mult'
 TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(16,143)])
 VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0,16)])
 RANDOM_SEED = 1234
@@ -28,7 +28,7 @@ CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper_Height_Grid
 MODEL_NAME = 'unet_origin_finetune_um_augfr_9'
 HEIGHT_MODE = 'subtract'
 DATA_AUG = 'filp,rotate'
-NUM_CLASS = 2
+NUM_CLASS = 3
 N_TRAIN = 8000
 GPU = '1'
 DECAY_STEP = 10
@@ -201,13 +201,13 @@ if __name__ == '__main__':
     decay_step = 20
     decay_rate = 0.1
     lr_base = 1e-4
-    for ly2kp in range(6, 8):
+    for ly2kp in range(7, 8):
         layers_to_keep_num = [i for i in range(1, ly2kp+1)]
         #for lr in [0.5, 0.25, 0.1, 0.075, 0.05, 0.025, 0.01]:
         for lr in [0.5]:
             learning_rate = lr * lr_base
 
-            model_name = '{}_rescaled3_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
+            model_name = '{}_rescaled_mult_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
                                                                            epochs,
                                                                            decay_step,
                                                                            decay_rate,
@@ -224,13 +224,16 @@ if __name__ == '__main__':
                                epochs,
                                model_name)
 
-            print('Evaluating model: {}'.format(model_name))
-            result = evaluate_results(flags, model_name, height_mode)
-            iou = []
-            for k, v in result.items():
-                iou.append(v)
-            result_mean = np.mean(iou)
-            print('\t Mean IoU on Validation Set: {:.3f}'.format(result_mean))
+            try:
+                print('Evaluating model: {}'.format(model_name))
+                result = evaluate_results(flags, model_name, height_mode)
+                iou = []
+                for k, v in result.items():
+                    iou.append(v)
+                result_mean = np.mean(iou)
+                print('\t Mean IoU on Validation Set: {:.3f}'.format(result_mean))
 
-            with open(os.path.join(task_dir, 'grid_exp_record_1129.txt'), 'a') as record_file:
-                record_file.write('{} {}\n'.format(model_name, result_mean))
+                with open(os.path.join(task_dir, 'grid_exp_record_1129.txt'), 'a') as record_file:
+                    record_file.write('{} {}\n'.format(model_name, result_mean))
+            finally:
+                print('end')

@@ -114,6 +114,10 @@ class PatchExtractorInria(object):
 
     def save_img_label(self, patch, dest_dir, city_name, tile_id, cnt, appendix=None):
         patch_img, patch_label = patch[:, :, :3], patch[:, :, -1]
+        patch_label = scipy.misc.toimage(patch_label,
+                                         high=np.max(patch_label),
+                                         low=np.min(patch_label),
+                                         mode='I')
         cnt_str = '{0:05d}'.format(cnt)
         if appendix is None:
             image_name = '{}{}_img_{}.jpg'.format(city_name, tile_id, cnt_str)
@@ -124,7 +128,8 @@ class PatchExtractorInria(object):
         file_name = os.path.join(dest_dir, self.name, image_name)
         scipy.misc.imsave(file_name, patch_img)
         file_name = os.path.join(dest_dir, self.name, label_name)
-        scipy.misc.imsave(file_name, patch_label)
+        #scipy.misc.imsave(file_name, patch_label)
+        patch_label.save(file_name)
         with open(os.path.join(dest_dir, self.name, 'data_list.txt'), 'a') as file:
             file.write('{} {}\n'.format(image_name, label_name))
 
@@ -177,8 +182,12 @@ class PatchExtractorUrbanMapper(object):
 
         # TODO check if extracted files already exists
 
-    def save_img_label(self, patch, dest_dir, city_name, tile_id, cnt, appendix=None):
+    def save_img_label(self, patch, dest_dir, city_name, tile_id, cnt, appendix=None, label_min=0, label_max=1):
         patch_img, patch_label = patch[:, :, :3], patch[:, :, -1]
+        patch_label = scipy.misc.toimage(patch_label,
+                                         high=label_max,
+                                         low=label_min,
+                                         mode='I')
         cnt_str = '{0:05d}'.format(cnt)
         if appendix is None:
             image_name = '{}{}_img_{}.jpg'.format(city_name, tile_id, cnt_str)
@@ -189,7 +198,8 @@ class PatchExtractorUrbanMapper(object):
         file_name = os.path.join(dest_dir, self.name, image_name)
         scipy.misc.imsave(file_name, patch_img)
         file_name = os.path.join(dest_dir, self.name, label_name)
-        scipy.misc.imsave(file_name, patch_label)
+        #scipy.misc.imsave(file_name, patch_label)
+        patch_label.save(file_name)
         with open(os.path.join(dest_dir, self.name, 'data_list.txt'), 'a') as file:
             file.write('{} {}\n'.format(image_name, label_name))
 
@@ -208,9 +218,13 @@ class PatchExtractorUrbanMapper(object):
             city_name = os.path.basename(file_tuple[0])[:3]
             tile_id = os.path.basename(file_tuple[0])[9:12]
 
+            label_max = np.max(block[:, :, -1].flatten())
+            label_min = np.min(block[:, :, -1].flatten())
+
             for cnt, patch in enumerate(patchify(block, self.tile_dim,
                                                  self.patch_size, overlap=self.overlap)):
-                self.save_img_label(patch, dest_dir, city_name, tile_id, cnt)
+                self.save_img_label(patch, dest_dir, city_name, tile_id, cnt,
+                                    label_min=label_min, label_max=label_max)
 
                 if self.aug_funcs is not None:
                     for func in self.aug_funcs:
@@ -221,12 +235,16 @@ class PatchExtractorUrbanMapper(object):
 
 
 class PatchExtractorUrbanMapperHeight(PatchExtractorUrbanMapper):
-    def save_img_label(self, patch, dest_dir, city_name, tile_id, cnt, appendix=None):
+    def save_img_label(self, patch, dest_dir, city_name, tile_id, cnt, appendix=None, label_min=0, label_max=1):
         assert patch.shape[-1] == 6
         patch_img, patch_dsm, patch_dtm, patch_label = patch[:, :, :3], \
                                                        patch[:, :, 3], \
                                                        patch[:, :, 4], \
                                                        patch[:, :, -1]
+        patch_label = scipy.misc.toimage(patch_label,
+                                         high=label_max,
+                                         low=label_min,
+                                         mode='I')
         cnt_str = '{0:05d}'.format(cnt)
         if appendix is None:
             image_name = '{}{}_img_{}.jpg'.format(city_name, tile_id, cnt_str)
@@ -247,7 +265,8 @@ class PatchExtractorUrbanMapperHeight(PatchExtractorUrbanMapper):
         #scipy.misc.imsave(file_name, patch_dtm)
         np.save(file_name, patch_dtm)
         file_name = os.path.join(dest_dir, self.name, label_name)
-        scipy.misc.imsave(file_name, patch_label)
+        #scipy.misc.imsave(file_name, patch_label)
+        patch_label.save(file_name)
         with open(os.path.join(dest_dir, self.name, 'data_list.txt'), 'a') as file:
             file.write('{} {} {} {}\n'.format(image_name, dsm_name, dtm_name, label_name))
 

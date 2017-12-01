@@ -12,7 +12,7 @@ def make_output_file(label, colormap):
 def decode_labels(label, num_images=10):
     n, h, w, c = label.shape
     outputs = np.zeros((n, h, w, 3), dtype=np.uint8)
-    label_colors = {0: (255, 255, 255), 1: (0, 0, 255)}
+    label_colors = {0: (255, 255, 255), 1: (0, 0, 255), 2: (0, 255, 255)}
     for i in range(n):
         pixels = np.zeros((h, w, 3), dtype=np.uint8)
         for j in range(h):
@@ -384,7 +384,8 @@ def test_authentic_unet_height(rsr_data_dir,
     mode = tf.placeholder(tf.bool, name='mode')
 
     # initialize model
-    model = unet.UnetModel_Origin({'X': X, 'Y': y}, trainable=mode, model_name=model_name, input_size=input_size)
+    #model = unet.UnetModel_Origin({'X': X, 'Y': y}, trainable=mode, model_name=model_name, input_size=input_size)
+    model = unet.UnetModel_Height_Appendix({'X': X, 'Y': y}, trainable=mode, model_name=model_name, input_size=input_size)
     model.create_graph('X', num_classes)
     model.make_update_ops('X', 'Y')
     # set ckdir
@@ -436,6 +437,7 @@ def test_authentic_unet_height(rsr_data_dir,
                                                   meta_test['colormap'], overlap=184,
                                                   output_image_dim=meta_test['dim_image'],
                                                   output_patch_size=(input_size[0]-184, input_size[1]-184))
+                #pred_label_img[np.where(pred_label_img==2)] = 1
                 # evaluate
                 truth_label_img = scipy.misc.imread(os.path.join(rsr_data_dir, label_name))
                 iou = iou_metric(truth_label_img, pred_label_img)

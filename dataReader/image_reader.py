@@ -306,13 +306,13 @@ class ImageLabelReaderHeight(object):
                 image_batch = read_batch_from_list(self.image_list, batch_idx)
                 dsm_batch = read_batch_from_list(self.dsm_list, batch_idx)
                 dtm_batch = read_batch_from_list(self.dtm_list, batch_idx)
-                label_batch = read_batch_from_list(self.label_list, batch_idx)/255
+                label_batch = read_batch_from_list(self.label_list, batch_idx)
                 if self.height_mode == 'all':
                     yield np.concatenate([image_batch, dsm_batch, dtm_batch], axis=3), label_batch
                 elif self.height_mode == 'subtract':
-                    res = 5 * (dsm_batch - dtm_batch)
-                    # res[np.where(res < -1)] = -1
-                    # res = 35 * np.log(res + 2) + 40
+                    res = 5 * (dsm_batch - dtm_batch) + 50
+                    #res[np.where(res < -1)] = -1
+                    #res = 35 * np.log(res + 2) + 40
                     yield np.concatenate([image_batch, res], axis=3), label_batch
                 elif self.height_mode == 'subtract_all':
                     yield np.concatenate([image_batch, dsm_batch, dtm_batch, dsm_batch-dtm_batch], axis=3), label_batch
