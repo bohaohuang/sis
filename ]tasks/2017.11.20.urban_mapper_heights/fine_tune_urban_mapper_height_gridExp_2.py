@@ -29,8 +29,8 @@ MODEL_NAME = 'unet_origin_finetune_um_augfr_9'
 HEIGHT_MODE = 'subtract'
 DATA_AUG = 'filp,rotate'
 NUM_CLASS = 2
-N_TRAIN = 8000
-GPU = '1'
+N_TRAIN = 1000
+GPU = '0'
 DECAY_STEP = 10
 DECAY_RATE = 0.1
 
@@ -134,7 +134,7 @@ def fine_tune_grid_exp(height_mode,
     mode = tf.placeholder(tf.bool, name='mode')
 
     # initialize model
-    model = unet.UnetModel_Height_Appendix({'X':X, 'Y':y}, trainable=mode, model_name=model_name, input_size=flags.input_size)
+    model = unet.UnetModel_Height({'X':X, 'Y':y}, trainable=mode, model_name=model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
     model.load_weights(flags.pre_trained_model, layers_to_keep_num, kernel)
     model.make_loss('Y')
@@ -206,7 +206,7 @@ if __name__ == '__main__':
         for lr in [1, 0.75]:
             learning_rate = lr * lr_base
 
-            model_name = '{}_rescaled_appendix_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
+            model_name = '{}_rescaled_appendix_temp_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
                                                                            epochs,
                                                                            decay_step,
                                                                            decay_rate,
