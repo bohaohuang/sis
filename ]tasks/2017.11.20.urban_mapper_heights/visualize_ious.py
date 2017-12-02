@@ -18,21 +18,12 @@ for i in range(layers):
     ax.bar()'''
 
 if __name__ == '__main__':
-    data_dir = r'/media/ei-edl01/data/remote_sensing_data/urban_mapper/truthWithEdgeClass'
+    data_dir = r'/media/ei-edl01/data/remote_sensing_data/urban_mapper/truthWithBigAndSmallClass'
     files = glob(os.path.join(data_dir, '*_GTC.tif'))
-
-    img = scipy.misc.imread(r'/home/lab/Documents/bohao/data/urban_mapper/PS_(572, 572)-OL_0-AF_valid_augfr_um_npy_mult/JAX004_label_00000.png')
-    plt.imshow(img)
-    plt.colorbar()
-    plt.show()
 
     for file in files:
         img = scipy.misc.imread(file)
 
-        img = scipy.misc.toimage(img, high=np.max(img), low=np.min(img), mode='I')
-        img.save('test.png')
-
-        img_load = scipy.misc.imread('test.png')
-        plt.imshow(img_load)
+        plt.imshow(img)
         plt.colorbar()
         plt.show()

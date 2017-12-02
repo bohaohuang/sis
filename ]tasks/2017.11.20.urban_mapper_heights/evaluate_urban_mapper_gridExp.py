@@ -15,7 +15,8 @@ def evaluate_results(rsr_data_dir, valid_data_dir, input_size,
                                               city_name,
                                               batch_size,
                                               ds_name='urban_mapper',
-                                              height_mode=height_mode)
+                                              height_mode=height_mode,
+                                              GPU='0')
     _, task_dir = utils.get_task_img_folder()
     np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
 
@@ -28,10 +29,10 @@ if __name__ == '__main__':
     # set parameters
     pre_trained_model = r'/home/lab/Documents/bohao/code/sis/test/models/UnetInria_Origin_fr_resample'
     rsr_data_dir = r'/media/ei-edl01/data/remote_sensing_data'
-    valid_data_dir = 'dcc_urban_mapper_height_valid'
+    valid_data_dir = 'dcc_urban_mapper_height_valid_mult'
     input_size = [572, 572]
-    num_classes = 2
-    ckdir = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper_Height_dcc'
+    num_classes = 3
+    ckdir = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper_Height_GridExp'
     city_name = 'JAX,TAM'
     height_mode = 'subtract'
     batch_size = 5
@@ -42,13 +43,13 @@ if __name__ == '__main__':
     decay_step = 20
     decay_rate = 0.1
     lr_base = 1e-4
-    for ly2kp in range(6, 7):
+    for ly2kp in range(7, 8):
         layers_to_keep_num = [i for i in range(1, ly2kp + 1)]
         # for lr in [0.5, 0.25, 0.1, 0.075, 0.05, 0.025, 0.01]:
         for lr in [0.5]:
             learning_rate = lr * lr_base
 
-            model_name = '{}_rescaled_appendix_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(
+            model_name = '{}_rescaled_mult_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(
                 pre_trained_model.split('/')[-1],
                 epochs,
                 decay_step,

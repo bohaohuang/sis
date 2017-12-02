@@ -8,15 +8,15 @@ from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
 
-TRAIN_DATA_DIR = 'dcc_urban_mapper_height_train'
-VALID_DATA_DIR = 'dcc_urban_mapper_height_valid'
+TRAIN_DATA_DIR = 'dcc_urban_mapper_height_train_p'
+VALID_DATA_DIR = 'dcc_urban_mapper_height_valid_p'
 CITY_NAME = 'JAX,TAM'
 RSR_DATA_DIR = r'/work/bh163/data/remote_sensing_data'
 PATCH_DIR = r'/work/bh163/data/iai'
 PRE_TRAINED_MODEL = r'/hpchome/collinslab/bh163/code/sis/test/models/UnetInria_Origin_fr_resample'
 LAYERS_TO_KEEP = '1,2,3,4,5,6,7,8,9'
-TRAIN_PATCH_APPENDIX = 'train_augfr_um_npy'
-VALID_PATCH_APPENDIX = 'valid_augfr_um_npy'
+TRAIN_PATCH_APPENDIX = 'train_augfr_um_npy_p'
+VALID_PATCH_APPENDIX = 'valid_augfr_um_npy_p'
 TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(16,143)])
 VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0,16)])
 RANDOM_SEED = 1234
@@ -134,7 +134,7 @@ def fine_tune_grid_exp(height_mode,
     mode = tf.placeholder(tf.bool, name='mode')
 
     # initialize model
-    model = unet.UnetModel_Height_Appendix({'X':X, 'Y':y}, trainable=mode, model_name=model_name, input_size=flags.input_size)
+    model = unet.UnetModel_Height({'X':X, 'Y':y}, trainable=mode, model_name=model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
     model.load_weights(flags.pre_trained_model, layers_to_keep_num, kernel)
     model.make_loss('Y')
@@ -201,13 +201,13 @@ if __name__ == '__main__':
     decay_step = 20
     decay_rate = 0.1
     lr_base = 1e-4
-    for ly2kp in range(6, 7):
+    for ly2kp in range(7, 8):
         layers_to_keep_num = [i for i in range(1, ly2kp+1)]
         #for lr in [0.5, 0.25, 0.1, 0.075, 0.05, 0.025, 0.01]:
-        for lr in [5, 0.25]:
+        for lr in [0.5, 0.75]:
             learning_rate = lr * lr_base
 
-            model_name = '{}_rescaled_appendix_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
+            model_name = '{}_rescaled_act2_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
                                                                            epochs,
                                                                            decay_step,
                                                                            decay_rate,

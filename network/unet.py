@@ -65,6 +65,10 @@ class UnetModel(network.Network):
             gt = tf.gather(y_flat, indices)
             prediction = tf.gather(pred_flat, indices)
             self.loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=prediction, labels=gt))
+            '''self.loss = tf.reduce_mean(tf.multiply(tf.random_normal(tf.shape(prediction)),
+                                                   -tf.reduce_sum(tf.multiply(gt, tf.log(prediction)), reduction_indices=[1])))'''
+            '''self.loss = tf.reduce_mean(tf.nn.weighted_cross_entropy_with_logits(logits=prediction, targets=gt,
+                                                                                pos_weight=tf.constant([1, 0.25, 1])))'''
 
     def make_update_ops(self, x_name, y_name):
         tf.add_to_collection('inputs', self.inputs[x_name])
@@ -163,7 +167,9 @@ class UnetModel_Origin(UnetModel):
 
     def make_loss(self, y_name):
         with tf.variable_scope('loss'):
-            pred_flat = tf.reshape(tf.nn.softmax(self.pred), [-1, self.class_num])
+            #pred_flat = tf.reshape(tf.nn.softmax(self.pred), [-1, self.class_num])
+            #pred_flat = pred_flat[:, 0]
+            pred_flat = tf.reshape(self.pred, [-1, self.class_num])
             _, w, h, _ = self.inputs[y_name].get_shape().as_list()
             y = tf.image.resize_image_with_crop_or_pad(self.inputs[y_name], w-184, h-184)
             y_flat = tf.reshape(tf.squeeze(y, axis=[3]), [-1, ])
@@ -171,6 +177,9 @@ class UnetModel_Origin(UnetModel):
             gt = tf.gather(y_flat, indices)
             prediction = tf.gather(pred_flat, indices)
             self.loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=prediction, labels=gt))
+            '''z = tf.random_normal(tf.shape(prediction))
+            loss_no_weight = tf.reduce_sum(tf.multiply(tf.cast(gt, dtype=tf.float32), tf.log(prediction)))
+            self.loss = tf.reduce_mean(tf.multiply(z, loss_no_weight))'''
 
 
 class UnetModel_Height(UnetModel_Origin):

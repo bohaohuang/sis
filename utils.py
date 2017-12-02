@@ -5,7 +5,12 @@ from dataReader import patch_extractor
 
 
 def make_output_file(label, colormap):
-    encode_func = np.vectorize(lambda x, y: y[x])
+    try:
+        colormap = {0: 0, 1: 255, 2: 255}
+        encode_func = np.vectorize(lambda x, y: y[x])
+    except:
+        colormap = {0:0, 1:255, 2:255}
+        encode_func = np.vectorize(lambda x, y: y[x])
     return encode_func(label, colormap)
 
 
@@ -440,6 +445,8 @@ def test_authentic_unet_height(rsr_data_dir,
                 #pred_label_img[np.where(pred_label_img==2)] = 1
                 # evaluate
                 truth_label_img = scipy.misc.imread(os.path.join(rsr_data_dir, label_name))
+                #truth_label_img[np.where(truth_label_img == 2)] = 1
+                #truth_label_img[np.where(truth_label_img == 1)] = 255
                 iou = iou_metric(truth_label_img, pred_label_img)
                 result_dict['{}{}'.format(city_name, tile_id)] = iou
             coord.request_stop()

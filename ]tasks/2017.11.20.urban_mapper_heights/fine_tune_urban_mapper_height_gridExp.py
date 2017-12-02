@@ -8,15 +8,15 @@ from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
 
-TRAIN_DATA_DIR = 'dcc_urban_mapper_height_train_mult'
-VALID_DATA_DIR = 'dcc_urban_mapper_height_valid_mult'
+TRAIN_DATA_DIR = 'dcc_urban_mapper_height_train_p'
+VALID_DATA_DIR = 'dcc_urban_mapper_height_valid_p'
 CITY_NAME = 'JAX,TAM'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/home/lab/Documents/bohao/data/urban_mapper'
 PRE_TRAINED_MODEL = r'/home/lab/Documents/bohao/code/sis/test/models/UnetInria_Origin_fr_resample'
 LAYERS_TO_KEEP = '1,2,3,4,5,6,7,8,9'
-TRAIN_PATCH_APPENDIX = 'train_augfr_um_npy_mult'
-VALID_PATCH_APPENDIX = 'valid_augfr_um_npy_mult'
+TRAIN_PATCH_APPENDIX = 'train_augfr_um_npy_p'
+VALID_PATCH_APPENDIX = 'valid_augfr_um_npy_p'
 TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(16,143)])
 VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0,16)])
 RANDOM_SEED = 1234
@@ -28,9 +28,9 @@ CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper_Height_Grid
 MODEL_NAME = 'unet_origin_finetune_um_augfr_9'
 HEIGHT_MODE = 'subtract'
 DATA_AUG = 'filp,rotate'
-NUM_CLASS = 3
+NUM_CLASS = 2
 N_TRAIN = 8000
-GPU = '1'
+GPU = '0'
 DECAY_STEP = 10
 DECAY_RATE = 0.1
 
@@ -134,7 +134,7 @@ def fine_tune_grid_exp(height_mode,
     mode = tf.placeholder(tf.bool, name='mode')
 
     # initialize model
-    model = unet.UnetModel_Height({'X':X, 'Y':y}, trainable=mode, model_name=model_name, input_size=flags.input_size)
+    model = unet.UnetModel_Height_Appendix({'X':X, 'Y':y}, trainable=mode, model_name=model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
     model.load_weights(flags.pre_trained_model, layers_to_keep_num, kernel)
     model.make_loss('Y')
@@ -160,6 +160,7 @@ def fine_tune_grid_exp(height_mode,
         if os.path.exists(model.ckdir) and tf.train.get_checkpoint_state(model.ckdir):
             latest_check_point = tf.train.latest_checkpoint(model.ckdir)
             saver.restore(sess, latest_check_point)
+            print('Model Loaded {}'.format(model.ckdir))
 
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)
         try:
@@ -185,6 +186,7 @@ def evaluate_results(flags, model_name, height_mode):
                                               flags.city_name,
                                               flags.batch_size,
                                               ds_name='urban_mapper',
+                                              GPU=flags.GPU,
                                               height_mode=height_mode)
     _, task_dir = utils.get_task_img_folder()
     np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
@@ -204,10 +206,10 @@ if __name__ == '__main__':
     for ly2kp in range(7, 8):
         layers_to_keep_num = [i for i in range(1, ly2kp+1)]
         #for lr in [0.5, 0.25, 0.1, 0.075, 0.05, 0.025, 0.01]:
-        for lr in [0.5]:
+        for lr in [1]:
             learning_rate = lr * lr_base
 
-            model_name = '{}_rescaled_mult_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
+            model_name = '{}_rescaled_appendix_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
                                                                            epochs,
                                                                            decay_step,
                                                                            decay_rate,
@@ -221,7 +223,7 @@ if __name__ == '__main__':
                                learning_rate,
                                decay_step,
                                decay_rate,
-                               epochs,
+                               4,
                                model_name)
 
             try:
