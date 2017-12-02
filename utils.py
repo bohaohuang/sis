@@ -391,7 +391,7 @@ def test_authentic_unet_height(rsr_data_dir,
     # initialize model
     #model = unet.UnetModel_Origin({'X': X, 'Y': y}, trainable=mode, model_name=model_name, input_size=input_size)
     model = unet.UnetModel_Height_Appendix({'X': X, 'Y': y}, trainable=mode, model_name=model_name, input_size=input_size)
-    model.create_graph('X', num_classes, start_filter_num=64)
+    model.create_graph('X', num_classes)
     model.make_update_ops('X', 'Y')
     # set ckdir
     model.make_ckdir(ckdir)
