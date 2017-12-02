@@ -136,7 +136,7 @@ def fine_tune_grid_exp(height_mode,
     # initialize model
     model = unet.UnetModel_Height_Appendix({'X':X, 'Y':y}, trainable=mode, model_name=model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes, start_filter_num=64)
-    model.load_weights(flags.pre_trained_model, layers_to_keep_num, kernel)
+    #model.load_weights(flags.pre_trained_model, layers_to_keep_num, kernel)
     model.make_loss('Y')
     model.make_learning_rate(learning_rate,
                              tf.cast(flags.n_train/flags.batch_size * decay_step, tf.int32), decay_rate)

@@ -531,7 +531,7 @@ def test_authentic_unet_height_fmap(rsr_data_dir,
             print('loaded model from {}'.format(latest_check_point))
 
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)
-        for (image_name, dsm_name, dtm_name, label_name) in collect_files_test:
+        for (image_name, dsm_name, dtm_name, f_name, label_name) in collect_files_test:
             #if city in image_name:
             if name_has_city(city, image_name):
                 if ds_name == 'inria':
@@ -543,7 +543,8 @@ def test_authentic_unet_height_fmap(rsr_data_dir,
 
                 iter_file_list = [os.path.join(rsr_data_dir, image_name),
                                   os.path.join(rsr_data_dir, dsm_name),
-                                  os.path.join(rsr_data_dir, dtm_name)]
+                                  os.path.join(rsr_data_dir, dtm_name),
+                                  os.path.join(rsr_data_dir, f_name)]
 
                 # load reader
                 iterator_test = image_reader.image_height_label_iterator(

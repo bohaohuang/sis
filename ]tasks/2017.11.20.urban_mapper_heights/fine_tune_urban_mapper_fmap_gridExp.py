@@ -30,7 +30,7 @@ HEIGHT_MODE = 'subtract'
 DATA_AUG = 'filp,rotate'
 NUM_CLASS = 2
 N_TRAIN = 8000
-GPU = '0'
+GPU = '1'
 DECAY_STEP = 10
 DECAY_RATE = 0.1
 
@@ -177,17 +177,17 @@ def fine_tune_grid_exp(height_mode,
 
 
 def evaluate_results(flags, model_name, height_mode):
-    result = utils.test_authentic_unet_height(flags.rsr_data_dir,
-                                              flags.valid_data_dir,
-                                              flags.input_size,
-                                              model_name,
-                                              flags.num_classes,
-                                              flags.ckdir,
-                                              flags.city_name,
-                                              flags.batch_size,
-                                              ds_name='urban_mapper',
-                                              GPU=flags.GPU,
-                                              height_mode=height_mode)
+    result = utils.test_authentic_unet_height_fmap(flags.rsr_data_dir,
+                                                   flags.valid_data_dir,
+                                                   flags.input_size,
+                                                   model_name,
+                                                   flags.num_classes,
+                                                   flags.ckdir,
+                                                   flags.city_name,
+                                                   flags.batch_size,
+                                                   ds_name='urban_mapper',
+                                                   GPU=flags.GPU,
+                                                   height_mode=height_mode)
     _, task_dir = utils.get_task_img_folder()
     np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
 
@@ -203,19 +203,21 @@ if __name__ == '__main__':
     decay_step = 20
     decay_rate = 0.1
     lr_base = 1e-4
-    for ly2kp in range(7, 8):
+    #for ly2kp in range(7, 8):
+    for ly2kp in [7, 6]:
         layers_to_keep_num = [i for i in range(1, ly2kp+1)]
         #for lr in [0.5, 0.25, 0.1, 0.075, 0.05, 0.025, 0.01]:
-        for lr in [1]:
+        for lr in [1, 0.5]:
             learning_rate = lr * lr_base
 
-            model_name = '{}_rescaled_appendix_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
-                                                                           epochs,
-                                                                           decay_step,
-                                                                           decay_rate,
-                                                                           ly2kp,
-                                                                           lr,
-                                                                           lr_base)
+            model_name = '{}_rescaled_appendix_fmap_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.\
+                format(flags.pre_trained_model.split('/')[-1],
+                       epochs,
+                       decay_step,
+                       decay_rate,
+                       ly2kp,
+                       lr,
+                       lr_base)
             print('Finetuneing model: {}'.format(model_name))
 
             fine_tune_grid_exp(height_mode,
