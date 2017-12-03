@@ -547,6 +547,125 @@ def test_authentic_unet_height_fmap(rsr_data_dir,
                                   os.path.join(rsr_data_dir, f_name)]
 
                 # load reader
+                iterator_test = image_reader.image_height_fmap_label_iterator(
+                    iter_file_list,
+                    batch_size=batch_size,
+                    tile_dim=meta_test['dim_image'][:2],
+                    patch_size=input_size,
+                    overlap=184, padding=92, height_mode=height_mode)
+                # run
+                result = model.test('X', sess, iterator_test)
+                pred_label_img = get_output_label(result,
+                                                  (meta_test['dim_image'][0]+184, meta_test['dim_image'][1]+184),
+                                                  input_size,
+                                                  meta_test['colormap'], overlap=184,
+                                                  output_image_dim=meta_test['dim_image'],
+                                                  output_patch_size=(input_size[0]-184, input_size[1]-184))
+                #pred_label_img[np.where(pred_label_img==2)] = 1
+                # evaluate
+                truth_label_img = scipy.misc.imread(os.path.join(rsr_data_dir, label_name))
+                #truth_label_img[np.where(truth_label_img == 2)] = 1
+                #truth_label_img[np.where(truth_label_img == 1)] = 255
+                iou = iou_metric(truth_label_img, pred_label_img)
+                result_dict['{}{}'.format(city_name, tile_id)] = iou
+            coord.request_stop()
+            coord.join(threads)
+    return result_dict
+
+
+def test_authentic_unet_height_weight(rsr_data_dir,
+                                    test_data_dir,
+                                    input_size,
+                                    model_name,
+                                    num_classes,
+                                    ckdir,
+                                    city,
+                                    batch_size,
+                                    ds_name='inria',
+                                    GPU='0',
+                                    random_seed=1234,
+                                    height_mode='subtract'):
+    import re
+    import scipy.misc
+    import tensorflow as tf
+    from network import unet
+    from dataReader import image_reader
+    from rsrClassData import rsrClassData
+
+    def name_has_city(city_list, name):
+        for city in city_list:
+            if city in name:
+                return True
+        return False
+
+    city = city.split(',')
+
+    # set gpu
+    os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
+    os.environ['CUDA_VISIBLE_DEVICES'] = GPU
+    tf.reset_default_graph()
+    # environment settings
+    np.random.seed(random_seed)
+    tf.set_random_seed(random_seed)
+
+    # data prepare step
+    Data = rsrClassData(rsr_data_dir)
+    (collect_files_test, meta_test) = Data.getCollectionByName(test_data_dir)
+
+    # image reader
+    coord = tf.train.Coordinator()
+
+    # define place holder
+    if height_mode == 'all':
+        X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 5], name='X')
+    elif height_mode == 'subtract':
+        X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 4], name='X')
+    else:
+        X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 6], name='X')
+    y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
+    z = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='z')
+    mode = tf.placeholder(tf.bool, name='mode')
+
+    # initialize model
+    #model = unet.UnetModel_Origin({'X': X, 'Y': y}, trainable=mode, model_name=model_name, input_size=input_size)
+    model = unet.UnetModel_Height_Appendix_Weight({'X': X, 'Y': y, 'Z': z}, trainable=mode, model_name=model_name, input_size=input_size)
+    model.create_graph('X', num_classes)
+    model.make_update_ops('X', 'Y')
+    # set ckdir
+    model.make_ckdir(ckdir)
+    # set up graph and initialize
+    config = tf.ConfigProto()
+
+    result_dict = {}
+
+    # run training
+    with tf.Session(config=config) as sess:
+        init = tf.global_variables_initializer()
+        sess.run(init)
+
+        saver = tf.train.Saver(var_list=tf.global_variables(), max_to_keep=1)
+
+        if os.path.exists(model.ckdir) and tf.train.get_checkpoint_state(model.ckdir):
+            latest_check_point = tf.train.latest_checkpoint(model.ckdir)
+            saver.restore(sess, latest_check_point)
+            print('loaded model from {}'.format(latest_check_point))
+
+        threads = tf.train.start_queue_runners(coord=coord, sess=sess)
+        for (image_name, dsm_name, dtm_name, f_name, label_name) in collect_files_test:
+            #if city in image_name:
+            if name_has_city(city, image_name):
+                if ds_name == 'inria':
+                    city_name = re.findall('[a-z\-]*(?=[0-9]+\.)', image_name)[0]
+                    tile_id = re.findall('[0-9]+(?=\.tif)', image_name)[0]
+                else:
+                    city_name = os.path.basename(image_name)[:3]
+                    tile_id = os.path.basename(image_name)[9:12]
+
+                iter_file_list = [os.path.join(rsr_data_dir, image_name),
+                                  os.path.join(rsr_data_dir, dsm_name),
+                                  os.path.join(rsr_data_dir, dtm_name)]
+
+                # load reader
                 iterator_test = image_reader.image_height_label_iterator(
                     iter_file_list,
                     batch_size=batch_size,

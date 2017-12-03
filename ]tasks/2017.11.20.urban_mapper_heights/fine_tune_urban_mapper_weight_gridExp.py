@@ -8,23 +8,23 @@ from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
 
-TRAIN_DATA_DIR = 'dcc_urban_mapper_height_train_p'
-VALID_DATA_DIR = 'dcc_urban_mapper_height_valid_p'
+TRAIN_DATA_DIR = 'dcc_urban_mapper_height_train_p_w'
+VALID_DATA_DIR = 'dcc_urban_mapper_height_valid_p_w'
 CITY_NAME = 'JAX,TAM'
-RSR_DATA_DIR = r'/work/bh163/data/remote_sensing_data'
-PATCH_DIR = r'/work/bh163/data/iai'
-PRE_TRAINED_MODEL = r'/hpchome/collinslab/bh163/code/sis/test/models/UnetInria_Origin_fr_resample'
+RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
+PATCH_DIR = r'/home/lab/Documents/bohao/data/urban_mapper'
+PRE_TRAINED_MODEL = r'/home/lab/Documents/bohao/code/sis/test/models/UnetInria_Origin_fr_resample'
 LAYERS_TO_KEEP = '1,2,3,4,5,6,7,8,9'
-TRAIN_PATCH_APPENDIX = 'train_augfr_um_npy_p'
-VALID_PATCH_APPENDIX = 'valid_augfr_um_npy_p'
-TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(16,143)])
-VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0,16)])
+TRAIN_PATCH_APPENDIX = 'train_augfr_um_npy_p_w'
+VALID_PATCH_APPENDIX = 'valid_augfr_um_npy_p_w'
+TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(17,143)])
+VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0,17)])
 RANDOM_SEED = 1234
-BATCH_SIZE = 4
+BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
 INPUT_SIZE = 572
 EPOCHS = 15
-CKDIR = r'/hpchome/collinslab/bh163/code/sis/test/models/UrbanMapper_Height_GridExp'
+CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper_Height_GridExp'
 MODEL_NAME = 'unet_origin_finetune_um_augfr_9'
 HEIGHT_MODE = 'subtract'
 DATA_AUG = 'filp,rotate'
@@ -96,13 +96,13 @@ def fine_tune_grid_exp(height_mode,
     # data prepare step
     Data = rsrClassData(flags.rsr_data_dir)
     (collect_files_train, meta_train) = Data.getCollectionByName(flags.train_data_dir)
-    pe_train = patch_extractor.PatchExtractorUrbanMapperHeight(flags.rsr_data_dir,
+    pe_train = patch_extractor.PatchExtractorUrbanMapperHeightWeight(flags.rsr_data_dir,
                                                                collect_files_train, patch_size=flags.input_size,
                                                                tile_dim=meta_train['dim_image'][:2],
                                                                appendix=flags.train_patch_appendix)
     train_data_dir = pe_train.extract(flags.patch_dir)
     (collect_files_valid, meta_valid) = Data.getCollectionByName(flags.valid_data_dir)
-    pe_valid = patch_extractor.PatchExtractorUrbanMapperHeight(flags.rsr_data_dir,
+    pe_valid = patch_extractor.PatchExtractorUrbanMapperHeightWeight(flags.rsr_data_dir,
                                                                collect_files_valid, patch_size=flags.input_size,
                                                                tile_dim=meta_train['dim_image'][:2],
                                                                appendix=flags.valid_patch_appendix)
@@ -112,16 +112,16 @@ def fine_tune_grid_exp(height_mode,
     coord = tf.train.Coordinator()
 
     # load reader
-    reader_train = image_reader.ImageLabelReaderHeight(train_data_dir, flags.input_size, coord,
+    reader_train = image_reader.ImageLabelReaderHeightWeight(train_data_dir, flags.input_size, coord,
                                                        city_list=flags.city_name, tile_list=flags.train_tile_names,
                                                        ds_name='urban_mapper', data_aug=flags.data_aug,
                                                        height_mode=flags.height_mode)
-    reader_valid = image_reader.ImageLabelReaderHeight(valid_data_dir, flags.input_size, coord,
+    reader_valid = image_reader.ImageLabelReaderHeightWeight(valid_data_dir, flags.input_size, coord,
                                                        city_list=flags.city_name, tile_list=flags.valid_tile_names,
                                                        ds_name='urban_mapper', data_aug=flags.data_aug,
                                                        height_mode=flags.height_mode)
-    reader_train_iter = reader_train.image_height_label_iterator(flags.batch_size)
-    reader_valid_iter = reader_valid.image_height_label_iterator(flags.batch_size)
+    reader_train_iter = reader_train.image_height_label_weight_iterator(flags.batch_size)
+    reader_valid_iter = reader_valid.image_height_label_weight_iterator(flags.batch_size)
 
     # define place holder
     if height_mode == 'all':
@@ -131,13 +131,14 @@ def fine_tune_grid_exp(height_mode,
     else:
         X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 6], name='X')
     y = tf.placeholder(tf.int32, shape=[None, flags.input_size[0], flags.input_size[1], 1], name='y')
+    z = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 1], name='z')
     mode = tf.placeholder(tf.bool, name='mode')
 
     # initialize model
-    model = unet.UnetModel_Height_Appendix({'X':X, 'Y':y}, trainable=mode, model_name=model_name, input_size=flags.input_size)
-    model.create_graph('X', flags.num_classes, start_filter_num=64)
-    #model.load_weights(flags.pre_trained_model, layers_to_keep_num, kernel)
-    model.make_loss('Y')
+    model = unet.UnetModel_Height_Appendix_Weight({'X':X, 'Y':y, 'Z':z}, trainable=mode, model_name=model_name, input_size=flags.input_size)
+    model.create_graph('X', flags.num_classes)
+    model.load_weights(flags.pre_trained_model, layers_to_keep_num, kernel)
+    model.make_loss('Y', 'Z')
     model.make_learning_rate(learning_rate,
                              tf.cast(flags.n_train/flags.batch_size * decay_step, tf.int32), decay_rate)
     model.make_update_ops('X', 'Y')
@@ -160,11 +161,12 @@ def fine_tune_grid_exp(height_mode,
         if os.path.exists(model.ckdir) and tf.train.get_checkpoint_state(model.ckdir):
             latest_check_point = tf.train.latest_checkpoint(model.ckdir)
             saver.restore(sess, latest_check_point)
+            print('Model Loaded {}'.format(model.ckdir))
 
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)
         try:
             train_summary_writer = tf.summary.FileWriter(model.ckdir, sess.graph)
-            model.train('X', 'Y', epochs, flags.n_train, flags.batch_size, sess, train_summary_writer,
+            model.train('X', 'Y', 'Z', epochs, flags.n_train, flags.batch_size, sess, train_summary_writer,
                         train_iterator=reader_train_iter, valid_iterator=reader_valid_iter, image_summary=utils.image_summary)
         finally:
             coord.request_stop()
@@ -176,44 +178,47 @@ def fine_tune_grid_exp(height_mode,
 
 
 def evaluate_results(flags, model_name, height_mode):
-    result = utils.test_authentic_unet_height(flags.rsr_data_dir,
-                                              flags.valid_data_dir,
-                                              flags.input_size,
-                                              model_name,
-                                              flags.num_classes,
-                                              flags.ckdir,
-                                              flags.city_name,
-                                              flags.batch_size,
-                                              ds_name='urban_mapper',
-                                              height_mode=height_mode)
-    #_, task_dir = utils.get_task_img_folder()
-    #np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
+    result = utils.test_authentic_unet_height_weight(flags.rsr_data_dir,
+                                                   flags.valid_data_dir,
+                                                   flags.input_size,
+                                                   model_name,
+                                                   flags.num_classes,
+                                                   flags.ckdir,
+                                                   flags.city_name,
+                                                   flags.batch_size,
+                                                   ds_name='urban_mapper',
+                                                   GPU=flags.GPU,
+                                                   height_mode=height_mode)
+    _, task_dir = utils.get_task_img_folder()
+    np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
 
     return result
 
 
 if __name__ == '__main__':
     flags = read_flag()
-    #_, task_dir = utils.get_task_img_folder()
+    _, task_dir = utils.get_task_img_folder()
 
     height_mode = 'subtract'
-    epochs = 100
-    decay_step = 60
+    epochs = 25
+    decay_step = 20
     decay_rate = 0.1
-    lr_base = 1e-3
-    for ly2kp in range(7, 8):
+    lr_base = 1e-4
+    #for ly2kp in range(7, 8):
+    for ly2kp in [7, 6]:
         layers_to_keep_num = [i for i in range(1, ly2kp+1)]
         #for lr in [0.5, 0.25, 0.1, 0.075, 0.05, 0.025, 0.01]:
-        for lr in [1]:
+        for lr in [1, 0.5]:
             learning_rate = lr * lr_base
 
-            model_name = '{}_rescaled_large2_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
-                                                                           epochs,
-                                                                           decay_step,
-                                                                           decay_rate,
-                                                                           ly2kp,
-                                                                           lr,
-                                                                           lr_base)
+            model_name = '{}_rescaled_appendix_weight_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.\
+                format(flags.pre_trained_model.split('/')[-1],
+                       epochs,
+                       decay_step,
+                       decay_rate,
+                       ly2kp,
+                       lr,
+                       lr_base)
             print('Finetuneing model: {}'.format(model_name))
 
             fine_tune_grid_exp(height_mode,
@@ -224,13 +229,16 @@ if __name__ == '__main__':
                                epochs,
                                model_name)
 
-            print('Evaluating model: {}'.format(model_name))
-            result = evaluate_results(flags, model_name, height_mode)
-            iou = []
-            for k, v in result.items():
-                iou.append(v)
-            result_mean = np.mean(iou)
-            print('\t Mean IoU on Validation Set: {:.3f}'.format(result_mean))
+            try:
+                print('Evaluating model: {}'.format(model_name))
+                result = evaluate_results(flags, model_name, height_mode)
+                iou = []
+                for k, v in result.items():
+                    iou.append(v)
+                result_mean = np.mean(iou)
+                print('\t Mean IoU on Validation Set: {:.3f}'.format(result_mean))
 
-            with open('grid_exp_record_1129.txt', 'a') as record_file:
-                record_file.write('{} {}\n'.format(model_name, result_mean))
+                with open(os.path.join(task_dir, 'grid_exp_record_1129.txt'), 'a') as record_file:
+                    record_file.write('{} {}\n'.format(model_name, result_mean))
+            finally:
+                print('end')

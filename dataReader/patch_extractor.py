@@ -271,6 +271,90 @@ class PatchExtractorUrbanMapperHeight(PatchExtractorUrbanMapper):
             file.write('{} {} {} {}\n'.format(image_name, dsm_name, dtm_name, label_name))
 
 
+class PatchExtractorUrbanMapperHeightFmap(PatchExtractorUrbanMapper):
+    def save_img_label(self, patch, dest_dir, city_name, tile_id, cnt, appendix=None, label_min=0, label_max=1):
+        assert patch.shape[-1] == 9
+        patch_img, patch_dsm, patch_dtm, patch_f, patch_label = patch[:, :, :3], \
+                                                       patch[:, :, 3], \
+                                                       patch[:, :, 4], \
+                                                       patch[:, :, 5:8], \
+                                                       patch[:, :, -1]
+        patch_label = scipy.misc.toimage(patch_label,
+                                         high=label_max,
+                                         low=label_min,
+                                         mode='I')
+        cnt_str = '{0:05d}'.format(cnt)
+        if appendix is None:
+            image_name = '{}{}_img_{}.jpg'.format(city_name, tile_id, cnt_str)
+            dsm_name = '{}{}_dsm_{}.npy'.format(city_name, tile_id, cnt_str)
+            dtm_name = '{}{}_dtm_{}.npy'.format(city_name, tile_id, cnt_str)
+            f_name = '{}{}_f_{}.png'.format(city_name, tile_id, cnt_str)
+            label_name = '{}{}_label_{}.png'.format(city_name, tile_id, cnt_str)
+        else:
+            image_name = '{}{}_img_{}_{}.jpg'.format(city_name, tile_id, appendix, cnt_str)
+            dsm_name = '{}{}_dsm_{}_{}.npy'.format(city_name, tile_id, appendix, cnt_str)
+            dtm_name = '{}{}_dtm_{}_{}.npy'.format(city_name, tile_id, appendix, cnt_str)
+            f_name = '{}{}_f_{}_{}.png'.format(city_name, tile_id, appendix, cnt_str)
+            label_name = '{}{}_label_{}_{}.png'.format(city_name, tile_id, appendix, cnt_str)
+        file_name = os.path.join(dest_dir, self.name, image_name)
+        scipy.misc.imsave(file_name, patch_img)
+        file_name = os.path.join(dest_dir, self.name, dsm_name)
+        #scipy.misc.imsave(file_name, patch_dsm)
+        np.save(file_name, patch_dsm)
+        file_name = os.path.join(dest_dir, self.name, dtm_name)
+        #scipy.misc.imsave(file_name, patch_dtm)
+        np.save(file_name, patch_dtm)
+        file_name = os.path.join(dest_dir, self.name, f_name)
+        scipy.misc.imsave(file_name, patch_f)
+        file_name = os.path.join(dest_dir, self.name, label_name)
+        #scipy.misc.imsave(file_name, patch_label)
+        patch_label.save(file_name)
+        with open(os.path.join(dest_dir, self.name, 'data_list.txt'), 'a') as file:
+            file.write('{} {} {} {} {}\n'.format(image_name, dsm_name, dtm_name, f_name, label_name))
+
+
+class PatchExtractorUrbanMapperHeightWeight(PatchExtractorUrbanMapper):
+    def save_img_label(self, patch, dest_dir, city_name, tile_id, cnt, appendix=None, label_min=0, label_max=1):
+        assert patch.shape[-1] == 7
+        patch_img, patch_dsm, patch_dtm, patch_f, patch_label = patch[:, :, :3], \
+                                                       patch[:, :, 3], \
+                                                       patch[:, :, 4], \
+                                                       patch[:, :, 5], \
+                                                       patch[:, :, -1]
+        patch_label = scipy.misc.toimage(patch_label,
+                                         high=label_max,
+                                         low=label_min,
+                                         mode='I')
+        cnt_str = '{0:05d}'.format(cnt)
+        if appendix is None:
+            image_name = '{}{}_img_{}.jpg'.format(city_name, tile_id, cnt_str)
+            dsm_name = '{}{}_dsm_{}.npy'.format(city_name, tile_id, cnt_str)
+            dtm_name = '{}{}_dtm_{}.npy'.format(city_name, tile_id, cnt_str)
+            f_name = '{}{}_w_{}.png'.format(city_name, tile_id, cnt_str)
+            label_name = '{}{}_label_{}.png'.format(city_name, tile_id, cnt_str)
+        else:
+            image_name = '{}{}_img_{}_{}.jpg'.format(city_name, tile_id, appendix, cnt_str)
+            dsm_name = '{}{}_dsm_{}_{}.npy'.format(city_name, tile_id, appendix, cnt_str)
+            dtm_name = '{}{}_dtm_{}_{}.npy'.format(city_name, tile_id, appendix, cnt_str)
+            f_name = '{}{}_w_{}_{}.png'.format(city_name, tile_id, appendix, cnt_str)
+            label_name = '{}{}_label_{}_{}.png'.format(city_name, tile_id, appendix, cnt_str)
+        file_name = os.path.join(dest_dir, self.name, image_name)
+        scipy.misc.imsave(file_name, patch_img)
+        file_name = os.path.join(dest_dir, self.name, dsm_name)
+        #scipy.misc.imsave(file_name, patch_dsm)
+        np.save(file_name, patch_dsm)
+        file_name = os.path.join(dest_dir, self.name, dtm_name)
+        #scipy.misc.imsave(file_name, patch_dtm)
+        np.save(file_name, patch_dtm)
+        file_name = os.path.join(dest_dir, self.name, f_name)
+        scipy.misc.imsave(file_name, patch_f)
+        file_name = os.path.join(dest_dir, self.name, label_name)
+        #scipy.misc.imsave(file_name, patch_label)
+        patch_label.save(file_name)
+        with open(os.path.join(dest_dir, self.name, 'data_list.txt'), 'a') as file:
+            file.write('{} {} {} {} {}\n'.format(image_name, dsm_name, dtm_name, f_name, label_name))
+
+
 if __name__ == '__main__':
     '''from rsrClassData import rsrClassData
     Data = rsrClassData(r'/media/ei-edl01/data/remote_sensing_data')

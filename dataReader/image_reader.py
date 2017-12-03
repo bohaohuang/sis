@@ -190,7 +190,7 @@ def image_height_fmap_label_iterator(image_dir, batch_size, tile_dim, patch_size
         #res = 35 * np.log(res + 2) + 40
 
         block = np.dstack([block[0], block[3], res])
-        image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 4))
+        image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 7))
     else:
         block = np.dstack([block[0], block[1], block[2], block[1]-block[2]])
         image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 6))
@@ -432,6 +432,83 @@ class ImageLabelReaderHeightFmap(object):
                     #res[np.where(res < -1)] = -1
                     #res = 35 * np.log(res + 2) + 40
                     yield np.concatenate([image_batch, f_batch, res], axis=3), label_batch
+                elif self.height_mode == 'subtract_all':
+                    yield np.concatenate([image_batch, dsm_batch, dtm_batch, dsm_batch-dtm_batch], axis=3), label_batch
+
+
+class ImageLabelReaderHeightWeight(object):
+    def __init__(self, data_dir, input_size, coord, city_list, tile_list,
+                 data_list='data_list.txt', random=True, ds_name='inria',
+                 data_aug='', height_mode='all'):
+        self.original_dir = ''
+        self.data_dir = data_dir
+        self.data_list = data_list
+        self.ds_name = ds_name
+        self.data_aug = data_aug
+        self.height_mode = height_mode
+        self.input_size = input_size
+        self.coord = coord
+        self.city_list = city_list
+        self.tile_list = tile_list
+        self.image_list, self.dsm_list, self.dtm_list, self.f_list, self.label_list = \
+            self.read_image_label_list()
+        self.images = tf.convert_to_tensor(self.image_list, dtype=tf.string)
+        self.dsms = tf.convert_to_tensor(self.dsm_list, dtype=tf.string)
+        self.dtms = tf.convert_to_tensor(self.dtm_list, dtype=tf.string)
+        self.labels = tf.convert_to_tensor(self.label_list, dtype=tf.string)
+        self.queue = tf.train.slice_input_producer([self.images, self.dsms, self.dtms, self.labels],
+                                                   shuffle=random)
+        self.image, self.dsm, self.dtm, self.label = \
+            read_images_heights_labels_from_disk(self.queue, self.input_size, self.data_aug)
+
+    def read_image_label_list(self):
+        with open(os.path.join(self.data_dir, self.data_list), 'r') as file:
+            files = file.readlines()
+        image_list = []
+        dsm_list = []
+        dtm_list = []
+        f_list = []
+        label_list = []
+        for file in files:
+            file_tuple = file.strip('\n').split(' ')
+            if self.ds_name == 'inria':
+                city_name = re.findall('^[a-z\-]*', file_tuple[0])[0]
+                tile_id = re.findall('[0-9]+(?=_img)', file_tuple[0])[0]
+            else:
+                city_name = file_tuple[0][:3]
+                tile_id = file_tuple[0][3:6].lstrip('0')
+            if city_name in self.city_list and tile_id in self.tile_list:
+                image_list.append(os.path.join(self.data_dir, file_tuple[0]))
+                dsm_list.append(os.path.join(self.data_dir, file_tuple[1]))
+                dtm_list.append(os.path.join(self.data_dir, file_tuple[2]))
+                f_list.append(os.path.join(self.data_dir, file_tuple[3]))
+                label_list.append(os.path.join(self.data_dir, file_tuple[4]))
+        if len(image_list) == 0:
+            raise ValueError
+        return image_list, dsm_list, dtm_list, f_list, label_list
+
+    def image_height_label_weight_iterator(self, batch_size):
+        assert len(self.image_list) == len(self.dsm_list) == len(self.dtm_list) == len(self.f_list) == len(self.label_list)
+        image_num = len(self.image_list)
+        while True:
+            idx = np.random.permutation(image_num)
+            for i in range(0, image_num, batch_size):
+                batch_idx = idx[i:i+batch_size]
+                if len(batch_idx) < batch_size:
+                    continue
+                image_batch = read_batch_from_list(self.image_list, batch_idx)
+                dsm_batch = read_batch_from_list(self.dsm_list, batch_idx)
+                dtm_batch = read_batch_from_list(self.dtm_list, batch_idx)
+                f_batch = read_batch_from_list(self.f_list, batch_idx)/255 + 0.5
+                label_batch = read_batch_from_list(self.label_list, batch_idx)/255
+                #label_batch = read_batch_from_list(self.label_list, batch_idx)
+                if self.height_mode == 'all':
+                    yield np.concatenate([image_batch, dsm_batch, dtm_batch], axis=3), label_batch
+                elif self.height_mode == 'subtract':
+                    res = 5 * (dsm_batch - dtm_batch) + 50
+                    #res[np.where(res < -1)] = -1
+                    #res = 35 * np.log(res + 2) + 40
+                    yield np.concatenate([image_batch, res], axis=3), f_batch, label_batch
                 elif self.height_mode == 'subtract_all':
                     yield np.concatenate([image_batch, dsm_batch, dtm_batch, dsm_batch-dtm_batch], axis=3), label_batch
 
