@@ -8,21 +8,21 @@ from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
 
-TRAIN_DATA_DIR = 'dcc_urban_mapper_height_train'
-VALID_DATA_DIR = 'dcc_urban_mapper_height_valid'
+TRAIN_DATA_DIR = 'dcc_urban_mapper_height_train_p'
+VALID_DATA_DIR = 'dcc_urban_mapper_height_valid_p'
 CITY_NAME = 'JAX,TAM'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/home/lab/Documents/bohao/data/urban_mapper'
 PRE_TRAINED_MODEL = r'/home/lab/Documents/bohao/code/sis/test/models/UnetInria_Origin_no_aug_resample'
 LAYERS_TO_KEEP = '1,2,3,4,5,6,7,8,9'
-TRAIN_PATCH_APPENDIX = 'train_augfr_um_npy'
-VALID_PATCH_APPENDIX = 'valid_augfr_um_npy'
-TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(16,143)])
-VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0,16)])
+TRAIN_PATCH_APPENDIX = 'train_augfr_um_p2'
+VALID_PATCH_APPENDIX = 'valid_augfr_um_p2'
+TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(20,143)])
+VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0,20)])
 RANDOM_SEED = 1234
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
-INPUT_SIZE = 572
+INPUT_SIZE = 321
 EPOCHS = 15
 CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UrbanMapper_Height_npy'
 MODEL_NAME = 'unet_origin_finetune_um_augfr_9'
@@ -78,25 +78,25 @@ def main(flags):
     tf.set_random_seed(flags.random_seed)
 
     # get weight
-    tf.reset_default_graph()
+    '''tf.reset_default_graph()
     if flags.height_mode == 'subtract':
         kernel = utils.get_unet_first_layer_weight(flags.pre_trained_model, 1)
     elif flags.height_mode == 'all':
         kernel = utils.get_unet_first_layer_weight(flags.pre_trained_model, 2)
     else:
         kernel = utils.get_unet_first_layer_weight(flags.pre_trained_model, 3)
-    tf.reset_default_graph()
+    tf.reset_default_graph()'''
 
     # data prepare step
     Data = rsrClassData(flags.rsr_data_dir)
     (collect_files_train, meta_train) = Data.getCollectionByName(flags.train_data_dir)
-    pe_train = patch_extractor.PatchExtractorUrbanMapperHeight(flags.rsr_data_dir,
+    pe_train = patch_extractor.PatchExtractorUrbanMapper(flags.rsr_data_dir,
                                                                collect_files_train, patch_size=flags.input_size,
                                                                tile_dim=meta_train['dim_image'][:2],
                                                                appendix=flags.train_patch_appendix)
     train_data_dir = pe_train.extract(flags.patch_dir)
     (collect_files_valid, meta_valid) = Data.getCollectionByName(flags.valid_data_dir)
-    pe_valid = patch_extractor.PatchExtractorUrbanMapperHeight(flags.rsr_data_dir,
+    pe_valid = patch_extractor.PatchExtractorUrbanMapper(flags.rsr_data_dir,
                                                                collect_files_valid, patch_size=flags.input_size,
                                                                tile_dim=meta_train['dim_image'][:2],
                                                                appendix=flags.valid_patch_appendix)

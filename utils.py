@@ -74,7 +74,7 @@ def pad_prediction(image, prediction):
         return prediction
 
 
-def image_summary(image, truth, prediction):
+def image_summary(image, truth, prediction, img_mean=np.array((109.629784946, 114.94964751, 102.778073453), dtype=np.float32)):
     truth_img = decode_labels(truth, 10)
 
     prediction = pad_prediction(image, prediction)
@@ -82,7 +82,7 @@ def image_summary(image, truth, prediction):
     pred_labels = get_pred_labels(prediction)
     pred_img = decode_labels(pred_labels, 10)
 
-    return np.concatenate([image, truth_img, pred_img], axis=2)
+    return np.concatenate([image+img_mean, truth_img, pred_img], axis=2)
 
 
 def get_output_label(result, image_dim, input_size, colormap, overlap=0,
