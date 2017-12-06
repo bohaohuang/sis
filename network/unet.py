@@ -142,7 +142,7 @@ class UnetModel(network.Network):
                                                               image_summary(X_batch_val[:,:,:,:3], y_batch_val, pred_valid)})
                 summary_writer.add_summary(valid_image_summary, self.global_step_value)
 
-            if epoch == save_epoch:
+            if epoch % save_epoch == 0:
                 saver = tf.train.Saver(var_list=tf.global_variables(), max_to_keep=1)
                 saver.save(sess, '{}/model_{}.ckpt'.format(self.ckdir, epoch), global_step=self.global_step)
 
