@@ -209,13 +209,14 @@ if __name__ == '__main__':
         for lr in [1]:
             learning_rate = lr * lr_base
 
-            model_name = '{}_rescaled_large2_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
+            '''model_name = '{}_rescaled_large2_EP-{}_DS-{}_DR-{}_LY-{}_LR-{}-{:1.1e}'.format(flags.pre_trained_model.split('/')[-1],
                                                                            epochs,
                                                                            decay_step,
                                                                            decay_rate,
                                                                            ly2kp,
                                                                            lr,
-                                                                           lr_base)
+                                                                           lr_base)'''
+            model_name = 'unet_origin_um_augfr_scratch'
             print('Finetuneing model: {}'.format(model_name))
 
             fine_tune_grid_exp(height_mode,
