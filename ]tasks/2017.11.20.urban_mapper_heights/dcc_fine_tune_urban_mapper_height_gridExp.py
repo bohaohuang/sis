@@ -20,12 +20,12 @@ VALID_PATCH_APPENDIX = 'valid_augfr_um_npy_p'
 TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(16,143)])
 VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0,16)])
 RANDOM_SEED = 1234
-BATCH_SIZE = 4
+BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
 INPUT_SIZE = 572
 EPOCHS = 15
 CKDIR = r'/hpchome/collinslab/bh163/code/sis/test/models/UrbanMapper_Height_GridExp'
-MODEL_NAME = 'unet_origin_finetune_um_augfr_9'
+MODEL_NAME = 'unet_origin_um_augfr_scratch'
 HEIGHT_MODE = 'subtract'
 DATA_AUG = 'filp,rotate'
 NUM_CLASS = 2
@@ -33,6 +33,7 @@ N_TRAIN = 8000
 GPU = '0'
 DECAY_STEP = 10
 DECAY_RATE = 0.1
+IMG_MEAN = np.array((101.30373957, 102.11770362, 83.02355979), dtype=np.float32)
 
 
 def read_flag():
@@ -120,8 +121,8 @@ def fine_tune_grid_exp(height_mode,
                                                        city_list=flags.city_name, tile_list=flags.valid_tile_names,
                                                        ds_name='urban_mapper', data_aug=flags.data_aug,
                                                        height_mode=flags.height_mode)
-    reader_train_iter = reader_train.image_height_label_iterator(flags.batch_size)
-    reader_valid_iter = reader_valid.image_height_label_iterator(flags.batch_size)
+    reader_train_iter = reader_train.image_height_label_iterator(flags.batch_size, img_mean=IMG_MEAN)
+    reader_valid_iter = reader_valid.image_height_label_iterator(flags.batch_size, img_mean=IMG_MEAN)
 
     # define place holder
     if height_mode == 'all':
@@ -134,7 +135,7 @@ def fine_tune_grid_exp(height_mode,
     mode = tf.placeholder(tf.bool, name='mode')
 
     # initialize model
-    model = unet.UnetModel_Height_Appendix({'X':X, 'Y':y}, trainable=mode, model_name=model_name, input_size=flags.input_size)
+    model = unet.UnetModel_Height({'X':X, 'Y':y}, trainable=mode, model_name=model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes, start_filter_num=64)
     #model.load_weights(flags.pre_trained_model, layers_to_keep_num, kernel)
     model.make_loss('Y')
@@ -185,7 +186,8 @@ def evaluate_results(flags, model_name, height_mode):
                                               flags.city_name,
                                               flags.batch_size,
                                               ds_name='urban_mapper',
-                                              height_mode=height_mode)
+                                              height_mode=height_mode,
+                                              img_mean=IMG_MEAN)
     #_, task_dir = utils.get_task_img_folder()
     #np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
 

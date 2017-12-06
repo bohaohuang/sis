@@ -81,9 +81,9 @@ class UnetModel(network.Network):
         tf.summary.scalar('learning rate', self.learning_rate)
         self.summary = tf.summary.merge_all()
 
-    def train(self, x_name, y_name, epoch_num, n_train, batch_size, sess, summary_writer,
+    def train(self, x_name, y_name, epoch_num, n_train, batch_size, sess, summary_writer, n_valid=1000,
               train_iterator=None, train_reader=None, valid_iterator=None, valid_reader=None,
-              image_summary=None, verb_step=100):
+              image_summary=None, verb_step=100, save_epoch=5):
         # define summary operations
         valid_cross_entropy_summary_op = tf.summary.scalar('xent_validation', self.valid_cross_entropy)
         valid_image_summary_op = tf.summary.image('Validation_images_summary', self.valid_images,
@@ -107,7 +107,7 @@ class UnetModel(network.Network):
                     print('Epoch {:d} step {:d}\tcross entropy = {:.3f}'.
                           format(epoch, self.global_step_value, step_cross_entropy))
             # validation
-            if valid_iterator is not None:
+            '''if valid_iterator is not None:
                 X_batch_val, y_batch_val = next(valid_iterator)
             else:
                 X_batch_val, y_batch_val = sess.run(valid_reader)
@@ -118,6 +118,22 @@ class UnetModel(network.Network):
             print('Validation cross entropy: {:.3f}'.format(cross_entropy_valid))
             valid_cross_entropy_summary = sess.run(valid_cross_entropy_summary_op,
                                                    feed_dict={self.valid_cross_entropy: cross_entropy_valid})
+            summary_writer.add_summary(valid_cross_entropy_summary, self.global_step_value)'''
+            cross_entropy_valid_mean = []
+            for step in range(0, n_valid, batch_size):
+                if valid_iterator is not None:
+                    X_batch_val, y_batch_val = next(valid_iterator)
+                else:
+                    X_batch_val, y_batch_val = sess.run(valid_reader)
+                pred_valid, cross_entropy_valid = sess.run([self.pred, self.loss],
+                                                           feed_dict={self.inputs[x_name]: X_batch_val,
+                                                                      self.inputs[y_name]: y_batch_val,
+                                                                      self.trainable: False})
+                cross_entropy_valid_mean.append(cross_entropy_valid)
+            cross_entropy_valid_mean = np.mean(cross_entropy_valid_mean)
+            print('Validation cross entropy: {:.3f}'.format(cross_entropy_valid_mean))
+            valid_cross_entropy_summary = sess.run(valid_cross_entropy_summary_op,
+                                                   feed_dict={self.valid_cross_entropy: cross_entropy_valid_mean})
             summary_writer.add_summary(valid_cross_entropy_summary, self.global_step_value)
 
             if image_summary is not None:
@@ -125,6 +141,11 @@ class UnetModel(network.Network):
                                                feed_dict={self.valid_images:
                                                               image_summary(X_batch_val[:,:,:,:3], y_batch_val, pred_valid)})
                 summary_writer.add_summary(valid_image_summary, self.global_step_value)
+
+            if epoch == save_epoch:
+                saver = tf.train.Saver(var_list=tf.global_variables(), max_to_keep=1)
+                saver.save(sess, '{}/model_{}.ckpt'.format(self.ckdir, epoch), global_step=self.global_step)
+
 
     def test(self, x_name, sess, test_iterator):
         result = []
@@ -162,9 +183,8 @@ class UnetModel_Origin(UnetModel):
 
     def make_loss(self, y_name):
         with tf.variable_scope('loss'):
-            pred_flat = tf.reshape(tf.nn.softmax(self.pred), [-1, self.class_num])
-            #pred_flat = pred_flat[:, 0]
-            #pred_flat = tf.reshape(self.pred, [-1, self.class_num])
+            #pred_flat = tf.reshape(tf.nn.softmax(self.pred), [-1, self.class_num])
+            pred_flat = tf.reshape(self.pred, [-1, self.class_num])
             _, w, h, _ = self.inputs[y_name].get_shape().as_list()
             y = tf.image.resize_image_with_crop_or_pad(self.inputs[y_name], w-184, h-184)
             y_flat = tf.reshape(tf.squeeze(y, axis=[3]), [-1, ])
@@ -172,9 +192,6 @@ class UnetModel_Origin(UnetModel):
             gt = tf.gather(y_flat, indices)
             prediction = tf.gather(pred_flat, indices)
             self.loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=prediction, labels=gt))
-            '''z = tf.random_normal(tf.shape(prediction))
-            loss_no_weight = tf.reduce_sum(tf.multiply(tf.cast(gt, dtype=tf.float32), tf.log(prediction)))
-            self.loss = tf.reduce_mean(tf.multiply(z, loss_no_weight))'''
 
 
 class UnetModel_Height(UnetModel_Origin):
@@ -336,12 +353,10 @@ class UnetModel_Height_Appendix_Weight(UnetModel_Height_Appendix):
     def make_loss(self, y_name, w_name):
         with tf.variable_scope('loss'):
             _, w, h, _ = self.inputs[y_name].get_shape().as_list()
-
             z = self.inputs[w_name]
             z = tf.image.resize_image_with_crop_or_pad(z, w - 184, h - 184)
             z = tf.squeeze(z, axis=3)
             pred_flat = tf.reshape(tf.nn.softmax(tf.multiply(self.pred, tf.stack([z, z], axis=3))), [-1, self.class_num])
-            # pred_flat = pred_flat[:, 0]
             y = tf.image.resize_image_with_crop_or_pad(self.inputs[y_name], w - 184, h - 184)
             y_flat = tf.reshape(tf.squeeze(y, axis=[3]), [-1, ])
             indices = tf.squeeze(tf.where(tf.less_equal(y_flat, self.class_num - 1)), 1)
@@ -350,8 +365,10 @@ class UnetModel_Height_Appendix_Weight(UnetModel_Height_Appendix):
             self.loss = tf.reduce_mean(
                 tf.nn.sparse_softmax_cross_entropy_with_logits(logits=prediction,
                                                                labels=gt))
-            '''loss_no_weight = tf.reduce_sum(tf.multiply(tf.cast(gt, dtype=tf.float32), tf.log(-prediction)))
-            self.loss = tf.reduce_mean(tf.multiply(z, loss_no_weight))'''
+            '''self.loss = tf.reduce_mean(
+                tf.nn.weighted_cross_entropy_with_logits(logits=prediction,
+                                                         targets=gt,
+                                                         pos_weight=tf.constant([0.5, 1])))'''
 
     def train(self, x_name, y_name, z_name, epoch_num, n_train, batch_size, sess, summary_writer,
               train_iterator=None, train_reader=None, valid_iterator=None, valid_reader=None,
@@ -394,6 +411,9 @@ class UnetModel_Height_Appendix_Weight(UnetModel_Height_Appendix):
             valid_cross_entropy_summary = sess.run(valid_cross_entropy_summary_op,
                                                    feed_dict={self.valid_cross_entropy: cross_entropy_valid})
             summary_writer.add_summary(valid_cross_entropy_summary, self.global_step_value)
+
+            saver = tf.train.Saver(var_list=tf.global_variables(), max_to_keep=1)
+            saver.save(sess, '{}/model_{}.ckpt'.format(self.ckdir, epoch), global_step=self.global_step)
 
             if image_summary is not None:
                 valid_image_summary = sess.run(valid_image_summary_op,

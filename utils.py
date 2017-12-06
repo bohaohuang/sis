@@ -6,10 +6,10 @@ from dataReader import patch_extractor
 
 def make_output_file(label, colormap):
     try:
-        colormap = {0: 0, 1: 255, 2: 255}
+        colormap = {0: 0, 1: 255, 2: 122}
         encode_func = np.vectorize(lambda x, y: y[x])
     except:
-        colormap = {0:0, 1:255, 2:255}
+        colormap = {0:0, 1: 255, 2: 122}
         encode_func = np.vectorize(lambda x, y: y[x])
     return encode_func(label, colormap)
 
@@ -347,7 +347,8 @@ def test_authentic_unet_height(rsr_data_dir,
                                ds_name='inria',
                                GPU='0',
                                random_seed=1234,
-                               height_mode='subtract'):
+                               height_mode='subtract',
+                               img_mean=np.array([0.0, 0.0, 0.0])):
     import re
     import scipy.misc
     import tensorflow as tf
@@ -390,7 +391,7 @@ def test_authentic_unet_height(rsr_data_dir,
 
     # initialize model
     #model = unet.UnetModel_Origin({'X': X, 'Y': y}, trainable=mode, model_name=model_name, input_size=input_size)
-    model = unet.UnetModel_Height_Appendix({'X': X, 'Y': y}, trainable=mode, model_name=model_name, input_size=input_size)
+    model = unet.UnetModel_Height({'X': X, 'Y': y}, trainable=mode, model_name=model_name, input_size=input_size)
     model.create_graph('X', num_classes)
     model.make_update_ops('X', 'Y')
     # set ckdir
@@ -433,7 +434,8 @@ def test_authentic_unet_height(rsr_data_dir,
                     batch_size=batch_size,
                     tile_dim=meta_test['dim_image'][:2],
                     patch_size=input_size,
-                    overlap=184, padding=92, height_mode=height_mode)
+                    overlap=184, padding=92, height_mode=height_mode,
+                    img_mean=img_mean)
                 # run
                 result = model.test('X', sess, iterator_test)
                 pred_label_img = get_output_label(result,
@@ -442,7 +444,6 @@ def test_authentic_unet_height(rsr_data_dir,
                                                   meta_test['colormap'], overlap=184,
                                                   output_image_dim=meta_test['dim_image'],
                                                   output_patch_size=(input_size[0]-184, input_size[1]-184))
-                #pred_label_img[np.where(pred_label_img==2)] = 1
                 # evaluate
                 truth_label_img = scipy.misc.imread(os.path.join(rsr_data_dir, label_name))
                 #truth_label_img[np.where(truth_label_img == 2)] = 1

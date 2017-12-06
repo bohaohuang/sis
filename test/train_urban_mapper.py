@@ -22,7 +22,7 @@ VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(0,20)])
 RANDOM_SEED = 1234
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-5
-INPUT_SIZE = 572
+INPUT_SIZE = 321
 EPOCHS = 15
 CKDIR = r'./models'
 MODEL_NAME = 'UNET_new_um_7'
@@ -153,12 +153,12 @@ def main(flags):
 
 if __name__ == '__main__':
     flags = read_flag()
-    #main(flags)
+    main(flags)
 
-    kernel = utils.get_unet_first_layer_weight(r'/home/lab/Documents/bohao/code/sis/test/models/UnetInria_Origin_no_aug_resample', 3)
+    '''kernel = utils.get_unet_first_layer_weight(r'/home/lab/Documents/bohao/code/sis/test/models/UnetInria_Origin_no_aug_resample', 3)
     import matplotlib.pyplot as plt
     for i in range(6):
         plt.subplot(231+i)
         plt.imshow(kernel[:, :, i, :].reshape((16, 18)))
         plt.title(i)
-    plt.show()
+    plt.show()'''

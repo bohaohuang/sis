@@ -54,17 +54,13 @@ def read_images_labels_from_disk(input_queue, input_size, data_aug='', image_mea
     # adhoc decoding for labels
     label = tf.image.decode_png(label_contents, channels=1)/255
 
-    image = tf.image.resize_images(image, input_size)
-    label = tf.image.resize_images(label, input_size)
-
     if 'flip' in data_aug:
         image, label = image_flipping(image, label)
     if 'rotate' in data_aug:
         image, label = image_rotating(image, label)
 
-    # this is necessary for dcc, which uses older version of tf
-    image = tf.image.resize_images(image, input_size)
-    label = tf.image.resize_images(label, input_size)
+    image.set_shape((input_size[0], input_size[1], 3))
+    label.set_shape((input_size[0], input_size[1], 1))
 
     return image, label
 
@@ -130,7 +126,8 @@ def image_label_iterator(image_dir, batch_size, tile_dim, patch_size, overlap, p
         yield image_batch[:cnt, :, :, :] - image_mean
 
 
-def image_height_label_iterator(image_dir, batch_size, tile_dim, patch_size, overlap, padding=0, height_mode='subtract'):
+def image_height_label_iterator(image_dir, batch_size, tile_dim, patch_size, overlap, padding=0, height_mode='subtract',
+                                img_mean=np.array([0, 0, 0])):
     # this is a iterator for test
     block = []
     for file in image_dir:
@@ -149,7 +146,7 @@ def image_height_label_iterator(image_dir, batch_size, tile_dim, patch_size, ove
         #res[np.where(res < -1)] = -1
         #res = 35 * np.log(res + 2) + 40
 
-        block = np.dstack([block[0], res])
+        block = np.dstack([block[0]-img_mean, res])
         image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 4))
     else:
         block = np.dstack([block[0], block[1], block[2], block[1]-block[2]])
@@ -334,7 +331,7 @@ class ImageLabelReaderHeight(object):
             return tf.concat([image_batch, dsm_batch, dtm_batch,
                               dsm_batch-dtm_batch], axis=3), label_batch
 
-    def image_height_label_iterator(self, batch_size):
+    def image_height_label_iterator(self, batch_size, img_mean=np.array([0, 0, 0])):
         assert len(self.image_list) == len(self.dsm_list) == len(self.dtm_list) == len(self.label_list)
         image_num = len(self.image_list)
         while True:
@@ -343,7 +340,7 @@ class ImageLabelReaderHeight(object):
                 batch_idx = idx[i:i+batch_size]
                 if len(batch_idx) < batch_size:
                     continue
-                image_batch = read_batch_from_list(self.image_list, batch_idx)
+                image_batch = read_batch_from_list(self.image_list, batch_idx) - img_mean
                 dsm_batch = read_batch_from_list(self.dsm_list, batch_idx)
                 dtm_batch = read_batch_from_list(self.dtm_list, batch_idx)
                 label_batch = read_batch_from_list(self.label_list, batch_idx)/255
@@ -499,7 +496,8 @@ class ImageLabelReaderHeightWeight(object):
                 image_batch = read_batch_from_list(self.image_list, batch_idx)
                 dsm_batch = read_batch_from_list(self.dsm_list, batch_idx)
                 dtm_batch = read_batch_from_list(self.dtm_list, batch_idx)
-                f_batch = read_batch_from_list(self.f_list, batch_idx)/255 + 0.5
+                f_batch = read_batch_from_list(self.f_list, batch_idx)/255
+                f_batch[np.where(f_batch == 0)] = 0.5
                 label_batch = read_batch_from_list(self.label_list, batch_idx)/255
                 #label_batch = read_batch_from_list(self.label_list, batch_idx)
                 if self.height_mode == 'all':
@@ -528,19 +526,30 @@ if __name__ == '__main__':
     print(x_batch.shape)
     print(label_batch.shape)'''
 
+    from glob import glob
+    from tqdm import tqdm
     data_dir = r'/media/ei-edl01/data/remote_sensing_data/urban_mapper/image'
-    tile_id = 4
+    img_files = glob(os.path.join(data_dir, '*_RGB.tif'))
+
+    img_mean = np.zeros(3)
+    for img_file in tqdm(img_files):
+        img = scipy.misc.imread(img_file)
+        img_mean += np.mean(img, axis=(0, 1))
+    img_mean /= len(img_files)
+    print(img_mean)
+
+    '''tile_id = 4
     img_file = 'JAX_Tile_{:03d}_RGB.tif'.format(tile_id)
     dsm_file = 'JAX_Tile_{:03d}_DSM.tif'.format(tile_id)
     dtm_file = 'JAX_Tile_{:03d}_DTM.tif'.format(tile_id)
 
     img = scipy.misc.imread(os.path.join(data_dir, img_file))
     dsm = scipy.misc.imread(os.path.join(data_dir, dsm_file))
-    dtm = scipy.misc.imread(os.path.join(data_dir, dtm_file))
+    dtm = scipy.misc.imread(os.path.join(data_dir, dtm_file))'''
 
-    res = 5*(dsm-dtm)+50
-    '''res[np.where(res<-2)] = -2
-    res = 35 * np.sqrt(res + 2) + 20'''
+    '''res = 5*(dsm-dtm)+50
+    res[np.where(res<-2)] = -2
+    res = 35 * np.sqrt(res + 2) + 20
     print(res.shape)
 
     import matplotlib.pyplot as plt
@@ -550,4 +559,4 @@ if __name__ == '__main__':
     plt.subplot(212)
     plt.hist(res.flatten())
     plt.xlim(0, 255)
-    plt.show()
+    plt.show()'''
