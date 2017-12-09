@@ -20,8 +20,8 @@ python train_inria_origin_unet.py \
                 --n-train=8000 \
                 --learning-rate=1e-4 \
                 --decay-step=60 \
-                --batch-size=5 \
+                --batch-size=4 \
                 --city-name=austin,chicago,kitsap,tyrol-w,vienna \
                 --valid-size=1000 \
                 --data-aug=flip,rotate \
-                --model=UnetInria_fr_mean_reduced_appendix_large
+                --model=UnetInria_fr_mean_reduced_large
