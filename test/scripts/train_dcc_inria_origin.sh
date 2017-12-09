@@ -18,10 +18,10 @@ python train_inria_origin_unet.py \
                 --valid-patch-appendix=valid_noaug_dcc \
                 --epochs=100 \
                 --n-train=8000 \
-                --learning-rate=1e-3 \
-                --decay-step=40 \
+                --learning-rate=1e-4 \
+                --decay-step=60 \
                 --batch-size=5 \
                 --city-name=austin,chicago,kitsap,tyrol-w,vienna \
                 --valid-size=1000 \
                 --data-aug=flip,rotate \
-                --model=UnetInria_fr_mean_reduced
+                --model=UnetInria_fr_mean_reduced_appendix
