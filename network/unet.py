@@ -396,3 +396,37 @@ class ResUnetModel(UnetModel_Origin):
         conv9 = self.conv_conv_identity_pool(up9, [sfn, sfn, sfn], self.trainable, name='up9', pool=False)
 
         self.pred = tf.layers.conv2d(conv9, class_num, (1, 1), name='final', activation=None, padding='same')
+
+
+class ResUnetSkipModel(UnetModel_Origin):
+    def create_graph(self, x_name, class_num, start_filter_num=32):
+        self.class_num = class_num
+        sfn = start_filter_num
+
+        # downsample
+        conv1 = self.conv_conv_identity_pool(self.inputs[x_name], [sfn, sfn], self.trainable, name='conv1', pool=False)
+        conv1_skip, pool1 = self.conv_conv_skip_pool(conv1, [sfn, sfn], self.trainable, name='conv1_skip')
+        conv2 = self.conv_conv_identity_pool(pool1, [sfn*2, sfn*2], self.trainable, name='conv2', pool=False)
+        conv2_skip, pool2 = self.conv_conv_skip_pool(conv2, [sfn*2, sfn*2], self.trainable, name='conv2_skip')
+        conv3 = self.conv_conv_identity_pool(pool2, [sfn*4, sfn*4], self.trainable, name='conv3', pool=False)
+        conv3_skip, pool3 = self.conv_conv_skip_pool(conv3, [sfn*4, sfn*4], self.trainable, name='conv3_skip')
+        conv4 = self.conv_conv_identity_pool(pool3, [sfn*8, sfn*8], self.trainable, name='conv4', pool=False)
+        conv4_skip, pool4 = self.conv_conv_skip_pool(conv4, [sfn*8, sfn*8], self.trainable, name='conv4_skip')
+        conv5 = self.conv_conv_identity_pool(pool4, [sfn*16, sfn*16], self.trainable, name='conv5', pool=False)
+        conv5 = self.conv_conv_skip_pool(conv5, [sfn*16, sfn*16], self.trainable, name='conv5_skip', pool=False)
+
+        # upsample
+        up6 = self.upsample_concat(conv5, conv4_skip, name='6')
+        conv6 = self.conv_conv_identity_pool(up6, [sfn*8, sfn*8], self.trainable, name='up6', pool=False)
+        conv6_skip = self.conv_conv_skip_pool(conv6, [sfn*8, sfn*8], self.trainable, name='up6_skip', pool=False)
+        up7 = self.upsample_concat(conv6_skip, conv3_skip, name='7')
+        conv7 = self.conv_conv_identity_pool(up7, [sfn*4, sfn*4], self.trainable, name='up7', pool=False)
+        conv7_skip = self.conv_conv_skip_pool(conv7, [sfn*4, sfn*4], self.trainable, name='up7_skip', pool=False)
+        up8 = self.upsample_concat(conv7_skip, conv2_skip, name='8')
+        conv8 = self.conv_conv_identity_pool(up8, [sfn*2, sfn*2], self.trainable, name='up8', pool=False)
+        conv8_skip = self.conv_conv_skip_pool(conv8, [sfn*2, sfn*2], self.trainable, name='up8_skip', pool=False)
+        up9 = self.upsample_concat(conv8_skip, conv1_skip, name='9')
+        conv9 = self.conv_conv_identity_pool(up9, [sfn, sfn], self.trainable, name='up9', pool=False)
+        conv9_skip = self.conv_conv_skip_pool(conv9, [sfn, sfn], self.trainable, name='up9_skip', pool=False)
+
+        self.pred = tf.layers.conv2d(conv9_skip, class_num, (1, 1), name='final', activation=None, padding='same')
