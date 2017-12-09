@@ -52,25 +52,21 @@ class Network(object):
 
     def conv_conv_identity_pool(self, input_, n_filters, training, name, conv_strid=(3, 3),
                                 pool=True, pool_size=(2, 2), pool_stride=(2, 2),
-                                activation=tf.nn.relu, padding='same', bn=True):
+                                activation=tf.nn.relu, bn=True):
         net = input_
 
         with tf.variable_scope('layer{}'.format(name)):
+            input_conv = tf.layers.conv2d(net, n_filters[-1], conv_strid, activation=None,
+                                          padding='same', name='conv_skip')
+
             for i, F in enumerate(n_filters):
                 net = tf.layers.conv2d(net, F, conv_strid, activation=None,
-                                       padding=padding, name='conv_{}'.format(i + 1))
+                                       padding='same', name='conv_{}'.format(i + 1))
                 if bn:
                     net = tf.layers.batch_normalization(net, training=training, name='bn_{}'.format(i+1))
-                if i == 0:
-                    net_2_copy = net
-                    _, w, h, _ = net_2_copy.get_shape().as_list()
-                if i != len(n_filters):
-                    net = activation(net, name='relu_{}'.format(name, i + 1))
 
             # identity connection
-            identity_connect = tf.image.resize_image_with_crop_or_pad(net_2_copy, w-2*(len(n_filters)-1),
-                                                                      h-2*(len(n_filters)-1))
-            net += identity_connect
+            net = tf.add(input_conv, net)
 
             if pool is False:
                 return net

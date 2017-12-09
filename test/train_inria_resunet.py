@@ -8,29 +8,30 @@ from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
 
-TRAIN_DATA_DIR = 'dcc_inria_resample_train'
-VALID_DATA_DIR = 'dcc_inria_resample_valid'
+TRAIN_DATA_DIR = 'dcc_inria_train'
+VALID_DATA_DIR = 'dcc_inria_valid'
 CITY_NAME = 'austin,chicago,kitsap,tyrol-w,vienna'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/home/lab/Documents/bohao/data/inria'
-TRAIN_PATCH_APPENDIX = 'train_noaug_dcc_resample'
-VALID_PATCH_APPENDIX = 'valid_noaug_dcc_resample'
+TRAIN_PATCH_APPENDIX = 'train_noaug_dcc'
+VALID_PATCH_APPENDIX = 'valid_noaug_dcc'
 TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,37)])
 VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,6)])
 RANDOM_SEED = 1234
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-3
-INPUT_SIZE = 572
+INPUT_SIZE = 224
 EPOCHS = 100
 CKDIR = r'./models'
 MODEL_NAME = 'ResUnetInria_fr_resample_mean_reduced'
 DATA_AUG = 'filp,rotate'
 NUM_CLASS = 2
 N_TRAIN = 8000
-GPU = '0'
+GPU = '1'
 DECAY_STEP = 60
 DECAY_RATE = 0.1
 VALID_SIZE = 1000
+IMG_MEAN = np.array((109.629784946, 114.94964751, 102.778073453), dtype=np.float32)
 
 
 def read_flag():
@@ -78,16 +79,14 @@ def main(flags):
     pe_train = patch_extractor.PatchExtractorInria(flags.rsr_data_dir,
                                                    collect_files_train, patch_size=flags.input_size,
                                                    tile_dim=meta_train['dim_image'][:2],
-                                                   appendix=flags.train_patch_appendix,
-                                                   overlap=184)
-    train_data_dir = pe_train.extract(flags.patch_dir, pad=184)
+                                                   appendix=flags.train_patch_appendix)
+    train_data_dir = pe_train.extract(flags.patch_dir)
     (collect_files_valid, meta_valid) = Data.getCollectionByName(flags.valid_data_dir)
     pe_valid = patch_extractor.PatchExtractorInria(flags.rsr_data_dir,
                                                    collect_files_valid, patch_size=flags.input_size,
                                                    tile_dim=meta_valid['dim_image'][:2],
-                                                   appendix=flags.valid_patch_appendix,
-                                                   overlap=184)
-    valid_data_dir = pe_valid.extract(flags.patch_dir, pad=184)
+                                                   appendix=flags.valid_patch_appendix)
+    valid_data_dir = pe_valid.extract(flags.patch_dir)
 
     # image reader
     coord = tf.train.Coordinator()
@@ -96,10 +95,10 @@ def main(flags):
     with tf.name_scope('image_loader'):
         reader_train = image_reader.ImageLabelReader(train_data_dir, flags.input_size, coord,
                                                      city_list=flags.city_name, tile_list=flags.train_tile_names,
-                                                     data_aug=flags.data_aug)
+                                                     data_aug=flags.data_aug, image_mean=IMG_MEAN)
         reader_valid = image_reader.ImageLabelReader(valid_data_dir, flags.input_size, coord,
                                                      city_list=flags.city_name, tile_list=flags.valid_tile_names,
-                                                     data_aug=flags.data_aug)
+                                                     data_aug=flags.data_aug, image_mean=IMG_MEAN)
         X_batch_op, y_batch_op = reader_train.dequeue(flags.batch_size)
         X_batch_op_valid, y_batch_op_valid = reader_valid.dequeue(flags.batch_size)
     reader_train_op = [X_batch_op, y_batch_op]
@@ -111,6 +110,8 @@ def main(flags):
     mode = tf.placeholder(tf.bool, name='mode')
 
     # initialize model
+    flags.model_name = '{}_EP-{}_DS-{}_LR-{}'.format(flags.model_name, flags.epochs, flags.decay_step,
+                                                     flags.learning_rate)
     model = unet.ResUnetModel({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
     model.make_loss('Y')
@@ -141,8 +142,9 @@ def main(flags):
         try:
             train_summary_writer = tf.summary.FileWriter(model.ckdir, sess.graph)
 
-            model.train('X', 'Y', flags.epochs, flags.n_train, flags.valid_size, flags.batch_size, sess, train_summary_writer,
-                        train_reader=reader_train_op, valid_reader=reader_valid_op, image_summary=utils.image_summary)
+            model.train('X', 'Y', flags.epochs, flags.n_train, flags.batch_size, sess, train_summary_writer,
+                        n_valid=flags.valid_size, train_reader=reader_train_op, valid_reader=reader_valid_op,
+                        image_summary=utils.image_summary)
         finally:
             coord.request_stop()
             coord.join(threads)
