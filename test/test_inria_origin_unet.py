@@ -12,18 +12,19 @@ from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
 
 TEST_DATA_DIR = 'dcc_inria_valid'
-CITY_NAME = 'austin'
+CITY_NAME = 'austin,chicago,kitsap,tyrol-w,vienna'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/media/ei-edl01/user/bh163/data/iai'
 TEST_PATCH_APPENDIX = 'valid_noaug_dcc'
 TEST_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1, 6)])
 RANDOM_SEED = 1234
-BATCH_SIZE = 2
-INPUT_SIZE = 572
+BATCH_SIZE = 1
+INPUT_SIZE = 2636
 CKDIR = r'./models'
-MODEL_NAME = 'UnetInria_Origin_no_aug'
+MODEL_NAME = 'UnetInria_fr_mean_reduced_EP-100_DS-40.0_LR-0.001'
 NUM_CLASS = 2
-GPU = '1'
+GPU = '0'
+IMG_MEAN = np.array((109.629784946, 114.94964751, 102.778073453), dtype=np.float32)
 
 
 def read_flag():
@@ -87,49 +88,68 @@ def main(flags):
         if os.path.exists(model.ckdir) and tf.train.get_checkpoint_state(model.ckdir):
             latest_check_point = tf.train.latest_checkpoint(model.ckdir)
             saver.restore(sess, latest_check_point)
+            print('loaded {}'.format(latest_check_point))
 
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)
         try:
+            iou_record = {}
             for (image_name, label_name) in collect_files_test:
-                if flags.city_name in image_name:
-                    city_name = re.findall('[a-z\-]*(?=[0-9]+\.)', image_name)[0]
-                    tile_id = re.findall('[0-9]+(?=\.tif)', image_name)[0]
+                c_names = flags.city_name.split(',')
+                for c_name in c_names:
+                    if c_name in image_name:
+                        city_name = re.findall('[a-z\-]*(?=[0-9]+\.)', image_name)[0]
+                        tile_id = re.findall('[0-9]+(?=\.tif)', image_name)[0]
 
-                    # load reader
-                    iterator_test = image_reader.image_label_iterator(
-                        os.path.join(flags.rsr_data_dir, image_name),
-                        batch_size=flags.batch_size,
-                        tile_dim=meta_test['dim_image'][:2],
-                        patch_size=flags.input_size,
-                        overlap=184, padding=92)
-                    # run
-                    result = model.test('X', sess, iterator_test)
+                        # load reader
+                        iterator_test = image_reader.image_label_iterator(
+                            os.path.join(flags.rsr_data_dir, image_name),
+                            batch_size=flags.batch_size,
+                            tile_dim=meta_test['dim_image'][:2],
+                            patch_size=flags.input_size,
+                            overlap=184, padding=92,
+                            image_mean=IMG_MEAN)
+                        # run
+                        result = model.test('X', sess, iterator_test)
 
-                    pred_label_img = utils.get_output_label(result,
-                                                            (meta_test['dim_image'][0]+184, meta_test['dim_image'][1]+184),
-                                                            flags.input_size,
-                                                            meta_test['colormap'], overlap=184,
-                                                            output_image_dim=meta_test['dim_image'],
-                                                            output_patch_size=(flags.input_size[0]-184, flags.input_size[1]-184))
-                    # evaluate
-                    truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
-                    iou = utils.iou_metric(truth_label_img, pred_label_img)
+                        pred_label_img = utils.get_output_label(result,
+                                                                (meta_test['dim_image'][0]+184, meta_test['dim_image'][1]+184),
+                                                                flags.input_size,
+                                                                meta_test['colormap'], overlap=184,
+                                                                output_image_dim=meta_test['dim_image'],
+                                                                output_patch_size=(flags.input_size[0]-184, flags.input_size[1]-184))
+                        # evaluate
+                        truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
+                        iou = utils.iou_metric(truth_label_img, pred_label_img)
 
-                    plt.subplot(121)
-                    plt.imshow(truth_label_img)
-                    plt.subplot(122)
-                    plt.imshow(pred_label_img)
-                    plt.show()
+                        '''plt.subplot(121)
+                        plt.imshow(truth_label_img)
+                        plt.subplot(122)
+                        plt.imshow(pred_label_img)
+                        plt.show()'''
 
-                    print('{}_{}: iou={:.2f}'.format(city_name, tile_id, iou*100))
+                        iou_record[image_name] = iou
+                        print('{}_{}: iou={:.2f}'.format(city_name, tile_id, iou*100))
         finally:
             coord.request_stop()
             coord.join(threads)
 
     duration = time.time() - start_time
     print('duration {:.2f} minutes'.format(duration/60))
+    np.save('{}.npy'.format(model.model_name), iou_record)
+
+    iou_mean = []
+    for _, val in iou_record.items():
+        iou_mean.append(val)
+    print(np.mean(iou_mean))
 
 
 if __name__ == '__main__':
     flags = read_flag()
-    main(flags)
+    #main(flags)
+
+    file_name = 'UnetInria_fr_mean_reduced_EP-100_DS-60.0_LR-0.0001.npy'
+    iou_mean = []
+    iou = dict(np.load(file_name).tolist())
+    for _, val in iou.items():
+        iou_mean.append(val)
+    print(np.mean(iou_mean))

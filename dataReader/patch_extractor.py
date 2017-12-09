@@ -114,10 +114,10 @@ class PatchExtractorInria(object):
 
     def save_img_label(self, patch, dest_dir, city_name, tile_id, cnt, appendix=None):
         patch_img, patch_label = patch[:, :, :3], patch[:, :, -1]
-        patch_label = scipy.misc.toimage(patch_label,
-                                         high=np.max(patch_label),
-                                         low=np.min(patch_label),
-                                         mode='I')
+        '''patch_label = scipy.misc.toimage(patch_label,
+                                         high=255,
+                                         low=1,
+                                         mode='I')'''
         cnt_str = '{0:05d}'.format(cnt)
         if appendix is None:
             image_name = '{}{}_img_{}.jpg'.format(city_name, tile_id, cnt_str)
@@ -128,8 +128,8 @@ class PatchExtractorInria(object):
         file_name = os.path.join(dest_dir, self.name, image_name)
         scipy.misc.imsave(file_name, patch_img)
         file_name = os.path.join(dest_dir, self.name, label_name)
-        #scipy.misc.imsave(file_name, patch_label)
-        patch_label.save(file_name)
+        scipy.misc.imsave(file_name, patch_label)
+        #patch_label.save(file_name)
         with open(os.path.join(dest_dir, self.name, 'data_list.txt'), 'a') as file:
             file.write('{} {}\n'.format(image_name, label_name))
 

@@ -23,7 +23,7 @@ LEARNING_RATE = 1e-3
 INPUT_SIZE = 572
 EPOCHS = 100
 CKDIR = r'./models'
-MODEL_NAME = 'UnetInria_fr_mean_reduced'
+MODEL_NAME = 'UnetInria_fr_mean_reduced_appendix'
 DATA_AUG = 'filp,rotate'
 NUM_CLASS = 2
 N_TRAIN = 8000
@@ -113,7 +113,7 @@ def main(flags):
 
     # initialize model
     flags.model_name = '{}_EP-{}_DS-{}_LR-{}'.format(flags.model_name, flags.epochs, flags.decay_step, flags.learning_rate)
-    model = unet.UnetModel_Origin({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
+    model = unet.UnetModel_Height_Appendix({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
     model.make_loss('Y')
     model.make_learning_rate(flags.learning_rate,
