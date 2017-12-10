@@ -64,9 +64,11 @@ class Network(object):
                                        padding='same', name='conv_{}'.format(i + 1))
                 if bn:
                     net = tf.layers.batch_normalization(net, training=training, name='bn_{}'.format(i+1))
+                net = activation(net, name='relu_{}'.format(name, i + 1))
 
             # identity connection
             net = tf.add(input_conv, net)
+            net = activation(net, name='relu_{}'.format(name, len(n_filters) + 1))
 
             if pool is False:
                 return net
@@ -85,9 +87,11 @@ class Network(object):
                                        padding='same', name='conv_{}'.format(i + 1))
                 if bn:
                     net = tf.layers.batch_normalization(net, training=training, name='bn_{}'.format(i+1))
+                net = activation(net, name='relu_{}'.format(name, i + 1))
 
             # identity connection
             net = tf.add(input_, net)
+            net = activation(net, name='relu_{}'.format(name, len(n_filters) + 1))
 
             if pool is False:
                 return net
