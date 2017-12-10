@@ -18,7 +18,7 @@ python train_inria_resunet.py \
                 --valid-patch-appendix=valid_noaug_dcc \
                 --epochs=100 \
                 --n-train=8000 \
-                --learning-rate=1e-3 \
+                --learning-rate=1e-4 \
                 --decay-step=60 \
                 --batch-size=4 \
                 --city-name=austin,chicago,kitsap,tyrol-w,vienna \
