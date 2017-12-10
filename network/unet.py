@@ -58,7 +58,8 @@ class UnetModel(network.Network):
 
     def make_loss(self, y_name):
         with tf.variable_scope('loss'):
-            pred_flat = tf.reshape(tf.nn.softmax(self.pred), [-1, self.class_num])
+            # pred_flat = tf.reshape(tf.nn.softmax(self.pred), [-1, self.class_num])
+            pred_flat = tf.reshape(self.pred, [-1, self.class_num])
             y_flat = tf.reshape(tf.squeeze(self.inputs[y_name], axis=[3]), [-1, ])
             indices = tf.squeeze(tf.where(tf.less_equal(y_flat, self.class_num - 1)), 1)
             gt = tf.gather(y_flat, indices)
@@ -373,7 +374,7 @@ class UnetModel_Height_Appendix_Weight(UnetModel_Height_Appendix):
                 summary_writer.add_summary(valid_image_summary, self.global_step_value)
 
 
-class ResUnetModel(UnetModel_Origin):
+class ResUnetModel(UnetModel):
     def create_graph(self, x_name, class_num, start_filter_num=32):
         self.class_num = class_num
         sfn = start_filter_num
@@ -398,7 +399,7 @@ class ResUnetModel(UnetModel_Origin):
         self.pred = tf.layers.conv2d(conv9, class_num, (1, 1), name='final', activation=None, padding='same')
 
 
-class ResUnetSkipModel(UnetModel_Origin):
+class ResUnetSkipModel(UnetModel):
     def create_graph(self, x_name, class_num, start_filter_num=32):
         self.class_num = class_num
         sfn = start_filter_num
