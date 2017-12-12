@@ -15,8 +15,8 @@ RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/home/lab/Documents/bohao/data/inria'
 TRAIN_PATCH_APPENDIX = 'train_noaug_dcc'
 VALID_PATCH_APPENDIX = 'valid_noaug_dcc'
-TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(6,37)])
-VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,6)])
+TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,32)])
+VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(32,37)])
 RANDOM_SEED = 1234
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-3
@@ -113,7 +113,7 @@ def main(flags):
 
     # initialize model
     flags.model_name = '{}_EP-{}_DS-{}_LR-{}'.format(flags.model_name, flags.epochs, flags.decay_step, flags.learning_rate)
-    model = unet.UnetModel_Height_Appendix({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
+    model = unet.UnetModel_Origin({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes, start_filter_num=40)
     model.make_loss('Y')
     model.make_learning_rate(flags.learning_rate,
