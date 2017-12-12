@@ -107,7 +107,7 @@ def read_images_heights_labels_from_disk(input_queue, input_size, data_aug=''):
     return image, dsm, dtm, label
 
 
-def image_label_iterator(image_dir, batch_size, tile_dim, patch_size, overlap, padding=0, image_mean=0):
+def image_label_iterator(image_dir, batch_size, tile_dim, patch_size, overlap=0, padding=0, image_mean=0):
     # this is a iterator for test
     block = scipy.misc.imread(image_dir)
     if padding > 0:

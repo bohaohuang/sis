@@ -18,10 +18,10 @@ python train_inria_resunet.py \
                 --valid-patch-appendix=valid_noaug_dcc \
                 --epochs=100 \
                 --n-train=8000 \
-                --learning-rate=1e-3 \
+                --learning-rate=1e-4 \
                 --decay-step=60 \
-                --batch-size=4 \
+                --batch-size=10 \
                 --city-name=austin,chicago,kitsap,tyrol-w,vienna \
                 --valid-size=1000 \
                 --data-aug=flip,rotate \
-                --model=ResUnetInria_fr_resample_mean_reduced
+                --model=ResUnetShrinkInria_fr_resample_mean_reduced
