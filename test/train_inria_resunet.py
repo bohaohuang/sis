@@ -18,9 +18,9 @@ VALID_PATCH_APPENDIX = 'valid_noaug_dcc'
 TRAIN_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,37)])
 VALID_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1,6)])
 RANDOM_SEED = 1234
-BATCH_SIZE = 10
+BATCH_SIZE = 5
 LEARNING_RATE = 1e-5
-INPUT_SIZE = 224
+INPUT_SIZE = 572
 EPOCHS = 100
 CKDIR = r'./models/ResUnet'
 MODEL_NAME = 'ResUnetShrinkInria_fr_resample_mean_reduced'
@@ -112,7 +112,7 @@ def main(flags):
     # initialize model
     flags.model_name = '{}_EP-{}_DS-{}_LR-{}'.format(flags.model_name, flags.epochs, flags.decay_step,
                                                      flags.learning_rate)
-    model = unet.ResUnetModel_shrink({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
+    model = unet.ResUnetModel_Crop({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
     model.make_loss('Y')
     model.make_learning_rate(flags.learning_rate,

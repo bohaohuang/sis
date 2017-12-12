@@ -10,7 +10,7 @@ from rsrClassData import rsrClassData
 
 TRAIN_DATA_DIR = 'dcc_inria_train'
 VALID_DATA_DIR = 'dcc_inria_valid'
-CITY_NAME = 'tyrol-w'
+CITY_NAME = 'kitsap'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/home/lab/Documents/bohao/data/inria'
 TRAIN_PATCH_APPENDIX = 'train_noaug_dcc'
@@ -113,7 +113,7 @@ def main(flags):
     mode = tf.placeholder(tf.bool, name='mode')
 
     # initialize model
-    flags.model_name = '{}_EP-{}_LR-{}_CT'.format(flags.model_name, flags.epochs, flags.learning_rate, flags.city_name)
+    flags.model_name = '{}_EP-{}_LR-{}_CT_{}'.format(flags.model_name, flags.epochs, flags.learning_rate, flags.city_name)
     model = unet.UnetModel_Origin({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
     model.make_loss('Y')

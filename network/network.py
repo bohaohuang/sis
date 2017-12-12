@@ -76,6 +76,34 @@ class Network(object):
             pool = tf.layers.max_pooling2d(net, pool_size, strides=pool_stride, name='pool_{}'.format(name))
             return net, pool
 
+    def conv_conv_identity_pool_crop(self, input_, n_filters, training, name, conv_strid=(3, 3),
+                                     pool=True, pool_size=(2, 2), pool_stride=(2, 2),
+                                     activation=tf.nn.relu, padding='same', bn=True):
+        net = input_
+        _, w, h, _ = input_.get_shape().as_list()
+        with tf.variable_scope('layer{}'.format(name)):
+            input_conv = tf.layers.conv2d(net, n_filters[-1], conv_strid, activation=None,
+                                          padding='same', name='conv_skip')
+
+            for i, F in enumerate(n_filters):
+                net = tf.layers.conv2d(net, F, conv_strid, activation=None,
+                                       padding=padding, name='conv_{}'.format(i + 1))
+                if bn:
+                    net = tf.layers.batch_normalization(net, training=training, name='bn_{}'.format(i+1))
+                net = activation(net, name='relu_{}'.format(name, i + 1))
+
+            # identity connection
+            if padding == 'valid':
+                input_conv = tf.image.resize_image_with_crop_or_pad(input_conv, w-2*len(n_filters), h-2*len(n_filters))
+            net = tf.add(input_conv, net)
+            net = activation(net, name='relu_{}'.format(name, len(n_filters) + 1))
+
+            if pool is False:
+                return net
+
+            pool = tf.layers.max_pooling2d(net, pool_size, strides=pool_stride, name='pool_{}'.format(name))
+            return net, pool
+
     def conv_conv_skip_pool(self, input_, n_filters, training, name, conv_strid=(3, 3),
                                 pool=True, pool_size=(2, 2), pool_stride=(2, 2),
                                 activation=tf.nn.relu, bn=True):
