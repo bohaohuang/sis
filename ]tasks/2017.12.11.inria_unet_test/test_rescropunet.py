@@ -70,7 +70,7 @@ def test(flags, ep, ds, lr, save_dir):
     mode = tf.placeholder(tf.bool, name='mode')
 
     # initialize model
-    flags.model_name = 'ResUnetCrop Inria_fr_resample_mean_reduced_EP-{}_DS-{}.0_LR-{}'.format(ep, ds, lr)
+    flags.model_name = 'ResUnetCrop Inria_fr_resample_mean_reduced_EP-{}_DS-{}_LR-{}'.format(ep, ds, lr)
     model = unet.ResUnetModel_Crop({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
     model.make_update_ops('X', 'Y')
@@ -125,11 +125,11 @@ def test(flags, ep, ds, lr, save_dir):
                         truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
                         iou = utils.iou_metric(truth_label_img, pred_label_img*255)
 
-                        plt.subplot(121)
+                        '''plt.subplot(121)
                         plt.imshow(truth_label_img)
                         plt.subplot(122)
                         plt.imshow(pred_label_img)
-                        plt.show()
+                        plt.show()'''
 
                         iou_record[image_name] = iou
                         print('{}_{}: iou={:.2f}'.format(city_name, tile_id, iou*100))

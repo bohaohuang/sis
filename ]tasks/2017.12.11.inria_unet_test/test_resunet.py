@@ -124,11 +124,11 @@ def test(flags, ep, ds, lr, save_dir):
                         truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
                         iou = utils.iou_metric(truth_label_img, pred_label_img*255)
 
-                        plt.subplot(121)
+                        '''plt.subplot(121)
                         plt.imshow(truth_label_img)
                         plt.subplot(122)
                         plt.imshow(pred_label_img)
-                        plt.show()
+                        plt.show()'''
 
                         iou_record[image_name] = iou
                         print('{}_{}: iou={:.2f}'.format(city_name, tile_id, iou*100))
