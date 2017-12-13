@@ -13,6 +13,7 @@ from rsrClassData import rsrClassData
 
 TEST_DATA_DIR = 'dcc_inria_valid'
 CITY_NAME = 'austin,chicago,kitsap,tyrol-w,vienna'
+#CITY_NAME = 'tyrol-w'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/media/ei-edl01/user/bh163/data/iai'
 TEST_PATCH_APPENDIX = 'valid_noaug_dcc'
@@ -70,7 +71,7 @@ def test(flags, ep, ds, lr, save_dir):
 
     # initialize model
     flags.model_name = 'ResUnetInria_fr_resample_mean_reduced_EP-{}_DS-{}.0_LR-{}'.format(ep, ds, lr)
-    model = unet.ResUnetModel({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
+    model = unet.ResUnetModel_Crop({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
     model.make_update_ops('X', 'Y')
     # set ckdir
@@ -107,26 +108,28 @@ def test(flags, ep, ds, lr, save_dir):
                             batch_size=flags.batch_size,
                             tile_dim=meta_test['dim_image'][:2],
                             patch_size=flags.input_size,
-                            overlap=0, padding=0,
+                            overlap=184, padding=92,
                             image_mean=IMG_MEAN)
                         # run
                         result = model.test('X', sess, iterator_test)
 
                         pred_label_img = utils.get_output_label(result,
-                                                                meta_test['dim_image'],
+                                                                (meta_test['dim_image'][0] + 184,
+                                                                 meta_test['dim_image'][1] + 184),
                                                                 flags.input_size,
-                                                                meta_test['colormap'],
+                                                                meta_test['colormap'], overlap=184,
                                                                 output_image_dim=meta_test['dim_image'],
-                                                                output_patch_size=flags.input_size)
+                                                                output_patch_size=(flags.input_size[0]-184, flags.input_size[1]-184),
+                                                                make_map=False)
                         # evaluate
                         truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
-                        iou = utils.iou_metric(truth_label_img, pred_label_img)
+                        iou = utils.iou_metric(truth_label_img, pred_label_img*255)
 
-                        '''plt.subplot(121)
+                        plt.subplot(121)
                         plt.imshow(truth_label_img)
                         plt.subplot(122)
                         plt.imshow(pred_label_img)
-                        plt.show()'''
+                        plt.show()
 
                         iou_record[image_name] = iou
                         print('{}_{}: iou={:.2f}'.format(city_name, tile_id, iou*100))

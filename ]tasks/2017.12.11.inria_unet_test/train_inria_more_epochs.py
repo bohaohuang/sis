@@ -10,7 +10,7 @@ from rsrClassData import rsrClassData
 
 TRAIN_DATA_DIR = 'dcc_inria_train'
 VALID_DATA_DIR = 'dcc_inria_valid'
-CITY_NAME = 'kitsap'
+CITY_NAME = 'vienna'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/home/lab/Documents/bohao/data/inria'
 TRAIN_PATCH_APPENDIX = 'train_noaug_dcc'

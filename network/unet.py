@@ -399,7 +399,7 @@ class ResUnetModel(UnetModel):
         self.pred = tf.layers.conv2d(conv9, class_num, (1, 1), name='final', activation=None, padding='same')
 
 
-class ResUnetModel_Crop(UnetModel):
+class ResUnetModel_Crop(UnetModel_Origin):
     def create_graph(self, x_name, class_num, start_filter_num=32):
         self.class_num = class_num
         sfn = start_filter_num

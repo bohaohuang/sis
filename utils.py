@@ -86,15 +86,18 @@ def image_summary(image, truth, prediction, img_mean=np.array((109.629784946, 11
 
 
 def get_output_label(result, image_dim, input_size, colormap, overlap=0,
-                     output_image_dim=None, output_patch_size=None):
+                     output_image_dim=None, output_patch_size=None, make_map=True):
     if output_image_dim is not None and output_patch_size is not None:
         image_pred = patch_extractor.un_patchify_shrink(result, image_dim, output_image_dim,
                                                         input_size, output_patch_size, overlap=overlap)
     else:
         image_pred = patch_extractor.un_patchify(result, image_dim, input_size, overlap=overlap)
     labels_pred = get_pred_labels(image_pred)
-    output_pred = make_output_file(labels_pred, colormap)
-    return output_pred
+    if make_map:
+        output_pred = make_output_file(labels_pred, colormap)
+        return output_pred
+    else:
+        return labels_pred
 
 
 def iou_metric(truth, pred, truth_val=255):

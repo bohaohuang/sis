@@ -5,20 +5,21 @@ import argparse
 import numpy as np
 import tensorflow as tf
 import scipy.misc
+import matplotlib.pyplot as plt
 import utils
 from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
 
 TEST_DATA_DIR = 'dcc_inria_valid'
-CITY_NAME = 'kitsap'
+CITY_NAME = 'chicago'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/media/ei-edl01/user/bh163/data/iai'
 TEST_PATCH_APPENDIX = 'valid_noaug_dcc'
 TEST_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1, 6)])
 RANDOM_SEED = 1234
-BATCH_SIZE = 1
-INPUT_SIZE = 1724
+BATCH_SIZE = 5
+INPUT_SIZE = 572
 CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/fine_tune_city'
 MODEL_NAME = 'UnetInria_fr_mean_reduced_EP-100_DS-40.0_LR-0.001'
 NUM_CLASS = 2
@@ -120,10 +121,10 @@ def test(flags, model_name, save_dir):
                         truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
                         iou = utils.iou_metric(truth_label_img, pred_label_img)
 
-                        '''plt.subplot(121)
-                        plt.imshow(truth_label_img)
-                        plt.subplot(122)
-                        plt.imshow(pred_label_img)
+                        '''ax1 = plt.subplot(121)
+                        ax1.imshow(truth_label_img)
+                        ax2 = plt.subplot(122, sharex=ax1, sharey=ax1)
+                        ax2.imshow(pred_label_img)
                         plt.show()'''
 
                         iou_record[image_name] = iou
@@ -147,7 +148,7 @@ if __name__ == '__main__':
     flags = read_flag()
     img_dir, task_dir = utils.get_task_img_folder()
 
-    model_names = ['UnetInria_fr_mean_reduced_appendix_EP-5_LR-0.0001_CT_tyrol-w']
+    model_names = ['UnetInria_fr_mean_reduced_appendix_EP-5_LR-0.0001_CT_vienna']
 
     for model_name in model_names:
         tf.reset_default_graph()

@@ -13,17 +13,18 @@ from rsrClassData import rsrClassData
 
 TEST_DATA_DIR = 'dcc_inria_valid'
 CITY_NAME = 'austin,chicago,kitsap,tyrol-w,vienna'
+#CITY_NAME = 'tyrol-w'
 RSR_DATA_DIR = r'/media/ei-edl01/data/remote_sensing_data'
 PATCH_DIR = r'/media/ei-edl01/user/bh163/data/iai'
 TEST_PATCH_APPENDIX = 'valid_noaug_dcc'
 TEST_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1, 6)])
 RANDOM_SEED = 1234
-BATCH_SIZE = 1
-INPUT_SIZE = 1724
+BATCH_SIZE = 5
+INPUT_SIZE = 572
 CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/UnetInria_fr_mean_reduced'
 MODEL_NAME = 'UnetInria_fr_mean_reduced_EP-100_DS-40.0_LR-0.001'
 NUM_CLASS = 2
-GPU = '1'
+GPU = '0'
 IMG_MEAN = np.array((109.629784946, 114.94964751, 102.778073453), dtype=np.float32)
 
 
@@ -122,15 +123,16 @@ def test(flags, model_name, save_dir):
                                                                 flags.input_size,
                                                                 meta_test['colormap'], overlap=184,
                                                                 output_image_dim=meta_test['dim_image'],
-                                                                output_patch_size=(flags.input_size[0]-184, flags.input_size[1]-184))
+                                                                output_patch_size=(flags.input_size[0]-184, flags.input_size[1]-184),
+                                                                make_map=False)
                         # evaluate
                         truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
-                        iou = utils.iou_metric(truth_label_img, pred_label_img)
+                        iou = utils.iou_metric(truth_label_img, pred_label_img*255)
 
-                        '''plt.subplot(121)
-                        plt.imshow(truth_label_img)
-                        plt.subplot(122)
-                        plt.imshow(pred_label_img)
+                        '''ax1 = plt.subplot(121)
+                        ax1.imshow(truth_label_img)
+                        ax2 = plt.subplot(122, sharex=ax1, sharey=ax1)
+                        ax2.imshow(pred_label_img)
                         plt.show()'''
 
                         iou_record[image_name] = iou
@@ -156,12 +158,13 @@ if __name__ == '__main__':
     iou_record = []
 
     model_names = [#'UnetInria_fr_mean_reduced_appendix_EP-100_DS-60.0_LR-0.0001',
-                   'UnetInria_fr_mean_reduced_appendix_large_EP-100_DS-60.0_LR-0.0001',
+                   #'UnetInria_fr_mean_reduced_appendix_large_EP-100_DS-60.0_LR-0.0001',
                    #'UnetInria_fr_mean_reduced_EP-100_DS-40.0_LR-0.001',
                    #'UnetInria_fr_mean_reduced_EP-100_DS-60.0_LR-0.0001',
                    #'UnetInria_fr_mean_reduced_EP-100_DS-60.0_LR-0.0005',
-                   #'UnetInria_fr_mean_reduced_EP-100_DS-60_LR-0.001',
-                   'UnetInria_fr_mean_reduced_large_EP-100_DS-60.0_LR-0.0001']
+                   'UnetInria_fr_mean_reduced_EP-100_DS-60_LR-0.001',
+                   'UnetInria_fr_mean_reduced_large_EP-100_DS-60.0_LR-0.0001'
+                  ]
 
     for model_name in model_names:
         tf.reset_default_graph()

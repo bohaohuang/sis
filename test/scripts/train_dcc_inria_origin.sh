@@ -11,7 +11,7 @@ cd ../
 python train_inria_origin_unet.py \
                 --GPU=0 \
                 --train-data-dir=dcc_inria_train_all \
-                --valid-data-dir=dcc_inria_valid_all \
+                --valid-data-dir=dcc_inria_train_all \
                 --rsr-data-dir=/work/bh163/data/remote_sensing_data \
                 --patch-dir=/work/bh163/data/iai \
                 --train-patch-appendix=train_noaug_dcc2 \
@@ -24,4 +24,4 @@ python train_inria_origin_unet.py \
                 --city-name=austin,chicago,kitsap,tyrol-w,vienna \
                 --valid-size=1000 \
                 --data-aug=flip,rotate \
-                --model=UnetInria_fr_mean_reduced2
+                --model=UnetInria_fr_mean_reduced_appendix_large
