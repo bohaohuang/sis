@@ -20,7 +20,7 @@ TEST_PATCH_APPENDIX = 'valid_noaug_dcc'
 TEST_TILE_NAMES = ','.join(['{}'.format(i) for i in range(1, 6)])
 RANDOM_SEED = 1234
 BATCH_SIZE = 1
-INPUT_SIZE = 224
+INPUT_SIZE = 572
 CKDIR = r'/home/lab/Documents/bohao/code/sis/test/models/ResUnet'
 MODEL_NAME = 'ResSkipUnetInria_fr_resample_mean_reduced_EP-{}_DS-{}_LR-{}'
 NUM_CLASS = 2
@@ -70,8 +70,8 @@ def test(flags, ep, ds, lr, save_dir):
     mode = tf.placeholder(tf.bool, name='mode')
 
     # initialize model
-    flags.model_name = 'ResUnetShrinkInria_fr_resample_mean_reduced_EP-{}_DS-{}.0_LR-{}'.format(ep, ds, lr)
-    model = unet.ResUnetModel_shrink({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
+    flags.model_name = 'ResUnetCrop Inria_fr_resample_mean_reduced_EP-{}_DS-{}.0_LR-{}'.format(ep, ds, lr)
+    model = unet.ResUnetModel_Crop({'X':X, 'Y':y}, trainable=mode, model_name=flags.model_name, input_size=flags.input_size)
     model.create_graph('X', flags.num_classes)
     model.make_update_ops('X', 'Y')
     # set ckdir
@@ -108,17 +108,18 @@ def test(flags, ep, ds, lr, save_dir):
                             batch_size=flags.batch_size,
                             tile_dim=meta_test['dim_image'][:2],
                             patch_size=flags.input_size,
-                            overlap=0, padding=0,
+                            overlap=184, padding=92,
                             image_mean=IMG_MEAN)
                         # run
                         result = model.test('X', sess, iterator_test)
 
                         pred_label_img = utils.get_output_label(result,
-                                                                meta_test['dim_image'],
+                                                                (meta_test['dim_image'][0] + 184,
+                                                                 meta_test['dim_image'][1] + 184),
                                                                 flags.input_size,
-                                                                meta_test['colormap'], overlap=0,
+                                                                meta_test['colormap'], overlap=184,
                                                                 output_image_dim=meta_test['dim_image'],
-                                                                output_patch_size=flags.input_size,
+                                                                output_patch_size=(flags.input_size[0]-184, flags.input_size[1]-184),
                                                                 make_map=False)
                         # evaluate
                         truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
@@ -152,7 +153,7 @@ if __name__ == '__main__':
     img_dir, task_dir = utils.get_task_img_folder()
     iou_record = []
 
-    for lr in [1e-3, 1e-4]:
+    for lr in [1e-4]:
         ds = 60
         tf.reset_default_graph()
         iou_mean = test(flags, 100, ds, lr, task_dir)
