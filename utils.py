@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import tensorflow as tf
 import matplotlib.pyplot as plt
 from dataReader import patch_extractor
 
@@ -86,13 +87,16 @@ def image_summary(image, truth, prediction, img_mean=np.array((109.629784946, 11
 
 
 def get_output_label(result, image_dim, input_size, colormap, overlap=0,
-                     output_image_dim=None, output_patch_size=None, make_map=True):
+                     output_image_dim=None, output_patch_size=None, make_map=True, soft_pred=False):
     if output_image_dim is not None and output_patch_size is not None:
         image_pred = patch_extractor.un_patchify_shrink(result, image_dim, output_image_dim,
                                                         input_size, output_patch_size, overlap=overlap)
     else:
         image_pred = patch_extractor.un_patchify(result, image_dim, input_size, overlap=overlap)
-    labels_pred = get_pred_labels(image_pred)
+    if soft_pred:
+        labels_pred = image_pred
+    else:
+        labels_pred = get_pred_labels(image_pred)
     if make_map:
         output_pred = make_output_file(labels_pred, colormap)
         return output_pred
@@ -122,17 +126,24 @@ def make_task_img_folder(parent_dir):
     return os.path.join(parent_dir, task_fold_name)
 
 
-def get_task_img_folder():
-    IMG_DIR = r'/media/ei-edl01/user/bh163/figs'
-    TASK_DIR = r'/media/ei-edl01/user/bh163/tasks'
+def get_task_img_folder(local_dir=False):
+    if local_dir:
+        IMG_DIR = r'/home/lab/Documents/bohao/research/figs'
+        TASK_DIR = r'/home/lab/Documents/bohao/research/tasks'
+    else:
+        IMG_DIR = r'/media/ei-edl01/user/bh163/figs'
+        TASK_DIR = r'/media/ei-edl01/user/bh163/tasks'
+
     return make_task_img_folder(IMG_DIR), make_task_img_folder(TASK_DIR)
 
 
-def barplot_autolabel(ax, rects, margin=0.05):
+def barplot_autolabel(ax, rects, margin=None):
+    if margin is None:
+        margin = (ax.get_ylim()[1] - ax.get_ylim()[0])/20/ax.get_ylim()[1]
     for rect in rects:
         height = rect.get_height()
         ax.text(rect.get_x()+rect.get_width()/2, (1+margin)*height,
-                '{:.3f}'.format(height), ha='center', va='bottom')
+                '{:.2f}'.format(height), ha='center', va='bottom')
 
 
 def test_unet(rsr_data_dir,

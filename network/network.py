@@ -84,6 +84,7 @@ class Network(object):
         with tf.variable_scope('layer{}'.format(name)):
             input_conv = tf.layers.conv2d(net, n_filters[-1], conv_strid, activation=None,
                                           padding='same', name='conv_skip')
+            input_conv = tf.layers.batch_normalization(input_conv, training=training, name='bn_skip')
 
             for i, F in enumerate(n_filters):
                 net = tf.layers.conv2d(net, F, conv_strid, activation=None,

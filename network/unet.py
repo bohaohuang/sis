@@ -108,18 +108,6 @@ class UnetModel(network.Network):
                     print('Epoch {:d} step {:d}\tcross entropy = {:.3f}'.
                           format(epoch, self.global_step_value, step_cross_entropy))
             # validation
-            '''if valid_iterator is not None:
-                X_batch_val, y_batch_val = next(valid_iterator)
-            else:
-                X_batch_val, y_batch_val = sess.run(valid_reader)
-            pred_valid, cross_entropy_valid = sess.run([self.pred, self.loss],
-                                                       feed_dict={self.inputs[x_name]: X_batch_val,
-                                                                  self.inputs[y_name]: y_batch_val,
-                                                                  self.trainable: False})
-            print('Validation cross entropy: {:.3f}'.format(cross_entropy_valid))
-            valid_cross_entropy_summary = sess.run(valid_cross_entropy_summary_op,
-                                                   feed_dict={self.valid_cross_entropy: cross_entropy_valid})
-            summary_writer.add_summary(valid_cross_entropy_summary, self.global_step_value)'''
             cross_entropy_valid_mean = []
             for step in range(0, n_valid, batch_size):
                 if valid_iterator is not None:
@@ -148,11 +136,15 @@ class UnetModel(network.Network):
                 saver.save(sess, '{}/model_{}.ckpt'.format(self.ckdir, epoch), global_step=self.global_step)
 
 
-    def test(self, x_name, sess, test_iterator):
+    def test(self, x_name, sess, test_iterator, soft_pred=False):
         result = []
         for X_batch in test_iterator:
-            pred = sess.run(self.pred, feed_dict={self.inputs[x_name]:X_batch,
-                                                  self.trainable: False})
+            if soft_pred:
+                pred = sess.run(tf.nn.softmax(self.pred), feed_dict={self.inputs[x_name]:X_batch,
+                                                                     self.trainable: False})
+            else:
+                pred = sess.run(self.pred, feed_dict={self.inputs[x_name]:X_batch,
+                                                      self.trainable: False})
             result.append(pred)
         result = np.vstack(result)
         return result

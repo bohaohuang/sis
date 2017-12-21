@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     sorted_iou_record = sorted(iou_record.items(), key=operator.itemgetter(1), reverse=True)
     txt_file = os.path.join(task_dir, 'exp_record.txt')
-    with open(txt_file, 'a') as file:
+    with open(txt_file, 'w') as file:
         for item in sorted_iou_record:
             str2write = '{}: {}\n'.format(item[0], item[1])
             print(str2write.strip())
