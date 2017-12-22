@@ -12,7 +12,6 @@ import os
 import time
 import numpy as np
 import tensorflow as tf
-import uabDataReader
 import uabRepoPaths
 import uabCrossValMaker
 import bohaoCustom.uabPreprocClasses as bPreproc
@@ -20,6 +19,7 @@ import uabPreprocClasses
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet
+from bohaoCustom import uabDataReader
 
 # experiment settings
 chip_size = (572, 572)
@@ -32,8 +32,8 @@ epochs=100                      # total number of epochs to rum
 start_filter_num=32             # the number of filters at the first layer
 n_train = 8000                  # number of samples per epoch
 n_valid = 1000                  # number of samples every validation step
-model_name = 'inria_aug_random_1' # a suffix for model name
-GPU = 1                         # which gpu to use
+model_name = 'inria_aug_incity' # a suffix for model name
+GPU = 0                         # which gpu to use
 
 # make network
 # define place holder
@@ -63,13 +63,13 @@ img_mean = blCol.getChannelMeans([0, 1, 2])         # get mean of rgb info
 print(blCol.readMetadata())                         # now inria collection has 4 channels, the last one is GT with (0, 1)
 
 # extract patches
-extrObj = uab_DataHandlerFunctions.uabPatchExtrRand([0, 1, 2, 4], # extract all 4 channels
-                                                    cSize=chip_size,  # patch size as 572*572
-                                                    numPerTile=121,   # 121 images per tile
-                                                    extSave=['jpg', 'jpg', 'jpg', 'png'], # save rgb files as jpg and gt as png
-                                                    isTrain=True,
-                                                    gtInd=3,
-                                                    pad=model.get_overlap()) # pad around the tiles
+extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 4], # extract all 4 channels
+                                                cSize=chip_size, # patch size as 572*572
+                                                numPixOverlap=int(model.get_overlap()/2),  # overlap as 92
+                                                extSave=['jpg', 'jpg', 'jpg', 'png'], # save rgb files as jpg and gt as png
+                                                isTrain=True,
+                                                gtInd=3,
+                                                pad=model.get_overlap()) # pad around the tiles
 patchDir = extrObj.run(blCol)
 
 # make data reader
@@ -80,13 +80,14 @@ idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'for
 file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(6, 37)])
 file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 6)])
 
-with tf.name_scope('image_loader'):
-    # GT has no mean to subtract, append a 0 for block mean
-    dataReader_train = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, chip_size, tile_size,
-                                                      batch_size, dataAug='flip,rotate', block_mean=np.append([0], img_mean))
-    # no augmentation needed for validation
-    dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, chip_size, tile_size,
-                                                      batch_size, dataAug='', block_mean=np.append([0], img_mean))
+
+dataReader_train = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, chip_size,
+                                                  batch_size, dataAug='flip,rotate', block_mean=np.append([0], img_mean),
+                                                  batch_code=1)
+# no augmentation needed for validation
+dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, chip_size,
+                                                  batch_size, dataAug=' ', block_mean=np.append([0], img_mean),
+                                                  batch_code=1)
 
 # train
 start_time = time.time()

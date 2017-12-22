@@ -8,21 +8,18 @@ from bohaoCustom import uabMakeNetwork_UNet
 gpu = 1
 batch_size = 5
 input_size = [572, 572]
-tile_size = [5000, 5000]
-model_dir = r'/hdd/Models/UnetCrop_inria_aug_grid_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
-blCol = uab_collectionFunctions.uabCollection('inria')
+tile_size = [2048, 2048]
+model_dir = r'/hdd/Models/UnetCrop_um_aug_grid_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
+blCol = uab_collectionFunctions.uabCollection('um')
 blCol.readMetadata()
 file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
 file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(4)
 idx, file_list = uabCrossValMaker.uabUtilGetFolds(None, file_list, 'force_tile')
 idx_truth, file_list_truth = uabCrossValMaker.uabUtilGetFolds(None, file_list_truth, 'force_tile')
 # use first 5 tiles for validation
-file_list_valid = uabCrossValMaker.make_file_list_by_key(
-    idx, file_list, [i for i in range(0, 6)],
-    filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
+file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 16)])
 file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(
-    idx_truth, file_list_truth, [i for i in range(0, 6)],
-    filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
+    idx_truth, file_list_truth, [i for i in range(0, 16)])
 img_mean = blCol.getChannelMeans([0, 1, 2])
 
 # make the model
