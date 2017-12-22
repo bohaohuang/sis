@@ -21,6 +21,8 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet
 
+RunId = 0
+
 # experiment settings
 chip_size = (572, 572)
 tile_size = (5000, 5000)
@@ -32,8 +34,8 @@ epochs=100                      # total number of epochs to rum
 start_filter_num=32             # the number of filters at the first layer
 n_train = 8000                  # number of samples per epoch
 n_valid = 1000                  # number of samples every validation step
-model_name = 'inria_aug_grid_1'   # a suffix for model name
-GPU = 1                         # which gpu to use
+model_name = 'inria_aug_grid_{}'.format(RunId)   # a suffix for model name
+GPU = 0                         # which gpu to use
 
 # make network
 # define place holder

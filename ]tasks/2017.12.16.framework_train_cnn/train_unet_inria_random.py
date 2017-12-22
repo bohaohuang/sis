@@ -21,6 +21,8 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet
 
+RunId = 0
+
 # experiment settings
 chip_size = (572, 572)
 tile_size = (5000, 5000)
@@ -32,7 +34,7 @@ epochs=100                      # total number of epochs to rum
 start_filter_num=32             # the number of filters at the first layer
 n_train = 8000                  # number of samples per epoch
 n_valid = 1000                  # number of samples every validation step
-model_name = 'inria_aug_random_1' # a suffix for model name
+model_name = 'inria_aug_random_{}'.format(RunId) # a suffix for model name
 GPU = 1                         # which gpu to use
 
 # make network
@@ -69,7 +71,8 @@ extrObj = uab_DataHandlerFunctions.uabPatchExtrRand([0, 1, 2, 4], # extract all 
                                                     extSave=['jpg', 'jpg', 'jpg', 'png'], # save rgb files as jpg and gt as png
                                                     isTrain=True,
                                                     gtInd=3,
-                                                    pad=model.get_overlap()) # pad around the tiles
+                                                    pad=model.get_overlap(),
+                                                    name='Rand{}'.format(RunId)) # pad around the tiles
 patchDir = extrObj.run(blCol)
 
 # make data reader
