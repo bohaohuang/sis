@@ -32,8 +32,8 @@ epochs=100                      # total number of epochs to rum
 start_filter_num=32             # the number of filters at the first layer
 n_train = 8000                  # number of samples per epoch
 n_valid = 1000                  # number of samples every validation step
-model_name = 'inria_aug_incity' # a suffix for model name
-GPU = 0                         # which gpu to use
+model_name = 'inria_aug_incity_2' # a suffix for model name
+GPU = 1                         # which gpu to use
 
 # make network
 # define place holder
@@ -87,7 +87,7 @@ dataReader_train = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file
 # no augmentation needed for validation
 dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, chip_size,
                                                   batch_size, dataAug=' ', block_mean=np.append([0], img_mean),
-                                                  batch_code=1)
+                                                  batch_code=2)
 
 # train
 start_time = time.time()

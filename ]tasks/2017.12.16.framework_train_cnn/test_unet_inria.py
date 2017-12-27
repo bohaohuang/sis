@@ -5,11 +5,16 @@ import uab_collectionFunctions
 from bohaoCustom import uabMakeNetwork_UNet
 
 # settings
-gpu = 1
+gpu = 0
 batch_size = 5
 input_size = [572, 572]
 tile_size = [5000, 5000]
-model_dir = r'/hdd/Models/UnetCrop_inria_aug_grid_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
+
+
+#for runId in range(2, 6):
+#    tf.reset_default_graph()
+
+model_dir = r'/hdd/Models/exp1/UnetCrop_inria_aug_random_{}_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.format(runId)
 blCol = uab_collectionFunctions.uabCollection('inria')
 blCol.readMetadata()
 file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])

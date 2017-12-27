@@ -24,9 +24,9 @@ from bohaoCustom import uabMakeNetwork_UNet
 RunId = 0
 
 # experiment settings
-chip_size = (572, 572)
+chip_size = (1052, 1052)
 tile_size = (5000, 5000)
-batch_size = 5                  # mini-batch size
+batch_size = 1                  # mini-batch size
 learn_rate = 1e-4               # learning rate
 decay_step = 60                 # learn rate dacay after 60 epochs
 decay_rate=0.1                  # learn rate decay to 0.1*before
@@ -35,7 +35,7 @@ start_filter_num=32             # the number of filters at the first layer
 n_train = 8000                  # number of samples per epoch
 n_valid = 1000                  # number of samples every validation step
 model_name = 'inria_aug_grid_{}'.format(RunId)   # a suffix for model name
-GPU = 0                         # which gpu to use
+GPU = 1                         # which gpu to use
 
 # make network
 # define place holder
