@@ -1,20 +1,26 @@
-import numpy as np
+import os
+import time
 import tensorflow as tf
+import numpy as np
 import uabCrossValMaker
 import uab_collectionFunctions
+import utils
 from bohaoCustom import uabMakeNetwork_UNet
 
 # settings
 gpu = 0
-batch_size = 5
-input_size = [572, 572]
+batch_size = 1
+input_sizes = [1052]#[508, 540, 572, 620, 684, 796, 1052]
 tile_size = [5000, 5000]
+img_dir, task_dir = utils.get_task_img_folder()
 
+for cnt, size in enumerate(input_sizes):
+    start_time = time.time()
 
-for runId in [5]:
     tf.reset_default_graph()
+    input_size = [size, size]
 
-    model_dir = r'/hdd/Models/exp3/UnetCrop_inria_aug_incity_{}_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.format(runId)
+    model_dir = r'/hdd/Models/exp2/UnetCrop_inria_aug_grid_1_PS({}, {})_BS{}_EP100_LR0.0001_DS60_DR0.1_SFN32'.format(size, size, 1)
     blCol = uab_collectionFunctions.uabCollection('inria')
     blCol.readMetadata()
     file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
@@ -43,5 +49,9 @@ for runId in [5]:
     model.create_graph('X', class_num=2)
 
     # evaluate on tiles
-    model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
-                   input_size, tile_size, batch_size, img_mean, model_dir, gpu)
+    iou_return = model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
+                                input_size, tile_size, batch_size, img_mean, model_dir, gpu, save_result=True)
+    duration = time.time() - start_time
+
+    iou_return['time']  = duration
+    np.save(os.path.join(task_dir, '{}_exp2.npy'.format(size)), iou_return)

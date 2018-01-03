@@ -12,6 +12,7 @@ import os
 import time
 import numpy as np
 import tensorflow as tf
+import uabDataReader
 import uabRepoPaths
 import uabCrossValMaker
 import bohaoCustom.uabPreprocClasses as bPreproc
@@ -19,12 +20,13 @@ import uabPreprocClasses
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet
-from bohaoCustom import uabDataReader
+
+RunId = 0
 
 # experiment settings
-chip_size = (572, 572)
+chip_size = (224, 224)
 tile_size = (5000, 5000)
-batch_size = 5                  # mini-batch size
+batch_size = 10                 # mini-batch size
 learn_rate = 1e-4               # learning rate
 decay_step = 60                 # learn rate dacay after 60 epochs
 decay_rate=0.1                  # learn rate decay to 0.1*before
@@ -32,24 +34,24 @@ epochs=100                      # total number of epochs to rum
 start_filter_num=32             # the number of filters at the first layer
 n_train = 8000                  # number of samples per epoch
 n_valid = 1000                  # number of samples every validation step
-model_name = 'inria_aug_xcity_5' # a suffix for model name
-GPU = 0                         # which gpu to use
+model_name = 'inria_aug_grid_{}'.format(RunId)   # a suffix for model name
+GPU = 1                         # which gpu to use
 
 # make network
 # define place holder
 X = tf.placeholder(tf.float32, shape=[None, chip_size[0], chip_size[1], 3], name='X')
 y = tf.placeholder(tf.int32, shape=[None, chip_size[0], chip_size[1], 1], name='y')
 mode = tf.placeholder(tf.bool, name='mode')
-model = uabMakeNetwork_UNet.UnetModelCrop({'X':X, 'Y':y},
-                                          trainable=mode,
-                                          model_name=model_name,
-                                          input_size=chip_size,
-                                          batch_size=batch_size,
-                                          learn_rate=learn_rate,
-                                          decay_step=decay_step,
-                                          decay_rate=decay_rate,
-                                          epochs=epochs,
-                                          start_filter_num=start_filter_num)
+model = uabMakeNetwork_UNet.UnetModel({'X':X, 'Y':y},
+                                      trainable=mode,
+                                      model_name=model_name,
+                                      input_size=chip_size,
+                                      batch_size=batch_size,
+                                      learn_rate=learn_rate,
+                                      decay_step=decay_step,
+                                      decay_rate=decay_rate,
+                                      epochs=epochs,
+                                      start_filter_num=start_filter_num)
 model.create_graph('X', class_num=2)
 
 # create collection
@@ -80,14 +82,13 @@ idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'for
 file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(6, 37)])
 file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 6)])
 
-
-dataReader_train = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, chip_size,
-                                                  batch_size, dataAug='flip,rotate', block_mean=np.append([0], img_mean),
-                                                  batch_code=2)
-# no augmentation needed for validation
-dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, chip_size,
-                                                  batch_size, dataAug='', block_mean=np.append([0], img_mean),
-                                                  batch_code=2)
+with tf.name_scope('image_loader'):
+    # GT has no mean to subtract, append a 0 for block mean
+    dataReader_train = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, chip_size, tile_size,
+                                                      batch_size, dataAug='flip,rotate', block_mean=np.append([0], img_mean))
+    # no augmentation needed for validation
+    dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, chip_size, tile_size,
+                                                      batch_size, dataAug=' ', block_mean=np.append([0], img_mean))
 
 # train
 start_time = time.time()

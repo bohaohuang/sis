@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import uabRepoPaths
 import utils
@@ -30,7 +31,8 @@ for cnt_1, run_id in enumerate(run_ids):
         mean_iou /= (len(results)-2)
         result_all[cnt_2, cnt_1] = mean_iou
 
-plt.figure(figsize=(10, 4))
+matplotlib.rcParams.update({'font.size': 18})
+plt.figure(figsize=(11, 8))
 
 plt.subplot(121)
 bp = plt.boxplot(np.transpose(result_all))
@@ -52,11 +54,11 @@ bp2 = plt.boxplot(np.transpose(city_res[1, :, :]), positions=positions+width, wi
 plt.setp(bp1['boxes'], color='red')
 plt.setp(bp2['boxes'], color='green')
 plt.title('City-wise IoU Comparison')
-plt.xticks(positions, ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna'])
+plt.xticks(positions, ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna'], rotation=-12)
 plt.xlabel('City Name')
 plt.ylabel('IoU')
 
-#img_dir, task_dir = utils.get_task_img_folder()
-#plt.savefig(os.path.join(img_dir, 'exp1_cmp.png'))
+img_dir, task_dir = utils.get_task_img_folder()
+plt.savefig(os.path.join(img_dir, 'exp1_cmp.png'))
 
 plt.show()

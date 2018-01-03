@@ -109,14 +109,10 @@ venv.bak/
 
 # repo folders
 ]data*
-]old*
 models*
 temp.py
 *.npy
+/test/MNIST_data/
 
 # temp files
 *~
-
-# search api credentials
-credential.txt
-/test/MNIST_data/

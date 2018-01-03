@@ -8,9 +8,10 @@ import utils
 from bohaoCustom import uabMakeNetwork_UNet
 
 # settings
-gpu = 0
+gpu = 1
 batch_size = 1
-input_sizes = [828, 1084, 1340, 1596, 572, 1852, 2108, 2364, 2620]
+#input_sizes = [828, 1084, 1340, 1596, 572, 1852, 2108, 2364, 2620]
+input_sizes = [2092, 2332, 2636]
 tile_size = [5000, 5000]
 img_dir, task_dir = utils.get_task_img_folder()
 

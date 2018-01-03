@@ -10,7 +10,8 @@ from bohaoCustom import uabMakeNetwork_ResFCN
 # settings
 gpu = 0
 batch_size = 1
-input_sizes = [224, 480, 736, 992, 1248, 1504, 1760, 2016, 2272, 2528]
+#input_sizes = [224, 480, 736, 992, 1248, 1504, 1760, 2016, 2272, 2528]
+input_sizes = [1504, 1760, 2016, 2272, 2528]
 tile_size = [5000, 5000]
 img_dir, task_dir = utils.get_task_img_folder()
 
@@ -44,7 +45,8 @@ for size in input_sizes:
     model = uabMakeNetwork_ResFCN.ResFcnModel({'X':X, 'Y':y},
                                               trainable=mode,
                                               input_size=input_size,
-                                              batch_size=5)
+                                              batch_size=5,
+                                              start_filter_num=32)
     # create graph
     model.create_graph('X', class_num=2)
 
