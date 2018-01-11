@@ -8,11 +8,13 @@ import utils
 from bohaoCustom import uabMakeNetwork_UNet
 
 # settings
-gpu = 0
+gpu = 1
 batch_size = 1
-input_sizes = [1052]#[508, 540, 572, 620, 684, 796, 1052]
+input_sizes = [540]#[508, 540, 572, 620, 684, 796, 1052]
+batch_sizes = [8]
 tile_size = [5000, 5000]
 img_dir, task_dir = utils.get_task_img_folder()
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 for cnt, size in enumerate(input_sizes):
     start_time = time.time()
@@ -20,7 +22,8 @@ for cnt, size in enumerate(input_sizes):
     tf.reset_default_graph()
     input_size = [size, size]
 
-    model_dir = r'/hdd/Models/exp2/UnetCrop_inria_aug_grid_1_PS({}, {})_BS{}_EP100_LR0.0001_DS60_DR0.1_SFN32'.format(size, size, 1)
+    model_dir = r'/hdd/Models/exp2/UnetMoreCrop_inria_aug_grid_2_PS({}, {})_BS{}_EP100_LR0.0001_DS60_DR0.1_SFN32'.\
+        format(size, size, batch_sizes[cnt])
     blCol = uab_collectionFunctions.uabCollection('inria')
     blCol.readMetadata()
     file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
@@ -41,7 +44,7 @@ for cnt, size in enumerate(input_sizes):
     X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_UNet.UnetModelCrop({'X':X, 'Y':y},
+    model = uabMakeNetwork_UNet.UnetModelMoreCrop({'X':X, 'Y':y},
                                               trainable=mode,
                                               input_size=input_size,
                                               batch_size=5)
@@ -54,4 +57,4 @@ for cnt, size in enumerate(input_sizes):
     duration = time.time() - start_time
 
     iou_return['time']  = duration
-    np.save(os.path.join(task_dir, '{}_exp2.npy'.format(size)), iou_return)
+    np.save(os.path.join(task_dir, '{}_exp2_more.npy'.format(size)), iou_return)

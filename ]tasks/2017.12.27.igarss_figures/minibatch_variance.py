@@ -53,9 +53,9 @@ grid_val = []
 incity_val = []
 xcity_val = []
 fields = ['Value']
-run_type = ['Patches from the same tile (IoU=55.73)',
+run_type = ['Low Diversity (IoU=55.73)',
             'Baseline (IoU=72.20)',
-            'Patches from different cities (IoU=73.23)']
+            'High Diversity (IoU=73.23)']
 
 for i in range(5):
     grid_filename = grid.format(i+1)

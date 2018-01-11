@@ -21,12 +21,12 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet
 
-RunId = 0
+RunId = 2
 
 # experiment settings
-chip_size = (620, 620)
+chip_size = (572, 572)
 tile_size = (5000, 5000)
-batch_size = 5                  # mini-batch size
+batch_size = 6                  # mini-batch size
 learn_rate = 1e-4               # learning rate
 decay_step = 60                 # learn rate dacay after 60 epochs
 decay_rate = 0.1                # learn rate decay to 0.1*before

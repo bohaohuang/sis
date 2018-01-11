@@ -15,18 +15,14 @@ import tensorflow as tf
 import uabDataReader
 import uabRepoPaths
 import uabCrossValMaker
-import bohaoCustom.uabPreprocClasses as bPreproc
-import uabPreprocClasses
-import uab_collectionFunctions
-import uab_DataHandlerFunctions
-from bohaoCustom import uabMakeNetwork_UNet
+from bohaoCustom import uabMakeNetwork_FRRN
 
 RunId = 0
 
 # experiment settings
-chip_size = (476, 476)
+chip_size = (224, 224)
 tile_size = (5000, 5000)
-batch_size = 9                  # mini-batch size
+batch_size = 5                  # mini-batch size
 learn_rate = 1e-4               # learning rate
 decay_step = 60                 # learn rate dacay after 60 epochs
 decay_rate=0.1                  # learn rate decay to 0.1*before
@@ -42,37 +38,22 @@ GPU = 1                         # which gpu to use
 X = tf.placeholder(tf.float32, shape=[None, chip_size[0], chip_size[1], 3], name='X')
 y = tf.placeholder(tf.int32, shape=[None, chip_size[0], chip_size[1], 1], name='y')
 mode = tf.placeholder(tf.bool, name='mode')
-model = uabMakeNetwork_UNet.UnetModelCrop({'X':X, 'Y':y},
-                                          trainable=mode,
-                                          model_name=model_name,
-                                          input_size=chip_size,
-                                          batch_size=batch_size,
-                                          learn_rate=learn_rate,
-                                          decay_step=decay_step,
-                                          decay_rate=decay_rate,
-                                          epochs=epochs,
-                                          start_filter_num=start_filter_num)
+model = uabMakeNetwork_FRRN.FRRN({'X':X, 'Y':y},
+                                 trainable=mode,
+                                 model_name=model_name,
+                                 input_size=chip_size,
+                                 batch_size=batch_size,
+                                 learn_rate=learn_rate,
+                                 decay_step=decay_step,
+                                 decay_rate=decay_rate,
+                                 epochs=epochs,
+                                 start_filter_num=start_filter_num)
 model.create_graph('X', class_num=2)
 
-# create collection
-# the original file is in /ei-edl01/data/uab_datasets/inria
-blCol = uab_collectionFunctions.uabCollection('inria')
-opDetObj = bPreproc.uabOperTileDivide(255)          # inria GT has value 0 and 255, we map it back to 0 and 1
-# [3] is the channel id of GT
-rescObj = uabPreprocClasses.uabPreprocMultChanOp([], 'GT_Divide.tif', 'Map GT to (0, 1)', [3], opDetObj)
-rescObj.run(blCol)
-img_mean = blCol.getChannelMeans([0, 1, 2])         # get mean of rgb info
-print(blCol.readMetadata())                         # now inria collection has 4 channels, the last one is GT with (0, 1)
-
-# extract patches
-extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 4], # extract all 4 channels
-                                                cSize=chip_size, # patch size as 572*572
-                                                numPixOverlap=int(model.get_overlap()/2),  # overlap as 92
-                                                extSave=['jpg', 'jpg', 'jpg', 'png'], # save rgb files as jpg and gt as png
-                                                isTrain=True,
-                                                gtInd=3,
-                                                pad=model.get_overlap()) # pad around the tiles
-patchDir = extrObj.run(blCol)
+# prepare data
+img_mean = np.array([109.54834218, 114.86824715, 102.69644417])
+patchDir_name = 'chipExtrReg_cSz{}x{}_pad{}'.format(chip_size[0], chip_size[1], model.get_overlap())
+patchDir = os.path.join(uabRepoPaths.resPath, 'PatchExtr', 'inria', patchDir_name)
 
 # make data reader
 chipFiles = os.path.join(patchDir, 'fileList.txt')

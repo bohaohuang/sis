@@ -13,7 +13,8 @@ def get_patch_effect(res_dir, file_dir, input_sizes, model_name, appendix='.npy'
         data = dict(np.load(os.path.join(res_dir, file_name)).tolist())
         iou = []
         for item in data.keys():
-            if item != 'kitsap4' and item != 'time':
+            #if item != 'kitsap4' and item != 'time':
+            if item != 'time':
                 iou.append(data[item]*100)
             elif item == 'time':
                 time_record_all[cnt_1] = data[item]
