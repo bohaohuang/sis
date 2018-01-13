@@ -1,5 +1,6 @@
 import os
 import imageio
+import scipy.signal
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -62,7 +63,9 @@ plt.subplot(121)
 sizes = [572, 828, 1084, 1340, 1596, 1852, 2092, 2332, 2636]
 for size in sizes: #[572, 828, 1084, 1340, 1596, 1852, 2092, 2332, 2636]:
     crop_dist, crop_error = get_error_vs_dist('UnetCrop{}'.format(size), size)
-    plt.plot(np.array(crop_dist), exponential_smoothing(np.array(crop_error)), label='{}:{}'.format(size, np.sum(crop_error)))
+    #plt.plot(np.array(crop_dist), exponential_smoothing(np.array(crop_error)), label='{}:{}'.format(size, np.sum(crop_error)))
+    plt.plot(np.array(crop_dist), scipy.signal.medfilt(np.array(crop_error), [9]),
+             label='{}:{:.3f}'.format(size, np.sum(crop_error)))
     error_cnt.append(np.sum(crop_error))
 plt.xlabel('Horizontal Dist to Center')
 plt.ylabel('%Errors')
