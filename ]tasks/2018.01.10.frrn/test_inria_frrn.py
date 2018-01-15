@@ -4,7 +4,7 @@ import uab_collectionFunctions
 from bohaoCustom import uabMakeNetwork_FRRN
 
 # settings
-gpu = None
+gpu = 0
 batch_size = 1
 input_size = [1792, 1792]
 tile_size = [5000, 5000]
@@ -13,7 +13,7 @@ tile_size = [5000, 5000]
 for runId in [0]:
     tf.reset_default_graph()
 
-    model_dir = r'/hdd/Models/FRRN_inria_aug_grid_{}_PS(224, 224)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.format(runId)
+    model_dir = r'/hdd/Models/FRRN/FRRN_inria_aug_grid_{}_PS(224, 224)_BS5_EP100_LR0.001_DS60_DR0.1_SFN32'.format(runId)
     blCol = uab_collectionFunctions.uabCollection('inria')
     blCol.readMetadata()
     file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
