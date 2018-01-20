@@ -11,19 +11,19 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_FRRN
 
-RUN_ID = 0
-BATCH_SIZE = 1
+RUN_ID = 1
+BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
-INPUT_SIZE = 496
+INPUT_SIZE = 224
 TILE_SIZE = 5000
 EPOCHS = 100
 NUM_CLASS = 2
-N_TRAIN = 1600
-N_VALID = 200
+N_TRAIN = 8000
+N_VALID = 1000
 GPU = None
 DECAY_STEP = 60
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_aug_psbs_{}'
+MODEL_NAME = 'um_aug_grid_{}'
 SFN = 32
 
 
@@ -71,7 +71,7 @@ def main(flags):
 
     # create collection
     # the original file is in /ei-edl01/data/uab_datasets/inria
-    blCol = uab_collectionFunctions.uabCollection('inria')
+    blCol = uab_collectionFunctions.uabCollection('um')
     opDetObj = bPreproc.uabOperTileDivide(255)          # inria GT has value 0 and 255, we map it back to 0 and 1
     # [3] is the channel id of GT
     rescObj = uabPreprocClasses.uabPreprocMultChanOp([], 'GT_Divide.tif', 'Map GT to (0, 1)', [3], opDetObj)
