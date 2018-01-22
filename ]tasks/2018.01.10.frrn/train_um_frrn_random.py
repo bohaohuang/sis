@@ -20,10 +20,10 @@ EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = 0
+GPU = 1
 DECAY_STEP = 60
 DECAY_RATE = 0.1
-MODEL_NAME = 'um_aug_grid_{}'
+MODEL_NAME = 'um_aug_random_{}'
 SFN = 32
 
 
@@ -79,13 +79,14 @@ def main(flags):
     img_mean = blCol.getChannelMeans([0, 1, 2])         # get mean of rgb info
 
     # extract patches
-    extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 4], # extract all 4 channels
-                                                    cSize=flags.input_size, # patch size as 572*572
-                                                    numPixOverlap=int(model.get_overlap()/2),  # overlap as 92
-                                                    extSave=['jpg', 'jpg', 'jpg', 'png'], # save rgb files as jpg and gt as png
-                                                    isTrain=True,
-                                                    gtInd=3,
-                                                    pad=model.get_overlap()) # pad around the tiles
+    extrObj = uab_DataHandlerFunctions.uabPatchExtrRand([0, 1, 2, 4], # extract all 4 channels
+                                                        cSize=flags.input_size, # patch size as 572*572
+                                                        numPerTile=121,  # overlap as 92
+                                                        extSave=['jpg', 'jpg', 'jpg', 'png'], # save rgb files as jpg and gt as png
+                                                        isTrain=True,
+                                                        gtInd=3,
+                                                        pad=model.get_overlap(),
+                                                        name='Rand{}'.format(flags.run_id)) # pad around the tiles
     patchDir = extrObj.run(blCol)
 
     # make data reader
