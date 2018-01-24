@@ -22,8 +22,9 @@ for size in tqdm(input_sizes):
 
     cnt += 1
     plt.subplot(330+cnt)
-    plt.imshow(error_map, cmap=plt.cm.get_cmap('Reds'))
-    plt.axis('off')
+    #plt.imshow(error_map, cmap=plt.cm.get_cmap('Reds'))
+    plt.plot(np.sum(error_map, axis=0))
+    #plt.axis('off')
 
 #plt.plot(input_sizes, error_cnt)
 plt.tight_layout()
