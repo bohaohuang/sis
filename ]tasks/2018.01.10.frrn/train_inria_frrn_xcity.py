@@ -11,9 +11,9 @@ import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_FRRN
 from bohaoCustom import uabDataReader
 
-RUN_ID = 3
+RUN_ID = 1
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-4
 INPUT_SIZE = 224
 TILE_SIZE = 5000
 EPOCHS = 100

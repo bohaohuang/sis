@@ -57,16 +57,16 @@ def main(flags):
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, flags.input_size[0], flags.input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_UNet.UnetModelMoreCrop({'X':X, 'Y':y},
-                                                  trainable=mode,
-                                                  model_name=flags.model_name,
-                                                  input_size=flags.input_size,
-                                                  batch_size=flags.batch_size,
-                                                  learn_rate=flags.learning_rate,
-                                                  decay_step=flags.decay_step,
-                                                  decay_rate=flags.decay_rate,
-                                                  epochs=flags.epochs,
-                                                  start_filter_num=flags.sfn)
+    model = uabMakeNetwork_UNet.UnetModelCrop({'X':X, 'Y':y},
+                                              trainable=mode,
+                                              model_name=flags.model_name,
+                                              input_size=flags.input_size,
+                                              batch_size=flags.batch_size,
+                                              learn_rate=flags.learning_rate,
+                                              decay_step=flags.decay_step,
+                                              decay_rate=flags.decay_rate,
+                                              epochs=flags.epochs,
+                                              start_filter_num=flags.sfn)
     model.create_graph('X', class_num=flags.num_classes)
 
     # create collection

@@ -11,12 +11,16 @@ input_size = [224, 224]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
-for runType in ['incity', 'xcity']:
+for runType in ['xcity']:
     for runId in range(5):
         tf.reset_default_graph()
 
-        model_dir = r'/hdd/Models/FRRN_inria_aug_{}_{}_PS(224, 224)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.\
-            format(runType, runId)
+        if runId == 4 or runId == 0 or runId == 1:
+            model_dir = r'/hdd/Models/FRRN_city/FRRN_inria_aug_{}_{}_PS(224, 224)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.\
+                format(runType, runId)
+        else:
+            model_dir = r'/hdd/Models/FRRN_city/FRRN_inria_aug_{}_{}_PS(224, 224)_BS5_EP100_LR1e-05_DS60_DR0.1_SFN32'. \
+                format(runType, runId)
         blCol = uab_collectionFunctions.uabCollection('inria')
         blCol.readMetadata()
         file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
