@@ -74,6 +74,7 @@ for size in tqdm(input_sizes):
         dist_array, error_array = np.load(save_file)
 
     #plt.subplot(121)
+    print(error_array[:10])
     plt.plot(np.array(dist_array), scipy.signal.medfilt(np.array(error_array), [51]),
              label='{}:{}'.format(size, np.sum(error_array)))
     #plt.subplot(122)
