@@ -5,14 +5,14 @@ import util_functions
 from bohaoCustom import uabMakeNetwork_UNet
 
 # settings
-gpu = None
+gpu = 0
 batch_size = 5
 input_size = [572, 572]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
 for runType in ['grid', 'random']:
-    for runId in range(5):
+    for runId in range(5, 6):
         tf.reset_default_graph()
 
         model_dir = r'/hdd/Models/UNET_rand_gird/UnetCrop_inria_aug_{}_{}_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.\

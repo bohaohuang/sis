@@ -68,18 +68,21 @@ for size in tqdm(input_sizes):
                     img_name = '{}{}_{}.png'.format(city, tile_id+1, cnt+1)
                     error_map += imageio.imread(os.path.join(img_dir, img_name))/255
         dist_array, error_array = get_error_vs_dist2(error_map/196/25, size-184)
+        error_array_cnt = np.sum(error_map)
         # print(dist_array)
-        np.save(save_file, [dist_array, error_array])
+        np.save(save_file, [dist_array, error_array, error_array_cnt])
     else:
-        dist_array, error_array = np.load(save_file)
+        dist_array, error_array, error_array_cnt = np.load(save_file)
 
-    #plt.subplot(121)
-    print(error_array[:10])
+    plt.subplot(121)
+    error_cnt.append(error_array_cnt/(196*25*size*size))
     plt.plot(np.array(dist_array), scipy.signal.medfilt(np.array(error_array), [51]),
              label='{}:{}'.format(size, np.sum(error_array)))
     #plt.subplot(122)
     #plt.plot(np.array(dist_array)[:], (np.array(error_array))[:], label='{}:{}'.format(size, np.sum(error_array)))
 
-plt.ylim(0.030, 0.040)
+#plt.ylim(0.030, 0.040)
+plt.subplot(122)
+plt.plot(input_sizes, error_cnt)
 plt.tight_layout()
 plt.show()
