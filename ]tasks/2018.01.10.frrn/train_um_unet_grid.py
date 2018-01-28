@@ -11,7 +11,7 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet
 
-RUN_ID = 3
+RUN_ID = 4
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
 INPUT_SIZE = 572
@@ -20,7 +20,7 @@ EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = None
+GPU = 1
 DECAY_STEP = 60
 DECAY_RATE = 0.1
 MODEL_NAME = 'um_aug_grid_{}'
