@@ -53,12 +53,12 @@ bp2 = plt.boxplot(np.transpose(city_res[1, :, :]), positions=positions+width, wi
 plt.setp(bp1['boxes'], color='red')
 plt.setp(bp2['boxes'], color='green')
 plt.title('City-wise IoU Comparison')
-plt.xticks(positions, ['Austin', 'Chicago', 'Kitsap', 'Tyrol-w', 'Vienna'], rotation=-12)
+plt.xticks(positions+width/2, ['Austin', 'Chicago', 'Kitsap', 'Tyrol-w', 'Vienna'], rotation=-12)
 plt.xlabel('City Name')
 plt.ylabel('IoU')
 plt.tight_layout()
 
 img_dir, task_dir = utils.get_task_img_folder()
-plt.savefig(os.path.join(img_dir, 'frrn_grid_vs_random.png'))
+plt.savefig(os.path.join(img_dir, 'frrn_grid_vs_random_inria.png'))
 
 plt.show()

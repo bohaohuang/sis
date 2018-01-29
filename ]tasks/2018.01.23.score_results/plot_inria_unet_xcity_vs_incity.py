@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import uabRepoPaths
 import utils
 
-run_ids = [1, 2, 3, 4, 5]
-run_types = ['random', 'grid']
+run_ids = [1, 2, 3, 4]
+run_types = ['xcity', 'incity']
 result_all = np.zeros((len(run_types), len(run_ids)))
 city_res = np.zeros((len(run_types), 5, len(run_ids)))
 city_dict = {'austin':0, 'chicago':1, 'kitsap':2, 'tyrol-w':3, 'vienna':4}
@@ -15,7 +15,7 @@ for cnt_1, run_id in enumerate(run_ids):
     for cnt_2, model_type in enumerate(run_types):
         model_name = \
             'UnetCrop_inria_aug_{}_{}_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.format(model_type, run_id)
-        res_path = os.path.join(uabRepoPaths.evalPath, 'grid_vs_random', model_name, 'inria', 'result.txt')
+        res_path = os.path.join(uabRepoPaths.evalPath, 'xcity_vs_incity', model_name, 'inria', 'result.txt')
         with open(res_path, 'r') as f:
             results = f.readlines()
 
@@ -53,12 +53,12 @@ bp2 = plt.boxplot(np.transpose(city_res[1, :, :]), positions=positions+width, wi
 plt.setp(bp1['boxes'], color='red')
 plt.setp(bp2['boxes'], color='green')
 plt.title('City-wise IoU Comparison')
-plt.xticks(positions+width/2, ['Austin', 'Chicago', 'Kitsap', 'Tyrol-w', 'Vienna'], rotation=-12)
+plt.xticks(positions, ['Austin', 'Chicago', 'Kitsap', 'Tyrol-w', 'Vienna'], rotation=-12)
 plt.xlabel('City Name')
 plt.ylabel('IoU')
 plt.tight_layout()
 
 img_dir, task_dir = utils.get_task_img_folder()
-plt.savefig(os.path.join(img_dir, 'unet_grid_vs_random_inria.png'))
+plt.savefig(os.path.join(img_dir, 'unet_xcity_vs_incity.png'))
 
 plt.show()

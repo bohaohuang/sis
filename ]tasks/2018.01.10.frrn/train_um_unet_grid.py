@@ -23,7 +23,7 @@ N_VALID = 1000
 GPU = 1
 DECAY_STEP = 60
 DECAY_RATE = 0.1
-MODEL_NAME = 'um_aug_grid_{}'
+MODEL_NAME = 'um_aug_grid_fix_{}'
 SFN = 32
 
 
@@ -92,8 +92,8 @@ def main(flags):
     # use uabCrossValMaker to get fileLists for training and validation
     idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
     # use first 5 tiles for validation
-    file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(6, 37)])
-    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 6)])
+    file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(20, 136)])
+    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 20)])
 
     with tf.name_scope('image_loader'):
         # GT has no mean to subtract, append a 0 for block mean
