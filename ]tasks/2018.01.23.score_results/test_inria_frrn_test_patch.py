@@ -18,8 +18,8 @@ save_dir = os.path.join(task_dir, 'train_patch')
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)
 
-for run_repeat in range(5):
-    for size in [224, 480, 736, 992, 1248, 1504, 1760, 2016, 2272, 2528]:
+for run_repeat in range(1, 5):
+    for size in [224, 480, 736, 992, 1248, 1504, 1760, 2016]:
         input_size = [size, size]
 
         tf.reset_default_graph()
