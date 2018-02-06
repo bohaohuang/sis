@@ -6,18 +6,19 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 # settings
 gpu = 0
-batch_size = 5
-load_epoch = 30
-input_size = [572, 572]
-tile_size = [2048, 2048]
+batch_sizes = [10,  9,   8,   7,   6,   5,   4,   3,   2,   1]
+patch_sizes = [460, 476, 492, 508, 540, 572, 620, 684, 796, 1052]
+tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
-for runType in ['grid', 'random']:
+for patch_size, batch_size in zip(patch_sizes, batch_sizes):
+    input_size = [patch_size, patch_size]
     for runId in range(5):
         tf.reset_default_graph()
 
-        model_dir = r'/hdd/Models/UNET_rand_gird/UnetCrop_um_aug_{}_fix_{}_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.format(runType, runId)
-        blCol = uab_collectionFunctions.uabCollection('um')
+        model_dir = r'/hdd/Models/UNET_fix_pixel/UnetCrop_inria_aug_psbs_{}_PS({}, {})_BS{}_EP100_LR0.0001_DS60_DR0.1_SFN32'.\
+            format(runId, patch_size, patch_size, batch_size)
+        blCol = uab_collectionFunctions.uabCollection('inria')
         blCol.readMetadata()
         file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
         file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(4)
@@ -25,9 +26,11 @@ for runType in ['grid', 'random']:
         idx_truth, file_list_truth = uabCrossValMaker.uabUtilGetFolds(None, file_list_truth, 'force_tile')
         # use first 5 tiles for validation
         file_list_valid = uabCrossValMaker.make_file_list_by_key(
-            idx, file_list, [i for i in range(0, 20)])
+            idx, file_list, [i for i in range(0, 6)],
+            filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
         file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(
-            idx_truth, file_list_truth, [i for i in range(0, 20)])
+            idx_truth, file_list_truth, [i for i in range(0, 6)],
+            filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
         img_mean = blCol.getChannelMeans([0, 1, 2])
 
         # make the model
@@ -45,4 +48,4 @@ for runType in ['grid', 'random']:
         # evaluate on tiles
         model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                        input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                       save_result_parent_dir='grid_vs_random', ds_name='um', load_epoch_num=load_epoch)
+                       save_result_parent_dir='fix_pixel', ds_name='inria')

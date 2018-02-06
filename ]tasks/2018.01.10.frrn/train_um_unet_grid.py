@@ -11,11 +11,11 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet
 
-RUN_ID = 4
+RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-5
 INPUT_SIZE = 572
-TILE_SIZE = 5000
+TILE_SIZE = 2048
 EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000

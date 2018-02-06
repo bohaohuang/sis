@@ -9,7 +9,7 @@ files = os.path.join(patchDir2, 'fileList.txt')
 with open(files, 'r') as f:
     file_list = f.readlines()
 
-files = os.path.join(patchDir2, 'state.txt')
+files = os.path.join(r'/media/lab/Michael(01)/chipExtrRegPurge_cSz572x572_pad184', 'state.txt')
 with open(files, 'r') as f:
     text = f.readlines()
 print(text)

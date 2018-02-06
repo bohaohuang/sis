@@ -14,7 +14,7 @@ city_dict = {'JAX':0, 'TAM':1}
 for cnt_1, run_id in enumerate(run_ids):
     for cnt_2, model_type in enumerate(run_types):
         model_name = \
-            'UnetCrop_um_aug_{}_{}_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.format(model_type, run_id)
+            'UnetCrop_um_aug_{}_fix_{}_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.format(model_type, run_id)
         res_path = os.path.join(uabRepoPaths.evalPath, 'grid_vs_random', model_name, 'um', 'result.txt')
         with open(res_path, 'r') as f:
             results = f.readlines()
@@ -59,6 +59,6 @@ plt.ylabel('IoU')
 plt.tight_layout()
 
 img_dir, task_dir = utils.get_task_img_folder()
-plt.savefig(os.path.join(img_dir, 'unet_grid_vs_random_um.png'))
+plt.savefig(os.path.join(img_dir, 'unet_grid_vs_random_um_fix.png'))
 
 plt.show()

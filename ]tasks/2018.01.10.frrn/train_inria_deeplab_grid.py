@@ -21,7 +21,7 @@ NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
 GPU = 0
-DECAY_STEP = 60
+DECAY_STEP = 40
 DECAY_RATE = 0.1
 MODEL_NAME = 'res101_inria_aug_grid_{}'
 SFN = 32
@@ -59,7 +59,7 @@ def main(flags):
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, flags.input_size[0], flags.input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_DeepLabV2.DeeplabV2({'X':X, 'Y':y},
+    model = uabMakeNetwork_DeepLabV2.DeeplabV3({'X':X, 'Y':y},
                                                trainable=mode,
                                                model_name=flags.model_name,
                                                input_size=flags.input_size,

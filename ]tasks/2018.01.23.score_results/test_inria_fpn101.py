@@ -1,19 +1,19 @@
 import tensorflow as tf
 import uabCrossValMaker
 import uab_collectionFunctions
-from bohaoCustom import uabMakeNetwork_DeepLabV2
+from bohaoCustom import uabMakeNetwork_FPN
 
 # settings
 gpu = 0
 batch_size = 1
-input_size = [321, 321]
+input_size = [224, 224]
 tile_size = [5000, 5000]
 
 
-for runId in [0]:
+for runId in [1]:
     tf.reset_default_graph()
 
-    model_dir = r'/hdd/Models/DeeplabV3_res101_inria_aug_grid_{}_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'.format(runId)
+    model_dir = r'/hdd/Models/FPNRes101_inria_aug_grid_{}_PS(224, 224)_BS10_EP100_LR0.0001_DS30_DR0.1_SFN32'.format(runId)
     blCol = uab_collectionFunctions.uabCollection('inria')
     blCol.readMetadata()
     file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
@@ -34,13 +34,13 @@ for runId in [0]:
     X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_DeepLabV2.DeeplabV3({'X':X, 'Y':y},
-                                               trainable=mode,
-                                               input_size=input_size,
-                                               batch_size=5)
+    model = uabMakeNetwork_FPN.FPNRes101({'X':X, 'Y':y},
+                                         trainable=mode,
+                                         input_size=input_size,
+                                         batch_size=5)
     # create graph
     model.create_graph('X', class_num=2)
 
     # evaluate on tiles
     model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
-                   input_size, tile_size, batch_size, img_mean, model_dir, gpu, load_epoch_num=95)
+                   input_size, tile_size, batch_size, img_mean, model_dir, gpu)
