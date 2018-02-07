@@ -11,7 +11,7 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
-RUN_ID = 0
+RUN_ID = 2
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-5
 INPUT_SIZE = 321
@@ -20,7 +20,7 @@ EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = 0
+GPU = 1
 DECAY_STEP = 40
 DECAY_RATE = 0.1
 MODEL_NAME = 'res101_inria_aug_grid_{}'
