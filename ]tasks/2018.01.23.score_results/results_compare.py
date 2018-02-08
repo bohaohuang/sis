@@ -35,15 +35,15 @@ for cnt, model in enumerate([unet_pred_dir, frrn_pred_dir, deeplab_pred_dir, fpn
         group_mean[cnt, int(i/5)] = np.mean(city_iou[i+5-1])
         group_err[cnt, int(i/5)] = np.std(city_iou[i+5-1])
 
-fig = plt.figure(figsize=(12, 5))
+fig = plt.figure(figsize=(6, 5))
 width = 0.2
 ind = np.arange(5)
 for i in range(4):
-    plt.bar(ind+width*i, group_mean[i,:], width, yerr=group_err[i,:], label='{} = {:.3f}'.format(model_names[i], ious[i]))
+    plt.bar(ind+width*i, group_mean[i,:], width, yerr=group_err[i,:], label='{} = {:.2f}'.format(model_names[i], ious[i]))
 plt.xticks(ind+1.5*width, ['Austin', 'Chicago', 'Kitsap', 'Tyrol-w', 'Vienna'])
-plt.legend(loc='upper left')
+plt.legend(loc='upper left', fancybox=True, framealpha=0.2)
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'city_level_cmp.png'))
+plt.savefig(os.path.join(img_dir, 'city_level_cmp_thinner.png'))
 plt.show()
 
 

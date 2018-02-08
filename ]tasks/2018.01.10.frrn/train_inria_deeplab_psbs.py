@@ -23,7 +23,7 @@ N_VALID = 1000
 GPU = 0
 DECAY_STEP = 40
 DECAY_RATE = 0.1
-MODEL_NAME = 'res101_inria_aug_grid_{}'
+MODEL_NAME = 'res101_inria_aug_psbs_{}'
 SFN = 32
 RES101_DIR = r'/hdd/Models/resnet_v1_101.ckpt'
 

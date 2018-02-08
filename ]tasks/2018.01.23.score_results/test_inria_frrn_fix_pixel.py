@@ -12,7 +12,7 @@ tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
 for patch_size, batch_size in zip(patch_sizes, batch_sizes):
-    input_size = [patch_size, patch_size]
+    input_size = [496, 496]
     for runId in range(5):
         tf.reset_default_graph()
 
@@ -47,5 +47,5 @@ for patch_size, batch_size in zip(patch_sizes, batch_sizes):
 
         # evaluate on tiles
         model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
-                       input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                       save_result_parent_dir='fix_pixel', ds_name='inria')
+                       input_size, tile_size, 1, img_mean, model_dir, gpu,
+                       save_result_parent_dir='fix_pixel_fix_test', ds_name='inria')
