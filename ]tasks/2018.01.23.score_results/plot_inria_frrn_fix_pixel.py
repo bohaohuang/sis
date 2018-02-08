@@ -39,18 +39,27 @@ def get_results(file_str):
     result_down = np.min(result_all, axis=1)
     return result_mean, result_var, result_up, result_down
 
+
 matplotlib.rcParams.update({'font.size': 18})
 plt.figure(figsize=(12, 5))
 ind = np.arange(len(batch_sizes))
 
+ax1 = plt.subplot()
 result_mean, result_var, result_up, result_down = get_results('fix_pixel_fix_test')
-plt.errorbar(patch_sizes, result_mean, yerr=result_var, uplims=result_up, lolims=result_down, label='test size=496')
+ax1.errorbar(patch_sizes, result_mean, yerr=result_var, uplims=result_up, lolims=result_down, label='test size=496')
 result_mean, result_var, result_up, result_down = get_results('fix_pixel')
-plt.errorbar(patch_sizes, result_mean, yerr=result_var, uplims=result_up, lolims=result_down, label='test size=train size')
+ax1.errorbar(patch_sizes, result_mean, yerr=result_var, uplims=result_up, lolims=result_down, label='test size=train size')
+
+ax2 = ax1.twinx()
+ax2.plot(patch_sizes, np.array(batch_sizes)*np.array(patch_sizes)**2, 'g.--')
+ax2.set_ylim(240000, 270000)
+ax2.tick_params('y', colors='g')
+ax2.set_ylabel('#pixels', color='g')
+
 plt.grid('on')
 plt.xticks(patch_sizes, patch_sizes)
-plt.xlabel('Patch Size')
-plt.ylabel('Mean IoU')
+ax1.set_xlabel('Patch Size')
+ax1.set_ylabel('Mean IoU')
 plt.title('FRRN on Inria')
 plt.legend()
 plt.tight_layout()
