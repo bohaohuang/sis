@@ -13,14 +13,14 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 3
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-5
 INPUT_SIZE = 572
 TILE_SIZE = 2048
 EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = None
+GPU = 1
 DECAY_STEP = 60
 DECAY_RATE = 0.1
 MODEL_NAME = 'um_aug_random_fix_{}'
@@ -81,7 +81,7 @@ def main(flags):
     # extract patches
     extrObj = uab_DataHandlerFunctions.uabPatchExtrRand([0, 1, 2, 4], # extract all 4 channels
                                                         cSize=flags.input_size, # patch size as 572*572
-                                                        numPerTile=121,  # overlap as 92
+                                                        numPerTile=25,  # overlap as 92
                                                         extSave=['jpg', 'jpg', 'jpg', 'png'], # save rgb files as jpg and gt as png
                                                         isTrain=True,
                                                         gtInd=3,

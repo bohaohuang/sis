@@ -61,7 +61,7 @@ plt.xticks(patch_sizes, patch_sizes)
 ax1.set_xlabel('Patch Size')
 ax1.set_ylabel('Mean IoU')
 plt.title('FRRN on Inria')
-plt.legend()
+ax1.legend()
 plt.tight_layout()
 
 img_dir, task_dir = utils.get_task_img_folder()
