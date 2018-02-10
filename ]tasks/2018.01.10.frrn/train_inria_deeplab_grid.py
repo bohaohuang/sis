@@ -115,15 +115,14 @@ def main(flags):
                        loss_type='xent')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
-              pretrained_model_dir=None,
+              pretrained_model_dir=flags.res_dir,
               isTrain=True,
               img_mean=img_mean,
               verb_step=100,                    # print a message every 100 step(sample)
               save_epoch=20,                     # save the model every 5 epochs
               gpu=GPU,
               tile_size=flags.tile_size,
-              patch_size=flags.input_size,
-              continue_dir=model.ckdir)
+              patch_size=flags.input_size)
 
     duration = time.time() - start_time
     print('duration {:.2f} hours'.format(duration/60/60))
