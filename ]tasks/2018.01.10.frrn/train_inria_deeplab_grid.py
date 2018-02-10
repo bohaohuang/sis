@@ -20,7 +20,7 @@ EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = 0
+GPU = None
 DECAY_STEP = 40
 DECAY_RATE = 0.1
 MODEL_NAME = 'res101_inria_aug_grid_{}'
@@ -115,7 +115,7 @@ def main(flags):
                        loss_type='xent')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
-              pretrained_model_dir=flags.res_dir,
+              pretrained_model_dir=None,
               isTrain=True,
               img_mean=img_mean,
               verb_step=100,                    # print a message every 100 step(sample)
