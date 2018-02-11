@@ -26,7 +26,7 @@ DECAY_RATE = 0.1
 MODEL_NAME = 'inria_aug_leave_{}_{}'
 SFN = 32
 RES101_DIR = r'/hdd/Models/resnet_v1_101.ckpt'
-LEAVE_CITY = 0
+LEAVE_CITY = 1
 
 
 def read_flag():
