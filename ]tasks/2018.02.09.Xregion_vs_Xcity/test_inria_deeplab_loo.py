@@ -4,7 +4,7 @@ import uab_collectionFunctions
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 # settings
-gpu = 1
+gpu = None
 batch_size = 5
 input_size = [321, 321]
 tile_size = [5000, 5000]
@@ -18,7 +18,7 @@ for runId in [0]:
     blCol.readMetadata()
     file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
     file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(4)
-    idx, file_list = uabCrossValMaker.uabUtilGetFolds(None, file_list, 'force_tile')
+    '''idx, file_list = uabCrossValMaker.uabUtilGetFolds(None, file_list, 'force_tile')
     idx_truth, file_list_truth = uabCrossValMaker.uabUtilGetFolds(None, file_list_truth, 'force_tile')
     # use first 5 tiles for validation
     file_list_valid = uabCrossValMaker.make_file_list_by_key(
@@ -26,6 +26,15 @@ for runId in [0]:
         filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
     file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(
         idx_truth, file_list_truth, [i for i in range(0, 6)],
+        filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])'''
+    idx, file_list = uabCrossValMaker.uabUtilGetFolds(None, file_list, 'city')
+    idx_truth, file_list_truth = uabCrossValMaker.uabUtilGetFolds(None, file_list_truth, 'city')
+    # use first 5 tiles for validation
+    file_list_valid = uabCrossValMaker.make_file_list_by_key(
+        idx, file_list, [0],
+        filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
+    file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(
+        idx_truth, file_list_truth, [0],
         filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
     img_mean = blCol.getChannelMeans([0, 1, 2])
 

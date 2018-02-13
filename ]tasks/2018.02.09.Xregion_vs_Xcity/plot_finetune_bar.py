@@ -4,13 +4,12 @@ import matplotlib.pyplot as plt
 import utils
 
 loo_dir_deeplab = r'/hdd/Results/DeeplabV3_inria_aug_leave_0_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32/default'
-loo_dir_unet = r'/hdd/Results/UnetCrop_inria_aug_leave_0_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32/default'
-pred_dir_xr_unet = r'/hdd/Results/grid_vs_random/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32/inria'
+loo_dir_deeplab_finetune = r'/hdd/Results/DeeplabV3_inria_aug_leave_0_0_0_PS(321, 321)_BS5_EP20_LR1e-07_DS10_DR0.1_SFN32/default'
 pred_dir_xr_deeplab = r'/hdd/Results/DeeplabV3_res101_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32/default'
 
-scores = np.zeros((2, 6))
+scores = np.zeros((3, 6))
 
-for cnt_1, loo_dir in enumerate([loo_dir_deeplab, loo_dir_unet]):
+for cnt_1, loo_dir in enumerate([loo_dir_deeplab, loo_dir_deeplab_finetune, pred_dir_xr_deeplab]):
     file_name = os.path.join(loo_dir, 'result.txt')
     with open(file_name, 'r') as f:
         lines = f.readlines()
@@ -26,7 +25,7 @@ for cnt_1, loo_dir in enumerate([loo_dir_deeplab, loo_dir_unet]):
     scores[cnt_1, -1] = A_record/B_record
 
 baseline = []
-for loo_dir in [pred_dir_xr_deeplab, pred_dir_xr_unet]:
+for loo_dir in [pred_dir_xr_deeplab]:
     file_name = os.path.join(loo_dir, 'result.txt')
     with open(file_name, 'r') as f:
         lines = f.readlines()
@@ -42,18 +41,19 @@ for loo_dir in [pred_dir_xr_deeplab, pred_dir_xr_unet]:
 
 img_dir, task_dir = utils.get_task_img_folder()
 ind = np.arange(6)
-width = 0.35
+width = 0.25
 scores *= 100
 
+plt.figure(figsize=(8, 6))
 plt.rcParams.update({'font.size': 12})
-plt.bar(ind, scores[0, :], width=width, label='DeepLab')
-plt.bar(ind+width, scores[1, :], width=width, label='U-Net')
+plt.bar(ind, scores[0, :], width=width, label='Leave-one-out')
+plt.bar(ind+width, scores[1, :], width=width, label='Finetune')
+plt.bar(ind+width*2, scores[2, :], width=width, label='Cross Region')
 plt.axhline(y=baseline[0], color='g', linestyle='--')
-plt.axhline(y=baseline[1], color='g', linestyle='--')
-plt.xticks(ind+width/2, ['Austin1', 'Austin2', 'Austin3', 'Austin4', 'Austin5', 'Avg'])
+plt.xticks(ind+width, ['Austin1', 'Austin2', 'Austin3', 'Austin4', 'Austin5', 'Avg'])
 plt.ylabel('IoU')
-plt.title('Leave-one-out Performance Comparison')
+plt.title('Leave-one-out Vs Finetune')
 plt.legend()
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'loo_cmp_austin.png'))
+#plt.savefig(os.path.join(img_dir, 'loo_cmp_austin_finetune.png'))
 plt.show()

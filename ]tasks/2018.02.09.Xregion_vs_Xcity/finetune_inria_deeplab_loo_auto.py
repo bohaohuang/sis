@@ -10,23 +10,25 @@ import uabPreprocClasses
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_DeepLabV2
+from record_error_patches import get_file_list_finetune
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-7
 INPUT_SIZE = 321
 TILE_SIZE = 5000
-EPOCHS = 100
+EPOCHS = 20
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
 GPU = 1
 DECAY_STEP = 40
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_aug_leave_{}_{}'
+MODEL_NAME = 'inria_aug_leave_auto_{}_{}'
 SFN = 32
-RES101_DIR = r'/hdd/Models/resnet_v1_101.ckpt'
-LEAVE_CITY = 4
+PRED_DIR = r'/hdd/Models/DeeplabV3_inria_aug_leave_0_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
+LEAVE_CITY = 0
+PORTION = 0.5
 
 
 def read_flag():
@@ -45,7 +47,7 @@ def read_flag():
     parser.add_argument('--model-name', type=str, default=MODEL_NAME, help='Model name')
     parser.add_argument('--run-id', type=str, default=RUN_ID, help='id of this run')
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
-    parser.add_argument('--res-dir', type=str, default=RES101_DIR, help='path to ckpt of Res101 model')
+    parser.add_argument('--pred-dir', type=str, default=PRED_DIR, help='path to ckpt of Res101 model')
     parser.add_argument('--leave-city', type=int, default=LEAVE_CITY, help='city id to leave-out in training')
 
     flags = parser.parse_args()
@@ -96,8 +98,21 @@ def main(flags):
     # use uabCrossValMaker to get fileLists for training and validation
     idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'city')
     # use first city for validation
-    file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(5) if i != flags.leave_city])
-    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [flags.leave_city])
+    file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list,
+                                                             [i for i in range(5) if i != flags.leave_city])
+    file_list_train += get_file_list_finetune(INPUT_SIZE, PORTION)
+
+    idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'city')
+    idx2, _ = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
+    idx3 = [j * 10 + i for i, j in zip(idx, idx2)]
+
+    # use first city for validation
+    filter_valid = []
+    for i in range(6):
+        for j in range(1, 37):
+            if i == flags.leave_city and j <= 5:
+                filter_valid.append(j * 10 + i)
+    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx3, file_list, filter_valid)
 
     with tf.name_scope('image_loader'):
         # GT has no mean to subtract, append a 0 for block mean
@@ -117,11 +132,11 @@ def main(flags):
                        loss_type='xent')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
-              pretrained_model_dir=flags.res_dir,   # train from scratch, no need to load pre-trained model
+              pretrained_model_dir=flags.pred_dir,   # train from scratch, no need to load pre-trained model
               isTrain=True,
               img_mean=img_mean,
               verb_step=100,                        # print a message every 100 step(sample)
-              save_epoch=5,                         # save the model every 5 epochs
+              save_epoch=1,                         # save the model every 1 epochs
               gpu=GPU,
               tile_size=flags.tile_size,
               patch_size=flags.input_size)
