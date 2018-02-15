@@ -40,26 +40,31 @@ if __name__ == '__main__':
     pred_dir_loo = r'/hdd/Results/DeeplabV3_inria_aug_leave_0_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32/default/pred'
     pred_dir_xr = r'/hdd/Results/DeeplabV3_res101_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32/default/pred'
     pred_dir_base = r'/hdd/Results/DeeplabV3_inria_aug_leave_0_0_0_PS(321, 321)_BS5_EP20_LR1e-07_DS10_DR0.1_SFN32/default/pred'
+    pred_dir_auto = r'/hdd/Results/DeeplabV3_inria_aug_leave_auto_0_0_PS(321, 321)_BS5_EP20_LR1e-07_DS40_DR0.1_SFN32/default/pred'
     gt_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/Original_Tiles'
 
-    city_name = 'austin1'
+    city_name = 'austin5'
     pred_file_loo_name = os.path.join(pred_dir_loo, '{}.png'.format(city_name))
     pred_file_xr_name = os.path.join(pred_dir_xr, '{}.png'.format(city_name))
     pred_file_base_name = os.path.join(pred_dir_base, '{}.png'.format(city_name))
+    pred_file_auto_name = os.path.join(pred_dir_auto, '{}.png'.format(city_name))
     gt_file_name = os.path.join(gt_dir, '{}_GT.tif'.format(city_name))
     rgb_file_name = os.path.join(gt_dir, '{}_RGB.tif'.format(city_name))
 
     pred_img_loo = imageio.imread(pred_file_loo_name)
     pred_img_xr = imageio.imread(pred_file_xr_name)
     pred_img_base = imageio.imread(pred_file_base_name)
+    pred_img_auto = imageio.imread(pred_file_auto_name)
     gt_img = imageio.imread(gt_file_name)
     rgb_img = imageio.imread(rgb_file_name)
     rgb_img_copy = np.copy(rgb_img)
     rgb_img_copy2 = np.copy(rgb_img)
+    rgb_img_copy3 = np.copy(rgb_img)
 
     mask_loo = get_error_mask(pred_img_loo, gt_img)
     mask_xr = get_error_mask(pred_img_xr, gt_img)
     mask_base = get_error_mask(pred_img_base, gt_img)
+    mask_auto = get_error_mask(pred_img_auto, gt_img)
     error_record_loo = get_high_error_region(mask_loo, 500, 400)
 
     region_num = 5
@@ -70,21 +75,22 @@ if __name__ == '__main__':
         emi_loo = get_error_mask_img(rgb_img[x:x+500, y:y+500, :], gt_img[x:x+500, y:y+500], mask_loo[x:x+500, y:y+500])
         emi_xr = get_error_mask_img(rgb_img_copy[x:x+500, y:y+500, :], gt_img[x:x+500, y:y+500], mask_xr[x:x+500, y:y+500])
         emi_base = get_error_mask_img(rgb_img_copy2[x:x+500, y:y+500, :], gt_img[x:x+500, y:y+500], mask_base[x:x+500, y:y+500])
+        emi_auto = get_error_mask_img(rgb_img_copy3[x:x+500, y:y+500, :], gt_img[x:x+500, y:y+500], mask_auto[x:x+500, y:y+500])
 
-        plt.figure(figsize=(10, 5))
-        plt.subplot(121)
-        plt.imshow(emi_loo)
+        plt.figure(figsize=(15, 5.5))
+        plt.subplot(131)
+        plt.imshow(emi_xr)
         plt.axis('off')
-        plt.title('Leave-one out IoU={:.3f}'.format(iou_metric(gt_img[x:x+500, y:y+500], pred_img_loo[x:x+500, y:y+500], truth_val=255)*100))
-        #plt.subplot(132)
-        #plt.imshow(emi_xr)
-        #plt.axis('off')
-        #plt.title('Cross region IoU={:.3f}'.format(iou_metric(gt_img[x:x+500, y:y+500], pred_img_xr[x:x+500, y:y+500], truth_val=255)*100))
-        plt.subplot(122)
+        plt.title('XRegion IoU={:.3f}'.format(iou_metric(gt_img[x:x+500, y:y+500], pred_img_xr[x:x+500, y:y+500], truth_val=255)*100))
+        plt.subplot(132)
+        plt.imshow(emi_auto)
+        plt.axis('off')
+        plt.title('Auto IoU={:.3f}'.format(iou_metric(gt_img[x:x+500, y:y+500], pred_img_auto[x:x+500, y:y+500], truth_val=255)*100))
+        plt.subplot(133)
         plt.imshow(emi_base)
         plt.axis('off')
         plt.title('Finetune IoU={:.3f}'.format(iou_metric(gt_img[x:x+500, y:y+500], pred_img_base[x:x+500, y:y+500], truth_val=255)*100))
         plt.suptitle('{}:({},{}) ({})'.format(city_name, x, y, 'DeepLab'), color='g')
         plt.tight_layout()
-        #plt.savefig(os.path.join(img_dir, '{}_{}_{}_deeplab_finetune.png'.format(city_name, x, y)))
+        plt.savefig(os.path.join(img_dir, '{}_{}_{}_deeplab_auto.png'.format(city_name, x, y)))
         plt.show()

@@ -41,7 +41,7 @@ if __name__ == '__main__':
     pred_dir_xr = r'/hdd/Results/DeeplabV3_res101_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32/default/pred'
     gt_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/Original_Tiles'
 
-    city_name = 'vienna1'
+    city_name = 'vienna5'
     pred_file_loo_name = os.path.join(pred_dir_loo, '{}.png'.format(city_name))
     pred_file_xr_name = os.path.join(pred_dir_xr, '{}.png'.format(city_name))
     gt_file_name = os.path.join(gt_dir, '{}_GT.tif'.format(city_name))
