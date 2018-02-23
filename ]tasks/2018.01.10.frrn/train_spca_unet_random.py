@@ -9,7 +9,7 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet
 
-RUN_ID = 3
+RUN_ID = 0
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
 INPUT_SIZE = 572
@@ -18,7 +18,7 @@ EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = 1
+GPU = 0
 DECAY_STEP = 60
 DECAY_RATE = 0.1
 MODEL_NAME = 'spca_aug_random_{}'

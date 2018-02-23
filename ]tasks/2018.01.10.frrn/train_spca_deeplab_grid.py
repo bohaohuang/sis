@@ -23,7 +23,7 @@ N_VALID = 1000
 GPU = 1
 DECAY_STEP = 40
 DECAY_RATE = 0.1
-MODEL_NAME = 'res101_spca_aug_grid_{}'
+MODEL_NAME = 'spca_aug_grid_{}'
 SFN = 32
 RES101_DIR = r'/hdd/Models/resnet_v1_101.ckpt'
 
@@ -73,15 +73,15 @@ def main(flags):
 
     # create collection
     # the original file is in /ei-edl01/data/uab_datasets/inria
-    blCol = uab_collectionFunctions.uabCollection('spca_sub')
+    blCol = uab_collectionFunctions.uabCollection('spca')
     blCol.readMetadata()
-    img_mean = blCol.getChannelMeans([0, 1, 2])         # get mean of rgb info
+    img_mean = blCol.getChannelMeans([1, 2, 3])         # get mean of rgb info
 
     # extract patches
     extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 3], # extract all 4 channels
                                                     cSize=flags.input_size, # patch size as 572*572
                                                     numPixOverlap=int(model.get_overlap()/2),  # overlap as 92
-                                                    extSave=['jpg', 'jpg', 'jpg', 'png'], # save rgb files as jpg and gt as png
+                                                    extSave=['png', 'jpg', 'jpg', 'jpg'], # save rgb files as jpg and gt as png
                                                     isTrain=True,
                                                     gtInd=0,
                                                     pad=model.get_overlap()) # pad around the tiles
@@ -96,12 +96,12 @@ def main(flags):
 
     with tf.name_scope('image_loader'):
         # GT has no mean to subtract, append a 0 for block mean
-        dataReader_train = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, flags.input_size,
+        dataReader_train = uabDataReader.ImageLabelReader([0], [1, 2, 3], patchDir, file_list_train, flags.input_size,
                                                           flags.tile_size,
                                                           flags.batch_size, dataAug='flip,rotate',
                                                           block_mean=np.append([0], img_mean))
         # no augmentation needed for validation
-        dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_valid, flags.input_size,
+        dataReader_valid = uabDataReader.ImageLabelReader([0], [1, 2, 3], patchDir, file_list_valid, flags.input_size,
                                                           flags.tile_size,
                                                           flags.batch_size, dataAug=' ', block_mean=np.append([0], img_mean))
 
@@ -116,7 +116,7 @@ def main(flags):
               isTrain=True,
               img_mean=img_mean,
               verb_step=100,                    # print a message every 100 step(sample)
-              save_epoch=20,                     # save the model every 5 epochs
+              save_epoch=5,                     # save the model every 5 epochs
               gpu=GPU,
               tile_size=flags.tile_size,
               patch_size=flags.input_size)
