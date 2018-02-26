@@ -16,7 +16,7 @@ for patch_size, batch_size in zip(patch_sizes, batch_sizes):
     for runId in range(5):
         tf.reset_default_graph()
 
-        model_dir = r'/hdd/Models/DeepLab_fix_pixel/DeeplabV3_res101_inria_aug_grid_{}_PS({}, {})_BS{}_EP100_LR1e-05_DS40_DR0.1_SFN32'.\
+        model_dir = r'/hdd/Models/DeepLab_fix_pixel/DeeplabV3_res101_inria_aug_psbs_{}_PS({}, {})_BS{}_EP100_LR1e-05_DS40_DR0.1_SFN32'.\
             format(runId, patch_size, patch_size, batch_size)
         blCol = uab_collectionFunctions.uabCollection('inria')
         blCol.readMetadata()
