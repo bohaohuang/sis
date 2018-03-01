@@ -83,7 +83,7 @@ def main(flags):
     # extract patches
     extrObj = uab_DataHandlerFunctions.uabPatchExtrRand([0, 1, 2, 4],  # extract all 4 channels
                                                         cSize=flags.input_size,  # patch size as 572*572
-                                                        numPerTile=121,  # overlap as 92
+                                                        numPerTile=256,  # overlap as 92
                                                         extSave=['jpg', 'jpg', 'jpg', 'png'],
                                                         # save rgb files as jpg and gt as png
                                                         isTrain=True,
