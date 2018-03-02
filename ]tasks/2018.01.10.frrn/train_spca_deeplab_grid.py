@@ -13,13 +13,13 @@ from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 5e-5
+LEARNING_RATE = 5e-8
 INPUT_SIZE = 321
 TILE_SIZE = 5000
-EPOCHS = 100
+EPOCHS = 60
 NUM_CLASS = 2
 N_TRAIN = 8000
-N_VALID = 1000
+N_VALID = 2000
 GPU = 0
 DECAY_STEP = 40
 DECAY_RATE = 0.1
@@ -34,7 +34,7 @@ def read_flag():
     parser.add_argument('--learning-rate', type=float, default=LEARNING_RATE, help='learning rate (1e-3)')
     parser.add_argument('--input-size', default=INPUT_SIZE, type=int, help='input size 224')
     parser.add_argument('--tile-size', default=TILE_SIZE, type=int, help='tile size 5000')
-    parser.add_argument('--epochs', default=EPOCHS, type=int, help='# epochs (1)')
+    parser.add_argument('--epochs', default=EPOCHS, type= int, help='# epochs (1)')
     parser.add_argument('--num-classes', type=int, default=NUM_CLASS, help='# classes (including background)')
     parser.add_argument('--n-train', type=int, default=N_TRAIN, help='# samples per epoch')
     parser.add_argument('--n-valid', type=int, default=N_VALID, help='# patches to valid')
