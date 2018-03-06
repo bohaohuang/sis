@@ -15,7 +15,7 @@ for runType in ['grid', 'random']:
     for runId in range(5):
         tf.reset_default_graph()
 
-        model_dir = r'/hdd/Models/UNET_rand_gird/UnetCrop_spca_aug_{}_{}_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.format(runType, runId)
+        model_dir = r'/hdd6/Models/UNET_rand_gird/UnetCrop_spca_aug_{}_{}_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.format(runType, runId)
         blCol = uab_collectionFunctions.uabCollection('spca')
         blCol.readMetadata()
         file_list, parent_dir = blCol.getAllTileByDirAndExt([1, 2, 3])

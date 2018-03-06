@@ -1,4 +1,5 @@
 import os
+import pickle
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -67,5 +68,7 @@ plt.tight_layout()
 
 img_dir, task_dir = utils.get_task_img_folder()
 plt.savefig(os.path.join(img_dir, 'unet_inria_fixpixel.png'))
+with open(os.path.join(task_dir, 'unet_inria_fixpixel.npy'), 'wb') as pk:
+    pickle.dump([result_mean, result_var, result_up, result_down, batch_sizes, patch_sizes], pk)
 
 plt.show()

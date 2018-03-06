@@ -21,7 +21,7 @@ if __name__ == '__main__':
     #print(verify['Stockton'])
 
 run_ids = [0, 1, 2, 3, 4]
-run_types = ['random', 'grid']
+run_types = ['xcity', 'incity']
 result_all = np.zeros((len(run_types), len(run_ids)))
 city_res_A = np.zeros((len(run_types), 3, len(run_ids)))
 city_res_B = np.zeros((len(run_types), 3, len(run_ids)))
@@ -30,8 +30,8 @@ city_dict = {'Fresno': 0, 'Modesto': 1, 'Stockton': 2}
 for cnt_1, run_id in enumerate(run_ids):
     for cnt_2, model_type in enumerate(run_types):
         model_name = \
-            'DeeplabV3_spca_aug_{}_{}_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.format(model_type, run_id)
-        res_path = os.path.join(uabRepoPaths.evalPath, 'Deeplab_spca', model_name, 'spca', 'result.txt')
+            'UnetCrop_spca_aug_{}_{}_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.format(model_type, run_id)
+        res_path = os.path.join(uabRepoPaths.evalPath, 'xcity_vs_incity', model_name, 'spca', 'result.txt')
         with open(res_path, 'r') as f:
             results = f.readlines()
 
@@ -84,6 +84,6 @@ plt.ylabel('IoU')
 plt.tight_layout()
 
 img_dir, task_dir = utils.get_task_img_folder()
-plt.savefig(os.path.join(img_dir, 'deeplab_grid_vs_random_spca.png'))
+plt.savefig(os.path.join(img_dir, 'unet_xcity_vs_incity_spca.png'))
 
 plt.show()

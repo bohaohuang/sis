@@ -7,19 +7,20 @@ from bohaoCustom import uabMakeNetwork_DeepLabV2
 # settings
 gpu = 0
 batch_size = 5
-input_size = [321, 321]
+input_size = [736, 736]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
-for runType in ['grid', 'random']:
+for runType in ['random', 'grid']:
     for runId in range(5):
         tf.reset_default_graph()
 
-        model_dir = r'/hdd/Models/DeepLab_rand_grid/DeeplabV3_res101_spca_aug_{}_{}_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'.format(runType, runId)
-        blCol = uab_collectionFunctions.uabCollection('spca_sub')
+        model_dir = r'/hdd6/Models/DeepLab_rand_grid/DeeplabV3_spca_aug_{}_{}_PS(321, 321)_BS5_EP60_LR5e-08_DS40_DR0.1_SFN32'\
+            .format(runType, runId)
+        blCol = uab_collectionFunctions.uabCollection('spca')
         blCol.readMetadata()
-        file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
-        file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(3)
+        file_list, parent_dir = blCol.getAllTileByDirAndExt([1, 2, 3])
+        file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(0)
         idx, file_list = uabCrossValMaker.uabUtilGetFolds(None, file_list, 'force_tile')
         idx_truth, file_list_truth = uabCrossValMaker.uabUtilGetFolds(None, file_list_truth, 'force_tile')
         # use first 5 tiles for validation
@@ -27,7 +28,7 @@ for runType in ['grid', 'random']:
             idx, file_list, [i for i in range(250, 500)])
         file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(
             idx_truth, file_list_truth, [i for i in range(250, 500)])
-        img_mean = blCol.getChannelMeans([0, 1, 2])
+        img_mean = blCol.getChannelMeans([1, 2, 3])
 
         # make the model
         # define place holder

@@ -2,28 +2,26 @@ import time
 import argparse
 import numpy as np
 import tensorflow as tf
-import uabDataReader
 import uabRepoPaths
 import uabCrossValMaker
-import bohaoCustom.uabPreprocClasses as bPreproc
-import uabPreprocClasses
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_DeepLabV2
+from bohaoCustom import uabDataReader
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 5e-8
 INPUT_SIZE = 321
 TILE_SIZE = 5000
-EPOCHS = 100
+EPOCHS = 60
 NUM_CLASS = 2
 N_TRAIN = 8000
-N_VALID = 4000
+N_VALID = 2000
 GPU = 0
 DECAY_STEP = 40
 DECAY_RATE = 0.1
-MODEL_NAME = 'spca_aug_grid_{}'
+MODEL_NAME = 'spca_aug_incity_{}'
 SFN = 32
 RES101_DIR = r'/hdd6/Models/resnet_v1_101.ckpt'
 
@@ -94,16 +92,13 @@ def main(flags):
     file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 250)])
     file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(250, 500)])
 
-    with tf.name_scope('image_loader'):
-        # GT has no mean to subtract, append a 0 for block mean
-        dataReader_train = uabDataReader.ImageLabelReader([0], [1, 2, 3], patchDir, file_list_train, flags.input_size,
-                                                          flags.tile_size,
-                                                          flags.batch_size, dataAug='flip,rotate',
-                                                          block_mean=np.append([0], img_mean))
-        # no augmentation needed for validation
-        dataReader_valid = uabDataReader.ImageLabelReader([0], [1, 2, 3], patchDir, file_list_valid, flags.input_size,
-                                                          flags.tile_size,
-                                                          flags.batch_size, dataAug=' ', block_mean=np.append([0], img_mean))
+    dataReader_train = uabDataReader.ImageLabelReader([0], [1, 2, 3], patchDir, file_list_train, flags.input_size,
+                                                      flags.batch_size, dataAug='flip,rotate',
+                                                      block_mean=np.append([0], img_mean), batch_code=1)
+    # no augmentation needed for validation
+    dataReader_valid = uabDataReader.ImageLabelReader([0], [1, 2, 3], patchDir, file_list_valid, flags.input_size,
+                                                      flags.batch_size, dataAug=' ',
+                                                      block_mean=np.append([0], img_mean), batch_code=0)
 
     # train
     start_time = time.time()
