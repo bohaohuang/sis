@@ -116,9 +116,9 @@ def main(flags):
               pretrained_model_dir=None,
               isTrain=True,
               img_mean=img_mean,
-              verb_step=100,                    # print a message every 100 step(sample)
+              verb_step=100,                     # print a message every 100 step(sample)
               save_epoch=20,                     # save the model every 5 epochs
-              gpu=GPU,
+              gpu=flags.GPU,
               tile_size=flags.tile_size,
               patch_size=flags.input_size,
               valid_iou=True)

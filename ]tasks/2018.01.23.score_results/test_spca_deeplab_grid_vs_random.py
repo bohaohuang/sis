@@ -11,11 +11,11 @@ input_size = [736, 736]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
-for runType in ['random', 'grid']:
+for runType in ['grid', 'random']:
     for runId in range(5):
         tf.reset_default_graph()
 
-        model_dir = r'/hdd6/Models/DeepLab_rand_grid/DeeplabV3_spca_aug_{}_{}_PS(321, 321)_BS5_EP60_LR5e-08_DS40_DR0.1_SFN32'\
+        model_dir = r'/hdd6/Models/DeepLab_rand_grid/DeeplabV3_spca_aug_{}_{}_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'\
             .format(runType, runId)
         blCol = uab_collectionFunctions.uabCollection('spca')
         blCol.readMetadata()
