@@ -11,14 +11,14 @@ from bohaoCustom import uabDataReader
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 5e-8
+LEARNING_RATE = 1e-5
 INPUT_SIZE = 321
 TILE_SIZE = 5000
-EPOCHS = 60
+EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 2000
-GPU = 1
+GPU = 0
 DECAY_STEP = 40
 DECAY_RATE = 0.1
 MODEL_NAME = 'spca_aug_xcity_{}'

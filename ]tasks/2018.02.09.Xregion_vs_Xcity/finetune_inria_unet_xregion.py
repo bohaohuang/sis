@@ -9,12 +9,12 @@ import bohaoCustom.uabPreprocClasses as bPreproc
 import uabPreprocClasses
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
-from bohaoCustom import uabMakeNetwork_DeepLabV2
+from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-7
-INPUT_SIZE = 321
+LEARNING_RATE = 1e-5
+INPUT_SIZE = 572
 TILE_SIZE = 5000
 EPOCHS = 20
 NUM_CLASS = 2
@@ -23,11 +23,12 @@ N_VALID = 1000
 GPU = 0
 DECAY_STEP = 10
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_aug_leave_{}_{}_{}'
+MODEL_NAME = 'inria_aug_leave_{}_{}'
 SFN = 32
-PRED_DIR = r'/hdd/Models/DeeplabV3_inria_aug_leave_0_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
+PRED_DIR = r'/hdd6/Models/Unet_focal/UnetCrop_inria_aug_xent_valiou_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
 LEAVE_CITY = 0
 LEAVE_TILE = 0
+CITY_DICT = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 
 
 def read_flag():
@@ -53,7 +54,7 @@ def read_flag():
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
     flags.tile_size = (flags.tile_size, flags.tile_size)
-    flags.model_name = flags.model_name.format(flags.leave_city, flags.leave_tile, flags.run_id)
+    flags.model_name = flags.model_name.format(CITY_DICT[flags.leave_city], flags.run_id)
     return flags
 
 
@@ -63,16 +64,16 @@ def main(flags):
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, flags.input_size[0], flags.input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_DeepLabV2.DeeplabV3({'X':X, 'Y':y},
-                                               trainable=mode,
-                                               model_name=flags.model_name,
-                                               input_size=flags.input_size,
-                                               batch_size=flags.batch_size,
-                                               learn_rate=flags.learning_rate,
-                                               decay_step=flags.decay_step,
-                                               decay_rate=flags.decay_rate,
-                                               epochs=flags.epochs,
-                                               start_filter_num=flags.sfn)
+    model = uabMakeNetwork_UNet.UnetModelCrop({'X':X, 'Y':y},
+                                              trainable=mode,
+                                              model_name=flags.model_name,
+                                              input_size=flags.input_size,
+                                              batch_size=flags.batch_size,
+                                              learn_rate=flags.learning_rate,
+                                              decay_step=flags.decay_step,
+                                              decay_rate=flags.decay_rate,
+                                              epochs=flags.epochs,
+                                              start_filter_num=flags.sfn)
     model.create_graph('X', class_num=flags.num_classes)
 
     # create collection
@@ -98,7 +99,7 @@ def main(flags):
     # use uabCrossValMaker to get fileLists for training and validation
     idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'city')
     idx2, _ = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
-    idx3 = [j*10 + i for i,j in zip(idx, idx2)]
+    idx3 = [j * 10 + i for i, j in zip(idx, idx2)]
 
     # use first city for validation
     filter_train = []
@@ -106,9 +107,9 @@ def main(flags):
     for i in range(6):
         for j in range(1, 37):
             if i == flags.leave_city and j <= 5:
-                filter_valid.append(j*10 + i)
-            else:
-                filter_train.append(j*10 + i)
+                filter_valid.append(j * 10 + i)
+            elif i == flags.leave_city and j > 5:
+                filter_train.append(j * 10 + i)
     file_list_train = uabCrossValMaker.make_file_list_by_key(idx3, file_list, filter_train)
     file_list_valid = uabCrossValMaker.make_file_list_by_key(idx3, file_list, filter_valid)
 
