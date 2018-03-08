@@ -110,6 +110,7 @@ def main(flags):
                        loss_type='xent')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
+              continue_dir=model.ckdir,
               pretrained_model_dir=flags.res_dir,        # train from scratch, no need to load pre-trained model
               isTrain=True,
               img_mean=img_mean,
