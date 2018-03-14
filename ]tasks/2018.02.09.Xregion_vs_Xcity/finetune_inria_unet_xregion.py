@@ -13,7 +13,7 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-7
 INPUT_SIZE = 572
 TILE_SIZE = 5000
 EPOCHS = 20
@@ -28,7 +28,7 @@ SFN = 32
 PRED_DIR = r'/hdd6/Models/Unet_focal/UnetCrop_inria_aug_xent_valiou_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
 LEAVE_CITY = 0
 LEAVE_TILE = 0
-KEEP_LAYER = 1
+KEEP_LAYER = 4
 CITY_DICT = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 VAR_LIST = ['layerup{}'.format(i) for i in range(5, 10)]
 
