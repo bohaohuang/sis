@@ -7,7 +7,7 @@ from bohaoCustom import uabMakeNetwork_DeepLabV2
 # settings
 gpu = 0
 batch_size = 5
-input_size = [736, 736]
+input_size = [321, 321]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
