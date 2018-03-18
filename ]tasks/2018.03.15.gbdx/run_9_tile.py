@@ -12,7 +12,7 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 # settings
 gpu = 1
-batch_size = 5
+batch_size = 1
 input_size = [572, 572]
 tile_size = [7623, 7623]
 util_functions.tf_warn_level(3)
@@ -72,8 +72,12 @@ image_pred = uabUtilreader.un_patchify_shrink(result,
                                               overlap=model.get_overlap())
 pred = util_functions.get_pred_labels(image_pred) * 255
 
+cfm_norm = image_pred[:, :, 1]/np.sum(image_pred, axis=2)
+cfm_norm = cfm_norm.astype(np.uint8)
+imageio.imsave(os.path.join(data_path, '{}_sw_cfm.jpg'.format(tile_id)), cfm_norm)
+
 # view result
-lt = imageio.imread(os.path.join(data_path, large_tile[0]))
+'''lt = imageio.imread(os.path.join(data_path, large_tile[0]))
 plt.figure(figsize=(16, 8))
 ax1 = plt.subplot(131)
 plt.axis('off')
@@ -82,8 +86,9 @@ ax2 = plt.subplot(132, sharex=ax1, sharey=ax1)
 plt.imshow(pred)
 plt.axis('off')
 ax3 = plt.subplot(133, sharex=ax1, sharey=ax1)
-plt.imshow(image_pred[:, :, 0])
-plt.axis('off')
+plt.imshow(image_pred[:, :, 1]/np.sum(image_pred, axis=2))
+#plt.axis('off')
+plt.colorbar()
 plt.tight_layout()
 plt.savefig(os.path.join(img_dir, '{}_result_cm.png'.format(tile_id)))
-plt.show()
+plt.show()'''

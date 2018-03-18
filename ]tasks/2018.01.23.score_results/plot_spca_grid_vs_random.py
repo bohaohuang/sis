@@ -30,8 +30,8 @@ city_dict = {'Fresno': 0, 'Modesto': 1, 'Stockton': 2}
 for cnt_1, run_id in enumerate(run_ids):
     for cnt_2, model_type in enumerate(run_types):
         model_name = \
-            'DeeplabV3_spca_aug_{}_{}_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.format(model_type, run_id)
-        res_path = os.path.join(uabRepoPaths.evalPath, 'Deeplab_spca', model_name, 'spca', 'result.txt')
+            'DeeplabV3_spca_aug_{}_{}_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'.format(model_type, run_id)
+        res_path = os.path.join(uabRepoPaths.evalPath, 'grid_vs_random', model_name, 'spca', 'result.txt')
         with open(res_path, 'r') as f:
             results = f.readlines()
 
