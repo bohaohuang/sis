@@ -18,12 +18,12 @@ EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = 1
+GPU = 0
 DECAY_STEP = 60
 DECAY_RATE = 0.1
-GAMMA = 2
+GAMMA = 0
 ALPHA = 5e-4
-MODEL_NAME = 'spca_aug_focal_valiou_{}_g{}_a{}'
+MODEL_NAME = 'spca_aug_focal_{}_g{}_a{}'
 SFN = 32
 
 
