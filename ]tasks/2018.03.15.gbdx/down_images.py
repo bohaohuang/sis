@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from tqdm import tqdm
 from gbdxtools import Interface
-from gbdxtools import TmsImage
+from gbdxtools import CatalogImage
 import utils
 
 
@@ -68,12 +68,35 @@ gbdx = Interface()
 
 img_dir, task_dir = utils.get_task_img_folder()
 
-for i in tqdm(range(len(imstocat))):
-    imprel = TmsImage(imstocat[i])  # READ IMAGE
-    aoi = imprel.aoi(bbox=list(bboxes[i]))
-    print(type(aoi.read()))
-    '''l = skimage.img_as_ubyte(imprel.aoi(bbox=list(bboxes[i])).read())  # CROP TO BBOX AND CONVERT TO RGB
+# verify polygons
+'''for bb in bboxes:
+    print(bb)
+    plt.plot([bb[0], bb[0]], [bb[1], bb[3]])
+    plt.plot([bb[0], bb[2]], [bb[3], bb[3]])
+    plt.plot([bb[2], bb[2]], [bb[3], bb[1]])
+    plt.plot([bb[0], bb[2]], [bb[1], bb[1]])
+
+plt.show()'''
+
+from gbdxtools.task import env
+from gbdxtools import CatalogImage
+
+catalog_id = env.inputs.get('catalog_id', '1040010033CCDF00')
+bbox = env.inputs.get('bbox', '-72.65748023986818, 41.51410470031741, -72.64263153076173, 41.52779263120528')
+
+image = CatalogImage(catalog_id, band_type="MS", bbox=map(float, bbox.split(",")))
+print(image.shape)
+image = image.rgb()
+plt.imshow(image)
+plt.show()
+
+'''for i in (range(len(imstocat))):
+    imprel = CatalogImage(imstocat[i])  # READ IMAGE
+    aoi = imprel.aoi(bbox=list(bboxes[i])).rgb()
+    plt.imshow(aoi)
+    plt.show()
+    l = skimage.img_as_ubyte(imprel.aoi(bbox=list(bboxes[i])).read())  # CROP TO BBOX AND CONVERT TO RGB
     img_name = os.path.join(r'/media/ei-edl01/user/bh163/figs/2018.03.15.gbdx/gbdx_geotiff',
                             imnames[i] + '.tif')
-    imprel.geotiff(path=img_name, proj='EPSG:4326', bands=[4,2,1])'''
-    #Image.fromarray(l).save(os.path.join(img_dir, imnames[i] + '.jpg'))
+    imprel.geotiff(path=img_name, proj='EPSG:4326', bands=[4,2,1])
+    #Image.fromarray(l).save(os.path.join(img_dir, imnames[i] + '.jpg'))'''

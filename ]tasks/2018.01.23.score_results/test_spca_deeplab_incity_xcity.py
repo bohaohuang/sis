@@ -11,8 +11,8 @@ input_size = [321, 321]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
-for runType in ['xcity', 'incity']:
-    for runId in range(5):
+for runType in ['incity']:
+    for runId in [4]:
         tf.reset_default_graph()
 
         model_dir = r'/hdd6/Models/Deeplab_citycopy/DeeplabV3_spca_aug_{}_{}_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'\

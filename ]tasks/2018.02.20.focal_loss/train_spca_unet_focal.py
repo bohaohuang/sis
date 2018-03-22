@@ -22,7 +22,7 @@ GPU = 0
 DECAY_STEP = 60
 DECAY_RATE = 0.1
 GAMMA = 0
-ALPHA = 5e-4
+ALPHA = 1-5e-4
 MODEL_NAME = 'spca_aug_focal_{}_g{}_a{}'
 SFN = 32
 

@@ -6,8 +6,10 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 # settings
 gpu = 1
-batch_sizes = [9,   8,   7,   6,   5,   4,   3,   2,   1]
-patch_sizes = [476, 492, 508, 540, 572, 620, 684, 796, 1052]
+#batch_sizes = [9,   8,   7,   6,   5,   4,   3,   2,   1]
+#patch_sizes = [476, 492, 508, 540, 572, 620, 684, 796, 1052]
+batch_sizes = [10]
+patch_sizes = [460]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
