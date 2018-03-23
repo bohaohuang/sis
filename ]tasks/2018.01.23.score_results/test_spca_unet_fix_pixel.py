@@ -6,10 +6,10 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 # settings
 gpu = 1
-#batch_sizes = [9,   8,   7,   6,   5,   4,   3,   2,   1]
-#patch_sizes = [476, 492, 508, 540, 572, 620, 684, 796, 1052]
-batch_sizes = [10]
-patch_sizes = [460]
+#batch_sizes = [10,  9,   8,   7,   6,   5,   4,   3,   2,   1]
+#patch_sizes = [460, 476, 492, 508, 540, 572, 620, 684, 796, 1052]
+batch_sizes = [3,   2,   1]
+patch_sizes = [684, 796, 1052]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
@@ -48,4 +48,5 @@ for patch_size, batch_size in zip(patch_sizes, batch_sizes):
         # evaluate on tiles
         model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                        input_size, tile_size, 1, img_mean, model_dir, gpu,
-                       save_result_parent_dir='fix_pixel_fix_test', ds_name='spca')
+                       save_result_parent_dir='fix_pixel_fix_test2', ds_name='spca',
+                       load_epoch_num=95)

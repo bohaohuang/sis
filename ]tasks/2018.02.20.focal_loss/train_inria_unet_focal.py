@@ -11,7 +11,6 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet
 
-RUN_ID = 0
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
 INPUT_SIZE = 572
@@ -23,7 +22,9 @@ N_VALID = 1000
 GPU = 0
 DECAY_STEP = 60
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_aug_focal_valiou_{}'
+GAMMA = 0
+ALPHA = 0.5 #1-5e-4
+MODEL_NAME = 'inria_aug_focal_{}_g{}_a{}'
 SFN = 32
 
 
@@ -43,11 +44,13 @@ def read_flag():
     parser.add_argument('--model-name', type=str, default=MODEL_NAME, help='Model name')
     parser.add_argument('--run-id', type=str, default=RUN_ID, help='id of this run')
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
+    parser.add_argument('--gamma', type=float, default=GAMMA, help='gamma parameter for focal loss')
+    parser.add_argument('--alpha', type=float, default=ALPHA, help='alpha parameter for focal loss')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
     flags.tile_size = (flags.tile_size, flags.tile_size)
-    flags.model_name = flags.model_name.format(flags.run_id)
+    flags.model_name = flags.model_name.format(flags.run_id, flags.gamma, flags.alpha)
     return flags
 
 

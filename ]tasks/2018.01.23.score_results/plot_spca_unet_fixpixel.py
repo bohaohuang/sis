@@ -7,8 +7,8 @@ import uabRepoPaths
 import utils
 
 run_ids = [0, 1, 2, 3, 4]
-batch_sizes = [9,   8,   7,   6,   5,   4,   3,   2,   1]
-patch_sizes = [476, 492, 508, 540, 572, 620, 684, 796, 1052]
+batch_sizes = [10,  9,   8,   7,   6,   5,   4,   3,   2,   1]
+patch_sizes = [460, 476, 492, 508, 540, 572, 620, 684, 796, 1052]
 
 
 def get_results(file_str, batch_sizes, patch_sizes):
@@ -71,8 +71,8 @@ ax1.legend()
 plt.tight_layout()
 
 img_dir, task_dir = utils.get_task_img_folder()
-plt.savefig(os.path.join(img_dir, 'unet_spca_fixpixel.png'))
-with open(os.path.join(task_dir, 'unet_spca_fixpixel.npy'), 'wb') as pk:
-    pickle.dump([result_mean, result_var, result_up, result_down, batch_sizes, patch_sizes], pk)
+#plt.savefig(os.path.join(img_dir, 'unet_spca_fixpixel.png'))
+#with open(os.path.join(task_dir, 'unet_spca_fixpixel.npy'), 'wb') as pk:
+#    pickle.dump([result_mean, result_var, result_up, result_down, batch_sizes, patch_sizes], pk)
 
 plt.show()
