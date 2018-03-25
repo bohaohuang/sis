@@ -1,5 +1,6 @@
 import os
 import csv
+import pickle
 import imageio
 import numpy as np
 import tensorflow as tf
@@ -7,7 +8,7 @@ import uabPreprocClasses
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
 import bohaoCustom.uabPreprocClasses as bPreproc
-from bohaoCustom import uabMakeNetwork_UNet
+from bohaoCustom import uabMakeNetwork_UNetEncoder
 
 
 def name_list_convert(name_list):
@@ -28,29 +29,30 @@ def image_reader(name_list, channels, parent_dir, img_mean, divide_num=5, sample
     idx = np.random.permutation(city_len)
     for s in range(sample_num):
         for i in range(divide_num):
+            city_id = select_pool[i][idx[s]][0]
             img = []
             for c in channels:
                 img.append(imageio.imread(os.path.join(parent_dir, select_pool[i][idx[s]][c])))
             img = np.dstack(img) - img_mean
-            yield np.expand_dims(img, axis=0)
+            yield np.expand_dims(img, axis=0), city_id
 
 
 if __name__ == '__main__':
     # settings
     input_size = [572, 572]
-    num_classes = 2
+    num_classes = 5
     fname = 'fileList.txt'
-    gpu = 1
-    model_dir = r'/hdd6/Models/UNET_rand_gird/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
+    gpu = 0
+    model_dir = r'/hdd6/Models/UnetEncoder_inria_uencoder_PS(572, 572)_BS20_EP200_LR1e-05_DS40_DR0.1_SFN32'
 
     # make network
     # define place holder
     X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_UNet.UnetModelCrop({'X': X, 'Y': y},
-                                              trainable=mode,
-                                              input_size=input_size)
+    model = uabMakeNetwork_UNetEncoder.UnetEncoder({'X': X, 'Y': y},
+                                                   trainable=mode,
+                                                   input_size=input_size)
     model.create_graph('X', class_num=num_classes)
 
     # get extracted patch directory
@@ -80,7 +82,7 @@ if __name__ == '__main__':
     name_list = name_list_convert(name_list)
 
     # get reader
-    reader = image_reader(name_list, [0, 1, 2], patchDir, img_mean)
+    reader = image_reader(name_list, [0, 1, 2], patchDir, img_mean, sample_num=1000)
 
     # run the model
     # run algo
@@ -90,11 +92,16 @@ if __name__ == '__main__':
         init = tf.global_variables_initializer()
         sess.run(init)
         model.load(model_dir, sess)
-        file_name = os.path.join(r'/hdd6/temp', 'encoded_unet.csv')
+        file_name = os.path.join(r'/hdd6/temp', 'encoded_uencoder.csv')
+        city_list = []
         with open(file_name, 'w+') as f:
-            for X_batch in reader:
+            for X_batch, city_id in reader:
+                city_list.append(city_id)
                 encoding = sess.run(model.encoding, feed_dict={model.inputs['X']: X_batch,
                                                                model.trainable: False})
                 encoding = encoding.reshape((-1,)).tolist()
                 writer = csv.writer(f, lineterminator='\n')
                 writer.writerow(['{:3.4e}'.format(x) for x in encoding])
+        file_name = os.path.join(r'/hdd6/temp', 'encoded_uencoder_city_list.pkl')
+        with open(file_name, 'wb') as handle:
+            pickle.dump(city_list, handle)

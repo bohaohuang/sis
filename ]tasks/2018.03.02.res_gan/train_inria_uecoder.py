@@ -12,21 +12,22 @@ from bohaoCustom import uabDataReader
 from bohaoCustom import uabMakeNetwork_UNetEncoder
 
 RUN_ID = 0
-BATCH_SIZE = 50
-LEARNING_RATE = 5e-6
-INPUT_SIZE = 256
+BATCH_SIZE = 20
+LEARNING_RATE = 1e-5
+INPUT_SIZE = 572
 TILE_SIZE = 5000
 EPOCHS = 200
 NUM_CLASS = 5
-N_TRAIN = 20000
-N_VALID = 4000
-GPU = 0
+N_TRAIN = 8000
+N_VALID = 1000
+GPU = 1
 DECAY_STEP = 40
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_uencoder'
 SFN = 32
 Z_DIM = 100
 CITY_DICT = {'austin':0, 'chicago':1, 'kitsap':2, 'tyrol-w':3, 'vienna':4}
+PRE_TRAINED_DIR = r'/hdd6/Models/UNET_rand_gird/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
 
 
 def read_flag():
@@ -46,6 +47,7 @@ def read_flag():
     parser.add_argument('--run-id', type=str, default=RUN_ID, help='id of this run')
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--z-dim', type=int, default=Z_DIM, help='dimension of latent variable')
+    parser.add_argument('--pretrained-dir', type=str, default=PRE_TRAINED_DIR, help='pretrained model directory')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
@@ -58,7 +60,7 @@ def main(flags):
     # make network
     # define place holder
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
-    y = tf.placeholder(tf.float32, shape=[None], name='y')
+    y = tf.placeholder(tf.int32, shape=[None], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
     model = uabMakeNetwork_UNetEncoder.UnetEncoder({'X':X, 'Y':y},
                                                    trainable=mode,
@@ -69,7 +71,8 @@ def main(flags):
                                                    decay_step=flags.decay_step,
                                                    decay_rate=flags.decay_rate,
                                                    epochs=flags.epochs,
-                                                   start_filter_num=flags.sfn)
+                                                   start_filter_num=flags.sfn,
+                                                   latent_num=flags.z_dim)
     model.create_graph('X', class_num=flags.num_classes)
 
     # create collection
@@ -98,7 +101,6 @@ def main(flags):
     file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(6, 37)])
     file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 6)])
 
-    #TODO start work from here
     dataReader_train = uabDataReader.ImageLabelReader_City([3], [0, 1, 2], patchDir, file_list_train, flags.input_size,
                                                            flags.batch_size, dataAug='flip,rotate',
                                                            block_mean=np.append([0], img_mean), city_dict=CITY_DICT)
@@ -109,7 +111,10 @@ def main(flags):
     # train
     start_time = time.time()
 
-    model.train_config('X', 'Z', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath)
+    train_scope = ['layerencode6', 'layerencode7', 'layerencode_final', 'layerencode_pred']
+    model.load_weights(flags.pretrained_dir, [1, 2, 3, 4, 5])
+    model.train_config('X', 'Y', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
+                       train_var_filter=train_scope)
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,
