@@ -31,8 +31,6 @@ plt.legend()
 ax2 = plt.subplot(212, sharex=ax1)
 for cnt_1, m in enumerate(model_name):
     file_name = os.path.join(save_dir, '{}_{}_fixpixel.npy'.format(m, 'spca'))
-    if m == 'deeplab':
-        continue
     with open(file_name, 'rb') as pk:
         [result_mean, result_var, result_up, result_down, batch_sizes, patch_sizes] \
             = pickle.load(pk)

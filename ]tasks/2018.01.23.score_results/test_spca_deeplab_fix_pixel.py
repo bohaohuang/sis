@@ -6,8 +6,8 @@ from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 # settings
 gpu = 1
-batch_sizes = [5,   4,   3,   2,   1]   # [10,  9,   8,   7,   6,   5,   4,   3,   2,   1]
-patch_sizes = [321, 368, 424, 520, 736] #[232, 248, 264, 276, 300, 321, 368, 424, 520, 736]
+batch_sizes = [2,   1]   # [10,  9,   8,   7,   6,   5,   4,   3,   2,   1]
+patch_sizes = [520, 736] #[232, 248, 264, 276, 300, 321, 368, 424, 520, 736]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 

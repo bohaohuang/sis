@@ -6,7 +6,7 @@ import uabCrossValMaker
 import uab_collectionFunctions
 import utils
 import util_functions
-from bohaoCustom import uabMakeNetwork_UNet
+from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 # settings
 gpu = None
@@ -19,12 +19,12 @@ if not os.path.exists(save_dir):
     os.makedirs(save_dir)
 
 for run_repeat in range(1, 5):
-    for size in [572, 828, 1084, 1340, 1596, 1852, 2092, 2332, 2636]:
+    for size in [321, 520, 736, 832, 1088, 1344, 1600, 1856, 2096, 2640]:
         input_size = [size, size]
 
         tf.reset_default_graph()
 
-        model_dir = r'/hdd6/Models/UNET_rand_gird/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
+        model_dir = r'/hdd6/Models/DeepLab_rand_grid/DeeplabV3_res101_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
         blCol = uab_collectionFunctions.uabCollection('inria')
         blCol.readMetadata()
         file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
@@ -45,10 +45,10 @@ for run_repeat in range(1, 5):
         X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
         y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
         mode = tf.placeholder(tf.bool, name='mode')
-        model = uabMakeNetwork_UNet.UnetModelCrop({'X':X, 'Y':y},
-                                                  trainable=mode,
-                                                  input_size=input_size,
-                                                  batch_size=5, start_filter_num=32)
+        model = uabMakeNetwork_DeepLabV2.DeeplabV3({'X':X, 'Y':y},
+                                                   trainable=mode,
+                                                   input_size=input_size,
+                                                   batch_size=5, start_filter_num=32)
         # create graph
         model.create_graph('X', class_num=2)
 
