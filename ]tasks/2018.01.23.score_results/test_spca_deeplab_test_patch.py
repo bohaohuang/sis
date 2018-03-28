@@ -24,21 +24,19 @@ for run_repeat in range(1):
 
         tf.reset_default_graph()
 
-        model_dir = r'/hdd6/Models/DeepLab_rand_grid/DeeplabV3_res101_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
-        blCol = uab_collectionFunctions.uabCollection('inria')
+        model_dir = r'/hdd6/Models/DeepLab_rand_grid/DeeplabV3_spca_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
+        blCol = uab_collectionFunctions.uabCollection('spca')
         blCol.readMetadata()
-        file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
-        file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(4)
+        file_list, parent_dir = blCol.getAllTileByDirAndExt([1, 2, 3])
+        file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(0)
         idx, file_list = uabCrossValMaker.uabUtilGetFolds(None, file_list, 'force_tile')
         idx_truth, file_list_truth = uabCrossValMaker.uabUtilGetFolds(None, file_list_truth, 'force_tile')
         # use first 5 tiles for validation
         file_list_valid = uabCrossValMaker.make_file_list_by_key(
-            idx, file_list, [i for i in range(0, 6)],
-            filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
+            idx, file_list, [i for i in range(250, 500)])
         file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(
-            idx_truth, file_list_truth, [i for i in range(0, 6)],
-            filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
-        img_mean = blCol.getChannelMeans([0, 1, 2])
+            idx_truth, file_list_truth, [i for i in range(250, 500)])
+        img_mean = blCol.getChannelMeans([1, 2, 3])
 
         # make the model
         # define place holder
@@ -59,5 +57,5 @@ for run_repeat in range(1):
                              save_result=False)
         duration = time.time() - start_time
 
-        file_name = '{}_{}_{}.npy'.format(model.model_name, size, run_repeat)
+        file_name = '{}_{}_{}_spca.npy'.format(model.model_name, size, run_repeat)
         np.save(os.path.join(save_dir, file_name), [iou, duration])
