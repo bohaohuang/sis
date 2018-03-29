@@ -27,6 +27,8 @@ for cnt_run, run_repeat in enumerate(runs):
         iou_record[cnt_run][cnt_size] = A/B*100
         duration_record[cnt_run][cnt_size] = duration
 
+np.save(os.path.join(save_dir, 'inria_deeplab_test_patch.npy'), [sizes, iou_record, duration_record])
+
 plt.rcParams.update({'font.size': 14})
 plt.rc('grid', linestyle='--')
 plt.subplot(211)

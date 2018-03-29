@@ -20,13 +20,13 @@ EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = None
+GPU = 1
 DECAY_STEP = 40
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_aug_train_{}'
 SFN = 32
-RES101_DIR = r'/hdd/Models/resnet_v1_101.ckpt'
-TRAIN_CITY = 'austin,chicago,kitsap,tyrol-w,vienna'
+RES101_DIR = r'/hdd6/Models/resnet_v1_101.ckpt'
+TRAIN_CITY = 'chicago,kitsap,tyrol-w,vienna'
 
 
 def read_flag():

@@ -19,14 +19,14 @@ tile_size = [2541, 2541]
 util_functions.tf_warn_level(3)
 img_dir, task_dir = utils.get_task_img_folder()
 
-for tile_cnt in range(10):
+for tile_cnt in range(50):
 
     tf.reset_default_graph()
 
     model_dir = r'/hdd6/Models/UNET_rand_gird/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
     gt_dir = r'/media/ei-edl01/data/uab_datasets/sp/DATA_BUILDING_AND_PANEL'
     # compute img mean
-    data_path = r'/media/ei-edl01/user/as667/cropped'
+    data_path = r'/media/ei-edl01/user/as667/cropped_brighten'
     imgs = glob(os.path.join(data_path, '*.tif'))[:50]
 
     '''img_mean = [[], [], []]
@@ -39,7 +39,7 @@ for tile_cnt in range(10):
     img_mean[1] = np.mean(img_mean[1])
     img_mean[2] = np.mean(img_mean[2])
     print(img_mean)'''
-    img_mean = [22.75243892, 28.836170284, 16.700785228]
+    img_mean = [65.44005765, 77.18910836, 59.67908051]
 
     # make the model
     # define place holder
@@ -86,7 +86,7 @@ for tile_cnt in range(10):
 
     # view result
     lt = imageio.imread(os.path.join(data_path, large_tile[0]))
-    plt.figure(figsize=(12, 6))
+    fig = plt.figure(figsize=(12, 6))
     ax1 = plt.subplot(121)
     plt.axis('off')
     plt.imshow(lt)
@@ -95,5 +95,7 @@ for tile_cnt in range(10):
     plt.axis('off')
     plt.suptitle(os.path.basename(imgs[tile_cnt]))
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, '{}_result_cm_building.png'.format(os.path.basename(imgs[tile_cnt])[:-5])))
+    plt.savefig(os.path.join(img_dir, 'gbdx_raw_brighten',
+                             '{}_result_cm_building.png'.format(os.path.basename(imgs[tile_cnt])[:-5])))
+    plt.close(fig)
     # plt.show()
