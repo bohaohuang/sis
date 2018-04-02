@@ -12,8 +12,10 @@ def get_error_vs_dist(model):
     patch_dir = '/hdd/Temp/IGARSS2018'
     if model == 'UnetCrop2':
         size = 388
-    else:
+    elif model == 'Deeplab321':
         size = 321
+    else:
+        size = 576
     error_map = np.zeros((size, size))
 
     pred_files = sorted(glob(os.path.join(patch_dir, model, '*pred*.png')))
@@ -55,8 +57,8 @@ def get_error_vs_dist(model):
 
 img_dir, task_dir = utils.get_task_img_folder()
 
-nocrop_dist, nocrop_error = get_error_vs_dist('Deeplab321')
-crop_dist, crop_error = get_error_vs_dist('UnetCrop2')
+nocrop_dist, nocrop_error = get_error_vs_dist('UnetNoCrop')
+crop_dist, crop_error = get_error_vs_dist('Deeplab321')
 nocrop_error = nocrop_error/np.sum(nocrop_error) * 100
 crop_error = crop_error/np.sum(crop_error) * 100
 
@@ -64,9 +66,9 @@ matplotlib.rcParams.update({'font.size': 14})
 plt.figure(figsize=(8, 4))
 #plt.subplot(211)
 #plt.subplot2grid((6, 1), (0, 0), rowspan=3)
-plt.plot(np.array(nocrop_dist), np.array(nocrop_error), label='DeepLab-V2')
-plt.plot(np.array(crop_dist), np.array(crop_error), label='U-Net')
-plt.legend(loc='best')
+plt.plot(np.array(nocrop_dist), np.array(nocrop_error), label='U-Net Zero-padding')
+plt.plot(np.array(crop_dist), np.array(crop_error), label='DeepLab-CRF')
+plt.legend(loc='center right')
 plt.xlabel('Horizontal Dist to Center')
 plt.grid('on')
 #plt.text(-300, 20, '(a)')
@@ -85,5 +87,5 @@ plt.xlabel('')
 plt.ylabel('Time:s')
 plt.text(-0.45, 600, '(b)')'''
 plt.tight_layout()
-#plt.savefig(os.path.join(img_dir, 'error_vs_dist.png'))
+plt.savefig(os.path.join(img_dir, 'error_vs_dist_unet2.png'))
 plt.show()

@@ -7,21 +7,21 @@ import uabCrossValMaker
 import uabUtilreader
 import util_functions
 import uab_collectionFunctions
-from bohaoCustom import uabMakeNetwork_DeepLabV2
+from bohaoCustom import uabMakeNetwork_FRRN
 
 # settings
 gpu = 1
 util_functions.tf_warn_level()
 batch_size = 1
-input_sizes = [544]
+input_sizes = [224]
 for size in input_sizes:
     print('Evaluating at size {} ...'.format(size))
     input_size = [size, size]
     tile_size = [5000, 5000]
-    save_dir = '/hdd/Temp/IGARSS2018/Deeplab{}'.format(size)
+    save_dir = '/hdd/Temp/IGARSS2018/FRRN{}'.format(size)
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
-    model_dir = r'/hdd6/Models/DeepLab_rand_grid/DeeplabV3_res101_inria_aug_grid_1_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
+    model_dir = r'/hdd6/Models/FRRN_inria_aug_grid_1_PS(224, 224)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
 
     # prepare data
     blCol = uab_collectionFunctions.uabCollection('inria')
@@ -49,11 +49,11 @@ for size in input_sizes:
         X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
         y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
         mode = tf.placeholder(tf.bool, name='mode')
-        model = uabMakeNetwork_DeepLabV2.DeeplabV3({'X': X, 'Y': y},
-                                                   trainable=mode,
-                                                   input_size=input_size,
-                                                   batch_size=5,
-                                                   start_filter_num=32)
+        model = uabMakeNetwork_FRRN.FRRN({'X': X, 'Y': y},
+                                         trainable=mode,
+                                         input_size=input_size,
+                                         batch_size=5,
+                                         start_filter_num=32)
         # create graph
         model.create_graph('X', class_num=2)
 
