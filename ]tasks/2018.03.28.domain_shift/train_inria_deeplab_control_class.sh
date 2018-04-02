@@ -9,4 +9,4 @@ module load Anaconda3/3.5.2
 export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=/opt/apps/rhel7/cudnn/lib64:$LD_LIBRARY_PATH
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/uab
-python train_inria_deeplab_control_city.py --patch-name=h0_austin --patch-dir=/dscrhome/bh163/code/sis/%5Dtasks/2018.03.28.domain_shift --res-dir=/dscrhome/bh163/resnet_v1_101.ckpt
+python train_inria_deeplab_control_class.py --patch-name=h0_austin --patch-dir=/dscrhome/bh163/code/sis/%5Dtasks/2018.03.28.domain_shift --res-dir=/dscrhome/bh163/resnet_v1_101.ckpt
