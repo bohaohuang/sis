@@ -18,18 +18,18 @@ def get_sum_of_channel(img):
 
 
 # settings
-gpu = 0
+gpu = 1
 batch_size = 5
 input_size = [572, 572]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 file_dir = r'/hdd/Temp/INRIA_gamma/orig'
 adjust_save_dir = r'/hdd/Temp/INRIA_gamma/adjust'
-model_dir = r'/hdd6/Models/UNET_rand_gird/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
+model_dir = r'/hdd6/Models/UnetCrop_inria_aug_gamma_0_PS(572, 572)_BS5_EP100_LR0.0001_DS40_DR0.1_SFN32'
 imgs = sorted(glob(os.path.join(file_dir, '*_RGB.tif')))
 n = len(imgs) * 5000 ** 2
 
-for gamma in [0.1, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9]:
+for gamma in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.5, 2]:
     tf.reset_default_graph()
     img_mean = np.zeros(3)
 

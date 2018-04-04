@@ -13,15 +13,15 @@ from bohaoCustom import uabDataReader
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-4
 INPUT_SIZE = 572
 TILE_SIZE = 5000
-EPOCHS = 40
+EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = 0
-DECAY_STEP = 20
+GPU = 1
+DECAY_STEP = 40
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_aug_gamma_{}'
 SFN = 32
@@ -112,7 +112,7 @@ def main(flags):
                        loss_type='xent')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
-              pretrained_model_dir=flags.res_dir,
+              pretrained_model_dir=None,
               isTrain=True,
               img_mean=img_mean,
               verb_step=100,                    # print a message every 100 step(sample)
