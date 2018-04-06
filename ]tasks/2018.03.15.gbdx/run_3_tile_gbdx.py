@@ -24,12 +24,13 @@ def get_sum_of_channel(img):
 tile_dir = r'/media/ei-edl01/user/as667/BOHAO'
 orig_dir = r'/media/ei-edl01/data/uab_datasets/sp/DATA_BUILDING_AND_PANEL'
 adjust_save_dir = r'/media/ei-edl01/user/as667/BOHAO/adjust_gamma'
-model_dir = r'/media/ei-edl01/data/uab_datasets/sp/]shared_models/UnetCropCV_(FixedRes)CTFinetune+nlayer9_' \
-            r'PS(572, 572)_BS5_EP100_LR1e-05_DS50_DR0.1_SFN32'
+#model_dir = r'/media/ei-edl01/data/uab_datasets/sp/]shared_models/UnetCropCV_(FixedRes)CTFinetune+nlayer9_' \
+#            r'PS(572, 572)_BS5_EP100_LR1e-05_DS50_DR0.1_SFN32'
+model_dir = r'/hdd6/Models/UNET_rand_gird/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
 reshape_files = glob(os.path.join(tile_dir, 'rs_*.tif'))
 gpu = 1
 batch_size = 5
-input_size = [572, 572]
+input_size = [736, 736]
 tile_size = [2541, 2541]
 util_functions.tf_warn_level(3)
 img_dir, task_dir = utils.get_task_img_folder()
@@ -45,16 +46,14 @@ if len(reshape_files) == 0:
 
 tile_ids = [os.path.basename(a)[3:].split('.')[0] for a in reshape_files]
 #gamma_list = np.arange(0.1, 5.1, 0.1) #[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.2, 1.5, 1.8, 2, 2.5, 3]
-gamma_list = [1]
+gamma_list = [1.8]
 gt_target_pixels = np.zeros((len(tile_ids), len(gamma_list)))
 pred_target_pixels = np.zeros((len(tile_ids), len(gamma_list)))
 gt_target_num = np.zeros((len(tile_ids), len(gamma_list)))
 pred_target_num = np.zeros((len(tile_ids), len(gamma_list)))
 for cnt_1, gamma in enumerate(gamma_list):
-    path = os.path.join(uabRepoPaths.evalPath, 'sp_gamma', 'UnetCropCV_(FixedRes)CTFinetune+nlayer9_'
-                                                                         'PS(572, 572)_BS5_EP100_LR1e-05_DS50_DR0.1_'
-                                                                         'SFN32',
-                                       'ct{}'.format(util_functions.d2s(gamma)))
+    path = os.path.join(uabRepoPaths.evalPath, 'sp_gamma', 'UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+                                       'building_ct{}'.format(util_functions.d2s(gamma)))
 
     # make new imgs
     invGamma = 1.0 / gamma
@@ -104,7 +103,7 @@ for cnt_1, gamma in enumerate(gamma_list):
         # evaluate on tiles
         model.evaluate(file_list_valid, file_list_valid_truth, adjust_save_dir, tile_dir,
                        input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                       save_result_parent_dir='sp_gamma', ds_name='ct{}'.format(util_functions.d2s(gamma)))
+                       save_result_parent_dir='sp_gamma', ds_name='building_ct{}'.format(util_functions.d2s(gamma)))
 
     # evaluate performance
     for cnt_2, tile_id in enumerate(tile_ids):
