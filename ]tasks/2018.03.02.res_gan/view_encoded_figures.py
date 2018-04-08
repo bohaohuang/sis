@@ -3,7 +3,7 @@ import imageio
 import numpy as np
 import matplotlib.pyplot as plt
 
-img_ids = [25508, 35237, 24154, 1851, 8427, 33718]
+img_ids = [1012, 2741, 44274, 2106, 732, 24897]
 input_size = 321
 patchDir = r'/hdd/uab_datasets/Results/PatchExtr/inria/chipExtrReg_cSz321x321_pad0'
 

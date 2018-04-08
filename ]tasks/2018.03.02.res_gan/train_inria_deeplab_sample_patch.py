@@ -11,7 +11,7 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
-RUN_ID = 0
+RUN_ID = 6
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-5
 INPUT_SIZE = 321
@@ -100,8 +100,10 @@ def main(flags):
     # use uabCrossValMaker to get fileLists for training and validation
     idx, file_list = uabCrossValMaker.uabUtilGetFolds(flags.patch_dir, '{}.txt'.format(flags.patch_name), 'force_tile')
     # use first 5 tiles for validation
-    file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(6, 37)])
-    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 6)])
+    #file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(6, 37)])
+    #file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 6)])
+    file_list_valid = file_list[:int(len(file_list)*5/36)]
+    file_list_train = file_list[int(len(file_list)*5/36):]
 
     with tf.name_scope('image_loader'):
         # GT has no mean to subtract, append a 0 for block mean

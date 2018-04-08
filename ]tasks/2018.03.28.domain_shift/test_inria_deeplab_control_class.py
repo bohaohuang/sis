@@ -10,7 +10,7 @@ batch_size = 5
 input_size = [321, 321]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
-city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
+city_list = ['vienna']
 
 for city in city_list:
     for run_type in ['h0']:

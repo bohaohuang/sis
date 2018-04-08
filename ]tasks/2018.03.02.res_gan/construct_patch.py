@@ -1,4 +1,5 @@
 import os
+import re
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
@@ -32,12 +33,11 @@ def make_bucket_group(bucket):
         if offset[cnt] < 0:
             for i in range(int(-offset[cnt])):
                 bucket[cnt].append(plus_term.pop())
-
     return bucket
 
 
 # settings
-random_seed = 4
+random_seed = 9
 img_dir, task_dir = utils.get_task_img_folder()
 file_name = os.path.join(task_dir, 'res50_fc1000_inria.csv')
 input_size = 321
@@ -49,6 +49,15 @@ np.random.seed(random_seed)
 features = np.load(npy_file_name)
 labels = KMeans(n_clusters=5, random_state=random_seed).fit_predict(features)
 cmap = plt.get_cmap('Set1').colors
+for i in range(5):
+    plt.scatter(features[labels == i, 0], features[labels == i, 1], color=cmap[i], label=i, edgecolors='k')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.title('TSNE Projection Result')
+plt.legend()
+plt.tight_layout()
+plt.savefig(os.path.join(img_dir, 'kmenas_res50_tsne_proj.png'))
+# plt.show()
 
 # load patch filelist
 file_name = os.path.join(patchDir, 'fileList.txt')
@@ -57,6 +66,8 @@ with open(file_name, 'r') as f:
 
 # construct patch file
 patch_bucket = []
+city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
+cnt = np.zeros(5)
 for i in range(5):
     patch_bucket.append([files[j] for j in range(len(files)) if labels[j] == i])
 bucket = make_bucket_group(patch_bucket)
@@ -66,4 +77,7 @@ save_patch_flie_name = os.path.join(task_dir, 'fileList_{}.txt'.format(random_se
 with open(save_patch_flie_name, 'w+') as f:
     for i in tqdm(range(bucket_len)):
         for j in range(len(bucket)):
+            #replaced_line = re.sub(r'[a-z]{6,}(?=[\d]*_)', city_list[j], bucket[j][i])
+            #cnt[j] += 1
+            #f.write(replaced_line)
             f.write(bucket[j][i])
