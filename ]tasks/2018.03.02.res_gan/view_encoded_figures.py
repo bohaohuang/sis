@@ -3,9 +3,9 @@ import imageio
 import numpy as np
 import matplotlib.pyplot as plt
 
-img_ids = [1012, 2741, 44274, 2106, 732, 24897]
-input_size = 321
-patchDir = r'/hdd/uab_datasets/Results/PatchExtr/inria/chipExtrReg_cSz321x321_pad0'
+img_ids = [3057, 7749, 11704, 9578, 20555, 856]
+input_size = 572
+patchDir = r'/hdd/uab_datasets/Results/PatchExtr/inria/chipExtrReg_cSz572x572_pad184'
 
 file_name = os.path.join(patchDir, 'fileList.txt')
 with open(file_name, 'r') as f:
@@ -22,4 +22,6 @@ for plt_cnt, iid in enumerate(img_ids):
     plt.title(patch_name)
     plt.axis('off')
 plt.tight_layout()
+plt.savefig(os.path.join(r'/media/ei-edl01/user/bh163/figs/2018.03.02.res_gan/view_inria_unet', '{}.png'.
+            format('_'.join([str(a) for a in img_ids]))))
 plt.show()

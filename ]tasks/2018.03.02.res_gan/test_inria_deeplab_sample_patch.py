@@ -11,7 +11,7 @@ input_size = [321, 321]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
-for city in range(5):
+for city in range(8, 10):
     tf.reset_default_graph()
 
     model_dir = r'/hdd6/Models/Deeplab_xgroup/DeeplabV3_inria_aug_train_fileList_{}_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'.\
