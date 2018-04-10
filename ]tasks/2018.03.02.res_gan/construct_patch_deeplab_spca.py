@@ -38,7 +38,7 @@ def make_bucket_group(bucket):
 
 
 # settings
-random_seed = 4
+random_seed = 0
 img_dir, task_dir = utils.get_task_img_folder()
 file_name = os.path.join(task_dir, 'res50_fc1000_sp_deeplab.csv')
 input_size = 321
@@ -65,6 +65,7 @@ plt.show()
 file_name = os.path.join(patchDir, 'fileList.txt')
 with open(file_name, 'r') as f:
     files = f.readlines()
+print(files[:5])
 
 # construct patch file
 print(len(files), len(labels))

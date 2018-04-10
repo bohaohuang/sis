@@ -77,6 +77,8 @@ model.create_graph('X', class_num=2)
 
 # load data
 for test_file in file_list_valid:
+    tf.reset_default_graph()
+
     # building detector
     file_name = 'building_' + test_file[0]
     if os.path.exists(os.path.join(my_dir, file_name)):
