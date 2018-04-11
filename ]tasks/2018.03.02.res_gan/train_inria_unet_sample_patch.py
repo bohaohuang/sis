@@ -13,7 +13,7 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-4
 INPUT_SIZE = 321
 TILE_SIZE = 5000
 EPOCHS = 100
@@ -125,7 +125,7 @@ def main(flags):
                        loss_type='xent')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
-              pretrained_model_dir=flags.res_dir,   # train from scratch, no need to load pre-trained model
+              pretrained_model_dir=None,   # train from scratch, no need to load pre-trained model
               isTrain=True,
               img_mean=img_mean,
               verb_step=100,                        # print a message every 100 step(sample)
