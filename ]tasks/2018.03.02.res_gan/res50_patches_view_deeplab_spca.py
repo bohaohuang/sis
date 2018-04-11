@@ -37,12 +37,12 @@ patch_name_fname = os.path.join(task_dir, 'temp', 'res50_fc1000_sp_deeplab.txt')
 with open(patch_name_fname, 'r') as f:
     patch_name_list = f.readlines()
 
-'''patch_percent_list = [patch_name_list[i] for i in range(len(patch_name_list)) if random_idx[i] == 1]
+patch_percent_list = [patch_name_list[i] for i in range(len(patch_name_list)) if random_idx[i] == 1]
 patch_percent = np.zeros(len(patch_percent_list))
-patchDir = r'/hdd/uab_datasets/Results/PatchExtr/inria/chipExtrReg_cSz321x321_pad0'
+patchDir = r'/hdd/uab_datasets/Results/PatchExtr/spca/chipExtrReg_cSz321x321_pad0'
 for cnt, patch_name in enumerate(tqdm(patch_percent_list)):
-    gt = imageio.imread(os.path.join(patchDir, '{}_GT_Divide.png'.format(patch_name.strip())))
-    patch_percent[cnt] = np.sum(gt)/(gt.shape[0] * gt.shape[1])'''
+    gt = imageio.imread(os.path.join(patchDir, '{}_GT.png'.format(patch_name.strip())))
+    patch_percent[cnt] = np.sum(gt)/(gt.shape[0] * gt.shape[1])
 
 patch_name_list = [city_order[a[:3]] for a in patch_name_list]
 
@@ -55,11 +55,11 @@ patch_name_code = patch_name_code[random_idx == 1]
 cmap = plt.get_cmap('Set1').colors
 patch_id = np.arange(feature_encode.shape[0])
 plt.figure(figsize=(15, 8))
-for i in range(3):
+'''for i in range(3):
     plt.scatter(feature_encode[patch_name_code == i, 0], feature_encode[patch_name_code == i, 1], color=cmap[i],
-                label=city_list[i], edgecolors='k')
-#plt.scatter(feature_encode[:, 0], feature_encode[:, 1], c=patch_percent, cmap=plt.get_cmap('bwr'))
-#plt.colorbar()
+                label=city_list[i], edgecolors='k')'''
+plt.scatter(feature_encode[:, 0], feature_encode[:, 1], c=patch_percent, cmap=plt.get_cmap('bwr'))
+plt.colorbar()
 
 #for i in range(feature_encode.shape[0]):
 #    plt.text(feature_encode[i, 0], feature_encode[i, 1], patch_ids[i])
@@ -68,5 +68,5 @@ plt.ylabel('Feature 2')
 plt.title('TSNE Projection Result')
 plt.legend()
 plt.tight_layout()
-#plt.savefig(os.path.join(img_dir, 'res50_tsne_proj.png'))
+# plt.savefig(os.path.join(img_dir, 'res50_tsne_proj_deeplab_spca.png'))
 plt.show()

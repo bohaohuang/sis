@@ -53,7 +53,7 @@ print(patch_file_name)
 with open(file_name, 'w+') as f:
     with open(patch_file_name, 'w+') as f2:
         for file_line in tqdm(files):
-            patch_name = file_line.split('.')[0][:-5]
+            patch_name = file_line.split('.')[0][:-3]
             img = np.zeros((input_size[0], input_size[1], 3), dtype=np.uint8)
             for cnt, file in enumerate(file_line.strip().split(' ')[:3]):
                 img[:, :, cnt] = imageio.imread(os.path.join(patchDir, file))

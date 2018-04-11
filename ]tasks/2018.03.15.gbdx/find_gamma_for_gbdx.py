@@ -30,61 +30,57 @@ building_model_dir = r'/hdd6/Models/UNET_rand_gird/UnetCrop_inria_aug_grid_0_PS(
                      r'BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
 sp_model_dir = r'/media/ei-edl01/data/uab_datasets/sp/]shared_models/UnetCropCV_(FixedRes)CTFinetune+nlayer9_' \
              r'PS(572, 572)_BS5_EP100_LR1e-05_DS50_DR0.1_SFN32'
-imgs = sorted(glob(os.path.join(img_dir, '*.tif')))
-gamma = 2.5
-invGamma = 1.0 / gamma
-table = np.array([((i / 255.0) ** invGamma) * 255 for i in np.arange(0, 256)]).astype('uint8')
-n = len(imgs) * 2541 ** 2
-gpu = 1
-batch_size = 5
-input_size = [1052, 1052]
-tile_size = [2541, 2541]
+imgs = [os.path.join(img_dir, '000795_ne.tif')]
+for gamma in [1.8, 1.9, 2, 2.2, 2.5, 2.8, 3]:
+    invGamma = 1.0 / gamma
+    table = np.array([((i / 255.0) ** invGamma) * 255 for i in np.arange(0, 256)]).astype('uint8')
+    n = len(imgs) * 2541 ** 2
+    gpu = 1
+    batch_size = 5
+    input_size = [1052, 1052]
+    tile_size = [2541, 2541]
 
-# make dirs
-if not os.path.exists(my_dir):
-    os.makedirs(my_dir)
+    # make dirs
+    if not os.path.exists(my_dir):
+        os.makedirs(my_dir)
 
-# calculate img_mean
-#img_mean = np.array([88.37291495, 90.42750029, 73.08226198])
-img_mean = np.zeros(3)
-img_file = []
-for file in tqdm(imgs):
-    img_name = os.path.basename(file)
-    try:
-        img = imageio.imread(file)
-        img = scipy.misc.imresize(img, tile_size)
-        img_adjust = cv2.LUT(img, table)
-        img_mean += get_sum_of_channel(img_adjust)
-        img_file.append(file)
-        imageio.imsave(os.path.join(adjust_save_dir, img_name), img_adjust)
-    except IndexError:
-        print(file)
-img_mean = img_mean / n
-print(img_mean)
+    # calculate img_mean
+    #img_mean = np.array([88.37291495, 90.42750029, 73.08226198])
+    img_mean = np.zeros(3)
+    img_file = []
+    for file in tqdm(imgs):
+        img_name = os.path.basename(file)
+        try:
+            img = imageio.imread(file)
+            img = scipy.misc.imresize(img, tile_size)
+            img_adjust = cv2.LUT(img, table)
+            img_mean += get_sum_of_channel(img_adjust)
+            img_file.append(file)
+            imageio.imsave(os.path.join(adjust_save_dir, img_name), img_adjust)
+        except IndexError:
+            print(file)
+    img_mean = img_mean / n
+    print(img_mean)
 
-# run detector
-file_list_valid = [[os.path.basename(x)] for x in img_file]
+    # run detector
+    file_list_valid = [[os.path.basename(x)] for x in img_file]
 
-# load data
-for test_file in file_list_valid:
-    tf.reset_default_graph()
-    # make the model
-    # define place holder
-    X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
-    y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
-    mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_UNet.UnetModelCrop({'X': X, 'Y': y},
-                                              trainable=mode,
-                                              input_size=input_size,
-                                              batch_size=5, start_filter_num=32)
-    # create graph
-    model.create_graph('X', class_num=2)
+    # load data
+    for test_file in file_list_valid:
+        tf.reset_default_graph()
+        # make the model
+        # define place holder
+        X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
+        y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
+        mode = tf.placeholder(tf.bool, name='mode')
+        model = uabMakeNetwork_UNet.UnetModelCrop({'X': X, 'Y': y},
+                                                  trainable=mode,
+                                                  input_size=input_size,
+                                                  batch_size=5, start_filter_num=32)
+        # create graph
+        model.create_graph('X', class_num=2)
 
-    # building detector
-    file_name = 'building_' + test_file[0]
-    if os.path.exists(os.path.join(my_dir, file_name)):
-        continue
-    else:
+        # building detector
         reader = uabDataReader.ImageLabelReader(gtInds=[0],
                                                 dataInds=[0],
                                                 nChannels=3,
@@ -113,14 +109,9 @@ for test_file in file_list_valid:
                                                       [input_size[0] - model.get_overlap(),
                                                        input_size[1] - model.get_overlap()],
                                                       overlap=model.get_overlap())
-        pred = util_functions.get_pred_labels(image_pred)
-        imageio.imsave(os.path.join(my_dir, file_name), pred)
+        bpred = util_functions.get_pred_labels(image_pred)
 
-    # sp detector
-    file_name = 'sp_' + test_file[0]
-    if os.path.exists(os.path.join(my_dir, file_name)):
-        continue
-    else:
+        # sp detector
         reader = uabDataReader.ImageLabelReader(gtInds=[0],
                                                 dataInds=[0],
                                                 nChannels=3,
@@ -149,5 +140,19 @@ for test_file in file_list_valid:
                                                       [input_size[0] - model.get_overlap(),
                                                        input_size[1] - model.get_overlap()],
                                                       overlap=model.get_overlap())
-        pred = util_functions.get_pred_labels(image_pred)
-        imageio.imsave(os.path.join(my_dir, file_name), pred)
+        spred = util_functions.get_pred_labels(image_pred)
+
+        plt.figure(figsize=(15, 5))
+        ax1 = plt.subplot(131)
+        plt.imshow(imageio.imread(os.path.join(adjust_save_dir, test_file[0])))
+        plt.title('Gamma={}'.format(gamma))
+        plt.axis('off')
+        ax2 = plt.subplot(132, sharex=ax1, sharey=ax1)
+        plt.imshow(bpred)
+        plt.axis('off')
+        ax3 = plt.subplot(133, sharex=ax1, sharey=ax1)
+        plt.imshow(spred)
+        plt.axis('off')
+        plt.tight_layout()
+        plt.show()
+

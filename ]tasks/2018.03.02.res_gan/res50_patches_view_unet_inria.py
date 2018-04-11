@@ -28,7 +28,7 @@ else:
     feature_encode = np.load(npy_file_name)
 feature_encode = np.array(feature_encode)
 
-random_idx = np.random.binomial(1, 0.2, feature_encode.shape[0])
+random_idx = np.random.binomial(1, 1, feature_encode.shape[0])
 patch_ids = np.arange(feature_encode.shape[0])
 feature_encode = feature_encode[random_idx == 1, :]
 patch_ids = patch_ids[random_idx == 1]
@@ -37,12 +37,12 @@ patch_name_fname = os.path.join(task_dir, 'temp', 'res50_fc1000_inria_unet.txt')
 with open(patch_name_fname, 'r') as f:
     patch_name_list = f.readlines()
 
-'''patch_percent_list = [patch_name_list[i] for i in range(len(patch_name_list)) if random_idx[i] == 1]
+patch_percent_list = [patch_name_list[i] for i in range(len(patch_name_list)) if random_idx[i] == 1]
 patch_percent = np.zeros(len(patch_percent_list))
-patchDir = r'/hdd/uab_datasets/Results/PatchExtr/inria/chipExtrReg_cSz321x321_pad0'
+patchDir = r'/hdd/uab_datasets/Results/PatchExtr/inria/chipExtrReg_cSz572x572_pad184'
 for cnt, patch_name in enumerate(tqdm(patch_percent_list)):
     gt = imageio.imread(os.path.join(patchDir, '{}_GT_Divide.png'.format(patch_name.strip())))
-    patch_percent[cnt] = np.sum(gt)/(gt.shape[0] * gt.shape[1])'''
+    patch_percent[cnt] = np.sum(gt)/(gt.shape[0] * gt.shape[1])
 
 patch_name_list = [city_order[a[:3]] for a in patch_name_list]
 
