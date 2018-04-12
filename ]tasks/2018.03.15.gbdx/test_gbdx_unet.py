@@ -26,7 +26,7 @@ task_id = '104001001099F800_rechunked'
 img_dir = r'/media/ei-edl01/user/as667/{}'.format(task_id)
 my_dir = r'/media/ei-edl01/user/as667/BOHAO/gbdx_results_v1/{}'.format(task_id)
 adjust_save_dir = r'/media/ei-edl01/data/uab_datasets/sp/data_gamma_adjust'
-sp_model_dir = r'/hdd6/Models/UnetCrop_gbdx2_aug_grid_0_sp_PS(572, 572)_BS8_EP60_LR1e-06_DS10_DR0.5_SFN32'
+sp_model_dir = r'/hdd6/Models/UnetCrop_gbdx2_aug_grid_0_sp_PS(572, 572)_BS8_EP15_LR1e-05_DS100_DR0.1_SFN32'
 imgs = sorted(glob(os.path.join(img_dir, '*.tif')))
 gamma = 2.5
 invGamma = 1.0 / gamma
@@ -109,5 +109,6 @@ for test_file in file_list_valid:
                                                       [input_size[0] - model.get_overlap(),
                                                        input_size[1] - model.get_overlap()],
                                                       overlap=model.get_overlap())
-        pred = util_functions.get_pred_labels(image_pred)
-        imageio.imsave(os.path.join(my_dir, file_name), (pred*255).astype(np.uint8))
+        #pred = util_functions.get_pred_labels(image_pred)
+        file_name = file_name.split('.')[0] + '.tif'
+        imageio.imsave(os.path.join(my_dir, file_name), image_pred[:, :, 1])
