@@ -7,16 +7,17 @@ import matplotlib.pyplot as plt
 from glob import glob
 from tqdm import tqdm
 from shutil import copyfile
+import uab_collectionFunctions
 
 exclude_id = '000795_se'
-orig_gt_dir = r'/media/ei-edl01/user/jmm123/gbdx/solar_ground_truth'
+orig_gt_dir = r'/media/ei-edl01/user/jmm123/gbdx/solar_ground_truth_v2'
 orig_rgb_dir = r'/media/ei-edl01/user/as667/1040010021B61200_rechunked'
-dest_dir = r'/media/ei-edl01/data/uab_datasets/gbdx/data/Original_Tiles'
+dest_dir = r'/media/ei-edl01/data/uab_datasets/gbdx2/data/Original_Tiles'
 gamma = 2.5
 invGamma = 1.0 / gamma
 table = np.array([((i / 255.0) ** invGamma) * 255 for i in np.arange(0, 256)]).astype('uint8')
 
-gt_files = glob(os.path.join(orig_gt_dir, '*_truth.png'))
+'''gt_files = glob(os.path.join(orig_gt_dir, '*_truth.png'))
 for gt_file in tqdm(gt_files):
     file_id = '_'.join(os.path.basename(gt_file).split('_')[:2])
     if file_id == exclude_id:
@@ -30,7 +31,7 @@ for gt_file in tqdm(gt_files):
     rgb_orig = cv2.LUT(rgb_orig, table)
     imageio.imsave(os.path.join(dest_dir, file_id.replace('_', '-')+'_RGB.tif'), rgb_orig)
 
-'''for gt_file in gt_files:
+for gt_file in gt_files[:5]:
     file_id = '_'.join(os.path.basename(gt_file).split('_')[:2])
     rgb_orig_fname = file_id + '.tif'
 
@@ -40,7 +41,6 @@ for gt_file in tqdm(gt_files):
         gt_dest = imageio.imread(os.path.join(dest_dir, file_id.replace('_', '-')+'_GT.png'))
         rgb_orig = imageio.imread(os.path.join(orig_rgb_dir, rgb_orig_fname))
         rgb_dest = imageio.imread(os.path.join(dest_dir, file_id.replace('_', '-')+'_RGB.tif'))
-        print(gt_orig.shape, gt_dest.shape, rgb_orig.shape, rgb_dest.shape)
 
         plt.figure(figsize=(12, 9))
         ax1 = plt.subplot(221)
@@ -63,3 +63,6 @@ for gt_file in tqdm(gt_files):
         plt.show()
     except OSError:
         continue'''
+
+blCol = uab_collectionFunctions.uabCollection('gbdx2')
+blCol.readMetadata()

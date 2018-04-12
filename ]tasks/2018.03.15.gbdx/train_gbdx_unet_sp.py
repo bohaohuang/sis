@@ -12,21 +12,20 @@ import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 0
-BATCH_SIZE = 5
-LEARNING_RATE = 5e-5
+BATCH_SIZE = 8
+LEARNING_RATE = 1e-5
 INPUT_SIZE = 572
 TILE_SIZE = 2541
-EPOCHS = 60
+EPOCHS = 15
 NUM_CLASS = 2
 N_TRAIN = 8000
-N_VALID = 4000
-GPU = 1
-DECAY_STEP = 10
-DECAY_RATE = 0.5
-MODEL_NAME = 'gbdx_aug_grid_{}_sp'
+N_VALID = 2000
+GPU = 0
+DECAY_STEP = 100
+DECAY_RATE = 0.1
+MODEL_NAME = 'gbdx2_aug_grid_{}_sp'
 SFN = 32
-RES101_DIR = r'/media/ei-edl01/data/uab_datasets/sp/]shared_models/UnetCropCV_(FixedRes)CTFinetune+nlayer9_' \
-             r'PS(572, 572)_BS5_EP100_LR1e-05_DS50_DR0.1_SFN32'
+RES101_DIR = r'/hdd6/Models/UnetCrop_gbdx_aug_grid_0_sp_PS(572, 572)_BS5_EP60_LR1e-05_DS20_DR0.1_SFN32'
 
 
 def read_flag():
@@ -74,7 +73,7 @@ def main(flags):
 
     # create collection
     # the original file is in /ei-edl01/data/uab_datasets/inria
-    blCol = uab_collectionFunctions.uabCollection('gbdx')
+    blCol = uab_collectionFunctions.uabCollection('gbdx2')
     opDetObj = bPreproc.uabOperTileDivide(255)
     rescObj = uabPreprocClasses.uabPreprocMultChanOp([], 'GT_Divide.tif', 'Map GT to (0, 1)', [0], opDetObj)
     rescObj.run(blCol)
@@ -125,7 +124,7 @@ def main(flags):
               isTrain=True,
               img_mean=img_mean,
               verb_step=100,                    # print a message every 100 step(sample)
-              save_epoch=3,                     # save the model every 5 epochs
+              save_epoch=2,                     # save the model every 5 epochs
               gpu=GPU,
               tile_size=flags.tile_size,
               patch_size=flags.input_size)
