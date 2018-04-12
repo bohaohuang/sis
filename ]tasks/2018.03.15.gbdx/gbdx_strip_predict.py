@@ -22,8 +22,8 @@ def get_sum_of_channel(img):
 
 # settings
 util_functions.tf_warn_level(3)
-task_id = '104001001099F800'
-img_dir = r'/media/ei-edl01/user/as667/{}_rechunked'.format(task_id)
+task_id = 'Aurangabad_chunks'
+img_dir = r'/media/ei-edl01/user/as667/{}'.format(task_id)
 my_dir = r'/media/ei-edl01/user/as667/BOHAO/gbdx_results/{}'.format(task_id)
 adjust_save_dir = r'/media/ei-edl01/data/uab_datasets/sp/data_gamma_adjust'
 building_model_dir = r'/hdd6/Models/UNET_rand_gird/UnetCrop_inria_aug_grid_0_PS(572, 572)_' \
@@ -114,7 +114,7 @@ for test_file in file_list_valid:
                                                        input_size[1] - model.get_overlap()],
                                                       overlap=model.get_overlap())
         pred = util_functions.get_pred_labels(image_pred)
-        imageio.imsave(os.path.join(my_dir, file_name), pred)
+        imageio.imsave(os.path.join(my_dir, file_name), pred*255)
 
     # sp detector
     file_name = 'sp_' + test_file[0]
@@ -150,4 +150,4 @@ for test_file in file_list_valid:
                                                        input_size[1] - model.get_overlap()],
                                                       overlap=model.get_overlap())
         pred = util_functions.get_pred_labels(image_pred)
-        imageio.imsave(os.path.join(my_dir, file_name), pred)
+        imageio.imsave(os.path.join(my_dir, file_name), pred*255)

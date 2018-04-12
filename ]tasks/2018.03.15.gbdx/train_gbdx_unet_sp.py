@@ -13,7 +13,7 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 5e-5
 INPUT_SIZE = 572
 TILE_SIZE = 2541
 EPOCHS = 60
@@ -21,8 +21,8 @@ NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 4000
 GPU = 1
-DECAY_STEP = 20
-DECAY_RATE = 0.1
+DECAY_STEP = 10
+DECAY_RATE = 0.5
 MODEL_NAME = 'gbdx_aug_grid_{}_sp'
 SFN = 32
 RES101_DIR = r'/media/ei-edl01/data/uab_datasets/sp/]shared_models/UnetCropCV_(FixedRes)CTFinetune+nlayer9_' \
@@ -96,11 +96,12 @@ def main(flags):
     # use uabCrossValMaker to get fileLists for training and validation
     idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
     # use first 5 tiles for validation
-    #file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 250)])
-    #file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(250, 500)])
-    valid_num = int(len(file_list) * 0.1)
-    file_list_valid = file_list[:valid_num]
-    file_list_train = file_list[valid_num:]
+    # file_list = [file_list[a] for a in np.random.permutation(len(file_list))] # permutate the files
+    valid_num = int(len(file_list) * 0.9)
+    file_list_train = file_list[:valid_num]
+    file_list_valid = file_list[valid_num:]
+    #file_list_valid = file_list[:valid_num]
+    #file_list_train = file_list[valid_num:]
 
     with tf.name_scope('image_loader'):
         # GT has no mean to subtract, append a 0 for block mean

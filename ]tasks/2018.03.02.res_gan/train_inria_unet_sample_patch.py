@@ -14,7 +14,7 @@ from bohaoCustom import uabMakeNetwork_UNet
 RUN_ID = 0
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
-INPUT_SIZE = 321
+INPUT_SIZE = 572
 TILE_SIZE = 5000
 EPOCHS = 100
 NUM_CLASS = 2
