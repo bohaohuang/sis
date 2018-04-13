@@ -11,7 +11,7 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
-RUN_ID = 6
+RUN_ID = 5
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-5
 INPUT_SIZE = 321
@@ -23,12 +23,12 @@ N_VALID = 1000
 GPU = 0
 DECAY_STEP = 40
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_aug_train_{}'
+MODEL_NAME = 'inria_control_patch_{}'
 SFN = 32
 RES101_DIR = r'/hdd6/Models/resnet_v1_101.ckpt'
 TRAIN_CITY = 'chicago,kitsap,tyrol-w,vienna'
 PATCH_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.03.02.res_gan'
-PATCH_NAME = 'fileList_{}'
+PATCH_NAME = 'deeplab_inria_fileList_{}'
 
 
 def read_flag():
@@ -98,12 +98,14 @@ def main(flags):
 
     # make data reader
     # use uabCrossValMaker to get fileLists for training and validation
-    idx, file_list = uabCrossValMaker.uabUtilGetFolds(flags.patch_dir, '{}.txt'.format(flags.patch_name), 'force_tile')
+    _, file_list_train = uabCrossValMaker.uabUtilGetFolds(flags.patch_dir, '{}.txt'.format(flags.patch_name), 'force_tile')
     # use first 5 tiles for validation
-    #file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(6, 37)])
-    #file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 6)])
-    file_list_valid = file_list[:int(len(file_list)*5/36)]
-    file_list_train = file_list[int(len(file_list)*5/36):]
+    idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
+    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 6)])
+
+    # assert valid set has no element in train set
+    for f_item in file_list_valid:
+        assert f_item not in file_list_train
 
     with tf.name_scope('image_loader'):
         # GT has no mean to subtract, append a 0 for block mean

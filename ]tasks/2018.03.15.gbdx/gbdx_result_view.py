@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 result_dir = r'/media/ei-edl01/user/as667/BOHAO/gbdx_results_v1'
 orig_img_dir = r'/media/ei-edl01/user/as667'
-task_id = '104001001099F800_rechunked'
-img_id = '000795_se'
+task_id = '1040010033CCDF00_rechunked'
+img_id = '000840_nw'
 
 gamma = 2.5
 invGamma = 1.0 / gamma
