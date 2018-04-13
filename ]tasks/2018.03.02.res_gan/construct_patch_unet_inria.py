@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from tqdm import tqdm
 import utils
+import uabCrossValMaker
 
 
 def pick_most_different(dist, pick_num):
@@ -38,7 +39,7 @@ def make_bucket_group(bucket):
 
 
 # settings
-random_seed = 4
+random_seed = 10
 img_dir, task_dir = utils.get_task_img_folder()
 file_name = os.path.join(task_dir, 'res50_fc1000_inria_unet.csv')
 input_size = 572
@@ -61,21 +62,20 @@ plt.tight_layout()
 # plt.savefig(os.path.join(img_dir, 'kmenas_res50_tsne_proj.png'))
 plt.show()
 
-# load patch filelist
-file_name = os.path.join(patchDir, 'fileList.txt')
-with open(file_name, 'r') as f:
-    files = f.readlines()
-print(files[:5])
+idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
+file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(6, 37)])
+file_list_train = [' '.join(a)+'\n' for a in file_list_train]
+labels = [labels[i] for i in range(len(labels)) if idx[i] >= 6]
 
 # construct patch file
-print(len(files), len(labels))
+print(len(file_list_train), len(labels))
 patch_bucket = []
 # city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 cnt = np.zeros(5)
 for i in range(5):
-    patch_bucket.append([files[j] for j in range(len(files)) if labels[j] == i])
+    patch_bucket.append([file_list_train[j] for j in range(len(file_list_train)) if labels[j] == i])
 bucket = make_bucket_group(patch_bucket)
-bucket_len = int(len(files)/5)
+bucket_len = int(len(file_list_train)/5)
 
 save_patch_flie_name = os.path.join(task_dir, 'unet_inria_fileList_{}.txt'.format(random_seed))
 with open(save_patch_flie_name, 'w+') as f:

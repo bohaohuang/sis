@@ -92,12 +92,15 @@ def main(flags):
 
     # make data reader
     # use uabCrossValMaker to get fileLists for training and validation
-    idx, file_list = uabCrossValMaker.uabUtilGetFolds(flags.patch_dir, '{}.txt'.format(flags.patch_name), 'force_tile')
+    _, file_list_train = uabCrossValMaker.uabUtilGetFolds(flags.patch_dir, '{}.txt'.format(flags.patch_name),
+                                                          'force_tile')
     # use first 5 tiles for validation
-    #file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(6, 37)])
-    #file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 6)])
-    file_list_valid = file_list[:67325]
-    file_list_train = file_list[67325:]
+    idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
+    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 250)])
+
+    # assert valid set has no element in train set
+    for f_item in file_list_valid:
+        assert f_item not in file_list_train
 
     with tf.name_scope('image_loader'):
         # GT has no mean to subtract, append a 0 for block mean
