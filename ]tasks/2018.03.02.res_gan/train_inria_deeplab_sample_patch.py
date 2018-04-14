@@ -11,7 +11,7 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
-RUN_ID = 5
+RUN_ID = 9
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-5
 INPUT_SIZE = 321
