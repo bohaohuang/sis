@@ -8,7 +8,7 @@ city_dir = r'/hdd/Results/xcity_vs_incity'
 group_dir = r'/hdd/Results/xgroup'
 incity_dir = glob(os.path.join(city_dir, 'DeeplabV3_inria_aug_incity*/'))
 xcity_dir = glob(os.path.join(city_dir, 'DeeplabV3_inria_aug_xcity*/'))
-xgroup_dir = glob(os.path.join(group_dir, 'DeeplabV3_inria_aug_train_fileList*/'))
+xgroup_dir = glob(os.path.join(group_dir, 'DeeplabV3_inria_control_patch_deeplab_inria_fileList*/'))
 city_dict = {'aus': 0, 'chi': 1, 'kit': 2, 'tyr': 3, 'vie': 4}
 img_dir, task_dir = utils.get_task_img_folder()
 
@@ -77,7 +77,7 @@ plt.ylabel('IoU')
 plt.grid(linestyle='dotted')
 plt.title('Overall Performance Comparison')
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'overall_performance_cmp.png'))
+#plt.savefig(os.path.join(img_dir, 'overall_performance_cmp.png'))
 #plt.show()
 
 plt.figure(figsize=(8, 5))
@@ -93,5 +93,5 @@ plt.ylabel('IoU')
 plt.ylim(0.65, 0.85)
 plt.title('Citywise Performance Comparison')
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'citywise_performance_cmp.png'))
+#plt.savefig(os.path.join(img_dir, 'citywise_performance_cmp.png'))
 plt.show()
