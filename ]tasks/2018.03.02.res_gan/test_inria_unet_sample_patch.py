@@ -2,20 +2,20 @@ import tensorflow as tf
 import uabCrossValMaker
 import uab_collectionFunctions
 import util_functions
-from bohaoCustom import uabMakeNetwork_DeepLabV2
+from bohaoCustom import uabMakeNetwork_UNet
 
 # settings
 gpu = 0
 batch_size = 5
-input_size = [321, 321]
+input_size = [572, 572]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
 for city in range(5):
     tf.reset_default_graph()
 
-    model_dir = r'/hdd6/Models/Deeplab_xgroup/DeeplabV3_inria_control_patch_deeplab_inria_fileList_{}_PS(321, 321)_BS5_' \
-                r'EP100_LR1e-05_DS40_DR0.1_SFN32'.\
+    model_dir = r'/hdd6/Models/Deeplab_xgroup/UnetCrop_inria_aug_train_unet_inria_fileList_{}_PS(572, 572)_' \
+                r'BS5_EP100_LR0.0001_DS40_DR0.1_SFN32'.\
         format(city)
     blCol = uab_collectionFunctions.uabCollection('inria')
     blCol.readMetadata()
@@ -37,10 +37,10 @@ for city in range(5):
     X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_DeepLabV2.DeeplabV3({'X':X, 'Y':y},
-                                               trainable=mode,
-                                               input_size=input_size,
-                                               batch_size=5, start_filter_num=32)
+    model = uabMakeNetwork_UNet.UnetModelCrop({'X':X, 'Y':y},
+                                              trainable=mode,
+                                              input_size=input_size,
+                                              batch_size=5, start_filter_num=32)
     # create graph
     model.create_graph('X', class_num=2)
 

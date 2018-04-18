@@ -108,8 +108,7 @@ def main(flags):
         # no augmentation needed for validation
         dataReader_valid = uabDataReader.ImageLabelReader([0], [1, 2, 3], patchDir, file_list_valid, flags.input_size,
                                                           flags.tile_size,
-                                                          flags.batch_size, dataAug=' ', block_mean=np.append([0], img_mean),
-                                                          random=False)
+                                                          flags.batch_size, dataAug=' ', block_mean=np.append([0], img_mean))
 
     # train
     start_time = time.time()

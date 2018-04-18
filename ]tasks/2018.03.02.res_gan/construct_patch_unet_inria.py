@@ -39,7 +39,7 @@ def make_bucket_group(bucket):
 
 
 # settings
-random_seed = 10
+random_seed = 9
 img_dir, task_dir = utils.get_task_img_folder()
 file_name = os.path.join(task_dir, 'res50_fc1000_inria_unet.csv')
 input_size = 572

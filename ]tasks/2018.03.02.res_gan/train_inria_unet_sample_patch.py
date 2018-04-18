@@ -11,7 +11,7 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet
 
-RUN_ID = 0
+RUN_ID = 7
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
 INPUT_SIZE = 572
@@ -23,7 +23,7 @@ N_VALID = 1000
 GPU = 0
 DECAY_STEP = 40
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_aug_train_{}'
+MODEL_NAME = 'inria_control_patch_{}'
 SFN = 32
 RES101_DIR = r'/hdd6/Models/resnet_v1_101.ckpt'
 TRAIN_CITY = 'chicago,kitsap,tyrol-w,vienna'
@@ -118,8 +118,7 @@ def main(flags):
         # no augmentation needed for validation
         dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_valid, flags.input_size,
                                                           flags.tile_size,
-                                                          flags.batch_size, dataAug=' ', block_mean=np.append([0], img_mean),
-                                                          random=False)
+                                                          flags.batch_size, dataAug=' ', block_mean=np.append([0], img_mean))
 
     # train
     start_time = time.time()
