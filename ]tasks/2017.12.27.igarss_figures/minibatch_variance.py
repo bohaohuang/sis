@@ -53,9 +53,9 @@ grid_val = []
 incity_val = []
 xcity_val = []
 fields = ['Value']
-run_type = ['Low Diversity (IoU=55.73)',
-            'Baseline (IoU=72.20)',
-            'High Diversity (IoU=73.23)']
+run_type = ['Low Diversity (IoU=58.75)',
+            'Baseline (IoU=75.88)',
+            'High Diversity (IoU=76.21)']
 
 for i in range(5):
     grid_filename = grid.format(i+1)
@@ -84,5 +84,6 @@ plt.legend()
 plt.xlabel('Epoch Number')
 plt.ylabel('Cross Entropy')
 plt.title('Mini Batch Scheme Comparison')
-#plt.savefig(os.path.join(img_dir, 'exp2_cmp.png'))
+plt.tight_layout()
+plt.savefig(os.path.join(img_dir, 'exp2_cmp_fixed.png'))
 plt.show()

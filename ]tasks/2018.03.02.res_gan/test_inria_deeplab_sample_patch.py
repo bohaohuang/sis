@@ -5,7 +5,7 @@ import util_functions
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 # settings
-gpu = 0
+gpu = 1
 batch_size = 5
 input_size = [321, 321]
 tile_size = [5000, 5000]

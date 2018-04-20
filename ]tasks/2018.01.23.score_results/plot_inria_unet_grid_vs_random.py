@@ -19,16 +19,19 @@ for cnt_1, run_id in enumerate(run_ids):
         with open(res_path, 'r') as f:
             results = f.readlines()
 
-        mean_iou = 0
+        mean_iou_A = 0
+        mean_iou_B = 0
         for item in results:
             city_name = item.split(' ')[0]
             if len(item.split(' ')) == 1:
                 mean_iou = float(item) * 100
                 continue
             A, B = item.split('(')[1].strip().strip(')').split(',')
+            mean_iou_A += float(A)
+            mean_iou_B += float(B)
             iou = float(A)/float(B) * 100
             city_res[cnt_2, city_dict[city_name[:-1]], cnt_1] = iou
-        result_all[cnt_2, cnt_1] = mean_iou
+        result_all[cnt_2, cnt_1] = mean_iou_A/mean_iou_B * 100
 
 matplotlib.rcParams.update({'font.size': 18})
 plt.figure(figsize=(11, 6))
@@ -59,6 +62,6 @@ plt.ylabel('IoU')
 plt.tight_layout()
 
 img_dir, task_dir = utils.get_task_img_folder()
-plt.savefig(os.path.join(img_dir, 'unet_grid_vs_random_inria.png'))
+plt.savefig(os.path.join(img_dir, 'unet_grid_vs_random_inria_fixed.png'))
 
 plt.show()

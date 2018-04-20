@@ -61,12 +61,13 @@ for i in range(5):
 #plt.scatter(feature_encode[:, 0], feature_encode[:, 1], c=patch_percent, cmap=plt.get_cmap('bwr'))
 #plt.colorbar()
 
-#for i in range(feature_encode.shape[0]):
-#    plt.text(feature_encode[i, 0], feature_encode[i, 1], patch_ids[i])
+for i in range(feature_encode.shape[0]):
+    plt.text(feature_encode[i, 0], feature_encode[i, 1], patch_ids[i])
 plt.xlabel('Feature 1')
 plt.ylabel('Feature 2')
 plt.title('TSNE Projection Result')
 plt.legend()
+plt.axis('off')
 plt.tight_layout()
-#plt.savefig(os.path.join(img_dir, 'res50_tsne_proj.png'))
+plt.savefig(os.path.join(img_dir, 'res50_tsne_proj_noaxis.png'))
 plt.show()

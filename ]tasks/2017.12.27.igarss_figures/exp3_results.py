@@ -74,10 +74,11 @@ for cnt_1, input_size in enumerate(input_sizes2):
     iou_mean = np.mean(iou)
     iou_record_all2[cnt_1] = iou_mean
 
-plt.figure(figsize=(8, 10))
+plt.figure(figsize=(8, 4))
 matplotlib.rcParams.update({'font.size': 14})
-plt.subplot2grid((10, 1), (6, 0), rowspan=4)
-plt.plot(input_sizes, iou_record_all*100, '-o', label='No Extra Crop')#, color='darkorange')
+iou_record_all = np.array([76.33549045, 76.40530316, 75.99784973, 75.77256768, 74.70321842, 71.84183233])
+# plt.subplot2grid((10, 1), (6, 0), rowspan=4)
+plt.plot(input_sizes, iou_record_all, '-o', label='No Extra Crop')#, color='darkorange')
 #plt.plot(input_sizes2, iou_record_all2, '-v', label='Extra Crop')
 #plt.xlim(ax[-1].get_xlim())
 #plt.legend()
@@ -89,7 +90,7 @@ plt.grid()
 #plt.savefig(os.path.join(img_dir, 'exp3_cmp.png'))
 
 # plot validation curve
-input_sizes = [508, 540, 572, 620, 684, 796, 1052]
+'''input_sizes = [508, 540, 572, 620, 684, 796, 1052]
 fields = ['Step', 'Value']
 plt.subplot2grid((10, 1), (0, 0), rowspan=5)
 for cnt, input_size  in enumerate(input_sizes):
@@ -103,6 +104,7 @@ for cnt, input_size  in enumerate(input_sizes):
 plt.legend(loc='center right', fontsize=10)#, bbox_to_anchor=(1.2, 0.5))
 plt.xlabel('Epoch Number')
 plt.ylabel('Cross Entropy')
-plt.title('Patch Size in Training Comparison')
-#plt.savefig(os.path.join(img_dir, 'exp3_val_curve.png'))
+plt.title('Patch Size in Training Comparison')'''
+plt.tight_layout()
+plt.savefig(os.path.join(img_dir, 'exp3_val_curve_fixed.png'))
 plt.show()

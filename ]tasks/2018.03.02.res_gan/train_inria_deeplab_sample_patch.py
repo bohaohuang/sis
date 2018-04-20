@@ -11,7 +11,7 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
-RUN_ID = 9
+RUN_ID = 0
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-5
 INPUT_SIZE = 321
@@ -23,12 +23,12 @@ N_VALID = 1000
 GPU = 0
 DECAY_STEP = 40
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_control_patch_{}'
+MODEL_NAME = 'inria_cp_{}'
 SFN = 32
 RES101_DIR = r'/hdd6/Models/resnet_v1_101.ckpt'
 TRAIN_CITY = 'chicago,kitsap,tyrol-w,vienna'
 PATCH_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.03.02.res_gan'
-PATCH_NAME = 'deeplab_inria_fileList_{}'
+PATCH_NAME = 'deeplab_inria_sp_{}'
 
 
 def read_flag():
