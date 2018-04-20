@@ -28,7 +28,7 @@ SFN = 32
 RES101_DIR = r'/hdd6/Models/resnet_v1_101.ckpt'
 TRAIN_CITY = 'chicago,kitsap,tyrol-w,vienna'
 PATCH_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.03.02.res_gan'
-PATCH_NAME = 'deeplab_inria_sp_{}'
+PATCH_NAME = 'deeplab_inria_cp_{}'
 
 
 def read_flag():
