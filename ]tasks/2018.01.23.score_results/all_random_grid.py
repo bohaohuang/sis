@@ -247,6 +247,6 @@ plt.legend(loc='lower right')
 
 plt.tight_layout()
 img_dir, task_dir = utils.get_task_img_folder()
-plt.savefig(os.path.join(img_dir, 'all_grid_vs_random.png'))
+#plt.savefig(os.path.join(img_dir, 'all_grid_vs_random.png'))
 
 plt.show()

@@ -7,15 +7,15 @@ from bohaoCustom import uabMakeNetwork_UNet
 # settings
 gpu = 0
 batch_size = 5
-input_size = [572, 572]
+input_size = [1052, 1052]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
-for city in range(8, 10):
+for city in range(2):
     tf.reset_default_graph()
 
-    model_dir = r'/hdd6/Models/Deeplab_xgroup/UnetCrop_inria_control_patch_unet_inria_fileList_{}_PS(572, 572)_' \
-                r'BS5_EP100_LR0.0001_DS40_DR0.1_SFN32'.\
+    model_dir = r'/hdd6/Models/Deeplab_xgroup/UnetCrop_inria_cp_unet_inria_cp_{}_PS(572, 572)_' \
+                r'BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.\
         format(city)
     blCol = uab_collectionFunctions.uabCollection('inria')
     blCol.readMetadata()
@@ -47,4 +47,4 @@ for city in range(8, 10):
     # evaluate on tiles
     model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                    input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                   save_result_parent_dir='xgroup', ds_name='inria')
+                   save_result_parent_dir='xgroup', ds_name='inria', best_model=False)

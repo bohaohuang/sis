@@ -8,6 +8,41 @@ import utils
 import uabCrossValMaker
 
 
+class equal_size_clustering(object):
+    def __init__(self, data, cluster_num):
+        self.data = data
+        self.cluster_num = cluster_num
+        self.n_sample = data.shape[0]
+        self.feature_dim = data.shape[1]
+        self.group_len = int(np.floor(self.n_sample/self.cluster_num))
+
+    def fit_angle(self, seed=1004):
+        np.random.seed(seed)
+        # get angles of each point
+        angles = np.zeros(self.n_sample)
+        for i in range(self.n_sample):
+            pt = self.data[i, :]
+            if pt[0] >= 0 and pt[1] >= 0:
+                angles[i] = np.arctan(pt[1] / pt[0])
+            elif pt[0] < 0 and pt[1] >= 0:
+                angles[i] = np.pi - np.arctan(-pt[1] / pt[0])
+            elif pt[0] < 0 and pt[1] < 0:
+                angles[i] = np.arctan(-pt[1] / -pt[0]) + np.pi
+            else:
+                angles[i] = 2*np.pi - np.arctan(pt[1] / -pt[0])
+
+        offset = np.random.uniform(0, np.pi/2)
+        angles = angles - offset
+        angles[angles < 0] = np.pi*2 - offset
+
+        ang_idx = np.argsort(angles)
+        labels = np.zeros(self.n_sample)
+        for i in range(self.cluster_num):
+            labels[ang_idx[self.group_len*i:self.group_len*(i+1)]] = i
+
+        return labels
+
+
 def pick_most_different(dist, pick_num):
     idx_list = np.argsort(dist)
     idx_len = len(idx_list)
@@ -39,18 +74,18 @@ def make_bucket_group(bucket):
 
 
 # settings
-random_seed = 9
+random_seed = 4
 img_dir, task_dir = utils.get_task_img_folder()
-file_name = os.path.join(task_dir, 'res50_fc1000_inria_unet.csv')
+file_name = os.path.join(task_dir, 'res50_fc1000_inria_unet_crop.csv')
 input_size = 572
-patchDir = r'/hdd/uab_datasets/Results/PatchExtr/inria/chipExtrReg_cSz572x572_pad184'
-npy_file_name = os.path.join(task_dir, 'encoded_res50_inria_unet.npy')
+patchDir = r'/hdd/uab_datasets/Results/PatchExtr/inria/chipExtrReg_cSz572x572_pad92'
+npy_file_name = os.path.join(task_dir, 'encoded_res50_inria_unet_crop.npy')
 np.random.seed(random_seed)
 
 # load tsne features
 features = np.load(npy_file_name)
 print(features.shape)
-labels = KMeans(n_clusters=5, random_state=random_seed).fit_predict(features)
+labels = equal_size_clustering(data=features, cluster_num=5).fit_angle(seed=random_seed)
 cmap = plt.get_cmap('Set1').colors
 for i in range(5):
     plt.scatter(features[labels == i, 0], features[labels == i, 1], color=cmap[i], label=i, edgecolors='k')
@@ -77,7 +112,7 @@ for i in range(5):
 bucket = make_bucket_group(patch_bucket)
 bucket_len = int(len(file_list_train)/5)
 
-save_patch_flie_name = os.path.join(task_dir, 'unet_inria_fileList_{}.txt'.format(random_seed))
+save_patch_flie_name = os.path.join(task_dir, 'unet_inria_cp_{}.txt'.format(random_seed))
 with open(save_patch_flie_name, 'w+') as f:
     for i in tqdm(range(bucket_len)):
         for j in range(len(bucket)):

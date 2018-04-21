@@ -45,7 +45,7 @@ extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 4], # extract all 4 ch
                                                 extSave=['jpg', 'jpg', 'jpg', 'png'], # save rgb files as jpg and gt as png
                                                 isTrain=True,
                                                 gtInd=3,
-                                                pad=model.get_overlap()) # pad around the tiles
+                                                pad=int(model.get_overlap()/2)) # pad around the tiles
 patchDir = extrObj.run(blCol)
 
 file_name = os.path.join(patchDir, 'fileList.txt')
@@ -53,8 +53,8 @@ with open(file_name, 'r') as f:
     files = f.readlines()
 
 res50 = keras.applications.resnet50.ResNet50(include_top=True, weights='imagenet')
-file_name = os.path.join(task_dir, 'temp', 'res50_fc1000_inria_unet.csv')
-patch_file_name = os.path.join(task_dir, 'temp', 'res50_fc1000_inria_unet.txt')
+file_name = os.path.join(task_dir, 'temp', 'res50_fc1000_inria_unet_crop.csv')
+patch_file_name = os.path.join(task_dir, 'temp', 'res50_fc1000_inria_unet_crop.txt')
 with open(file_name, 'w+') as f:
     with open(patch_file_name, 'w+') as f2:
         for file_line in tqdm(files):
@@ -62,6 +62,7 @@ with open(file_name, 'w+') as f:
             img = np.zeros((input_size[0], input_size[1], 3), dtype=np.uint8)
             for cnt, file in enumerate(file_line.strip().split(' ')[:3]):
                 img[:, :, cnt] = imageio.imread(os.path.join(patchDir, file))
+            img = img[92:input_size[0]-92, 92:input_size[1]-92, :]
             img = np.expand_dims(scipy.misc.imresize(img, input_size_fit), axis=0)
 
             fc1000 = res50.predict(img).reshape((-1,)).tolist()

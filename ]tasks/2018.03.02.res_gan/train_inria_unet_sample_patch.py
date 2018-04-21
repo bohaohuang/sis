@@ -11,7 +11,7 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet
 
-RUN_ID = 7
+RUN_ID = 1
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
 INPUT_SIZE = 572
@@ -20,15 +20,15 @@ EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = 0
-DECAY_STEP = 40
+GPU = 1
+DECAY_STEP = 60
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_control_patch_{}'
+MODEL_NAME = 'inria_cp_{}'
 SFN = 32
 RES101_DIR = r'/hdd6/Models/resnet_v1_101.ckpt'
 TRAIN_CITY = 'chicago,kitsap,tyrol-w,vienna'
 PATCH_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.03.02.res_gan'
-PATCH_NAME = 'unet_inria_fileList_{}'
+PATCH_NAME = 'unet_inria_cp_{}'
 
 
 def read_flag():
@@ -93,7 +93,7 @@ def main(flags):
                                                     extSave=['jpg', 'jpg', 'jpg', 'png'], # save rgb files as jpg and gt as png
                                                     isTrain=True,
                                                     gtInd=3,
-                                                    pad=model.get_overlap()) # pad around the tiles
+                                                    pad=int(model.get_overlap()/2)) # pad around the tiles
     patchDir = extrObj.run(blCol)
 
     # make data reader

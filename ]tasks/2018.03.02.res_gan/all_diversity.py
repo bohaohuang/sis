@@ -84,10 +84,10 @@ for i in range(5, 10):
         results = f.readlines()
     iou_unet.append(float(results[-1])*100)
 
-result_all_unet = np.append(np.array([[76.0153697,  75.88163622, 76.16206155, 76.19242719, 76.13832969]]),
+result_all_unet = np.append(np.array([[75.88011385, 75.85050917, 75.86489646, 75.9223303, 75.89194368]]),
                             result_all_unet, axis=0)
 result_all_unet = np.append(result_all_unet, np.array([iou_unet]), axis=0)
-result_all_deeplab = np.append(np.array([[75.88011385, 75.85050917, 75.86489646, 75.9223303, 75.89194368]]),
+result_all_deeplab = np.append(np.array([[76.0153697,  75.88163622, 76.16206155, 76.19242719, 76.13832969]]),
                                result_all_deeplab, axis=0)
 result_all_deeplab = np.append(result_all_deeplab, np.array([iou_deeplab]), axis=0)
 
