@@ -23,12 +23,11 @@ N_VALID = 1000
 GPU = 0
 DECAY_STEP = 40
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_cp_{}'
+MODEL_NAME = 'inria_cp1000_{}'
 SFN = 32
 RES101_DIR = r'/hdd6/Models/resnet_v1_101.ckpt'
-TRAIN_CITY = 'chicago,kitsap,tyrol-w,vienna'
 PATCH_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.03.02.res_gan'
-PATCH_NAME = 'deeplab_inria_cp_{}'
+PATCH_NAME = 'deeplab_inria_cp1000_{}'
 
 
 def read_flag():

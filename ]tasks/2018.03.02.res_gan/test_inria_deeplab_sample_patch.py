@@ -11,12 +11,11 @@ input_size = [321, 321]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
-for city in range(1):
+for city in range(5):
     tf.reset_default_graph()
 
-    model_dir = r'/hdd6/Models/Deeplab_xgroup/DeeplabV3_inria_sp_deeplab_sp_{}_PS(321, 321)_BS5_' \
-                r'EP100_LR1e-05_DS40_DR0.1_SFN32'.\
-        format(city)
+    model_dir = r'/hdd6/Models/Deeplab_xgroup/DeeplabV3_inria_cp_deeplab_inria_cp_{}_PS(321, 321)_' \
+                r'BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'.format(city)
     blCol = uab_collectionFunctions.uabCollection('inria')
     blCol.readMetadata()
     file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
@@ -47,4 +46,4 @@ for city in range(1):
     # evaluate on tiles
     model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                    input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                   save_result_parent_dir='xgroup', ds_name='inria')
+                   save_result_parent_dir='xgroup', ds_name='inria', best_model=False)

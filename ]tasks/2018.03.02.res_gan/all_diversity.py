@@ -72,14 +72,14 @@ for cnt_1, run_id in enumerate(run_ids):
 iou_unet = []
 iou_deeplab = []
 for i in range(5):
-    file_name = r'/hdd/Results/xgroup/DeeplabV3_inria_control_patch_deeplab_inria_fileList_{}_PS(321, 321)_' \
+    file_name = r'/hdd/Results/xgroup/DeeplabV3_inria_cp_deeplab_inria_cp_{}_PS(321, 321)_' \
                 r'BS5_EP100_LR1e-05_DS40_DR0.1_SFN32/inria/result.txt'.format(i)
     with open(file_name, 'r') as f:
         results = f.readlines()
     iou_deeplab.append(float(results[-1])*100)
-for i in range(5, 10):
-    file_name = r'/hdd/Results/xgroup/UnetCrop_inria_control_patch_unet_inria_fileList_{}_PS(572, 572)_' \
-                r'BS5_EP100_LR0.0001_DS40_DR0.1_SFN32/inria/result.txt'.format(i)
+for i in range(5):
+    file_name = r'/hdd/Results/xgroup/UnetCrop_inria_cp_unet_inria_cp_{}_PS(572, 572)_' \
+                r'BS5_EP100_LR0.0001_DS60_DR0.1_SFN32/inria/result.txt'.format(i)
     with open(file_name, 'r') as f:
         results = f.readlines()
     iou_unet.append(float(results[-1])*100)

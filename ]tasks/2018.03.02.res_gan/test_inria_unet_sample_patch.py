@@ -11,7 +11,7 @@ input_size = [1052, 1052]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
-for city in range(2):
+for city in range(5):
     tf.reset_default_graph()
 
     model_dir = r'/hdd6/Models/Deeplab_xgroup/UnetCrop_inria_cp_unet_inria_cp_{}_PS(572, 572)_' \
