@@ -28,7 +28,7 @@ class kmeans_equal(object):
         labels = KMeans(n_clusters=5, random_state=self.ransed).fit_predict(data)
         means = np.zeros((self.n_cluster, data.shape[1]))
         for i in range(self.n_cluster):
-            means[i, :] = np.mean(data[labels==i, :], axis=0)
+            means   [i, :] = np.mean(data[labels==i, :], axis=0)
 
         # 3. Order points by the distance to their nearest cluster minus distance to the farthest cluster
         point_dist = np.zeros((n_sample, self.n_cluster))

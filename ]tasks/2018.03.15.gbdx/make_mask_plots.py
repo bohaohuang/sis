@@ -12,6 +12,13 @@ import uabUtilreader
 from bohaoCustom import uabMakeNetwork_UNet
 
 
+def draw_contour(orig_img, post_img, truth_val=255):
+    post_img = post_img / truth_val
+    im2, contours, hierarchy = cv2.findContours(np.uint8(post_img), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    img = cv2.drawContours(orig_img, contours, -1, (255, 0, 0), 2)
+    return img
+
+
 def get_sum_of_channel(img):
     means = []
     for i in range(3):
@@ -23,13 +30,16 @@ util_functions.tf_warn_level(3)
 adjust_save_dir = r'/media/ei-edl01/data/uab_datasets/sp/data_gamma_adjust'
 sp_model_dir = r'/media/ei-edl01/data/uab_datasets/sp/]shared_models/UnetCropCV_(FixedRes)CTFinetune+nlayer9_' \
              r'PS(572, 572)_BS5_EP100_LR1e-05_DS50_DR0.1_SFN32'
-mask_save_dir = r'/media/ei-edl01/user/as667/BOHAO/gbdx_mask'
+mask_save_dir = r'/media/ei-edl01/user/as667/BOHAO/gbdx_mask/{}'
 orig_img_dir = r'/media/ei-edl01/user/as667'
-task_id = 'Honolulu_chunks'
-img_id = '10400100232FC300_1'
+task_id = 'Aurangabad_chunks'
+img_id = '104001003A6C8C00_0'
+mask_save_dir = mask_save_dir.format(task_id)
+if not os.path.exists(mask_save_dir):
+    os.makedirs(mask_save_dir)
 
 gpu = 0
-gamma = 2.5
+gamma = 2.0
 invGamma = 1.0 / gamma
 table = np.array([((i / 255.0) ** invGamma) * 255 for i in np.arange(0, 256)]).astype('uint8')
 input_size = [1052, 1052]
@@ -86,12 +96,24 @@ image_pred = uabUtilreader.un_patchify_shrink(result,
 pred = util_functions.get_pred_labels(image_pred)
 
 mask_img = np.copy(orig_img)
-mask_img = util_functions.add_mask(mask_img, pred, [255, None, None], mask_1=1)
-plt.imshow(mask_img)
-plt.show()
+mask_img = draw_contour(mask_img, pred, truth_val=1)
+# mask_img = util_functions.add_mask(mask_img, pred, [255, None, None], mask_1=1)
+region = [250, 450, 450, 650]
 
-plt.imshow(mask_img[1350:1750, 400:1000, :])
+save_dir = r'/media/ei-edl01/user/bh163/figs/2018.03.15.gbdx/blog_figures'
+plt.figure(figsize=(8, 8))
+plt.imshow(mask_img[region[0]:region[1], region[2]:region[3], :])
+plt.tight_layout()
 plt.show()
+imageio.imsave(os.path.join(save_dir, 'IN_2.png'), mask_img[region[0]:region[1], region[2]:region[3], :])
 
-imageio.imsave(os.path.join(mask_save_dir, '{}_{}_orig_large.png'.format(task_id, img_id)), orig_img[1350:1750, 400:1000, :])
-imageio.imsave(os.path.join(mask_save_dir, '{}_{}_mask_large.png'.format(task_id, img_id)), mask_img[1350:1750, 400:1000, :])
+'''for i in range(0, 2541-1000, 200):
+    for j in range(0, 2541-600, 120):
+        position = [i, i+1000, j, j+600]
+        #plt.imshow(mask_img[position[0]:position[1], position[2]:position[3], :])
+        #plt.show()
+
+        imageio.imsave(os.path.join(mask_save_dir, '{}_{}_orig_{}.png'.format(task_id, img_id, '_'.join([str(a) for a in position]))),
+                       orig_img[position[0]:position[1], position[2]:position[3], :])
+        imageio.imsave(os.path.join(mask_save_dir, '{}_{}_mask_{}.png'.format(task_id, img_id, '_'.join([str(a) for a in position]))),
+                       mask_img[position[0]:position[1], position[2]:position[3], :])'''
