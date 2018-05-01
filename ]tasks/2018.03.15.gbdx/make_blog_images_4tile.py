@@ -26,7 +26,7 @@ post_dir_2 = r'/media/ei-edl01/user/as667/BOHAO/gbdx_results_v1/1040010033CCDF00
 orig_dir_2 = r'/media/ei-edl01/user/as667/1040010033CCDF00_rechunked'
 save_dir = r'/media/ei-edl01/user/bh163/figs/2018.03.15.gbdx/blog_figures'
 
-img_id = '015820_sw'
+img_id = '010825_se'
 post_name_1 = os.path.join(post_dir_1, 'sp_{}.tif'.format(img_id))
 orig_name_1 = os.path.join(orig_dir_1, '{}.tif'.format(img_id))
 post_name_2 = os.path.join(post_dir_2, 'sp_{}.tif'.format(img_id))
@@ -38,13 +38,14 @@ orig_img_1 = pre_processing(orig_img_1)
 mask_img_1 = np.copy(orig_img_1)
 cout_img_1 = draw_contour(mask_img_1, post_img_1)
 
+print(post_name_2)
 post_img_2 = scipy.misc.imread(post_name_2)
 orig_img_2 = imageio.imread(orig_name_2)
 orig_img_2 = pre_processing(orig_img_2)
 mask_img_2 = np.copy(orig_img_2)
 cout_img_2 = draw_contour(mask_img_2, post_img_2)
 
-region = [0, 2541, 0, 2541]
+region = [600, 1600, 1000, 2000]
 
 plt.figure(figsize=(15, 8))
 ax1 = plt.subplot(121)
@@ -56,5 +57,4 @@ plt.imshow(cout_img_2[region[0]:region[1], region[2]:region[3], :])
 plt.tight_layout()
 plt.show()
 
-#imageio.imsave(os.path.join(save_dir, '2016_2.png'), cout_img_1[region[0]:region[1], region[2]:region[3], :])
-#imageio.imsave(os.path.join(save_dir, '2017_2.png'), cout_img_2[region[0]:region[1], region[2]:region[3], :])
+#imageio.imsave(os.path.join(save_dir, 'header_1.png'), cout_img[region[0]:region[1], region[2]:region[3], :])

@@ -5,14 +5,14 @@ import util_functions
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 # settings
-gpu = None
+gpu = 1
 batch_size = 5
 input_size = [321, 321]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
-for runType in ['incity']:
-    for runId in [4]:
+for runType in ['xcity']:
+    for runId in [0, 3, 4]:
         tf.reset_default_graph()
 
         model_dir = r'/hdd6/Models/Deeplab_citycopy/DeeplabV3_spca_aug_{}_{}_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'\
@@ -45,4 +45,4 @@ for runType in ['incity']:
         # evaluate on tiles
         model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                        input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                       save_result_parent_dir='xcity_vs_incity2', ds_name='spca')
+                       save_result_parent_dir='xcity_vs_incity2', ds_name='spca', best_model=False)

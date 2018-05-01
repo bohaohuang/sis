@@ -5,13 +5,13 @@ import util_functions
 from bohaoCustom import uabMakeNetwork_UNet
 
 # settings
-gpu = 1
+gpu = 0
 batch_size = 5
-input_size = [572, 572]
+input_size = [1052, 1052]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
-for runType in ['xcity', 'incity']:
+for runType in ['xcity']:
     for runId in range(5):
         tf.reset_default_graph()
 
@@ -44,4 +44,4 @@ for runType in ['xcity', 'incity']:
         # evaluate on tiles
         model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                        input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                       save_result_parent_dir='xcity_vs_incity', ds_name='spca')
+                       save_result_parent_dir='xcity_vs_incity2', ds_name='spca')

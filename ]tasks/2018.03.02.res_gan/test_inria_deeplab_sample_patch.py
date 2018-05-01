@@ -14,7 +14,7 @@ util_functions.tf_warn_level(3)
 for city in range(5):
     tf.reset_default_graph()
 
-    model_dir = r'/hdd6/Models/Deeplab_xgroup/DeeplabV3_inria_cp_deeplab_inria_cp_{}_PS(321, 321)_' \
+    model_dir = r'/hdd6/Models/Deeplab_xgroup/DeeplabV3_inria_cp1000_deeplab_inria_cp1000_{}_PS(321, 321)_' \
                 r'BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'.format(city)
     blCol = uab_collectionFunctions.uabCollection('inria')
     blCol.readMetadata()
