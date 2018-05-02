@@ -44,4 +44,4 @@ for runType in ['xcity']:
         # evaluate on tiles
         model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                        input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                       save_result_parent_dir='xcity_vs_incity2', ds_name='spca')
+                       save_result_parent_dir='xcity_vs_incity2', ds_name='spca', best_model=False)

@@ -1,22 +1,54 @@
 import os
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib import cm
 import uabRepoPaths
 import utils
 
 
-def set_box_color(bp, color, c2):
-    plt.setp(bp['boxes'], color=color)
-    plt.setp(bp['whiskers'], color=color)
-    plt.setp(bp['caps'], color=color)
-    plt.setp(bp['medians'], color=c2)
+def plot_bar(city_res, all_res, xtick_str, title_str, width=0.15):
+    run_type_cnt, city_num, run_cnt = city_res.shape
+    width = width
+    N = np.arange(city_num+1)
+    plt.figure(figsize=(10, 6))
+    plt.rcParams.update({'font.size': 14})
+    for i in range(run_type_cnt):
+        data = np.concatenate((city_res[i, :, :], np.array([all_res[i, :]])))
+        data_mean = np.mean(data, axis=1)
+        data_std = np.std(data, axis=1)
+        plt.bar(N+i*width, data_mean, width, yerr=data_std)
+    plt.xticks(N+(run_type_cnt/2-0.5)*width, xtick_str)
+    plt.xlabel('City Name')
+    plt.ylabel('IoU')
+    plt.title(title_str)
 
 
+def plot_bar2(city_res, all_res, xtick_str, title_str, width=0.15):
+    run_type_cnt, city_num, run_cnt = city_res.shape
+    width = width
+    ylim_left = [100 for i in range(city_num+1)]
+    plt.figure(figsize=(12, 5))
+    plt.rcParams.update({'font.size': 14})
+    for i in range(run_type_cnt):
+        data = np.concatenate((city_res[i, :, :], np.array([all_res[i, :]])))
+        data_mean = np.mean(data, axis=1)
+        data_std = np.std(data, axis=1)
+        for j in range(city_num+1):
+            plt.subplot(1, (city_num + 1), j+1)
+            plt.bar(np.arange(1)+i*width, data_mean[j], width, yerr=data_std[j])
+            plt.xticks(np.arange(1)+(run_type_cnt/2-0.5)*width, [xtick_str[j]])
+            if 0.9 * (data_mean[j] - data_std[j]) < ylim_left[j]:
+                ylim_left[j] = 0.9 * (data_mean[j] - data_std[j])
+            plt.ylim(bottom=ylim_left[j])
+    plt.tight_layout()
+    plt.suptitle(title_str)
+
+
+img_dir, task_dir = utils.get_task_img_folder()
+
+# Inria
+tick_str = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna', 'avg']
 run_ids = [0, 1, 2, 3, 4]
 run_types = ['grid', 'incity', 'xcity', 'xgroup']
-
 result_all_unet = np.zeros((len(run_types), len(run_ids)))
 city_res_unet = np.zeros((len(run_types), 5, len(run_ids)))
 city_dict = {'austin':0, 'chicago':1, 'kitsap':2, 'tyrol-w':3, 'vienna':4}
@@ -41,6 +73,10 @@ for cnt_1, run_id in enumerate(run_ids):
             mean_iou_B += float(B)
             city_res_unet[cnt_2, city_dict[city_name[:-1]], cnt_1] = iou
         result_all_unet[cnt_2, cnt_1] = mean_iou_A/mean_iou_B * 100
+title_str = 'U-Net Citywise Comparison D1 (2)'
+plot_bar2(city_res_unet, result_all_unet, tick_str, title_str)
+plt.savefig(os.path.join(img_dir, '{}.png'.format('_'.join(title_str.split()))))
+plt.show()
 
 result_all_deeplab = np.zeros((len(run_types), len(run_ids)))
 city_res_deeplab = np.zeros((len(run_types), 5, len(run_ids)))
@@ -66,47 +102,19 @@ for cnt_1, run_id in enumerate(run_ids):
             mean_iou_B += float(B)
             city_res_deeplab[cnt_2, city_dict[city_name[:-1]], cnt_1] = iou
         result_all_deeplab[cnt_2, cnt_1] = mean_iou_A/mean_iou_B * 100
-
-matplotlib.rcParams.update({'font.size': 14})
-plt.figure(figsize=(8, 6))
-
-plt.subplot(211)
-positions = np.arange(4)
-width = 0.3
-bp1 = plt.boxplot(np.transpose(result_all_unet[0, :]), positions=[positions[0]],widths=width)
-bp2 = plt.boxplot(np.transpose(result_all_unet[1, :]), positions=[positions[1]],widths=width)
-bp3 = plt.boxplot(np.transpose(result_all_unet[2, :]), positions=[positions[2]],widths=width)
-bp4 = plt.boxplot(np.transpose(result_all_unet[3, :]), positions=[positions[3]],widths=width)
-bp5 = plt.boxplot(np.transpose(result_all_deeplab[0, :]), positions=[positions[0]+width], widths=width)
-bp6 = plt.boxplot(np.transpose(result_all_deeplab[1, :]), positions=[positions[1]+width], widths=width)
-bp7 = plt.boxplot(np.transpose(result_all_deeplab[2, :]), positions=[positions[2]+width], widths=width)
-bp8 = plt.boxplot(np.transpose(result_all_deeplab[3, :]), positions=[positions[3]+width], widths=width)
-set_box_color(bp1, cm.tab10(0), 'blue')
-set_box_color(bp2, cm.tab10(0), 'red')
-set_box_color(bp3, cm.tab10(0), 'green')
-set_box_color(bp4, cm.tab10(0), 'purple')
-set_box_color(bp5, cm.tab10(1), 'blue')
-set_box_color(bp6, cm.tab10(1), 'red')
-set_box_color(bp7, cm.tab10(1), 'green')
-set_box_color(bp8, cm.tab10(1), 'purple')
-plt.xlim([-0.25, 3.75])
-plt.xticks(np.arange(len(run_types))+width/2, ['base', 'low diversity', 'high diversity', 'higher diversity'])
-plt.plot([], c=cm.tab10(0), label='U-Net')
-plt.plot([], c=cm.tab10(1), label='Deeplab-CRF')
-plt.ylim([75, 77])
-plt.legend(loc='lower left')
-plt.xlabel('Patch Extraction Type')
-plt.ylabel('IoU')
-plt.title('Overall IoU Comparison D1')
+title_str = 'Deeplab-CRF Citywise Comparison D1 (2)'
+plot_bar2(city_res_deeplab, result_all_deeplab, tick_str, title_str)
+plt.savefig(os.path.join(img_dir, '{}.png'.format('_'.join(title_str.split()))))
+plt.show()
 
 # spca
+tick_str = ['fresno', 'modesto', 'stockton', 'avg']
 run_ids = [0, 1, 2, 3, 4]
 run_types = ['grid', 'incity', 'xcity', 'xgroup']
 result_all_unet = np.zeros((len(run_types), len(run_ids)))
 city_res_A = np.zeros((len(run_types), 3, len(run_ids)))
 city_res_B = np.zeros((len(run_types), 3, len(run_ids)))
 city_dict = {'Fresno': 0, 'Modesto': 1, 'Stockton': 2}
-
 for cnt_1, run_id in enumerate(run_ids):
     for cnt_2, model_type in enumerate(run_types):
         model_name = \
@@ -130,6 +138,10 @@ for cnt_1, run_id in enumerate(run_ids):
         mean_iou = mean_iou_A/mean_iou_B
         result_all_unet[cnt_2, cnt_1] = mean_iou
 city_res_unet = city_res_A/city_res_B
+title_str = 'U-Net Citywise Comparison D2'
+plot_bar(city_res_unet, result_all_unet, tick_str, title_str)
+plt.savefig(os.path.join(img_dir, '{}.png'.format('_'.join(title_str.split()))))
+plt.show()
 
 
 run_ids = [0, 1, 2, 3, 4]
@@ -138,7 +150,6 @@ result_all_deeplab = np.zeros((len(run_types), len(run_ids)))
 city_res_A = np.zeros((len(run_types), 3, len(run_ids)))
 city_res_B = np.zeros((len(run_types), 3, len(run_ids)))
 city_dict = {'Fresno': 0, 'Modesto': 1, 'Stockton': 2}
-
 for cnt_1, run_id in enumerate(run_ids):
     for cnt_2, model_type in enumerate(run_types):
         model_name = \
@@ -162,37 +173,7 @@ for cnt_1, run_id in enumerate(run_ids):
         mean_iou = mean_iou_A/mean_iou_B
         result_all_deeplab[cnt_2, cnt_1] = mean_iou
 city_res_deeplab = city_res_A/city_res_B
-
-plt.subplot(212)
-positions = np.arange(4)
-width = 0.3
-bp1 = plt.boxplot(np.transpose(result_all_unet[0, :]), positions=[positions[0]],widths=width)
-bp2 = plt.boxplot(np.transpose(result_all_unet[1, :]), positions=[positions[1]],widths=width)
-bp3 = plt.boxplot(np.transpose(result_all_unet[2, :]), positions=[positions[2]],widths=width)
-bp4 = plt.boxplot(np.transpose(result_all_unet[3, :]), positions=[positions[3]],widths=width)
-bp5 = plt.boxplot(np.transpose(result_all_deeplab[0, :]), positions=[positions[0]+width], widths=width)
-bp6 = plt.boxplot(np.transpose(result_all_deeplab[1, :]), positions=[positions[1]+width], widths=width)
-bp7 = plt.boxplot(np.transpose(result_all_deeplab[2, :]), positions=[positions[2]+width], widths=width)
-bp8 = plt.boxplot(np.transpose(result_all_deeplab[3, :]), positions=[positions[3]+width], widths=width)
-set_box_color(bp1, cm.tab10(0), 'blue')
-set_box_color(bp2, cm.tab10(0), 'red')
-set_box_color(bp3, cm.tab10(0), 'green')
-set_box_color(bp4, cm.tab10(0), 'purple')
-set_box_color(bp5, cm.tab10(1), 'blue')
-set_box_color(bp6, cm.tab10(1), 'red')
-set_box_color(bp7, cm.tab10(1), 'green')
-set_box_color(bp8, cm.tab10(1), 'purple')
-plt.xlim([-0.25, 3.75])
-plt.xticks(np.arange(len(run_types))+width/2, ['base', 'low diversity', 'high diversity', 'higher diversity'])
-plt.plot([], c=cm.tab10(0), label='U-Net')
-plt.plot([], c=cm.tab10(1), label='Deeplab-CRF')
-plt.legend(loc='lower left')
-plt.xlabel('Patch Extraction Type')
-plt.ylabel('IoU')
-plt.title('Overall IoU Comparison D2')
-
-plt.tight_layout()
-img_dir, task_dir = utils.get_task_img_folder()
-plt.savefig(os.path.join(img_dir, 'all_diversity_temp.png'))
-
+title_str = 'Deeplab-CRF Citywise Comparison D2'
+plot_bar(city_res_deeplab, result_all_deeplab, tick_str, title_str)
+plt.savefig(os.path.join(img_dir, '{}.png'.format('_'.join(title_str.split()))))
 plt.show()

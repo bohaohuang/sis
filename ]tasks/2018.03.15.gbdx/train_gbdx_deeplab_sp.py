@@ -9,23 +9,23 @@ import bohaoCustom.uabPreprocClasses as bPreproc
 import uabPreprocClasses
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
-from bohaoCustom import uabMakeNetwork_UNet
+from bohaoCustom import uabMakeNetwork_DeepLabV2
 
-RUN_ID = 0
+RUN_ID = 1
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-4
-INPUT_SIZE = 572
+LEARNING_RATE = 1e-5
+INPUT_SIZE = 321
 TILE_SIZE = 2541
 EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 2000
 GPU = 0
-DECAY_STEP = 60
+DECAY_STEP = 40
 DECAY_RATE = 0.1
 MODEL_NAME = 'gbdx2_aug_grid_{}_sp'
 SFN = 32
-RES101_DIR = r'/hdd6/Models/UnetCrop_gbdx_aug_grid_0_sp_PS(572, 572)_BS5_EP60_LR1e-05_DS20_DR0.1_SFN32'
+RES101_DIR = r'/hdd/Models/resnet_v1_101.ckpt'
 
 
 def read_flag():
@@ -59,16 +59,16 @@ def main(flags):
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, flags.input_size[0], flags.input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_UNet.UnetModelCrop({'X':X, 'Y':y},
-                                              trainable=mode,
-                                              model_name=flags.model_name,
-                                              input_size=flags.input_size,
-                                              batch_size=flags.batch_size,
-                                              learn_rate=flags.learning_rate,
-                                              decay_step=flags.decay_step,
-                                              decay_rate=flags.decay_rate,
-                                              epochs=flags.epochs,
-                                              start_filter_num=flags.sfn)
+    model = uabMakeNetwork_DeepLabV2.DeeplabV3({'X':X, 'Y':y},
+                                               trainable=mode,
+                                               model_name=flags.model_name,
+                                               input_size=flags.input_size,
+                                               batch_size=flags.batch_size,
+                                               learn_rate=flags.learning_rate,
+                                               decay_step=flags.decay_step,
+                                               decay_rate=flags.decay_rate,
+                                               epochs=flags.epochs,
+                                               start_filter_num=flags.sfn)
     model.create_graph('X', class_num=flags.num_classes)
 
     # create collection
