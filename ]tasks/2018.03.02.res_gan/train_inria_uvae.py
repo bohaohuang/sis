@@ -13,19 +13,20 @@ from bohaoCustom import uabMakeNetwork_UNetEncoder
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-6
+LEARNING_RATE = 2e-4
 INPUT_SIZE = 256
 TILE_SIZE = 5000
-EPOCHS = 100
-NUM_CLASS = 2
+EPOCHS = 500
+NUM_CLASS = 3
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = 1
-DECAY_STEP = 60
+GPU = 0
+DECAY_STEP = 100
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_z{}_{}'
 SFN = 32
-Z_DIM = 128
+Z_DIM = 1000
+PRETRAINED_DIR = r'/hdd6/Models/UNET_rand_gird/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
 
 
 def read_flag():
@@ -45,6 +46,7 @@ def read_flag():
     parser.add_argument('--run-id', type=str, default=RUN_ID, help='id of this run')
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--z-dim', type=int, default=Z_DIM, help='dimension of latent variable')
+    parser.add_argument('--pred-dir', type=str, default=PRETRAINED_DIR, help='path to ckpt of pretrained model')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
@@ -115,11 +117,12 @@ def main(flags):
     model.train_config('X', 'Y', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath)
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
-              pretrained_model_dir=None,
+              pretrained_model_dir=flags.pred_dir,
+              layers2load=[1,2,3,4,5],
               isTrain=True,
               img_mean=img_mean,
               verb_step=100,                    # print a message every 100 step(sample)
-              save_epoch=5,                     # save the model every 5 epochs
+              save_epoch=10,                     # save the model every 5 epochs
               gpu=GPU,
               tile_size=flags.tile_size,
               patch_size=flags.input_size)

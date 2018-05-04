@@ -13,7 +13,7 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-3
+LEARNING_RATE = 1e-4
 INPUT_SIZE = 572
 TILE_SIZE = 2541
 EPOCHS = 100
@@ -21,11 +21,11 @@ NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 2000
 GPU = 0
-DECAY_STEP = 40
+DECAY_STEP = 60
 DECAY_RATE = 0.1
 MODEL_NAME = 'gbdx2_aug_grid_{}_sp'
 SFN = 32
-RES101_DIR = r'/media/ei-edl01/data/uab_datasets/sp/]shared_models/UnetCropCV_(FixedRes)CTFinetune+nlayer9_PS(572, 572)_BS5_EP100_LR1e-05_DS50_DR0.1_SFN32'
+RES101_DIR = r'/hdd6/Models/UnetCrop_gbdx2_aug_grid_0_sp_PS(572, 572)_BS5_EP100_LR0.001_DS40_DR0.1_SFN32'
 
 
 def read_flag():
