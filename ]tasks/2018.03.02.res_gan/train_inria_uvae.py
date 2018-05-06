@@ -21,7 +21,7 @@ NUM_CLASS = 3
 N_TRAIN = 8000
 N_VALID = 1000
 GPU = 0
-DECAY_STEP = 100
+DECAY_STEP = 250
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_z{}_{}'
 SFN = 32
@@ -81,7 +81,7 @@ def main(flags):
     # [3] is the channel id of GT
     rescObj = uabPreprocClasses.uabPreprocMultChanOp([], 'GT_Divide.tif', 'Map GT to (0, 1)', [3], opDetObj)
     rescObj.run(blCol)
-    img_mean = blCol.getChannelMeans([0, 1, 2])         # get mean of rgb info
+    img_mean = np.zeros(3) #blCol.getChannelMeans([0, 1, 2])         # get mean of rgb info
 
     # extract patches
     extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 4], # extract all 4 channels

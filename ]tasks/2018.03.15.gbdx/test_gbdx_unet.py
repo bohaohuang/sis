@@ -22,16 +22,16 @@ def get_sum_of_channel(img):
 
 # settings
 task_list = ['104001001099F800', '1040010021B61200', '1040010033CCDF00']
-adjust_save_dir = r'/media/ei-edl01/data/uab_datasets/sp/data_gamma_adjust'
+adjust_save_dir = r'/hdd6/gbdx_data/sp/data_gamma_adjust'
 model_dirs = {'UNET': r'/hdd6/Models/UnetCrop_gbdx2_aug_grid_0_sp_PS(572, 572)_BS8_EP60_LR1e-06_DS10_DR0.5_SFN32',
-                'DEEPLAB': r'/hdd6/Models/Deeplab_xgroup/DeeplabV3_spca_aug_train_deeplab_spca_fileList_4_PS(321, 321)_'
-                           r'BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'}
+                'DEEPLAB': r'/hdd6/Models/gbdx_models/DeeplabV3_gbdx2_aug_grid_0_sp_PS(321, 321)_'
+                           r'BS5_EP100_LR1e-06_DS40_DR0.1_SFN32'}
 
 util_functions.tf_warn_level(3)
 for cnt, task in enumerate(task_list):
     task_id = '{}_rechunked'.format(task)
     year = 2015 + cnt
-    img_dir = r'/media/ei-edl01/user/as667/{}'.format(task_id)
+    img_dir = r'/hdd6/gbdx_data/{}'.format(task_id)
     imgs = sorted(glob(os.path.join(img_dir, '*.tif')))
     gamma = 2.5
     invGamma = 1.0 / gamma
@@ -56,7 +56,7 @@ for cnt, task in enumerate(task_list):
     print(img_mean)
 
     for model_name in ['DEEPLAB']:
-        my_dir = r'/media/ei-edl01/user/jmm123/gbdx_pred/{}/sp/{}'.format(year, model_name)
+        my_dir = r'/media/ei-edl01/user/jmm123/gbdx_pred2/{}/sp/{}'.format(year, model_name)
         sp_model_dir = model_dirs[model_name]
 
         gpu = 1
