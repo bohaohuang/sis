@@ -23,7 +23,7 @@ if run_clustering:
         for row in csv_reader:
             features.append(row)
 
-    feature_encode = TSNE(n_components=2, perplexity=20, verbose=True).fit_transform(features)
+    feature_encode = TSNE(n_components=2, perplexity=40, verbose=True).fit_transform(features)
     np.save(npy_file_name, feature_encode)
 else:
     feature_encode = np.load(npy_file_name)
