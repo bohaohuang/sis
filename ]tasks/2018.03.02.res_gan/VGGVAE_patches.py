@@ -5,6 +5,7 @@ import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
 import utils
+import util_functions
 import uabCrossValMaker
 import uabPreprocClasses
 import uab_collectionFunctions
@@ -25,8 +26,10 @@ def patch_iterator(parent_dir, file_list, patch_size, img_mean):
 gpu = 1
 batch_size = 5
 input_size = [256, 256]
-latent_num = 1000
+latent_num = 500
 img_dir, task_dir = utils.get_task_img_folder()
+os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
+os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu)
 
 # make the model
 # define place holder
@@ -42,7 +45,7 @@ model = uabMakeNetwork_UNetEncoder.VGGVAE({'X':X, 'Y':y},
 # create graph
 model.create_graph('X', class_num=3)
 
-model_dir = r'/hdd6/Models/VGGVAE/VGGVAE_inria_z1000_0_PS(256, 256)_BS5_EP400_LR5e-05_DS200.0_DR0.5_SFN32'
+model_dir = r'/hdd6/Models/VGGVAE/VGGVAE_inria_z500_0_PS(256, 256)_BS5_EP400_LR1e-05_DS200.0_DR0.5_SFN32'
 blCol = uab_collectionFunctions.uabCollection('inria')
 opDetObj = bPreproc.uabOperTileDivide(255)          # inria GT has value 0 and 255, we map it back to 0 and 1
 # [3] is the channel id of GT

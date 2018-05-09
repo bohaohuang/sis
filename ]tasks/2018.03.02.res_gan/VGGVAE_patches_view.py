@@ -8,7 +8,7 @@ from sklearn.manifold import TSNE
 import utils
 
 run_clustering = True
-model_dir = r'/hdd6/Models/VGGVAE/VGGVAE_inria_z1000_0_PS(256, 256)_BS5_EP400_LR5e-05_DS200.0_DR0.5_SFN32'
+model_dir = r'/hdd6/Models/VGGVAE/VGGVAE_inria_z500_0_PS(256, 256)_BS5_EP400_LR1e-05_DS200.0_DR0.5_SFN32'
 img_dir, task_dir = utils.get_task_img_folder()
 npy_file_name = os.path.join(task_dir, '{}.npy'.format(model_dir.split('/')[-1]))
 city_order = {'aus': 0, 'chi': 1, 'kit': 2, 'tyr': 3, 'vie': 4}
@@ -23,7 +23,7 @@ if run_clustering:
         for row in csv_reader:
             features.append(row)
 
-    feature_encode = TSNE(n_components=2, perplexity=40, verbose=True).fit_transform(features)
+    feature_encode = TSNE(n_components=2, perplexity=30, learning_rate=500, n_iter=250, verbose=True).fit_transform(features)
     np.save(npy_file_name, feature_encode)
 else:
     feature_encode = np.load(npy_file_name)
@@ -62,8 +62,8 @@ for i in range(5):
 #plt.scatter(feature_encode[:, 0], feature_encode[:, 1], c=patch_percent, cmap=plt.get_cmap('bwr'))
 #plt.colorbar()
 
-#for i in range(feature_encode.shape[0]):
-#    plt.text(feature_encode[i, 0], feature_encode[i, 1], patch_ids[i])
+for i in range(feature_encode.shape[0]):
+    plt.text(feature_encode[i, 0], feature_encode[i, 1], patch_ids[i])
 plt.xlabel('Feature 1')
 plt.ylabel('Feature 2')
 plt.title('TSNE Projection Result')

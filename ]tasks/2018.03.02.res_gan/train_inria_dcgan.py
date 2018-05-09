@@ -9,7 +9,7 @@ import bohaoCustom.uabPreprocClasses as bPreproc
 import uabPreprocClasses
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
-from bohaoCustom import uabMakeNetwork_UGAN
+from bohaoCustom import uabMakeNetwork_DCGAN
 
 RUN_ID = 0
 BATCH_SIZE = 5
@@ -23,7 +23,7 @@ N_VALID = 2000
 GPU = 0
 DECAY_STEP = 100
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_ugan_z{}_{}'
+MODEL_NAME = 'inria_z{}_{}'
 SFN = 32
 Z_DIM = 1000
 
@@ -59,7 +59,7 @@ def main(flags):
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
     z = tf.placeholder(tf.float32, shape=[None, flags.z_dim], name='z')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_UGAN.VGGGAN({'X':X, 'Z':z},
+    model = uabMakeNetwork_DCGAN.DCGAN({'X':X, 'Z':z},
                                        trainable=mode,
                                        model_name=flags.model_name,
                                        input_size=flags.input_size,
@@ -69,7 +69,7 @@ def main(flags):
                                        decay_rate=flags.decay_rate,
                                        epochs=flags.epochs,
                                        start_filter_num=flags.sfn,
-                                       latent_num=flags.z_dim)
+                                       z_dim=flags.z_dim)
     model.create_graph('X', class_num=flags.num_classes)
 
     # create collection
@@ -79,7 +79,7 @@ def main(flags):
     # [3] is the channel id of GT
     rescObj = uabPreprocClasses.uabPreprocMultChanOp([], 'GT_Divide.tif', 'Map GT to (0, 1)', [3], opDetObj)
     rescObj.run(blCol)
-    img_mean = blCol.getChannelMeans([0, 1, 2])         # get mean of rgb info
+    img_mean = np.zeros(3) #blCol.getChannelMeans([0, 1, 2])         # get mean of rgb info
 
     # extract patches
     extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 4], # extract all 4 channels
