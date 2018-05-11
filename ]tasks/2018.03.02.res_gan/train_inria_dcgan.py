@@ -13,7 +13,7 @@ from bohaoCustom import uabMakeNetwork_DCGAN
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-4
 INPUT_SIZE = 256
 TILE_SIZE = 5000
 EPOCHS = 500
@@ -21,7 +21,7 @@ NUM_CLASS = 3
 N_TRAIN = 8000
 N_VALID = 2000
 GPU = 0
-DECAY_STEP = 100
+DECAY_STEP = 250
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_z{}_{}'
 SFN = 32
@@ -70,7 +70,7 @@ def main(flags):
                                        epochs=flags.epochs,
                                        start_filter_num=flags.sfn,
                                        z_dim=flags.z_dim)
-    model.create_graph('X', class_num=flags.num_classes)
+    model.create_graph('X', class_num=flags.num_classes, reduce_dim=False)
 
     # create collection
     # the original file is in /ei-edl01/data/uab_datasets/inria

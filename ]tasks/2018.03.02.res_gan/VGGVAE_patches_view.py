@@ -23,7 +23,7 @@ if run_clustering:
         for row in csv_reader:
             features.append(row)
 
-    feature_encode = TSNE(n_components=2, perplexity=30, learning_rate=500, n_iter=250, verbose=True).fit_transform(features)
+    feature_encode = TSNE(n_components=2, perplexity=40, learning_rate=500, verbose=True).fit_transform(features)
     np.save(npy_file_name, feature_encode)
 else:
     feature_encode = np.load(npy_file_name)
@@ -62,8 +62,8 @@ for i in range(5):
 #plt.scatter(feature_encode[:, 0], feature_encode[:, 1], c=patch_percent, cmap=plt.get_cmap('bwr'))
 #plt.colorbar()
 
-for i in range(feature_encode.shape[0]):
-    plt.text(feature_encode[i, 0], feature_encode[i, 1], patch_ids[i])
+#for i in range(feature_encode.shape[0]):
+#    plt.text(feature_encode[i, 0], feature_encode[i, 1], patch_ids[i])
 plt.xlabel('Feature 1')
 plt.ylabel('Feature 2')
 plt.title('TSNE Projection Result')
