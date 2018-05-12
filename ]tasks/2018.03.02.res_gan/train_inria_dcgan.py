@@ -26,6 +26,7 @@ DECAY_RATE = 0.1
 MODEL_NAME = 'inria_z{}_{}'
 SFN = 32
 Z_DIM = 1000
+LR_MULT = 5
 
 
 def read_flag():
@@ -45,6 +46,7 @@ def read_flag():
     parser.add_argument('--run-id', type=str, default=RUN_ID, help='id of this run')
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--z-dim', type=int, default=Z_DIM, help='dimension of latent variable')
+    parser.add_argument('--lr-mult', type=int, default=LR_MULT, help='Multifactor of G and D LR')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
@@ -69,7 +71,8 @@ def main(flags):
                                        decay_rate=flags.decay_rate,
                                        epochs=flags.epochs,
                                        start_filter_num=flags.sfn,
-                                       z_dim=flags.z_dim)
+                                       z_dim=flags.z_dim,
+                                       lr_mult=flags.lr_mult)
     model.create_graph('X', class_num=flags.num_classes, reduce_dim=False)
 
     # create collection
