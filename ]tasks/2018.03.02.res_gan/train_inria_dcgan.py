@@ -23,7 +23,7 @@ N_VALID = 2000
 GPU = 0
 DECAY_STEP = 250
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_z{}_{}'
+MODEL_NAME = 'inria_z{}_{}_lrm{}'
 SFN = 32
 Z_DIM = 1000
 LR_MULT = 5
@@ -51,7 +51,7 @@ def read_flag():
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
     flags.tile_size = (flags.tile_size, flags.tile_size)
-    flags.model_name = flags.model_name.format(flags.z_dim, flags.run_id)
+    flags.model_name = flags.model_name.format(flags.z_dim, flags.run_id, flags.lr_mult)
     return flags
 
 
