@@ -13,7 +13,7 @@ from bohaoCustom import uabMakeNetwork_DCGAN
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-6
 INPUT_SIZE = 256
 TILE_SIZE = 5000
 EPOCHS = 500
@@ -21,12 +21,12 @@ NUM_CLASS = 3
 N_TRAIN = 8000
 N_VALID = 2000
 GPU = 0
-DECAY_STEP = 250
+DECAY_STEP = 500
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_z{}_{}_lrm{}'
 SFN = 32
 Z_DIM = 1000
-LR_MULT = 5
+LR_MULT = 1
 
 
 def read_flag():
