@@ -14,19 +14,19 @@ from bohaoCustom import uabMakeNetwork_DCGAN
 RUN_ID = 0
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-6
-INPUT_SIZE = 256
+INPUT_SIZE = 128
 TILE_SIZE = 5000
 EPOCHS = 500
 NUM_CLASS = 3
 N_TRAIN = 8000
 N_VALID = 2000
-GPU = 0
+GPU = 1
 DECAY_STEP = 500
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_z{}_{}_lrm{}'
+MODEL_NAME = 'inria_z{}_{}_lrm{}_mini'
 SFN = 32
 Z_DIM = 1000
-LR_MULT = 1
+LR_MULT = 2
 
 
 def read_flag():
@@ -115,7 +115,8 @@ def main(flags):
     # train
     start_time = time.time()
 
-    model.train_config('X', 'Z', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath)
+    model.train_config('X', 'Z', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
+                       par_dir='DCGAN_128')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,
