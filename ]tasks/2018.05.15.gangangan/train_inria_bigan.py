@@ -9,11 +9,11 @@ import bohaoCustom.uabPreprocClasses as bPreproc
 import uabPreprocClasses
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
-from bohaoCustom import uabMakeNetwork_DCGAN
+from bohaoCustom import uabMakeNetwork_BiGAN
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-6
 INPUT_SIZE = 128
 TILE_SIZE = 5000
 EPOCHS = 500
@@ -61,7 +61,7 @@ def main(flags):
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
     z = tf.placeholder(tf.float32, shape=[None, flags.z_dim], name='z')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_DCGAN.DCGAN({'X': X, 'Z': z},
+    model = uabMakeNetwork_BiGAN.BiGAN({'X': X, 'Z': z},
                                        trainable=mode,
                                        model_name=flags.model_name,
                                        input_size=flags.input_size,
@@ -116,7 +116,7 @@ def main(flags):
     start_time = time.time()
 
     model.train_config('X', 'Z', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
-                       par_dir='DCGAN_128')
+                       par_dir='BiGAN_128')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,
