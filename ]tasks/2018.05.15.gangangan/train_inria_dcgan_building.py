@@ -8,25 +8,26 @@ import uabCrossValMaker
 import bohaoCustom.uabPreprocClasses as bPreproc
 import uabPreprocClasses
 import uab_collectionFunctions
-import uab_DataHandlerFunctions
-from bohaoCustom import uabMakeNetwork_BiGAN
+from bohaoCustom import uabMakeNetwork_DCGAN
+from bohaoCustom import uabPatchExtrClassSelect
 
 RUN_ID = 0
-BATCH_SIZE = 5
-LEARNING_RATE = 1e-5
+BATCH_SIZE = 100
+LEARNING_RATE = 5e-6
 INPUT_SIZE = 128
 TILE_SIZE = 5000
 EPOCHS = 100
 NUM_CLASS = 3
-N_TRAIN = 8000
+N_TRAIN = 20000
 N_VALID = 2000
-GPU = 1
+GPU = 0
 DECAY_STEP = 10
 DECAY_RATE = 0.9
-MODEL_NAME = 'inria_z{}_{}_lrm{}_mini'
+MODEL_NAME = 'inria_z{}_{}_lrm{}'
 SFN = 32
 Z_DIM = 1000
 LR_MULT = 2
+CLASS_PERCENT = 0.4
 
 
 def read_flag():
@@ -47,11 +48,12 @@ def read_flag():
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--z-dim', type=int, default=Z_DIM, help='dimension of latent variable')
     parser.add_argument('--lr-mult', type=int, default=LR_MULT, help='Multifactor of G and D LR')
+    parser.add_argument('--class-per', type=float, default=CLASS_PERCENT, help='Class percentage to keep the patch')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
     flags.tile_size = (flags.tile_size, flags.tile_size)
-    flags.model_name = flags.model_name.format(flags.z_dim, flags.run_id, flags.lr_mult)
+    flags.model_name = flags.model_name.format(flags.z_dim, flags.class_per, flags.lr_mult)
     return flags
 
 
@@ -61,7 +63,7 @@ def main(flags):
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
     z = tf.placeholder(tf.float32, shape=[None, flags.z_dim], name='z')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_BiGAN.BiGAN({'X': X, 'Z': z},
+    model = uabMakeNetwork_DCGAN.DCGAN({'X': X, 'Z': z},
                                        trainable=mode,
                                        model_name=flags.model_name,
                                        input_size=flags.input_size,
@@ -85,13 +87,14 @@ def main(flags):
     img_mean = np.zeros(3) #blCol.getChannelMeans([0, 1, 2])         # get mean of rgb info
 
     # extract patches
-    extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 4], # extract all 4 channels
+    extrObj = uabPatchExtrClassSelect.uabPatchExtrClassSelect([0, 1, 2, 4], # extract all 4 channels
                                                     cSize=flags.input_size, # patch size as 572*572
                                                     numPixOverlap=int(model.get_overlap()/2),  # overlap as 92
                                                     extSave=['jpg', 'jpg', 'jpg', 'png'], # save rgb files as jpg and gt as png
                                                     isTrain=True,
                                                     gtInd=3,
-                                                    pad=model.get_overlap()) # pad around the tiles
+                                                    pad=model.get_overlap(),
+                                                    select_percent=0.4) # pad around the tiles
     patchDir = extrObj.run(blCol)
 
     # make data reader
@@ -116,14 +119,14 @@ def main(flags):
     start_time = time.time()
 
     model.train_config('X', 'Z', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
-                       par_dir='BiGAN_128')
+                       par_dir='DCGAN_building')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,
               isTrain=True,
               img_mean=img_mean,
               verb_step=100,                    # print a message every 100 step(sample)
-              save_epoch=20,                     # save the model every 5 epochs
+              save_epoch=50,                     # save the model every 5 epochs
               gpu=GPU,
               tile_size=flags.tile_size,
               patch_size=flags.input_size)
