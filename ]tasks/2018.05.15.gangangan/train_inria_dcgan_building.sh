@@ -10,4 +10,4 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=/opt/apps/rhel7/cudnn/lib64:$LD_LIBRARY_PATH
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/uab
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/sis
-python train_inria_dcgan_building.py --learning-rate=1e-4 --decay-rate=0.9 --decay-step=10 --z-dim=1000 --lr-mult=2
+python train_inria_dcgan_building.py --learning-rate=5e-6 --decay-rate=0.9 --decay-step=5 --z-dim=1000 --lr-mult=2

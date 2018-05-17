@@ -12,16 +12,16 @@ from bohaoCustom import uabMakeNetwork_DCGAN
 from bohaoCustom import uabPatchExtrClassSelect
 
 RUN_ID = 0
-BATCH_SIZE = 100
+BATCH_SIZE = 50
 LEARNING_RATE = 5e-6
-INPUT_SIZE = 128
+INPUT_SIZE = 256
 TILE_SIZE = 5000
 EPOCHS = 100
 NUM_CLASS = 3
 N_TRAIN = 20000
 N_VALID = 2000
 GPU = 0
-DECAY_STEP = 10
+DECAY_STEP = 5
 DECAY_RATE = 0.9
 MODEL_NAME = 'inria_z{}_{}_lrm{}'
 SFN = 32
