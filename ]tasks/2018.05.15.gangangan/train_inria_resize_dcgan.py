@@ -1,40 +1,42 @@
+import os
 import time
 import argparse
 import numpy as np
 import tensorflow as tf
+from glob import glob
 import uabDataReader
 import uabRepoPaths
-from bohaoCustom import uabMakeNetwork_BiGAN
+from bohaoCustom import uabMakeNetwork_DCGAN
 
 
-class ImageLabelReader_celeb(uabDataReader.ImageLabelReader):
+class ImageLabelReader_inria(uabDataReader.ImageLabelReader):
     def __init__(self, batch_size, patch_size, is_train=True):
         self.isQueue = 0
         self.readManager = self.readFromDiskIteratorTrain(batch_size, patch_size, is_train)
 
     def readFromDiskIteratorTrain(self, batch_size, patch_size, is_train):
-        import os
         import imageio
-        import scipy.misc
 
-        def read_img(data_dir, img_id):
-            img = imageio.imread(os.path.join(data_dir, '{:06}.jpg'.format(img_id + 1)))
+        def read_img(img_name):
+            img = imageio.imread(img_name)
             return img
 
-        data_dir = r'/home/lab/Documents/bohao/data/data/celebA'
-        n_sample = 202599
+        data_dir = r'/home/lab/Documents/bohao/code/third_party/DCGAN-tensorflow/data/inria'
+        data_files = glob(os.path.join(data_dir, '*.png'))
+        n_sample = len(data_files)
+        train_num = int(0.8 * n_sample)
 
         idx = np.random.permutation(n_sample)
         if is_train:
-            idx = idx[:200000]
+            idx = idx[:train_num]
         else:
-            idx = idx[200000:]
+            idx = idx[train_num:]
         while True:
             image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 3)).astype(np.float32)
             for cnt, img_id in enumerate(idx):
-                block = read_img(data_dir, img_id)
-                image_batch[cnt % batch_size, :, :, :] = scipy.misc.imresize(block, patch_size)
-                if ((cnt + 1) % batch_size == 0):
+                block = read_img(data_files[img_id])
+                image_batch[cnt % batch_size, :, :, :] = block
+                if (cnt + 1) % batch_size == 0:
                     yield image_batch, None
 
 
@@ -43,14 +45,14 @@ BATCH_SIZE = 64
 LEARNING_RATE = 2e-4
 INPUT_SIZE = 128
 TILE_SIZE = 5000
-EPOCHS = 50
+EPOCHS = 25
 NUM_CLASS = 3
-N_TRAIN = 200000
-N_VALID = 2599
-GPU = 1
-DECAY_STEP = 50
+N_TRAIN = 39680
+N_VALID = 2000
+GPU = 0
+DECAY_STEP = 40
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_z{}_lrm{}'
+MODEL_NAME = 'inria_z{}_lrm{}_resize'
 SFN = 64
 Z_DIM = 100
 LR_MULT = 1
@@ -88,7 +90,7 @@ def main(flags):
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
     z = tf.placeholder(tf.float32, shape=[None, flags.z_dim], name='z')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_BiGAN.BiGAN({'X': X, 'Z': z},
+    model = uabMakeNetwork_DCGAN.DCGAN({'X': X, 'Z': z},
                                        trainable=mode,
                                        model_name=flags.model_name,
                                        input_size=flags.input_size,
@@ -99,13 +101,14 @@ def main(flags):
                                        epochs=flags.epochs,
                                        start_filter_num=flags.sfn,
                                        z_dim=flags.z_dim,
-                                       lr_mult=flags.lr_mult)
-    model.create_graph('X', class_num=flags.num_classes, reduce_dim=False, minibatch_dis=False)
+                                       lr_mult=flags.lr_mult,
+                                       depth=4)
+    model.create_graph('X', class_num=flags.num_classes, reduce_dim=False)
 
     # prepare data
-    dataReader_train = ImageLabelReader_celeb(flags.batch_size,
+    dataReader_train = ImageLabelReader_inria(flags.batch_size,
                                               (flags.input_size[0], flags.input_size[1]), True)
-    dataReader_valid = ImageLabelReader_celeb(flags.batch_size,
+    dataReader_valid = ImageLabelReader_inria(flags.batch_size,
                                               (flags.input_size[0], flags.input_size[1]), False)
     img_mean = np.zeros(3)
 
@@ -113,7 +116,7 @@ def main(flags):
     start_time = time.time()
 
     model.train_config('X', 'Z', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
-                       par_dir='DCGAN_CELEB')
+                       par_dir='DCGAN_INRIA_RESIZE')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,

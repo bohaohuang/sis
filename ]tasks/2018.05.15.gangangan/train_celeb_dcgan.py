@@ -47,13 +47,13 @@ EPOCHS = 100
 NUM_CLASS = 3
 N_TRAIN = 20000
 N_VALID = 2000
-GPU = 0
-DECAY_STEP = 50
+GPU = 1
+DECAY_STEP = 100
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_z{}_lrm{}_mini'
+MODEL_NAME = 'inria_z{}_lrm{}'
 SFN = 32
 Z_DIM = 100
-LR_MULT = 5
+LR_MULT = 1
 
 
 def read_flag():
@@ -100,7 +100,7 @@ def main(flags):
                                        start_filter_num=flags.sfn,
                                        z_dim=flags.z_dim,
                                        lr_mult=flags.lr_mult)
-    model.create_graph('X', class_num=flags.num_classes, reduce_dim=False, minibatch_dis=True)
+    model.create_graph('X', class_num=flags.num_classes, reduce_dim=False)
 
     # prepare data
     dataReader_train = ImageLabelReader_celeb(flags.batch_size,

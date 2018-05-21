@@ -56,7 +56,7 @@ Z_DIM = 100
 LR_MULT = 1
 
 
-def read_flag():
+def read_flag(LEARNING_RATE):
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch-size', default=BATCH_SIZE, type=int, help='batch size (10)')
     parser.add_argument('--learning-rate', type=float, default=LEARNING_RATE, help='learning rate (1e-3)')
@@ -113,14 +113,14 @@ def main(flags):
     start_time = time.time()
 
     model.train_config('X', 'Z', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
-                       par_dir='DCGAN_CELEB')
+                       par_dir='BiGAN_CELEB')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,
               isTrain=True,
               img_mean=img_mean,
               verb_step=100,                    # print a message every 100 step(sample)
-              save_epoch=50,                     # save the model every 5 epochs
+              save_epoch=5,                     # save the model every 5 epochs
               gpu=GPU,
               tile_size=flags.tile_size,
               patch_size=flags.input_size)
@@ -130,5 +130,6 @@ def main(flags):
 
 
 if __name__ == '__main__':
-    flags = read_flag()
-    main(flags)
+    for lr in [1e-4, 5e-5, 1e-5]:
+        flags = read_flag(lr)
+        main(flags)
