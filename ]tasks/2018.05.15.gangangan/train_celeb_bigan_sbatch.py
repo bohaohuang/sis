@@ -43,12 +43,12 @@ BATCH_SIZE = 64
 LEARNING_RATE = 2e-4
 INPUT_SIZE = 128
 TILE_SIZE = 5000
-EPOCHS = 50
+EPOCHS = 25
 NUM_CLASS = 3
 N_TRAIN = 200000
 N_VALID = 2599
-GPU = 1
-DECAY_STEP = 50
+GPU = 0
+DECAY_STEP = 25
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_z{}_lrm{}'
 SFN = 64
@@ -99,7 +99,8 @@ def main(flags):
                                        epochs=flags.epochs,
                                        start_filter_num=flags.sfn,
                                        z_dim=flags.z_dim,
-                                       lr_mult=flags.lr_mult)
+                                       lr_mult=flags.lr_mult,
+                                       depth=4)
     model.create_graph('X', class_num=flags.num_classes, reduce_dim=False, minibatch_dis=False)
 
     # prepare data
@@ -130,6 +131,6 @@ def main(flags):
 
 
 if __name__ == '__main__':
-    for lr in [1e-4, 5e-5, 1e-5]:
+    for lr in [2e-4, 5e-4, 1e-3]:
         flags = read_flag(lr)
         main(flags)

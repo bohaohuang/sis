@@ -8,11 +8,11 @@ from bohaoCustom import uabMakeNetwork_BiGAN
 
 
 class ImageLabelReader_celeb(uabDataReader.ImageLabelReader):
-    def __init__(self, batch_size, patch_size, is_train=True):
+    def __init__(self, data_dir, batch_size, patch_size, is_train=True):
         self.isQueue = 0
-        self.readManager = self.readFromDiskIteratorTrain(batch_size, patch_size, is_train)
+        self.readManager = self.readFromDiskIteratorTrain(data_dir, batch_size, patch_size, is_train)
 
-    def readFromDiskIteratorTrain(self, batch_size, patch_size, is_train):
+    def readFromDiskIteratorTrain(self, data_dir, batch_size, patch_size, is_train):
         import os
         import imageio
         import scipy.misc
@@ -21,7 +21,6 @@ class ImageLabelReader_celeb(uabDataReader.ImageLabelReader):
             img = imageio.imread(os.path.join(data_dir, '{:06}.jpg'.format(img_id + 1)))
             return img
 
-        data_dir = r'/home/lab/Documents/bohao/data/data/celebA'
         n_sample = 202599
 
         idx = np.random.permutation(n_sample)
@@ -47,13 +46,14 @@ EPOCHS = 50
 NUM_CLASS = 3
 N_TRAIN = 200000
 N_VALID = 2599
-GPU = 1
+GPU = 0
 DECAY_STEP = 50
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_z{}_lrm{}'
 SFN = 64
 Z_DIM = 100
 LR_MULT = 1
+DATA_DIR = r'/home/lab/Documents/bohao/data/data/celebA'
 
 
 def read_flag():
@@ -74,6 +74,7 @@ def read_flag():
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--z-dim', type=int, default=Z_DIM, help='dimension of latent variable')
     parser.add_argument('--lr-mult', type=int, default=LR_MULT, help='Multifactor of G and D LR')
+    parser.add_argument('--data-dir', type=str, default=DATA_DIR, help='data dir to celeb dataset')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
@@ -103,9 +104,9 @@ def main(flags):
     model.create_graph('X', class_num=flags.num_classes, reduce_dim=False, minibatch_dis=False)
 
     # prepare data
-    dataReader_train = ImageLabelReader_celeb(flags.batch_size,
+    dataReader_train = ImageLabelReader_celeb(flags.data_dir, flags.batch_size,
                                               (flags.input_size[0], flags.input_size[1]), True)
-    dataReader_valid = ImageLabelReader_celeb(flags.batch_size,
+    dataReader_valid = ImageLabelReader_celeb(flags.data_dir, flags.batch_size,
                                               (flags.input_size[0], flags.input_size[1]), False)
     img_mean = np.zeros(3)
 
