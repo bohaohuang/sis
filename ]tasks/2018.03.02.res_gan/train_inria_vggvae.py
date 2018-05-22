@@ -14,18 +14,18 @@ from bohaoCustom import uabMakeNetwork_UNetEncoder
 RUN_ID = 0
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-5
-INPUT_SIZE = 256
+INPUT_SIZE = 321
 TILE_SIZE = 5000
 EPOCHS = 400
 NUM_CLASS = 3
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = 0
+GPU = 1
 DECAY_STEP = 200
 DECAY_RATE = 0.5
 MODEL_NAME = 'inria_z{}_{}'
 SFN = 32
-Z_DIM = 1000
+Z_DIM = 500
 
 
 def read_flag():

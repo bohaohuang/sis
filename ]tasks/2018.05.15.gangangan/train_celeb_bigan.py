@@ -100,7 +100,8 @@ def main(flags):
                                        epochs=flags.epochs,
                                        start_filter_num=flags.sfn,
                                        z_dim=flags.z_dim,
-                                       lr_mult=flags.lr_mult)
+                                       lr_mult=flags.lr_mult,
+                                       depth=4)
     model.create_graph('X', class_num=flags.num_classes, reduce_dim=False, minibatch_dis=False)
 
     # prepare data
