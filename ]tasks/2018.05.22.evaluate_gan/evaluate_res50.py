@@ -52,8 +52,8 @@ with open(file_name, 'r') as f:
     files = f.readlines()
 
 res50 = keras.applications.resnet50.ResNet50(include_top=True, weights='imagenet')
-file_name = os.path.join(task_dir, 'inria_res50.csv')
-patch_file_name = os.path.join(task_dir, 'inria_res50.txt')
+file_name = os.path.join(task_dir, 'res50_inria.csv')
+patch_file_name = os.path.join(task_dir, 'res50_inria.txt')
 with open(file_name, 'w+') as f:
     with open(patch_file_name, 'w+') as f2:
         for file_line in tqdm(files):
