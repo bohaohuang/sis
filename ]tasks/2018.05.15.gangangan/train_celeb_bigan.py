@@ -46,10 +46,10 @@ EPOCHS = 25
 NUM_CLASS = 3
 N_TRAIN = 200000
 N_VALID = 2599
-GPU = 1
+GPU = 0
 DECAY_STEP = 25
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_z{}_lrm{}_eco'
+MODEL_NAME = 'inria_z{}_lrm{}_eco_1000'
 SFN = 64
 Z_DIM = 100
 LR_MULT = 1
@@ -115,7 +115,7 @@ def main(flags):
     start_time = time.time()
 
     model.train_config('X', 'Z', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
-                       par_dir='DCGAN_CELEB')
+                       par_dir='BiGAN_CELEB')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,

@@ -52,7 +52,7 @@ N_VALID = 2000
 GPU = 1
 DECAY_STEP = 25
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_z{}_lrm{}_resize'
+MODEL_NAME = 'inria_z{}_lrm{}_resize_1000'
 SFN = 64
 Z_DIM = 100
 LR_MULT = 1
@@ -134,6 +134,7 @@ def main(flags):
 
 if __name__ == '__main__':
     for lr in [2e-4, 5e-4, 1e-3, 1e-4, 5e-5, 1e-5]:
+    #for lr in [5e-5, 1e-5]:
         tf.reset_default_graph()
         flags = read_flag(lr)
         main(flags)

@@ -10,4 +10,4 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=/opt/apps/rhel7/cudnn/lib64:$LD_LIBRARY_PATH
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/uab
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/sis
-python train_celeb_bigan.py --learning-rate=1e-4 --data-dir=/work/bh163/data/celebA
+python train_celeb_bigan.py --learning-rate=2e-4 --lr-mult=2 --data-dir=/work/bh163/data/celebA
