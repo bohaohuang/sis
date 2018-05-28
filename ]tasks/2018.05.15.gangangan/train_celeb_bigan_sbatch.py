@@ -47,7 +47,7 @@ EPOCHS = 25
 NUM_CLASS = 3
 N_TRAIN = 200000
 N_VALID = 2599
-GPU = 0
+GPU = 1
 DECAY_STEP = 25
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_z{}_lrm{}'
@@ -101,7 +101,7 @@ def main(flags):
                                        z_dim=flags.z_dim,
                                        lr_mult=flags.lr_mult,
                                        depth=4)
-    model.create_graph('X', class_num=flags.num_classes, reduce_dim=False, minibatch_dis=False)
+    model.create_graph('X', class_num=flags.num_classes, reduce_dim=False)
 
     # prepare data
     dataReader_train = ImageLabelReader_celeb(flags.batch_size,
@@ -114,7 +114,8 @@ def main(flags):
     start_time = time.time()
 
     model.train_config('X', 'Z', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
-                       par_dir='BiGAN_CELEB')
+                       par_dir='BiGAN_CELEB_debug',
+                       )
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,
@@ -131,7 +132,7 @@ def main(flags):
 
 
 if __name__ == '__main__':
-    for lr in [5e-4, 1e-3]:
+    for lr in [2e-4, 1e-4, 5e-4]:
         tf.reset_default_graph()
         flags = read_flag(lr)
         main(flags)

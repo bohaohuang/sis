@@ -42,17 +42,17 @@ class ImageLabelReader_inria(uabDataReader.ImageLabelReader):
 
 RUN_ID = 0
 BATCH_SIZE = 64
-LEARNING_RATE = 2e-4
+LEARNING_RATE = 1e-5
 INPUT_SIZE = 128
 TILE_SIZE = 5000
 EPOCHS = 50
 NUM_CLASS = 3
 N_TRAIN = 39680
 N_VALID = 2000
-GPU = 1
+GPU = 0
 DECAY_STEP = 25
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_z{}_lrm{}_resize_1000'
+MODEL_NAME = 'inria_z{}_lrm{}'
 SFN = 64
 Z_DIM = 100
 LR_MULT = 1
@@ -116,7 +116,9 @@ def main(flags):
     start_time = time.time()
 
     model.train_config('X', 'Z', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
-                       par_dir='BiGAN_INRIA_RESIZE')
+                       #par_dir='BiGAN_INRIA_RESIZE',
+                       par_dir='Debug',
+                       )
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,
@@ -133,8 +135,8 @@ def main(flags):
 
 
 if __name__ == '__main__':
-    for lr in [2e-4, 5e-4, 1e-3, 1e-4, 5e-5, 1e-5]:
+    #for lr in [2e-4, 1e-4, 5e-4]:
     #for lr in [5e-5, 1e-5]:
-        tf.reset_default_graph()
-        flags = read_flag(lr)
-        main(flags)
+    tf.reset_default_graph()
+    flags = read_flag(LEARNING_RATE)
+    main(flags)
