@@ -73,7 +73,7 @@ feature_file = os.path.join(task_dir, '{}_inria.csv'.format(model_name))
 feature = pd.read_csv(feature_file, sep=',', header=None).values
 
 # fit on training set
-n_comp = 50
+n_comp = 80
 idx = np.array(idx)
 truth_city_train = truth_city[idx >= 6]
 feature_train = feature[idx >= 6, :]
@@ -121,6 +121,7 @@ for i in range(5):
         else:
             plt.subplot(511 + j, sharex=ax, sharey=ax)
         plt.hist(llh, bins=100)
+        plt.axvline(x=np.mean(llh), color='r', linestyle='--', linewidth=2)
         plt.title('{} model on {} (Avg: {:.3f})'.format(city_list[j], city_list[i], np.mean(llh)))
     plt.tight_layout()
     plt.savefig(os.path.join(img_dir, '{}_{}.png'.format(model_name, city_list[i])))

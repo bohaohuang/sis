@@ -1,6 +1,7 @@
 import os
 import time
 import argparse
+import scipy.misc
 import numpy as np
 import tensorflow as tf
 from glob import glob
@@ -34,28 +35,28 @@ class ImageLabelReader_inria(uabDataReader.ImageLabelReader):
             image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], 3)).astype(np.float32)
             for cnt, img_id in enumerate(idx):
                 block = read_img(data_files[img_id])
-                image_batch[cnt % batch_size, :, :, :] = block
+                image_batch[cnt % batch_size, :, :, :] = scipy.misc.imresize(block, patch_size)
                 if (cnt + 1) % batch_size == 0:
                     yield image_batch, None
 
 
 RUN_ID = 0
 BATCH_SIZE = 128
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 2e-4
 INPUT_SIZE = 64
 TILE_SIZE = 5000
 EPOCHS = 50
 NUM_CLASS = 3
-N_TRAIN = 39680
+N_TRAIN = 38400
 N_VALID = 2000
-GPU = 1
+GPU = 0
 DECAY_STEP = 50
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_z{}_lrm{}'
 SFN = 64
 Z_DIM = 100
 LR_MULT = 1
-DATA_DIR = r'/home/lab/Documents/bohao/data/data/inria'
+DATA_DIR = r'/home/lab/Documents/bohao/code/third_party/DCGAN-tensorflow/data/inria'
 
 
 def read_flag():

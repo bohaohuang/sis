@@ -75,7 +75,7 @@ idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'for
 
 plt.figure(figsize=(8, 6))
 fig_num = plt.gcf().number
-for model_name in ['res50', 'vae', 'bigan']:
+for model_name in ['res50', 'vae']:
     # load patch names
     patch_file = os.path.join(task_dir, '{}_inria.txt'.format(model_name))
     with open(patch_file, 'r') as f:

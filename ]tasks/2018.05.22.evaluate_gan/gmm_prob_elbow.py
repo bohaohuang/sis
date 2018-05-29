@@ -74,6 +74,8 @@ feature = pd.read_csv(feature_file, sep=',', header=None).values
 
 # fit on training set
 llh_curve = []
+llh_curve_test = []
+curve_points = [i for i in range(10, 151, 5)]
 for n_comp in range(10, 151, 5):
     print('N Comp = {}'.format(n_comp))
     idx = np.array(idx)
@@ -101,18 +103,35 @@ for n_comp in range(10, 151, 5):
     truth_city_valid = truth_city[idx >= 6]
     feature_valid = feature[idx >= 6, :]
     truth_building_valid = truth_building[idx >= 6]
+
+    track_id_test = track_id[idx < 6]
+    truth_city_test = truth_city[idx < 6]
+    feature_test = feature[idx < 6, :]
+    truth_building_test = truth_building[idx < 6]
+
     llh_model = []
+    llh_model_test = []
     for i in range(5):
         print('\tevaluating city {}'.format(city_list[i]))
         for j in range(5):
             llh = gmm_models[j].score_samples(feature_valid[truth_city_valid == i, :])
             llh_model.append(llh)
+            llh = gmm_models[j].score_samples(feature_test[truth_city_test == i, :])
+            llh_model_test.append(llh)
     llh_curve.append(np.mean(llh_model))
+    llh_curve_test.append(np.mean(llh_model_test))
 
-plt.figure(figsize=(10, 6))
-plt.plot(np.arange(10, 151, 5), llh_curve)
+plt.figure(figsize=(10, 8))
+plt.subplot(211)
+plt.plot(curve_points, llh_curve)
+plt.xlabel('')
+plt.ylabel('LLH Train')
+plt.grid(True)
+plt.subplot(212)
+plt.plot(curve_points, llh_curve_test)
 plt.xlabel('N Comp')
-plt.ylabel('LLH')
+plt.ylabel('LLH Valid')
 plt.grid(True)
 plt.tight_layout()
+plt.savefig(os.path.join(img_dir, 'elbow_{}.png'.format(model_name)))
 plt.show()
