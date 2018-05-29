@@ -102,7 +102,7 @@ def main(flags):
                                        z_dim=flags.z_dim,
                                        lr_mult=flags.lr_mult,
                                        depth=4)
-    model.create_graph('X', class_num=flags.num_classes, reduce_dim=False, minibatch_dis=False)
+    model.create_graph('X', class_num=flags.num_classes, reduce_dim=False)
 
     # prepare data
     dataReader_train = ImageLabelReader_celeb(flags.data_dir, flags.batch_size,

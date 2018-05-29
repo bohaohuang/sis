@@ -73,55 +73,46 @@ feature_file = os.path.join(task_dir, '{}_inria.csv'.format(model_name))
 feature = pd.read_csv(feature_file, sep=',', header=None).values
 
 # fit on training set
-n_comp = 50
-idx = np.array(idx)
-truth_city_train = truth_city[idx >= 6]
-feature_train = feature[idx >= 6, :]
-truth_building_train = truth_building[idx >= 6]
-gmm_models = []
-model_file_name = os.path.join(task_dir, 'gmm_models_{}_{}.npy'.format(model_name, n_comp))
-if not os.path.exists(model_file_name):
-    print('train GMM models ...')
-    for i in tqdm(range(5)):
-        gmm = GaussianMixture(n_components=n_comp, covariance_type='diag')
-        #gmm.fit(feature_train[np.all([truth_city_train == i, truth_building_train == 1], axis=0), :])
-        gmm.fit(feature_train[truth_city_train == i, :])
-        gmm_models.append(gmm)
-        np.save(model_file_name, gmm_models)
-else:
-    print('loading models')
-    gmm_models = np.load(model_file_name)
+llh_curve = []
+for n_comp in range(10, 151, 5):
+    print('N Comp = {}'.format(n_comp))
+    idx = np.array(idx)
+    truth_city_train = truth_city[idx >= 6]
+    feature_train = feature[idx >= 6, :]
+    truth_building_train = truth_building[idx >= 6]
+    gmm_models = []
+    model_file_name = os.path.join(task_dir, 'gmm_models_{}_{}.npy'.format(model_name, n_comp))
+    if not os.path.exists(model_file_name):
+        print('\ttrain GMM models ...')
+        for i in tqdm(range(5)):
+            gmm = GaussianMixture(n_components=n_comp, covariance_type='diag')
+            #gmm.fit(feature_train[np.all([truth_city_train == i, truth_building_train == 1], axis=0), :])
+            gmm.fit(feature_train[truth_city_train == i, :])
+            gmm_models.append(gmm)
+            np.save(model_file_name, gmm_models)
+    else:
+        print('loading models')
+        gmm_models = np.load(model_file_name)
 
-# evaluate on valid set
-idx = np.array(idx)
-track_id = np.arange(len(patch_names))
-track_id_valid = track_id[idx < 6]
-truth_city_valid = truth_city[idx < 6]
-feature_valid = feature[idx < 6, :]
-truth_building_valid = truth_building[idx < 6]
-for i in range(5):
-    print('evaluating city {}'.format(city_list[i]))
-    plt.figure(figsize=(6, 12))
-    for j in range(5):
-        llh = gmm_models[j].score_samples(feature_valid[truth_city_valid == i, :])
-        #tid = track_id_valid[np.all([truth_city_valid == i, truth_building_valid == 1], axis=0)]
-        tid = track_id_valid[truth_city_valid == i]
-        top5 = tid[np.argsort(llh)[::-1][:5]]
+    # evaluate on train set
+    idx = np.array(idx)
+    track_id = np.arange(len(patch_names))
+    track_id_valid = track_id[idx >= 6]
+    truth_city_valid = truth_city[idx >= 6]
+    feature_valid = feature[idx >= 6, :]
+    truth_building_valid = truth_building[idx >= 6]
+    llh_model = []
+    for i in range(5):
+        print('\tevaluating city {}'.format(city_list[i]))
+        for j in range(5):
+            llh = gmm_models[j].score_samples(feature_valid[truth_city_valid == i, :])
+            llh_model.append(llh)
+    llh_curve.append(np.mean(llh_model))
 
-        img = np.zeros((321, 321*5, 3), dtype=np.uint8)
-        for img_cnt, pid in enumerate(top5):
-            for c_cnt in range(3):
-                img[:, 321*img_cnt:321*(img_cnt+1), c_cnt] = imageio.imread(
-                    os.path.join(patchDir, '{}_RGB{}.jpg'.format(patch_names[pid][:-1], c_cnt)))
-        imageio.imsave(os.path.join(img_dir, '{}_top5_{}_model_on_{}.png'.format(model_name, city_list[j], city_list[i])),
-                       img)
-
-        if j == 0:
-            ax = plt.subplot(511 + j)
-        else:
-            plt.subplot(511 + j, sharex=ax, sharey=ax)
-        plt.hist(llh, bins=100)
-        plt.title('{} model on {} (Avg: {:.3f})'.format(city_list[j], city_list[i], np.mean(llh)))
-    plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, '{}_{}.png'.format(model_name, city_list[i])))
+plt.figure(figsize=(10, 6))
+plt.plot(np.arange(10, 151, 5), llh_curve)
+plt.xlabel('N Comp')
+plt.ylabel('LLH')
+plt.grid(True)
+plt.tight_layout()
 plt.show()

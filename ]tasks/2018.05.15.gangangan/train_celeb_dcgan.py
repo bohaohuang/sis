@@ -43,12 +43,12 @@ BATCH_SIZE = 64
 LEARNING_RATE = 2e-4
 INPUT_SIZE = 128
 TILE_SIZE = 5000
-EPOCHS = 100
+EPOCHS = 25
 NUM_CLASS = 3
-N_TRAIN = 20000
-N_VALID = 2000
-GPU = 1
-DECAY_STEP = 100
+N_TRAIN = 200000
+N_VALID = 2599
+GPU = 0
+DECAY_STEP = 25
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_z{}_lrm{}'
 SFN = 32
@@ -113,7 +113,7 @@ def main(flags):
     start_time = time.time()
 
     model.train_config('X', 'Z', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
-                       par_dir='DCGAN_CELEB')
+                       par_dir='Debug')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,
