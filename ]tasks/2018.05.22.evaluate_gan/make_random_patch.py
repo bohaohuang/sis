@@ -27,7 +27,7 @@ def random_crop(img, crop_x, crop_y):
 inria_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/Original_Tiles'
 img_dir, task_dir = utils.get_task_img_folder()
 model_name ='vae'
-city_name = 'chicago'
+city_name = 'austin'
 city_id = 1
 img_name = '{}{}_RGB.tif'.format(city_name, city_id)
 img = imageio.imread(os.path.join(inria_dir, img_name))
@@ -37,7 +37,7 @@ patch_size = [321, 321]
 vae_size = [256, 256]
 
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 # define model
 X = tf.placeholder(tf.float32, shape=[None, vae_size[0], vae_size[1], 3], name='X')
@@ -88,4 +88,5 @@ with tf.Session() as sess:
         plt.xlabel('GMM Model')
         plt.ylabel('LLH')
         plt.tight_layout()
+        plt.savefig(os.path.join(img_dir, 'llh_bar_{}_{}_({},{}).png'.format(city_name, city_id, start_x, start_y)))
         plt.show()

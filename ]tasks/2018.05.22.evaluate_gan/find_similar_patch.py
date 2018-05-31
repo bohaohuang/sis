@@ -32,7 +32,7 @@ def random_crop(img, crop_x, crop_y):
 inria_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/Original_Tiles'
 img_dir, task_dir = utils.get_task_img_folder()
 model_name ='vae'
-city_name = 'vienna'
+city_name = 'austin'
 city_id = 1
 img_name = '{}{}_RGB.tif'.format(city_name, city_id)
 img = imageio.imread(os.path.join(inria_dir, img_name))
@@ -42,7 +42,7 @@ patch_size = [321, 321]
 vae_size = [256, 256]
 
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 # load encoded features in valid set
 feature_file = os.path.join(task_dir, '{}_inria.csv'.format(model_name))
@@ -111,7 +111,7 @@ with tf.Session() as sess:
         plt.axis('off')
 
         dist = np.linalg.norm(encoded - feature, ord=2, axis=1)
-        top6_idx = np.argsort(dist)[1000:1006]
+        top6_idx = np.argsort(dist)[:6]
         for plt_cnt, idx in enumerate(top6_idx):
             similar_img = np.zeros((321, 321, 3), dtype=np.uint8)
             for c_cnt in range(3):
@@ -123,4 +123,6 @@ with tf.Session() as sess:
             plt.title('{}: {:.3f}'.format(patch_names[idx][:-1].split('_')[0], dist[idx]))
             plt.axis('off')
         plt.tight_layout()
+        plt.savefig(os.path.join(img_dir, 'similar_patch_{}_{}_({},{}).png'.
+                                 format(city_name, city_id, start_x, start_y)))
         plt.show()
