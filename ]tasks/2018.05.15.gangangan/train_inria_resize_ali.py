@@ -109,7 +109,7 @@ def main(flags):
                                    start_filter_num=flags.sfn,
                                    z_dim=flags.z_dim,
                                    lr_mult=flags.lr_mult,
-                                   raw_marginal=raw_marginal)
+                                   raw_marginal=None)
     model.create_graph('X', class_num=flags.num_classes, reduce_dim=False)
 
     # prepare data
