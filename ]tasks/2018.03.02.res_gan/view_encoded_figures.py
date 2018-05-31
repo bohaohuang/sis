@@ -16,6 +16,7 @@ for plt_cnt, iid in enumerate(img_ids):
     patch_name = files[iid].split('.')[0][:-5]
     img = np.zeros((input_size, input_size, 3), dtype=np.uint8)
     for cnt, file in enumerate(files[iid].strip().split(' ')[:3]):
+        print(file)
         img[:, :, cnt] = imageio.imread(os.path.join(patchDir, file))
     plt.subplot(321+plt_cnt)
     plt.imshow(img)

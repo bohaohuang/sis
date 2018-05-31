@@ -103,9 +103,9 @@ for i in range(5):
     print('evaluating city {}'.format(city_list[i]))
     plt.figure(figsize=(6, 12))
     for j in range(5):
-        llh = gmm_models[j].score_samples(feature_valid[truth_city_valid == i, :])
-        #tid = track_id_valid[np.all([truth_city_valid == i, truth_building_valid == 1], axis=0)]
-        tid = track_id_valid[truth_city_valid == i]
+        llh = gmm_models[j].score_samples(feature_valid[np.all([truth_city_valid == i, truth_building_valid == 1], axis=0), :])
+        tid = track_id_valid[np.all([truth_city_valid == i, truth_building_valid == 1], axis=0)]
+        #tid = track_id_valid[truth_city_valid == i]
         top5 = tid[np.argsort(llh)[::-1][:5]]
 
         img = np.zeros((321, 321*5, 3), dtype=np.uint8)
@@ -113,8 +113,8 @@ for i in range(5):
             for c_cnt in range(3):
                 img[:, 321*img_cnt:321*(img_cnt+1), c_cnt] = imageio.imread(
                     os.path.join(patchDir, '{}_RGB{}.jpg'.format(patch_names[pid][:-1], c_cnt)))
-        imageio.imsave(os.path.join(img_dir, '{}_top5_{}_model_on_{}.png'.format(model_name, city_list[j], city_list[i])),
-                       img)
+        imageio.imsave(os.path.join(img_dir, '{}_top5_{}_model_on_{}_(building).png'.format(model_name, city_list[j],
+                                                                                            city_list[i])), img)
 
         if j == 0:
             ax = plt.subplot(511 + j)

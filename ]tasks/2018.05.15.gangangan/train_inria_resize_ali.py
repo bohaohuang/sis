@@ -42,7 +42,7 @@ class ImageLabelReader_inria(uabDataReader.ImageLabelReader):
 
 RUN_ID = 0
 BATCH_SIZE = 128
-LEARNING_RATE = 2e-4
+LEARNING_RATE = 1e-5
 INPUT_SIZE = 64
 TILE_SIZE = 5000
 EPOCHS = 50
@@ -52,9 +52,9 @@ N_VALID = 2000
 GPU = 0
 DECAY_STEP = 50
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_z{}_lrm{}'
+MODEL_NAME = 'inria_z{}_lrm{}_rawm'
 SFN = 64
-Z_DIM = 100
+Z_DIM = 500
 LR_MULT = 1
 DATA_DIR = r'/home/lab/Documents/bohao/code/third_party/DCGAN-tensorflow/data/inria'
 
@@ -87,6 +87,11 @@ def read_flag():
 
 
 def main(flags):
+    # read sample data for marginal
+    dataReader = ImageLabelReader_inria(flags.data_dir, 500,
+                                        (flags.input_size[0], flags.input_size[1]), True)
+    raw_marginal, _ = dataReader.readerAction()
+
     # make network
     # define place holder
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
@@ -104,7 +109,7 @@ def main(flags):
                                    start_filter_num=flags.sfn,
                                    z_dim=flags.z_dim,
                                    lr_mult=flags.lr_mult,
-                                   raw_marginal=None)
+                                   raw_marginal=raw_marginal)
     model.create_graph('X', class_num=flags.num_classes, reduce_dim=False)
 
     # prepare data

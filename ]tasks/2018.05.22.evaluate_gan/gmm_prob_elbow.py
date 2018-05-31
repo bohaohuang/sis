@@ -37,7 +37,7 @@ patchDir = extrObj.run(blCol)
 # use uabCrossValMaker to get fileLists for training and validation
 idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
 
-model_name = 'vae'
+model_name = 'ali'
 # load patch names
 patch_file = os.path.join(task_dir, '{}_inria.txt'.format(model_name))
 with open(patch_file, 'r') as f:
