@@ -76,105 +76,108 @@ idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'for
 task_dir = os.path.join(task_dir, 'ali')
 plt.figure(figsize=(8, 6))
 fig_num = plt.gcf().number
-for lr in ['0.0001', '5e-05', '1e-05']:
-    for z_dim in [500, 800, 1000]:
+for lr in ['1e-05']:
+    for z_dim in [800]:
         for model_name in ['ali']:
-            # load patch names
-            patch_file = os.path.join(task_dir, 'ali_inria_lr{}_z{}.txt'.format(lr, z_dim))
-            with open(patch_file, 'r') as f:
-                patch_names = f.readlines()
-            # make truth
-            truth_file_building = os.path.join(task_dir, 'truth_inria_building.npy')
-            if not os.path.exists(truth_file_building):
-                print('Making ground truth building...')
-                truth_building = np.zeros(len(patch_names))
-                for cnt, file in enumerate(tqdm(patch_names)):
-                    gt_name = os.path.join(patchDir, '{}_GT_Divide.png'.format(file[:-1]))
-                    gt = imageio.imread(gt_name)
-                    portion = np.sum(gt) / (321 * 321)
-                    if portion > 0.2:
-                        truth_building[cnt] = 1
-                np.save(truth_file_building, truth_building)
-            else:
-                truth_building = np.load(truth_file_building)
-            truth_file_city = os.path.join(task_dir, 'truth_inria_city.npy')
-            if not os.path.exists(truth_file_city):
-                print('Making ground truth city...')
-                truth_city = np.zeros(len(patch_names))
-                city_dict = {'austin': 0, 'chicago': 1, 'kitsap': 2, 'tyrol-w': 3, 'vienna': 4}
-                for cnt, file in enumerate(tqdm(patch_names)):
-                    city_name = ''.join([i for i in file.split('_')[0] if not i.isdigit()])
-                    truth_city[cnt] = city_dict[city_name]
-                np.save(truth_file_city, truth_city)
-            else:
-                truth_city = np.load(truth_file_city)
+            for DS in [400, 200]:
+                # load patch names
+                patch_file = os.path.join(task_dir, 'ali_inria_lr{}_z{}_ds{}.txt'.format(lr, z_dim, DS))
+                with open(patch_file, 'r') as f:
+                    patch_names = f.readlines()
+                # make truth
+                truth_file_building = os.path.join(task_dir, 'truth_inria_building.npy')
+                if not os.path.exists(truth_file_building):
+                    print('Making ground truth building...')
+                    truth_building = np.zeros(len(patch_names))
+                    for cnt, file in enumerate(tqdm(patch_names)):
+                        gt_name = os.path.join(patchDir, '{}_GT_Divide.png'.format(file[:-1]))
+                        gt = imageio.imread(gt_name)
+                        portion = np.sum(gt) / (321 * 321)
+                        if portion > 0.2:
+                            truth_building[cnt] = 1
+                    np.save(truth_file_building, truth_building)
+                else:
+                    truth_building = np.load(truth_file_building)
+                truth_file_city = os.path.join(task_dir, 'truth_inria_city.npy')
+                if not os.path.exists(truth_file_city):
+                    print('Making ground truth city...')
+                    truth_city = np.zeros(len(patch_names))
+                    city_dict = {'austin': 0, 'chicago': 1, 'kitsap': 2, 'tyrol-w': 3, 'vienna': 4}
+                    for cnt, file in enumerate(tqdm(patch_names)):
+                        city_name = ''.join([i for i in file.split('_')[0] if not i.isdigit()])
+                        truth_city[cnt] = city_dict[city_name]
+                    np.save(truth_file_city, truth_city)
+                else:
+                    truth_city = np.load(truth_file_city)
 
-            # load features
-            feature_file = os.path.join(task_dir, 'ali_inria_lr{}_z{}.csv'.format(lr, z_dim))
-            feature = pd.read_csv(feature_file, sep=',', header=None).values
+                # load features
+                feature_file = os.path.join(task_dir, 'ali_inria_lr{}_z{}_ds{}.csv'.format(lr, z_dim, DS))
+                feature = pd.read_csv(feature_file, sep=',', header=None).values
 
-            # do on valid set
-            idx = np.array(idx)
-            truth_building = truth_building[idx < 6]
-            truth_city = truth_city[idx < 6]
-            feature = feature[idx < 6, :]
+                # do on valid set
+                idx = np.array(idx)
+                truth_building = truth_building[idx < 6]
+                truth_city = truth_city[idx < 6]
+                feature = feature[idx < 6, :]
 
-            # do cross validation
-            np.random.seed(1004)
+                # do cross validation
+                np.random.seed(1004)
 
-            pred_file_name = os.path.join(task_dir, '{}_lr{}_z{}_building_pred.npy'.format(model_name, lr, z_dim))
-            if not os.path.exists(pred_file_name):
-                kf = KFold(n_splits=5)
-                clf = svm.SVC(probability=True)
-                pred_building = []
-                truth_building_rearrange = []
-                for cnt, (train_idx, test_idx) in enumerate(kf.split(feature)):
-                    print('Training on fold {}'.format(cnt))
-                    X_train, X_test = feature[train_idx, :], feature[test_idx, :]
-                    y_train, y_test = truth_building[train_idx], truth_building[test_idx]
-                    clf.fit(X_train, y_train)
-                    pred_building.append(clf.predict_proba(X_test)[:,1])
-                    truth_building_rearrange.append(y_test)
-                pred_building = np.concatenate(pred_building)
-                truth_building_rearrange = np.concatenate(truth_building_rearrange)
-                np.save(pred_file_name, [pred_building, truth_building_rearrange])
-            else:
-                pred_building, truth_building_rearrange = np.load(pred_file_name)
+                pred_file_name = os.path.join(task_dir, '{}_lr{}_z{}_ds{}_building_pred.npy'.
+                                              format(model_name, lr, z_dim, DS))
+                if not os.path.exists(pred_file_name):
+                    kf = KFold(n_splits=5)
+                    clf = svm.SVC(probability=True)
+                    pred_building = []
+                    truth_building_rearrange = []
+                    for cnt, (train_idx, test_idx) in enumerate(kf.split(feature)):
+                        print('Training on fold {}'.format(cnt))
+                        X_train, X_test = feature[train_idx, :], feature[test_idx, :]
+                        y_train, y_test = truth_building[train_idx], truth_building[test_idx]
+                        clf.fit(X_train, y_train)
+                        pred_building.append(clf.predict_proba(X_test)[:,1])
+                        truth_building_rearrange.append(y_test)
+                    pred_building = np.concatenate(pred_building)
+                    truth_building_rearrange = np.concatenate(truth_building_rearrange)
+                    np.save(pred_file_name, [pred_building, truth_building_rearrange])
+                else:
+                    pred_building, truth_building_rearrange = np.load(pred_file_name)
 
-            pred_file_name = os.path.join(task_dir, '{}_lr{}_z{}_city_pred.npy'.format(model_name, lr, z_dim))
-            if not os.path.exists(pred_file_name):
-                kf = KFold(n_splits=5, shuffle=True)
-                clf = OneVsRestClassifier(svm.SVC(probability=True))
-                pred_city = []
-                truth_city_rearrange = []
-                for cnt, (train_idx, test_idx) in enumerate(kf.split(feature)):
-                    print('Training on fold {}'.format(cnt))
-                    X_train, X_test = feature[train_idx, :], feature[test_idx, :]
-                    y_train, y_test = truth_city[train_idx], truth_city[test_idx]
-                    clf.fit(X_train, y_train)
-                    pred_city.append(clf.predict(X_test))
-                    truth_city_rearrange.append(y_test)
-                pred_city = np.concatenate(pred_city)
-                truth_city_rearrange = np.concatenate(truth_city_rearrange)
-                np.save(pred_file_name, [pred_city, truth_city_rearrange])
-            else:
-                pred_city, truth_city_rearrange = np.load(pred_file_name)
+                pred_file_name = os.path.join(task_dir, '{}_lr{}_z{}_ds{}_city_pred.npy'.
+                                              format(model_name, lr, z_dim, DS))
+                if not os.path.exists(pred_file_name):
+                    kf = KFold(n_splits=5, shuffle=True)
+                    clf = OneVsRestClassifier(svm.SVC(probability=True))
+                    pred_city = []
+                    truth_city_rearrange = []
+                    for cnt, (train_idx, test_idx) in enumerate(kf.split(feature)):
+                        print('Training on fold {}'.format(cnt))
+                        X_train, X_test = feature[train_idx, :], feature[test_idx, :]
+                        y_train, y_test = truth_city[train_idx], truth_city[test_idx]
+                        clf.fit(X_train, y_train)
+                        pred_city.append(clf.predict(X_test))
+                        truth_city_rearrange.append(y_test)
+                    pred_city = np.concatenate(pred_city)
+                    truth_city_rearrange = np.concatenate(truth_city_rearrange)
+                    np.save(pred_file_name, [pred_city, truth_city_rearrange])
+                else:
+                    pred_city, truth_city_rearrange = np.load(pred_file_name)
 
-            plt.figure(fig_num)
-            fpr_rf, tpr_rf, _ = roc_curve(truth_building_rearrange, pred_building)
-            plt.plot(fpr_rf, tpr_rf, label='{} lr{} z{} AUC = {:.2f}'.
-                     format(model_name, lr, z_dim, auc(fpr_rf, tpr_rf)))
-            plt.plot([0, 1], [0, 1], color='grey', lw=2, linestyle='--')
-            plt.xlim([0.0, 1.0])
-            plt.ylim([0.0, 1.05])
-            plt.xlabel('False Positive Rate')
-            plt.ylabel('True Positive Rate')
-            plt.title('ROC Building')
-            plt.legend(loc="lower right")
+                plt.figure(fig_num)
+                fpr_rf, tpr_rf, _ = roc_curve(truth_building_rearrange, pred_building)
+                plt.plot(fpr_rf, tpr_rf, label='{} lr{} z{} ds{} AUC = {:.2f}'.
+                         format(model_name, lr, z_dim, DS, auc(fpr_rf, tpr_rf)))
+                plt.plot([0, 1], [0, 1], color='grey', lw=2, linestyle='--')
+                plt.xlim([0.0, 1.0])
+                plt.ylim([0.0, 1.05])
+                plt.xlabel('False Positive Rate')
+                plt.ylabel('True Positive Rate')
+                plt.title('ROC Building')
+                plt.legend(loc="lower right")
 
-            plt.figure()
-            cnf_matrix = confusion_matrix(truth_city_rearrange, pred_city)
-            np.set_printoptions(precision=2)
-            plot_confusion_matrix(cnf_matrix, classes=['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna'], normalize=True,
-                                  title='CM City ({}, lr{}, z{})'.format(model_name, lr, z_dim))
+                plt.figure()
+                cnf_matrix = confusion_matrix(truth_city_rearrange, pred_city)
+                np.set_printoptions(precision=2)
+                plot_confusion_matrix(cnf_matrix, classes=['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna'], normalize=True,
+                                      title='CM City ({}, lr{}, z{} ds{})'.format(model_name, lr, z_dim, DS))
 plt.show()
