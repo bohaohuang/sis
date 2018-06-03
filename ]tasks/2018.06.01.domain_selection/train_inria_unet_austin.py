@@ -19,12 +19,13 @@ TILE_SIZE = 5000
 EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
-N_VALID = 4000
+N_VALID = 1000
 GPU = 0
-DECAY_STEP = 60
+DECAY_STEP= 60
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_austin_{}'
 SFN = 32
+PRED_DIR = None
 
 
 def read_flag():
@@ -113,7 +114,7 @@ def main(flags):
                        loss_type='xent', par_dir='Inria_Domain')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
-              pretrained_model_dir=None,
+              pretrained_model_dir=PRED_DIR,
               isTrain=True,
               img_mean=img_mean,
               verb_step=100,                    # print a message every 100 step(sample)

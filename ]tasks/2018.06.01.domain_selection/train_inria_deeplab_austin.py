@@ -13,19 +13,19 @@ from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-6
 INPUT_SIZE = 321
 TILE_SIZE = 5000
-EPOCHS = 100
+EPOCHS = 40
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
 GPU = 1
-DECAY_STEP = 40
+DECAY_STEP = 20
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_austin_{}'
 SFN = 32
-RES101_DIR = r'/hdd6/Models/resnet_v1_101.ckpt'
+RES101_DIR = r'/hdd6/Models/DeepLab_rand_grid/DeeplabV3_res101_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
 
 
 def read_flag():
