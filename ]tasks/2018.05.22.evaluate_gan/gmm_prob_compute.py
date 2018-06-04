@@ -37,7 +37,7 @@ patchDir = extrObj.run(blCol)
 # use uabCrossValMaker to get fileLists for training and validation
 idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
 
-model_name = 'vae'
+model_name = 'res50'
 # load patch names
 patch_file = os.path.join(task_dir, '{}_inria.txt'.format(model_name))
 with open(patch_file, 'r') as f:
@@ -73,7 +73,7 @@ feature_file = os.path.join(task_dir, '{}_inria.csv'.format(model_name))
 feature = pd.read_csv(feature_file, sep=',', header=None).values
 
 # fit on training set
-n_comp = 80
+n_comp = 150
 idx = np.array(idx)
 truth_city_train = truth_city[idx >= 6]
 feature_train = feature[idx >= 6, :]

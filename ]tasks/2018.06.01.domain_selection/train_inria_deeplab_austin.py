@@ -122,7 +122,8 @@ def main(flags):
               save_epoch=5,                     # save the model every 5 epochs
               gpu=GPU,
               tile_size=flags.tile_size,
-              patch_size=flags.input_size)
+              patch_size=flags.input_size
+              )
 
     duration = time.time() - start_time
     print('duration {:.2f} hours'.format(duration/60/60))

@@ -32,9 +32,9 @@ os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu)
 
 # make the model
 # define place holder
-for lr in ['1e-05']:
-    for z_dim in [800]:
-        for DS in [400, 200]:
+for lr in ['5e-06']:
+    for z_dim in [500]:
+        for DS in [400.0]:
             latent_num = z_dim
 
             tf.reset_default_graph()

@@ -66,7 +66,7 @@ model.create_graph('X', class_num=3)
 model_dir = r'/hdd6/Models/VGGVAE/VGGVAE_inria_z500_0_PS(256, 256)_BS5_EP400_LR1e-05_DS200.0_DR0.5_SFN32'
 
 # load gmm model
-model_file_name = os.path.join(task_dir, 'gmm_models_{}_{}.npy'.format(model_name, 80))
+model_file_name = os.path.join(task_dir, 'gmm_models_{}_{}.npy'.format(model_name, 150))
 gmm_models = np.load(model_file_name)
 
 # load patch dir
@@ -123,6 +123,6 @@ with tf.Session() as sess:
             plt.title('{}: {:.3f}'.format(patch_names[idx][:-1].split('_')[0], dist[idx]))
             plt.axis('off')
         plt.tight_layout()
-        plt.savefig(os.path.join(img_dir, 'similar_patch_{}_{}_({},{}).png'.
-                                 format(city_name, city_id, start_x, start_y)))
+        #plt.savefig(os.path.join(img_dir, 'similar_patch_{}_{}_({},{}).png'.
+        #                         format(city_name, city_id, start_x, start_y)))
         plt.show()
