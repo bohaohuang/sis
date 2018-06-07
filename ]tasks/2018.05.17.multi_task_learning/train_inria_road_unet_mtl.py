@@ -13,31 +13,31 @@ from bohaoCustom import uabMakeNetwork_UnetMTL
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-4
+LEARNING_RATE = [1e-5, 1e-4, 1e-4]
 INPUT_SIZE = 572
 TILE_SIZE = 5000
-EPOCHS = 100
-NUM_CLASS = '2,2'
+EPOCHS = 10
+NUM_CLASS = [2, 2]
 N_TRAIN = 8000
 N_VALID = 1000
 GPU = 1
-DECAY_STEP = 60
+DECAY_STEP = 6
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_road_mtl_{}'
 SFN = 32
 S_NUM = 2
 S_NAME = 'INRIA,ROAD'
-S_CONTROL = '2,1'
+S_CONTROL = [1, 1]
 
 
 def read_flag():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch-size', default=BATCH_SIZE, type=int, help='batch size (10)')
-    parser.add_argument('--learning-rate', type=float, default=LEARNING_RATE, help='learning rate (1e-3)')
+    parser.add_argument('--learning-rate', type=list, default=LEARNING_RATE, help='learning rate (1e-3)')
     parser.add_argument('--input-size', default=INPUT_SIZE, type=int, help='input size 224')
     parser.add_argument('--tile-size', default=TILE_SIZE, type=int, help='tile size 5000')
     parser.add_argument('--epochs', default=EPOCHS, type=int, help='# epochs (1)')
-    parser.add_argument('--num-classes', type=str, default=NUM_CLASS, help='# classes (including background)')
+    parser.add_argument('--num-classes', type=list, default=NUM_CLASS, help='# classes (including background)')
     parser.add_argument('--n-train', type=int, default=N_TRAIN, help='# samples per epoch')
     parser.add_argument('--n-valid', type=int, default=N_VALID, help='# patches to valid')
     parser.add_argument('--GPU', type=str, default=GPU, help="GPU used for computation.")
@@ -48,15 +48,13 @@ def read_flag():
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--s-num', type=int, default=S_NUM, help='number of input sources')
     parser.add_argument('--s-name', type=str, default=S_NAME, help='names of input sources')
-    parser.add_argument('--s-control', type=str, default=S_CONTROL, help='control portions of input sources')
+    parser.add_argument('--s-control', type=list, default=S_CONTROL, help='control portions of input sources')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
     flags.tile_size = (flags.tile_size, flags.tile_size)
     flags.model_name = flags.model_name.format(flags.run_id)
     flags.s_name = flags.s_name.split(',')
-    flags.s_control = [int(i) for i in flags.s_control.split(',')]
-    flags.num_classes = [int(i) for i in flags.num_classes.split(',')]
     return flags
 
 
