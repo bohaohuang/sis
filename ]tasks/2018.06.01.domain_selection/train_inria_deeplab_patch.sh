@@ -10,4 +10,4 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=/opt/apps/rhel7/cudnn/lib64:$LD_LIBRARY_PATH
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/uab
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/sis
-python train_inria_deeplab_austin_patch.py --train-city=chicago --res-dir=/dscrhome/bh163/resnet_v1_101.ckpt --patch-prob-dir=/dscrhome/bh163/misc/temp_filespatch_prob_{}_2048.npy
+python train_inria_deeplab_austin_patch.py --train-city=chicago --res-dir=/dscrhome/bh163/resnet_v1_101.ckpt --patch-prob-dir=/dscrhome/bh163/misc/temp_files/patch_prob_{}_2048.npy
