@@ -23,10 +23,11 @@ N_VALID = 1000
 GPU = 0
 DECAY_STEP = 40
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_austin_patch_{}'
+TRAIN_CITY = 'austin'
+MODEL_NAME = 'inria_{}_patch2048_{}'
 SFN = 32
 RES101_DIR = r'/hdd6/Models/resnet_v1_101.ckpt' #r'/hdd6/Models/DeepLab_rand_grid/DeeplabV3_res101_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
-PATCH_PROB_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.06.01.domain_selection/patch_prob.npy'
+PATCH_PROB_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.06.01.domain_selection/patch_prob_{}_2048.npy'
 
 
 def read_flag():
@@ -47,11 +48,13 @@ def read_flag():
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--res-dir', type=str, default=RES101_DIR, help='path to ckpt of Res101 model')
     parser.add_argument('--patch-prob-dir', type=str, default=PATCH_PROB_DIR, help='path to group file dir')
+    parser.add_argument('--train-city', type=str, default=TRAIN_CITY, help='test city to upsample')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
     flags.tile_size = (flags.tile_size, flags.tile_size)
-    flags.model_name = flags.model_name.format(flags.run_id)
+    flags.model_name = flags.model_name.format(flags.train_city, flags.run_id)
+    flags.patch_prob_dir = flags.patch_prob_dir.format(flags.train_city)
     return flags
 
 
@@ -112,7 +115,7 @@ def main(flags):
     start_time = time.time()
 
     model.train_config('X', 'Y', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
-                       loss_type='xent', par_dir='Inria_Domain')
+                       loss_type='xent', par_dir='Inria_Domain2')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
               pretrained_model_dir=flags.res_dir,

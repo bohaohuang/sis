@@ -13,6 +13,14 @@ from tqdm import tqdm
 import utils
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
+
+def crop_center(img,cropx,cropy):
+    y,x, _ = img.shape
+    startx = x//2-(cropx//2)
+    starty = y//2-(cropy//2)
+    return img[starty:starty+cropy,startx:startx+cropx, :]
+
+
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 img_dir, task_dir = utils.get_task_img_folder()
@@ -52,8 +60,9 @@ with open(file_name, 'r') as f:
     files = f.readlines()
 
 res50 = keras.applications.resnet50.ResNet50(include_top=True, weights='imagenet')
-file_name = os.path.join(task_dir, 'res50_inria.csv')
-patch_file_name = os.path.join(task_dir, 'res50_inria.txt')
+fc2048 = keras.models.Model(inputs=res50.input, outputs=res50.get_layer('flatten_1').output)
+file_name = os.path.join(task_dir, 'res50_inria_2048.csv')
+patch_file_name = os.path.join(task_dir, 'res50_inria_2048.txt')
 with open(file_name, 'w+') as f:
     with open(patch_file_name, 'w+') as f2:
         for file_line in tqdm(files):
@@ -61,9 +70,9 @@ with open(file_name, 'w+') as f:
             img = np.zeros((input_size[0], input_size[1], 3), dtype=np.uint8)
             for cnt, file in enumerate(file_line.strip().split(' ')[:3]):
                 img[:, :, cnt] = imageio.imread(os.path.join(patchDir, file))
-            img = np.expand_dims(scipy.misc.imresize(img, input_size_fit), axis=0)
+            img = np.expand_dims(crop_center(img, input_size_fit[0], input_size_fit[1]), axis=0)
 
-            fc1000 = res50.predict(img).reshape((-1,)).tolist()
+            output2048 = fc2048.predict(img).reshape((-1,)).tolist()
             writer = csv.writer(f, lineterminator='\n')
-            writer.writerow(['{}'.format(x) for x in fc1000])
+            writer.writerow(['{}'.format(x) for x in output2048])
             f2.write('{}\n'.format(patch_name))

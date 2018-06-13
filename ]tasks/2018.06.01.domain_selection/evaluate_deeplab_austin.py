@@ -4,7 +4,7 @@ import uab_collectionFunctions
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 # settings
-gpu = 0
+gpu = -1
 batch_size = 5
 input_size = [321, 321]
 tile_size = [5000, 5000]
@@ -12,8 +12,12 @@ tile_size = [5000, 5000]
 
 for runId in [0]:
     for model_dir in [
-        '/hdd6/Models/Inria_Domain/DeeplabV3_inria_austin_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
-            '/hdd6/Models/Inria_Domain/DeeplabV3_inria_austin_0_PS(321, 321)_BS5_EP40_LR1e-06_DS20_DR0.1_SFN32']:
+        #r'/hdd6/Models/Inria_Domain/DeeplabV3_inria_austin_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        #r'/hdd6/Models/Inria_Domain/DeeplabV3_inria_austin_0_PS(321, 321)_BS5_EP40_LR1e-06_DS20_DR0.1_SFN32',
+        #r'/hdd6/Models/Inria_Domain/DeeplabV3_inria_chicago_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        #r'/hdd6/Models/Inria_Domain/DeeplabV3_inria_kitsap_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain/DeeplabV3_inria_tyrol-w_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+    ]:
 
         tf.reset_default_graph()
 
@@ -47,4 +51,5 @@ for runId in [0]:
         # evaluate on tiles
         model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                        input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                       save_result_parent_dir='domain_selection', ds_name='inria')
+                       save_result_parent_dir='domain_selection', ds_name='inria',
+                       best_model=False)

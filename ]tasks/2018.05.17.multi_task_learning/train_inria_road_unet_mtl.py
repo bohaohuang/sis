@@ -13,13 +13,13 @@ from bohaoCustom import uabMakeNetwork_UnetMTL
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = [1e-5, 1e-4, 1e-4]
+LEARNING_RATE = [1e-4, 1e-4, 1e-4]
 INPUT_SIZE = 572
 TILE_SIZE = 5000
 EPOCHS = 10
 NUM_CLASS = [2, 2]
-N_TRAIN = 8000
-N_VALID = 1000
+N_TRAIN = 100
+N_VALID = 100
 GPU = 1
 DECAY_STEP = 6
 DECAY_RATE = 0.1
@@ -162,11 +162,11 @@ def main(flags):
                        loss_type='xent')
     model.run(train_reader=[dataReader_train_inria, dataReader_train_road],
               valid_reader=[dataReader_valid_inria, dataReader_valid_road],
-              pretrained_model_dir=None,        # train from scratch, no need to load pre-trained model
+              pretrained_model_dir=r'/hdd6/Models/UnetMTL_inria_road_mtl_0_PS(572, 572)_BS5_EP10_LR0.0001,0.0001,0.0001_DS6_DR0.1_SFN32',        # train from scratch, no need to load pre-trained model,
               isTrain=True,
               img_mean=[img_mean_inria, img_mean_road],
               verb_step=100,                    # print a message every 100 step(sample)
-              save_epoch=5,                     # save the model every 5 epochs
+              save_epoch=2,                     # save the model every 5 epochs
               gpu=GPU,
               tile_size=flags.tile_size,
               patch_size=flags.input_size)

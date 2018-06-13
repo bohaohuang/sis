@@ -14,7 +14,10 @@ for runId in [0]:
     for model_dir in [
         #'/hdd6/Models/Inria_Domain/UnetCrop_inria_austin_0_PS(572, 572)_BS5_EP40_LR1e-05_DS20_DR0.1_SFN32',
             #'/hdd6/Models/Inria_Domain/UnetCrop_inria_austin_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
-            r'/hdd6/Models/Inria_Domain/UnetCrop_inria_aug_leave_0_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32']:
+            r'/hdd6/Models/Inria_Domain/UnetCrop_inria_chicago_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+            r'/hdd6/Models/Inria_Domain/UnetCrop_inria_kitsap_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+            r'/hdd6/Models/Inria_Domain/UnetCrop_inria_tyrol-w_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+            r'/hdd6/Models/Inria_Domain/UnetCrop_inria_vienna_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32']:
 
         tf.reset_default_graph()
 
@@ -48,4 +51,5 @@ for runId in [0]:
         # evaluate on tiles
         model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                        input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                       save_result_parent_dir='domain_selection', ds_name='inria')
+                       save_result_parent_dir='domain_selection', ds_name='inria',
+                       best_model=False)

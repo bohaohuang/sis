@@ -39,11 +39,11 @@ idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'for
 
 model_name = 'res50'
 # load patch names
-patch_file = os.path.join(task_dir, '{}_inria.txt'.format(model_name))
+patch_file = os.path.join(task_dir, '{}_inria_2048.txt'.format(model_name))
 with open(patch_file, 'r') as f:
     patch_names = f.readlines()
 # make truth
-truth_file_building = os.path.join(task_dir, 'truth_inria_building.npy')
+truth_file_building = os.path.join(task_dir, 'truth_inria_building_2048.npy')
 if not os.path.exists(truth_file_building):
     print('Making ground truth building...')
     truth_building = np.zeros(len(patch_names))
@@ -56,7 +56,7 @@ if not os.path.exists(truth_file_building):
     np.save(truth_file_building, truth_building)
 else:
     truth_building = np.load(truth_file_building)
-truth_file_city = os.path.join(task_dir, 'truth_inria_city.npy')
+truth_file_city = os.path.join(task_dir, 'truth_inria_city_2048.npy')
 if not os.path.exists(truth_file_city):
     print('Making ground truth city...')
     truth_city = np.zeros(len(patch_names))
@@ -69,7 +69,7 @@ else:
     truth_city = np.load(truth_file_city)
 
 # load features
-feature_file = os.path.join(task_dir, '{}_inria.csv'.format(model_name))
+feature_file = os.path.join(task_dir, '{}_inria_2048.csv'.format(model_name))
 feature = pd.read_csv(feature_file, sep=',', header=None).values
 
 # fit on training set
@@ -79,7 +79,7 @@ truth_city_train = truth_city[idx >= 6]
 feature_train = feature[idx >= 6, :]
 truth_building_train = truth_building[idx >= 6]
 gmm_models = []
-model_file_name = os.path.join(task_dir, 'gmm_models_{}_{}.npy'.format(model_name, n_comp))
+model_file_name = os.path.join(task_dir, 'gmm_models_2048_{}_{}.npy'.format(model_name, n_comp))
 if not os.path.exists(model_file_name):
     print('train GMM models ...')
     for i in tqdm(range(5)):
@@ -124,5 +124,5 @@ for i in range(5):
         plt.axvline(x=np.mean(llh), color='r', linestyle='--', linewidth=2)
         plt.title('{} model on {} (Avg: {:.3f})'.format(city_list[j], city_list[i], np.mean(llh)))
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, '{}_{}.png'.format(model_name, city_list[i])))
+    #plt.savefig(os.path.join(img_dir, '{}_{}.png'.format(model_name, city_list[i])))
 plt.show()

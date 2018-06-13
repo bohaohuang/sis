@@ -32,7 +32,7 @@ def random_crop(img, crop_x, crop_y):
 inria_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/Original_Tiles'
 img_dir, task_dir = utils.get_task_img_folder()
 model_name ='res50'
-city_name = 'austin'
+city_name = 'tyrol-w'
 city_id = 1
 img_name = '{}{}_RGB.tif'.format(city_name, city_id)
 img = imageio.imread(os.path.join(inria_dir, img_name))
@@ -42,17 +42,17 @@ patch_size = [321, 321]
 res50_size = [224, 224]
 
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 # load encoded features in valid set
-feature_file = os.path.join(task_dir, '{}_inria.csv'.format(model_name))
+feature_file = os.path.join(task_dir, '{}_inria_2048.csv'.format(model_name))
 feature = pd.read_csv(feature_file, sep=',', header=None).values
-patch_file = os.path.join(task_dir, '{}_inria.txt'.format(model_name))
+patch_file = os.path.join(task_dir, '{}_inria_2048.txt'.format(model_name))
 with open(patch_file, 'r') as f:
     patch_names = f.readlines()
 
 # load gmm model
-model_file_name = os.path.join(task_dir, 'gmm_models_{}_{}.npy'.format(model_name, 150))
+model_file_name = os.path.join(task_dir, 'gmm_models_2048_{}_{}.npy'.format(model_name, 150))
 gmm_models = np.load(model_file_name)
 
 # load patch dir
@@ -73,12 +73,13 @@ extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 4],
                                                 pad=0)
 patchDir = extrObj.run(blCol)
 res50 = keras.applications.resnet50.ResNet50(include_top=True, weights='imagenet')
+fc2048 = keras.models.Model(inputs=res50.input, outputs=res50.get_layer('flatten_1').output)
 
 # evaluate
 while True:
     patch, start_x, start_y = random_crop(img, res50_size[0], res50_size[1])
     img2encode = np.expand_dims(patch, axis=0)
-    encoded = res50.predict(img2encode).reshape((-1,))
+    encoded = fc2048.predict(img2encode).reshape((-1,))
 
     # find closest patch
     plt.figure(figsize=(15, 6))
@@ -101,6 +102,6 @@ while True:
         plt.title('{}: {:.3f}'.format(patch_names[idx][:-1].split('_')[0], dist[idx]))
         plt.axis('off')
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'similar_patch_{}_{}_({},{}).png'.
+    plt.savefig(os.path.join(img_dir, 'similar_patch_{}_{}_({},{})_2048.png'.
                              format(city_name, city_id, start_x, start_y)))
     plt.show()

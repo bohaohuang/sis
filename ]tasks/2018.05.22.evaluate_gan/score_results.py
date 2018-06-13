@@ -75,13 +75,13 @@ idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'for
 
 plt.figure(figsize=(8, 6))
 fig_num = plt.gcf().number
-for model_name in ['res50', 'vae', 'ali', 'ali2']:
+for model_name in ['res50']:
     # load patch names
-    patch_file = os.path.join(task_dir, '{}_inria.txt'.format(model_name))
+    patch_file = os.path.join(task_dir, '{}_inria_2048.txt'.format(model_name))
     with open(patch_file, 'r') as f:
         patch_names = f.readlines()
     # make truth
-    truth_file_building = os.path.join(task_dir, 'truth_inria_building.npy')
+    truth_file_building = os.path.join(task_dir, 'truth_inria_building_2048.npy')
     if not os.path.exists(truth_file_building):
         print('Making ground truth building...')
         truth_building = np.zeros(len(patch_names))
@@ -94,7 +94,7 @@ for model_name in ['res50', 'vae', 'ali', 'ali2']:
         np.save(truth_file_building, truth_building)
     else:
         truth_building = np.load(truth_file_building)
-    truth_file_city = os.path.join(task_dir, 'truth_inria_city.npy')
+    truth_file_city = os.path.join(task_dir, 'truth_inria_city_2048.npy')
     if not os.path.exists(truth_file_city):
         print('Making ground truth city...')
         truth_city = np.zeros(len(patch_names))
@@ -107,7 +107,7 @@ for model_name in ['res50', 'vae', 'ali', 'ali2']:
         truth_city = np.load(truth_file_city)
 
     # load features
-    feature_file = os.path.join(task_dir, '{}_inria.csv'.format(model_name))
+    feature_file = os.path.join(task_dir, '{}_inria_2048.csv'.format(model_name))
     feature = pd.read_csv(feature_file, sep=',', header=None).values
 
     # do on valid set
@@ -119,10 +119,10 @@ for model_name in ['res50', 'vae', 'ali', 'ali2']:
     # do cross validation
     np.random.seed(1004)
 
-    pred_file_name = os.path.join(task_dir, '{}_building_pred.npy'.format(model_name))
+    pred_file_name = os.path.join(task_dir, '{}_building_pred_2048.npy'.format(model_name))
     if not os.path.exists(pred_file_name):
         kf = KFold(n_splits=5)
-        clf = svm.SVC(probability=True)
+        clf = svm.SVC(kernel='rbf', probability=True)
         pred_building = []
         truth_building_rearrange = []
         for cnt, (train_idx, test_idx) in enumerate(kf.split(feature)):
@@ -138,7 +138,7 @@ for model_name in ['res50', 'vae', 'ali', 'ali2']:
     else:
         pred_building, truth_building_rearrange = np.load(pred_file_name)
 
-    pred_file_name = os.path.join(task_dir, '{}_city_pred.npy'.format(model_name))
+    pred_file_name = os.path.join(task_dir, '{}_city_pred_2048.npy'.format(model_name))
     if not os.path.exists(pred_file_name):
         kf = KFold(n_splits=5, shuffle=True)
         clf = OneVsRestClassifier(svm.SVC(probability=True))
