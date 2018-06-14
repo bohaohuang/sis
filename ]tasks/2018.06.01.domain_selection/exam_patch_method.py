@@ -17,7 +17,7 @@ def get_patch_by_name(patch_dir, p_name, patch_size):
     return img
 
 
-patch_prob = np.load('/media/ei-edl01/user/bh163/tasks/2018.06.01.domain_selection/patch_prob_chicago_2048.npy')
+patch_prob = np.load('/media/ei-edl01/user/bh163/tasks/2018.06.01.domain_selection/patch_prob_vienna_2048.npy')
 
 # create collection
 # the original file is in /ei-edl01/data/uab_datasets/inria

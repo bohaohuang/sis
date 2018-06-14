@@ -1,9 +1,6 @@
 import os
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import scipy.stats
-import sklearn.metrics
 from tqdm import tqdm
 from sklearn.mixture import GaussianMixture
 import utils
@@ -63,33 +60,30 @@ idx = np.array(idx)
 truth_city_train = truth_city[idx >= 6]
 feature_train = feature[idx >= 6, :]
 
-test_points = list(range(10, 51, 5)) + list(range(50, 151, 20)) # + list(range(180, 301, 30))
-entropy = np.zeros((5, len(test_points)))
-mutual_info = np.zeros(len(test_points))
-for cnt, n_comp in enumerate(tqdm([40])):
-    gmm_models = []
-    model_file_name = os.path.join(r'/media/ei-edl01/user/bh163/tasks/2018.05.22.evaluate_gan',
-                                   'gmm_models_{}_{}_2048.npy'.format(model_name, n_comp))
-    if not os.path.exists(model_file_name):
-        print('train GMM models ...')
-        for i in tqdm(range(5)):
-            gmm = GaussianMixture(n_components=n_comp, covariance_type='diag')
-            gmm.fit(feature_train[truth_city_train == i, :])
-            gmm_models.append(gmm)
-            np.save(model_file_name, gmm_models)
-    else:
-        #print('loading models')
-        gmm_models = np.load(model_file_name)
+n_comp = 40
+gmm_models = []
+model_file_name = os.path.join(r'/media/ei-edl01/user/bh163/tasks/2018.05.22.evaluate_gan',
+                               'gmm_models_{}_{}_2048.npy'.format(model_name, n_comp))
+if not os.path.exists(model_file_name):
+    print('train GMM models ...')
+    for i in tqdm(range(5)):
+        gmm = GaussianMixture(n_components=n_comp, covariance_type='diag')
+        gmm.fit(feature_train[truth_city_train == i, :])
+        gmm_models.append(gmm)
+        np.save(model_file_name, gmm_models)
+else:
+    print('loading models')
+    gmm_models = np.load(model_file_name)
 
-    # compute llh for each patch
-    city_dict = {'aus': 0, 'chi': 1, 'kit': 2, 'tyr': 3, 'vie': 4}
-    feature_valid = feature[idx < 6, :]
-    patch_valid = [patch_names[i] for i in range(len(patch_names)) if idx[i] < 6]
-    city_name_list = [a[:3] for a in patch_valid]
-    city_id_list = [city_dict[a] for a in city_name_list]
+# compute llh for each patch
+city_dict = {'aus': 0, 'chi': 1, 'kit': 2, 'tyr': 3, 'vie': 4}
+feature_valid = feature[idx < 6, :]
+patch_valid = [patch_names[i] for i in range(len(patch_names)) if idx[i] < 6]
+city_name_list = [a[:3] for a in patch_valid]
+city_id_list = [city_dict[a] for a in city_name_list]
 
-    fig = plt.figure(figsize=(12, 6))
-    llh_all = np.zeros((5, 5))
+prior_file_name = os.path.join(task_dir, 'prior_gmm_n_comp_{}.txt'.format(n_comp))
+with open(prior_file_name, 'w') as f:
     for test_city in range(5):
         test_city_feature = feature_valid[[i for i in range(len(city_id_list)) if city_id_list[i] == test_city], :]
 
@@ -100,30 +94,4 @@ for cnt, n_comp in enumerate(tqdm([40])):
         llh = (llh - np.min(llh)) / (np.max(llh) - np.min(llh)) + 0.1
         llh = llh / np.sum(llh)
 
-        llh_all[test_city, :] = llh
-        entropy[test_city, cnt] = scipy.stats.entropy(llh)
-
-        plt.subplot(231 + test_city)
-        X = np.arange(5)
-        width = 0.5
-        plt.bar(X, llh)
-        for cnt, val in enumerate(llh):
-            plt.text(X[cnt] - width*0.48, val, '{:.3f}'.format(val))
-        plt.xticks(np.arange(5), city_list)
-        plt.title(city_list[test_city])
-    plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'llh_c_num{}.png'.format(n_comp)))
-    plt.show()
-    #plt.close(fig)
-    '''for i in range(5):
-        for j in range(i, 5):
-            mutual_info[cnt] += scipy.stats.entropy(llh_all[i, :], llh_all[j, :])'''
-
-'''plt.subplot(211)
-for i in range(5):
-    plt.plot(test_points, entropy[i, :], label=city_list[i])
-plt.plot(test_points, np.mean(entropy, axis=0), 'k')
-plt.legend()
-plt.subplot(212)
-plt.plot(test_points, mutual_info)
-plt.show()'''
+        f.write('{}\n'.format(','.join([str(num) for num in llh])))

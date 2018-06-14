@@ -75,15 +75,16 @@ feature = pd.read_csv(feature_file, sep=',', header=None).values
 # fit on training set
 llh_curve = []
 llh_curve_test = []
-test_points = list(range(50, 151, 20)) + list(range(180, 301, 30)) + list(range(350, 1001, 50)) + \
-              list(range(1100, 1201, 100))
+test_points = list(range(10, 51, 5))
+'''list(range(50, 151, 20)) + list(range(180, 301, 30)) + list(range(350, 1001, 50)) + \
+              list(range(1100, 1501, 100))'''
 curve_points = [i for i in test_points]
 for n_comp in test_points:
     print('N Comp = {}'.format(n_comp))
     idx = np.array(idx)
-    truth_city_train = truth_city[idx < 6]
-    feature_train = feature[idx < 6, :]
-    truth_building_train = truth_building[idx < 6]
+    truth_city_train = truth_city[idx >= 6]
+    feature_train = feature[idx >= 6, :]
+    truth_building_train = truth_building[idx >= 6]
     gmm_models = []
     model_file_name = os.path.join(task_dir, 'gmm_models_{}_{}_2048.npy'.format(model_name, n_comp))
     if not os.path.exists(model_file_name):
@@ -101,15 +102,15 @@ for n_comp in test_points:
     # evaluate on train set
     idx = np.array(idx)
     track_id = np.arange(len(patch_names))
-    track_id_valid = track_id[idx < 6]
-    truth_city_valid = truth_city[idx < 6]
-    feature_valid = feature[idx < 6, :]
-    truth_building_valid = truth_building[idx < 6]
+    track_id_valid = track_id[idx >= 6]
+    truth_city_valid = truth_city[idx >= 6]
+    feature_valid = feature[idx >= 6, :]
+    truth_building_valid = truth_building[idx >= 6]
 
-    track_id_test = track_id[idx >= 6]
-    truth_city_test = truth_city[idx >= 6]
-    feature_test = feature[idx >= 6, :]
-    truth_building_test = truth_building[idx >= 6]
+    track_id_test = track_id[idx < 6]
+    truth_city_test = truth_city[idx < 6]
+    feature_test = feature[idx < 6, :]
+    truth_building_test = truth_building[idx < 6]
 
     llh_model = []
     llh_model_test = []
