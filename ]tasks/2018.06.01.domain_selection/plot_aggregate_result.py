@@ -12,7 +12,7 @@ colors = util_functions.get_default_colors()
 if model_type == 'deeplab':
     model_list = [
                   r'/hdd/Results/domain_selection/DeeplabV3_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
-                  r'/hdd/Results/domain_selection/DeeplabV3_inria_{}_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+                  r'/hdd/Results/domain_selection/DeeplabV3_inria_{}_patch2048_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
     ]
     model_name_show = ['Base', 'Agg']
 
@@ -67,7 +67,7 @@ if model_type == 'deeplab':
     plt.ylim([50, 85])
     plt.title('IoU Comparison Deeplab Austin')
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'deeplab_agg_cmp.png'))
+    plt.savefig(os.path.join(img_dir, 'deeplab_agg_cmp_patch.png'))
     plt.show()
 else:
     model_list = [

@@ -75,7 +75,7 @@ feature = pd.read_csv(feature_file, sep=',', header=None).values
 # fit on training set
 llh_curve = []
 llh_curve_test = []
-test_points = list(range(10, 51, 5))
+test_points = list(range(10, 51, 5)) + list(range(50, 151, 20)) + list(range(180, 301, 30))
 '''list(range(50, 151, 20)) + list(range(180, 301, 30)) + list(range(350, 1001, 50)) + \
               list(range(1100, 1501, 100))'''
 curve_points = [i for i in test_points]
@@ -91,7 +91,6 @@ for n_comp in test_points:
         print('\ttrain GMM models ...')
         for i in tqdm(range(5)):
             gmm = GaussianMixture(n_components=n_comp, covariance_type='diag')
-            #gmm.fit(feature_train[np.all([truth_city_train == i, truth_building_train == 1], axis=0), :])
             gmm.fit(feature_train[truth_city_train == i, :])
             gmm_models.append(gmm)
             np.save(model_file_name, gmm_models)

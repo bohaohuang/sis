@@ -17,7 +17,8 @@ def get_patch_by_name(patch_dir, p_name, patch_size):
     return img
 
 
-patch_prob = np.load('/media/ei-edl01/user/bh163/tasks/2018.06.01.domain_selection/patch_prob_vienna_2048.npy')
+patch_prob = np.load('/media/ei-edl01/user/bh163/tasks/2018.06.01.domain_selection/patch_prob_austin_2048.npy')
+city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 
 # create collection
 # the original file is in /ei-edl01/data/uab_datasets/inria
@@ -63,11 +64,11 @@ for reader_cnt in tqdm(range(100000)):
         c_cnt[city_dict[p_name[:3]]] += 1
         patch_cnt[patch_id_dict[p_name]] += 1
 plt.bar(np.arange(5), c_cnt)
+plt.xticks(np.arange(5), city_list)
 plt.show()
 
 top_num = 28
 top_idx = np.argsort(patch_cnt)[::-1][:top_num]
-city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 c_cnt = np.zeros(5)
 plt.figure(figsize=(18, 10))
 for i in range(top_num):

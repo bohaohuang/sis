@@ -75,10 +75,10 @@ idx = np.array(idx)
 truth_city_train = truth_city[idx >= 6]
 feature_train = feature[idx >= 6, :]
 
-test_points = list(range(10, 51, 5)) + list(range(50, 151, 20)) # + list(range(180, 301, 30))
+test_points = list(range(10, 51, 5)) + list(range(50, 151, 20)) + list(range(180, 301, 30))
 entropy = np.zeros((5, len(test_points)))
 mutual_info = np.zeros(len(test_points))
-for cnt, n_comp in enumerate(tqdm([35])):
+for cnt, n_comp in enumerate(tqdm(test_points)):
     gmm_models = []
     model_file_name = os.path.join(r'/media/ei-edl01/user/bh163/tasks/2018.05.22.evaluate_gan',
                                    'gmm_models_{}_{}_2048_{}.npy'.format(model_name, n_comp, cnn_name))
@@ -100,7 +100,6 @@ for cnt, n_comp in enumerate(tqdm([35])):
     city_name_list = [a[:3] for a in patch_valid]
     city_id_list = [city_dict[a] for a in city_name_list]
 
-    fig = plt.figure(figsize=(12, 6))
     llh_all = np.zeros((5, 5))
     for test_city in range(5):
         test_city_feature = feature_valid[[i for i in range(len(city_id_list)) if city_id_list[i] == test_city], :]
@@ -115,14 +114,23 @@ for cnt, n_comp in enumerate(tqdm([35])):
         llh_all[test_city, :] = llh
         entropy[test_city, cnt] = scipy.stats.entropy(llh)
 
-        plt.subplot(231 + test_city)
-        X = np.arange(5)
-        width = 0.5
-        plt.bar(X, llh)
-        for cnt, val in enumerate(llh):
-            plt.text(X[cnt] - width*0.48, val, '{:.3f}'.format(val))
-        plt.xticks(np.arange(5), city_list)
-        plt.title(city_list[test_city])
-    plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'llh_c_num{}_{}.png'.format(n_comp, cnn_name)))
-    plt.show()
+    for i in range(5):
+        for j in range(i, 5):
+            mutual_info[cnt] += scipy.stats.entropy(llh_all[i, :], llh_all[j, :])
+
+plt.figure(figsize=(10, 8))
+plt.subplot(211)
+for i in range(5):
+    plt.plot(test_points, entropy[i, :], label=city_list[i])
+plt.plot(test_points, np.mean(entropy, axis=0), 'k', label='Avg')
+plt.grid(True)
+plt.legend()
+plt.ylabel('Entropy')
+plt.subplot(212)
+plt.plot(test_points, mutual_info)
+plt.xlabel('N Comp')
+plt.ylabel('Mutual Info')
+plt.grid(True)
+plt.tight_layout()
+plt.savefig(os.path.join(img_dir, 'info_curve_{}.png'.format(cnn_name)))
+plt.show()

@@ -7,12 +7,12 @@ import util_functions
 img_dir, task_dir = utils.get_task_img_folder()
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 model_type = 'deeplab'
-city_num = 3
+city_num = 0
 colors = util_functions.get_default_colors()
 
 if model_type == 'deeplab':
     model_list = [r'/hdd/Results/domain_selection/DeeplabV3_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
-                  r'/hdd/Results/domain_selection/DeeplabV3_inria_{}_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
+                  r'/hdd/Results/domain_selection/DeeplabV3_inria_{}_tile2048_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
                       .format(city_list[city_num]),
     ]
     model_name_show = ['Base', 'Scratch']
@@ -41,11 +41,13 @@ if model_type == 'deeplab':
         plt.xticks(X+width*0.5, city_list+['Over All'])
         plt.xlabel('City')
         plt.ylabel('IoU')
+        for cnt, iou in enumerate(city_iou):
+            plt.text(X[cnt] +  width * (plt_cnt - 0.5), iou, '{:.1f}'.format(iou), fontsize=8)
     plt.legend(loc='upper right')
     plt.ylim([50, 85])
     plt.title('IoU Comparison Deeplab {}'.format(city_list[city_num].title()))
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'deeplab_{}_cmp.png'.format(city_list[city_num])))
+    #plt.savefig(os.path.join(img_dir, 'deeplab_{}_cmp.png'.format(city_list[city_num])))
     plt.show()
 else:
     model_list = [
