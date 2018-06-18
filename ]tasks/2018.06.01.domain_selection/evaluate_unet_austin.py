@@ -14,10 +14,15 @@ for runId in [0]:
     for model_dir in [
         #'/hdd6/Models/Inria_Domain/UnetCrop_inria_austin_0_PS(572, 572)_BS5_EP40_LR1e-05_DS20_DR0.1_SFN32',
             #'/hdd6/Models/Inria_Domain/UnetCrop_inria_austin_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
-            r'/hdd6/Models/Inria_Domain/UnetCrop_inria_chicago_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-            r'/hdd6/Models/Inria_Domain/UnetCrop_inria_kitsap_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-            r'/hdd6/Models/Inria_Domain/UnetCrop_inria_tyrol-w_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-            r'/hdd6/Models/Inria_Domain/UnetCrop_inria_vienna_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32']:
+            #r'/hdd6/Models/Inria_Domain/UnetCrop_inria_chicago_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+            #r'/hdd6/Models/Inria_Domain/UnetCrop_inria_kitsap_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+            #r'/hdd6/Models/Inria_Domain/UnetCrop_inria_tyrol-w_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+            #r'/hdd6/Models/Inria_Domain/UnetCrop_inria_vienna_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        #r'/hdd6/Models/Inria_Domain2/UnetCrop_inria_austin_tile2048_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        #r'/hdd6/Models/Inria_Domain2/UnetCrop_inria_chicago_tile2048_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        #r'/hdd6/Models/Inria_Domain2/UnetCrop_inria_kitsap_tile2048_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain2/UnetCrop_inria_vienna_tile2048_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+    ]:
 
         tf.reset_default_graph()
 

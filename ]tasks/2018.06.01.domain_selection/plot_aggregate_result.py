@@ -11,10 +11,11 @@ colors = util_functions.get_default_colors()
 
 if model_type == 'deeplab':
     model_list = [
-                  r'/hdd/Results/domain_selection/DeeplabV3_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
-                  r'/hdd/Results/domain_selection/DeeplabV3_inria_{}_patch2048_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        r'/hdd/Results/domain_selection/DeeplabV3_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        r'/hdd/Results/domain_selection/DeeplabV3_inria_{}_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        r'/hdd/Results/domain_selection/DeeplabV3_inria_{}_tile2048_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
     ]
-    model_name_show = ['Base', 'Agg']
+    model_name_show = ['Base', 'Agg Manual', 'Agg Auto']
 
     fig = plt.figure()
     for plt_cnt, model_name in enumerate(model_list):
@@ -54,27 +55,28 @@ if model_type == 'deeplab':
             city_iou_b_all[-1] = np.sum(city_iou_b_all[:-1])
             city_iou = city_iou_a_all / city_iou_b_all * 100
 
-        width = 0.35
+        width = 0.3
         X = np.arange(6)
         plt.bar(X+width*plt_cnt, city_iou, width=width, label=model_name_show[plt_cnt],
                 color=colors[plt_cnt + 1])
-        plt.xticks(X + width * 0.5, city_list+['Over All'])
+        plt.xticks(X + width, city_list+['Over All'])
         plt.xlabel('City')
         plt.ylabel('IoU')
         for cnt, iou in enumerate(city_iou):
-            plt.text(X[cnt] +  width * (plt_cnt - 0.5), iou, '{:.1f}'.format(iou))
+            plt.text(X[cnt] +  width * (plt_cnt - 0.5), iou, '{:.1f}'.format(iou), fontsize=8)
     plt.legend(loc='upper right')
     plt.ylim([50, 85])
-    plt.title('IoU Comparison Deeplab Austin')
+    plt.title('IoU Comparison Deeplab Aggregate')
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'deeplab_agg_cmp_patch.png'))
+    plt.savefig(os.path.join(img_dir, 'deeplab_agg_cmp_tile.png'))
     plt.show()
 else:
     model_list = [
         r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
         r'/hdd/Results/domain_selection/UnetCrop_inria_{}_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        r'/hdd/Results/domain_selection/UnetCrop_inria_{}_tile2048_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
     ]
-    model_name_show = ['Base', 'Agg']
+    model_name_show = ['Base', 'Agg Manual', 'Agg Auto']
 
     fig = plt.figure()
     for plt_cnt, model_name in enumerate(model_list):
@@ -114,18 +116,18 @@ else:
             city_iou_b_all[-1] = np.sum(city_iou_b_all[:-1])
             city_iou = city_iou_a_all / city_iou_b_all * 100
 
-        width = 0.35
+        width = 0.3
         X = np.arange(6)
         plt.bar(X + width * plt_cnt, city_iou, width=width, label=model_name_show[plt_cnt],
                 color=colors[plt_cnt + 1])
-        plt.xticks(X + width * 0.5, city_list + ['Over All'])
+        plt.xticks(X + width, city_list + ['Over All'])
         plt.xlabel('City')
         plt.ylabel('IoU')
         for cnt, iou in enumerate(city_iou):
-            plt.text(X[cnt] +  width * (plt_cnt - 0.5), iou, '{:.1f}'.format(iou))
+            plt.text(X[cnt] +  width * (plt_cnt - 0.5), iou, '{:.1f}'.format(iou), fontsize=8)
     plt.legend(loc='upper right')
     plt.ylim([50, 85])
     plt.title('IoU Comparison UNet Aggregate')
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'unet_agg_cmp.png'))
+    plt.savefig(os.path.join(img_dir, 'unet_agg_cmp_tile.png'))
     plt.show()

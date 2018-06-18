@@ -4,7 +4,7 @@ import uab_collectionFunctions
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 # settings
-gpu = 0
+gpu = 1
 batch_size = 5
 input_size = [321, 321]
 tile_size = [5000, 5000]
@@ -16,7 +16,10 @@ for runId in [0]:
         #r'/hdd6/Models/Inria_Domain/DeeplabV3_inria_austin_0_PS(321, 321)_BS5_EP40_LR1e-06_DS20_DR0.1_SFN32',
         #r'/hdd6/Models/Inria_Domain/DeeplabV3_inria_chicago_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
         #r'/hdd6/Models/Inria_Domain/DeeplabV3_inria_kitsap_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain2/DeeplabV3_inria_austin_tile2048_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        #r'/hdd6/Models/Inria_Domain2/DeeplabV3_inria_chicago_tile2048_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        #r'/hdd6/Models/Inria_Domain2/DeeplabV3_inria_kitsap_tile2048_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        #r'/hdd6/Models/Inria_Domain2/DeeplabV3_inria_tyrol-w_tile2048_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain2/DeeplabV3_inria_vienna_tile2048_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
     ]:
 
         tf.reset_default_graph()
