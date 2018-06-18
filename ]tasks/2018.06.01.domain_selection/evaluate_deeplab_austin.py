@@ -4,7 +4,7 @@ import uab_collectionFunctions
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 # settings
-gpu = 1
+gpu = 0
 batch_size = 5
 input_size = [321, 321]
 tile_size = [5000, 5000]
@@ -19,7 +19,12 @@ for runId in [0]:
         #r'/hdd6/Models/Inria_Domain2/DeeplabV3_inria_chicago_tile2048_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
         #r'/hdd6/Models/Inria_Domain2/DeeplabV3_inria_kitsap_tile2048_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
         #r'/hdd6/Models/Inria_Domain2/DeeplabV3_inria_tyrol-w_tile2048_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain2/DeeplabV3_inria_vienna_tile2048_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        #r'/hdd6/Models/Inria_Domain2/DeeplabV3_inria_vienna_tile2048_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain_LOO/DeeplabV3_inria_aug_train_leave_0_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain_LOO/DeeplabV3_inria_aug_train_leave_1_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain_LOO/DeeplabV3_inria_aug_train_leave_2_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain_LOO/DeeplabV3_inria_aug_train_leave_3_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain_LOO/DeeplabV3_inria_aug_train_leave_4_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
     ]:
 
         tf.reset_default_graph()
