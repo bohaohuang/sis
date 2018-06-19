@@ -13,12 +13,13 @@ if model_type == 'deeplab':
     model_list = [
         r'/hdd/Results/domain_selection/DeeplabV3_inria_aug_train_leave_{}_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
         r'/hdd/Results/domain_selection/DeeplabV3_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        r'/hdd/Results/domain_selection/DeeplabV3_inria_chicago_loo_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
     ]
-    model_name_show = ['LOO', 'Base']
+    model_name_show = ['LOO', 'Base', 'Aus']
 
     fig = plt.figure()
     for plt_cnt, model_name in enumerate(model_list):
-        if plt_cnt == 1:
+        if plt_cnt >= 1:
             city_iou_a = np.zeros(6)
             city_iou_b = np.zeros(6)
 
@@ -67,7 +68,7 @@ if model_type == 'deeplab':
     plt.ylim([50, 85])
     plt.title('IoU Comparison Deeplab Aggregate')
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'deeplab_agg_cmp_tile_loo.png'))
+    # plt.savefig(os.path.join(img_dir, 'deeplab_agg_cmp_tile_loo.png'))
     plt.show()
 else:
     model_list = [

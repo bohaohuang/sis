@@ -39,7 +39,8 @@ idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'for
 
 model_name = 'res50'
 # load patch names
-patch_file = os.path.join(task_dir, '{}_inria_2048.txt'.format(model_name))
+patch_file = os.path.join(r'/media/ei-edl01/user/bh163/tasks/2018.06.01.domain_selection',
+                          '{}_inria_2048.txt'.format(model_name))
 with open(patch_file, 'r') as f:
     patch_names = f.readlines()
 # make truth
@@ -69,7 +70,8 @@ else:
     truth_city = np.load(truth_file_city)
 
 # load features
-feature_file = os.path.join(task_dir, '{}_inria_2048.csv'.format(model_name))
+feature_file = os.path.join(r'/media/ei-edl01/user/bh163/tasks/2018.06.01.domain_selection',
+                            '{}_inria_2048.csv'.format(model_name))
 feature = pd.read_csv(feature_file, sep=',', header=None).values
 
 # fit on training set
@@ -135,5 +137,5 @@ plt.xlabel('N Comp')
 plt.ylabel('LLH Valid')
 plt.grid(True)
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'elbow_{}_2048.png'.format(model_name)))
+# plt.savefig(os.path.join(img_dir, 'elbow_{}_2048.png'.format(model_name)))
 plt.show()
