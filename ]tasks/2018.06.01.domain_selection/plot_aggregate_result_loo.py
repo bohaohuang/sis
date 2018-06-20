@@ -13,13 +13,13 @@ if model_type == 'deeplab':
     model_list = [
         r'/hdd/Results/domain_selection/DeeplabV3_inria_aug_train_leave_{}_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
         r'/hdd/Results/domain_selection/DeeplabV3_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
-        r'/hdd/Results/domain_selection/DeeplabV3_inria_chicago_loo_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
+        r'/hdd/Results/domain_selection/DeeplabV3_inria_{}_loo_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
     ]
-    model_name_show = ['LOO', 'Base', 'Aus']
+    model_name_show = ['LOO', 'Base', 'Agg']
 
     fig = plt.figure()
     for plt_cnt, model_name in enumerate(model_list):
-        if plt_cnt >= 1:
+        if plt_cnt == 1:
             city_iou_a = np.zeros(6)
             city_iou_b = np.zeros(6)
 
@@ -41,10 +41,16 @@ if model_type == 'deeplab':
                 city_iou_a = np.zeros(6)
                 city_iou_b = np.zeros(6)
 
-                model_dir = model_name + '/inria'
-                result_file = os.path.join(model_dir.format(city_cnt), 'result.txt')
-                with open(result_file, 'r') as f:
-                    result_record = f.readlines()
+                try:
+                    model_dir = model_name + '/inria'
+                    result_file = os.path.join(model_dir.format(city_cnt), 'result.txt')
+                    with open(result_file, 'r') as f:
+                        result_record = f.readlines()
+                except FileNotFoundError:
+                    model_dir = model_name + '/inria'
+                    result_file = os.path.join(model_dir.format(city_list[city_cnt]), 'result.txt')
+                    with open(result_file, 'r') as f:
+                        result_record = f.readlines()
                 for cnt, line in enumerate(result_record[:-1]):
                     A, B = line.split('(')[1].strip().strip(')').split(',')
                     city_iou_a[cnt // 5] += float(A)
