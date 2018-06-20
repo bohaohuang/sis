@@ -1,5 +1,6 @@
 import sys
 sys.path.append('../../../uab')
+sys.path.append('../../../uab/bohaoCustom')
 import time
 import argparse
 import numpy as np
