@@ -77,7 +77,8 @@ plt.figure(figsize=(8, 6))
 fig_num = plt.gcf().number
 for model_name in ['res50']:
     # load patch names
-    patch_file = os.path.join(task_dir, '{}_inria_2048.txt'.format(model_name))
+    patch_file = os.path.join(r'/media/ei-edl01/user/bh163/tasks/2018.06.01.domain_selection',
+                              '{}_inria_2048.txt'.format(model_name))
     with open(patch_file, 'r') as f:
         patch_names = f.readlines()
     # make truth
@@ -107,7 +108,8 @@ for model_name in ['res50']:
         truth_city = np.load(truth_file_city)
 
     # load features
-    feature_file = os.path.join(task_dir, '{}_inria_2048.csv'.format(model_name))
+    feature_file = os.path.join(r'/media/ei-edl01/user/bh163/tasks/2018.06.01.domain_selection',
+                                '{}_inria_2048.csv'.format(model_name))
     feature = pd.read_csv(feature_file, sep=',', header=None).values
 
     # do on valid set
@@ -161,6 +163,7 @@ for model_name in ['res50']:
     fpr_rf, tpr_rf, _ = roc_curve(truth_building_rearrange, pred_building)
     plt.plot(fpr_rf, tpr_rf, label='{} AUC = {:.2f}'.format(model_name, auc(fpr_rf, tpr_rf)))
     plt.plot([0, 1], [0, 1], color='grey', lw=2, linestyle='--')
+    plt.plot([0.028234771009337484], [0.8338590956887487], marker='*')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
     plt.xlabel('False Positive Rate')

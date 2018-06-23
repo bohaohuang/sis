@@ -10,4 +10,4 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=/opt/apps/rhel7/cudnn/lib64:$LD_LIBRARY_PATH
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/uab
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/sis
-python train_inria_unet_loo_base.py --leave-city=2
+python train_inria_unet_loo_mtl.py --leave-city=1
