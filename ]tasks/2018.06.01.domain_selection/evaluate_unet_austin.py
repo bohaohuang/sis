@@ -4,7 +4,7 @@ import uab_collectionFunctions
 from bohaoCustom import uabMakeNetwork_UNet
 
 # settings
-gpu = 0
+gpu = 1
 batch_size = 5
 input_size = [572, 572]
 tile_size = [5000, 5000]
@@ -22,16 +22,10 @@ for runId in [0]:
         #r'/hdd6/Models/Inria_Domain2/UnetCrop_inria_chicago_tile2048_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
         #r'/hdd6/Models/Inria_Domain2/UnetCrop_inria_kitsap_tile2048_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
         #r'/hdd6/Models/Inria_Domain2/UnetCrop_inria_vienna_tile2048_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_austin_loo_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_chicago_loo_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_kitsap_loo_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_tyrol-w_loo_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_vienna_loo_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_0_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_1_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_2_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_3_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_4_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain_LOO/UnetPredict_inria_loo_mtl_1_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain_LOO/UnetPredict_inria_loo_mtl_2_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain_LOO/UnetPredict_inria_loo_mtl_3_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain_LOO/UnetPredict_inria_loo_mtl_4_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
     ]:
 
         tf.reset_default_graph()

@@ -6,7 +6,7 @@ import util_functions
 
 img_dir, task_dir = utils.get_task_img_folder()
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-model_type = 'deeplab'
+model_type = 'unet'
 colors = util_functions.get_default_colors()
 
 if model_type == 'deeplab':
@@ -52,12 +52,12 @@ if model_type == 'deeplab':
     plt.show()
 else:
     model_list = [
-        #r'/hdd/Results/domain_selection/UnetCrop_inria_aug_leave_0_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        r'/hdd/Results/domain_selection/UnetCrop_inria_aug_leave_0_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
         r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd/Results/domain_selection/UnetCrop_inria_vienna_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        #r'/hdd/Results/domain_selection/UnetCrop_inria_austin_0_PS(572, 572)_BS5_EP40_LR1e-05_DS20_DR0.1_SFN32',
+        #r'/hdd/Results/domain_selection/UnetCrop_inria_austin_loo_patch_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        r'/hdd/Results/domain_selection/UnetPredict_inria_loo_mtl_0_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
     ]
-    model_name_show = ['Base', 'Scratch']
+    model_name_show = ['LOO', 'Base', 'MTL']
 
     fig = plt.figure()
     for plt_cnt, model_name in enumerate(model_list):
@@ -76,7 +76,7 @@ else:
         city_iou_b[-1] = np.sum(city_iou_b[:-1])
         city_iou = city_iou_a / city_iou_b * 100
 
-        width = 0.2
+        width = 0.3
         X = np.arange(6)
         plt.bar(X + width * plt_cnt, city_iou, width=width, label=model_name_show[plt_cnt])
         plt.xticks(X + width, city_list + ['Over All'])
@@ -86,5 +86,5 @@ else:
     plt.ylim([50, 85])
     plt.title('IoU Comparison UNet Austin')
     plt.tight_layout()
-    #plt.savefig(os.path.join(img_dir, 'unet_austin_cmp.png'))
+    plt.savefig(os.path.join(img_dir, 'unet_austin_cmp_loo_mtl.png'))
     plt.show()

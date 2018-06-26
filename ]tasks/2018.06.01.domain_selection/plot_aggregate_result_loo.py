@@ -6,7 +6,7 @@ import util_functions
 
 img_dir, task_dir = utils.get_task_img_folder()
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-model_type = 'deeplab'
+model_type = 'unet'
 colors = util_functions.get_default_colors()
 
 if model_type == 'deeplab':
@@ -74,19 +74,19 @@ if model_type == 'deeplab':
     plt.ylim([50, 85])
     plt.title('IoU Comparison Deeplab Aggregate')
     plt.tight_layout()
-    # plt.savefig(os.path.join(img_dir, 'deeplab_agg_cmp_tile_loo.png'))
+    plt.savefig(os.path.join(img_dir, 'deeplab_agg_cmp_tile_loo.png'))
     plt.show()
 else:
     model_list = [
+        r'/hdd/Results/domain_selection/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
         r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd/Results/domain_selection/UnetCrop_inria_{}_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd/Results/domain_selection/UnetCrop_inria_{}_tile2048_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        r'/hdd/Results/domain_selection/UnetPredict_inria_loo_mtl_{}_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
     ]
-    model_name_show = ['Base', 'Agg Manual', 'Agg Auto']
+    model_name_show = ['LOO', 'Base', 'MTL']
 
     fig = plt.figure()
     for plt_cnt, model_name in enumerate(model_list):
-        if plt_cnt == 0:
+        if plt_cnt == 1:
             city_iou_a = np.zeros(6)
             city_iou_b = np.zeros(6)
 
@@ -109,9 +109,14 @@ else:
                 city_iou_b = np.zeros(6)
 
                 model_dir = model_name + '/inria'
-                result_file = os.path.join(model_dir.format(city_name), 'result.txt')
-                with open(result_file, 'r') as f:
-                    result_record = f.readlines()
+                try:
+                    result_file = os.path.join(model_dir.format(city_name), 'result.txt')
+                    with open(result_file, 'r') as f:
+                        result_record = f.readlines()
+                except FileNotFoundError:
+                    result_file = os.path.join(model_dir.format(city_cnt), 'result.txt')
+                    with open(result_file, 'r') as f:
+                        result_record = f.readlines()
                 for cnt, line in enumerate(result_record[:-1]):
                     A, B = line.split('(')[1].strip().strip(')').split(',')
                     city_iou_a[cnt // 5] += float(A)
@@ -132,8 +137,8 @@ else:
         for cnt, iou in enumerate(city_iou):
             plt.text(X[cnt] +  width * (plt_cnt - 0.5), iou, '{:.1f}'.format(iou), fontsize=8)
     plt.legend(loc='upper right')
-    plt.ylim([50, 85])
+    plt.ylim([30, 85])
     plt.title('IoU Comparison UNet Aggregate')
     plt.tight_layout()
-    # plt.savefig(os.path.join(img_dir, 'unet_agg_cmp_tile.png'))
+    #plt.savefig(os.path.join(img_dir, 'unet_agg_cmp_tile_loo.png'))
     plt.show()

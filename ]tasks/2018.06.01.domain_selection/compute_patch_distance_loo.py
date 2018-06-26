@@ -124,10 +124,10 @@ for test_city in range(5):
     plt.xticks(X, [city_list[x] for x in range(5) if x != test_city])
     plt.title('{} LOO'.format(city_list[test_city]))
 plt.tight_layout()
-#plt.savefig(os.path.join(img_dir, 'llh_c_num{}_{}_LOO.png'.format(n_comp, cnn_name)))
+plt.savefig(os.path.join(img_dir, 'llh_c_num{}_{}_LOO_patchwise.png'.format(n_comp, cnn_name)))
 plt.show()
 
-with open(prior_file_name, 'w') as f:
+'''with open(prior_file_name, 'w') as f:
     for test_city in range(5):
-        f.write('{}\n'.format(','.join([str(num) for num in llh_all[test_city]])))
+        f.write('{}\n'.format(','.join([str(num) for num in llh_all[test_city]])))'''
 

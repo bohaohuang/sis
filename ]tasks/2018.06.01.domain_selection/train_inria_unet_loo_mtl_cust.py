@@ -1,3 +1,4 @@
+import os
 import time
 import argparse
 import numpy as np
@@ -21,11 +22,12 @@ NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
 GPU = 0
-DECAY_STEP = 40
+DECAY_STEP = 60
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_loo_mtl_{}_{}'
+MODEL_NAME = 'inria_loo_mtl_cust_{}_{}'
 SFN = 32
 LEAVE_CITY = 0
+PRED_FILE_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.06.01.domain_selection'
 
 
 def read_flag():
@@ -45,6 +47,7 @@ def read_flag():
     parser.add_argument('--run-id', type=str, default=RUN_ID, help='id of this run')
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--leave-city', type=int, default=LEAVE_CITY, help='city id to leave-out in training')
+    parser.add_argument('--pred-file-dir', type=str, default=PRED_FILE_DIR, help='building/non-building prediction dir')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
@@ -54,6 +57,10 @@ def read_flag():
 
 
 def main(flags):
+    city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
+    flags.pred_file_dir = os.path.join(flags.pred_file_dir, 'unet_{}_building_record.npy'.
+                                       format(city_list[flags.leave_city]))
+
     # make network
     # define place holder
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
@@ -101,9 +108,9 @@ def main(flags):
     dataReader_train = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, flags.input_size,
                                                       flags.batch_size, dataAug='flip,rotate',
                                                       block_mean=np.append([0], img_mean), batch_code=0)
-    dataReader_train_building = uabDataReader.ImageLabelReaderBuilding([3], [0, 1, 2], patchDir, file_list_valid, flags.input_size,
-                                                      flags.batch_size, dataAug='flip,rotate',
-                                                      block_mean=np.append([0], img_mean), patch_prob=0.1)
+    dataReader_train_building = uabDataReader.ImageLabelReaderBuildingCustom(
+        [3], [0, 1, 2], patchDir, file_list_valid, flags.input_size, flags.batch_size, dataAug='flip,rotate',
+        percent_file=flags.pred_file_dir, block_mean=np.append([0], img_mean), patch_prob=0.1)
     # no augmentation needed for validation
     dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_valid, flags.input_size,
                                                       flags.batch_size, dataAug=' ',
