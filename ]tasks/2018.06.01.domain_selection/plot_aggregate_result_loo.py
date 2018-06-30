@@ -137,8 +137,8 @@ else:
         for cnt, iou in enumerate(city_iou):
             plt.text(X[cnt] +  width * (plt_cnt - 0.5), iou, '{:.1f}'.format(iou), fontsize=8)
     plt.legend(loc='upper right')
-    plt.ylim([30, 85])
-    plt.title('IoU Comparison UNet Aggregate')
+    plt.ylim([50, 85])
+    plt.title('IoU Comparison UNet MTL')
     plt.tight_layout()
-    #plt.savefig(os.path.join(img_dir, 'unet_agg_cmp_tile_loo.png'))
+    #plt.savefig(os.path.join(img_dir, 'unet_agg_cmp_loo_mtl_base.png'))
     plt.show()

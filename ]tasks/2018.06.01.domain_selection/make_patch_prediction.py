@@ -14,7 +14,7 @@ def center_crop(img, pad):
 
 
 # settings
-cnn_name = 'unet'
+cnn_name = 'deeplab'
 city_num = 4
 img_dir, task_dir = utils.get_task_img_folder()
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']

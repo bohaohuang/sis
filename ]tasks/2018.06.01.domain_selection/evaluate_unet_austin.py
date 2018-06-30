@@ -22,10 +22,10 @@ for runId in [0]:
         #r'/hdd6/Models/Inria_Domain2/UnetCrop_inria_chicago_tile2048_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
         #r'/hdd6/Models/Inria_Domain2/UnetCrop_inria_kitsap_tile2048_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
         #r'/hdd6/Models/Inria_Domain2/UnetCrop_inria_vienna_tile2048_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain_LOO/UnetPredict_inria_loo_mtl_1_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain_LOO/UnetPredict_inria_loo_mtl_2_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain_LOO/UnetPredict_inria_loo_mtl_3_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd6/Models/Inria_Domain_LOO/UnetPredict_inria_loo_mtl_4_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain_LOO/UnetPredict_inria_loo_mtl_cust_1_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain_LOO/UnetPredict_inria_loo_mtl_cust_2_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain_LOO/UnetPredict_inria_loo_mtl_cust_3_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        r'/hdd6/Models/Inria_Domain_LOO/UnetPredict_inria_loo_mtl_cust_4_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
     ]:
 
         tf.reset_default_graph()
@@ -61,4 +61,4 @@ for runId in [0]:
         model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                        input_size, tile_size, batch_size, img_mean, model_dir, gpu,
                        save_result_parent_dir='domain_selection', ds_name='inria',
-                       best_model=False)
+                       best_model=True)
