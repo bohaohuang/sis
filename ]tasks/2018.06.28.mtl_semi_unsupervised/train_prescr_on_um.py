@@ -28,7 +28,7 @@ if __name__ == '__main__':
     n_valid = 100
     epoch = 100
     learn_rate = 1e-5
-    prescr_name = 'res50'
+    prescr_name = 'incep'
     img_dir, task_dir = utils.get_task_img_folder()
 
     if prescr_name == 'incep':
