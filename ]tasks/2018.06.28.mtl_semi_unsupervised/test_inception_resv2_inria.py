@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 import utils
+import uabRepoPaths
 import uabCrossValMaker
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
@@ -73,9 +74,8 @@ class ImageLabelReaderBuilding(uabDataReader.ImageLabelReader):
 if __name__ == '__main__':
     city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
     model_name = 'unet'
-    leave_city = 1
     batch_size = 100
-    prescr_name = 'incep'
+    prescr_name = 'res50'
     blCol = uab_collectionFunctions.uabCollection('inria')
     img_mean = blCol.getChannelMeans([0, 1, 2])
     img_dir, task_dir = utils.get_task_img_folder()
@@ -87,7 +87,8 @@ if __name__ == '__main__':
     else:
         raise KeyError
 
-    model_save_dir = os.path.join(task_dir, '{}_building_loo_{}.hdf5'.format(prescr_name, leave_city))
+    model_save_dir = os.path.join(uabRepoPaths.modelPath, 'Prescreen', prescr_name,
+                                  '{}_building_loo.hdf5'.format(prescr_name))
     model = keras.models.load_model(model_save_dir)
 
     if model_name == 'unet':
@@ -109,39 +110,26 @@ if __name__ == '__main__':
                                                     pad=pad)
     patchDir = extrObj.run(blCol)
     chipFiles = os.path.join(patchDir, 'fileList.txt')
-    idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'city')
-    idx2, _ = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
-    idx3 = [j * 10 + i for i, j in zip(idx, idx2)]
+    idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
+    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 6)])
 
     plt.figure()
-    for leave_city in range(5):
-        filter_train = []
-        filter_valid = []
-        for i in range(5):
-            for j in range(1, 37):
-                if i == leave_city:
-                    filter_valid.append(j * 10 + i)
-                else:
-                    filter_train.append(j * 10 + i)
-        file_list_train = uabCrossValMaker.make_file_list_by_key(idx3, file_list, filter_train)
-        file_list_valid = uabCrossValMaker.make_file_list_by_key(idx3, file_list, filter_valid)
+    dataReader_valid = ImageLabelReaderBuilding(
+        [3], [0, 1, 2], patchDir, file_list_valid, patch_size, batch_size, center_crop, 0.1,
+        block_mean=np.append([0], img_mean)).readManager
 
-        dataReader_valid = ImageLabelReaderBuilding(
-            [3], [0, 1, 2], patchDir, file_list_valid, patch_size, batch_size, center_crop, 0.1,
-            block_mean=np.append([0], img_mean)).readManager
+    truth_building = []
+    pred_building = []
+    for img, gt in dataReader_valid:
+        pred = model.predict_on_batch(img)
+        truth_building.append(np.argmax(gt, axis=1))
+        pred_building.append(pred[:, 1])
+        #pred_building.append(np.argmax(pred, axis=1))
 
-        truth_building = []
-        pred_building = []
-        for img, gt in dataReader_valid:
-            pred = model.predict_on_batch(img)
-            truth_building.append(np.argmax(gt, axis=1))
-            # pred_building.append(pred[:, 1])
-            pred_building.append(np.argmax(pred, axis=1))
-
-        truth_building = [item for sublist in truth_building for item in sublist]
-        pred_building = [item for sublist in pred_building for item in sublist]
-        fpr_rf, tpr_rf, _ = roc_curve(truth_building, pred_building)
-        plt.plot(fpr_rf, tpr_rf, label='{} AUC = {:.2f}'.format(city_list[leave_city], auc(fpr_rf, tpr_rf)))
+    truth_building = [item for sublist in truth_building for item in sublist]
+    pred_building = [item for sublist in pred_building for item in sublist]
+    fpr_rf, tpr_rf, _ = roc_curve(truth_building, pred_building)
+    plt.plot(fpr_rf, tpr_rf, label='AUC = {:.2f}'.format(auc(fpr_rf, tpr_rf)))
     plt.plot([0, 1], [0, 1], color='grey', lw=2, linestyle='--')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
