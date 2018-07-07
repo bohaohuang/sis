@@ -98,21 +98,21 @@ def visualize_fn_object(rgb, gt, pred, pred_cmp):
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 img_dir, task_dir = utils.get_task_img_folder()
 truth_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/Original_Tiles'
-cnn_base_dir = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \
-               r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria/pred'
-deeplab_base_dir = r'/hdd/Results/domain_selection/DeeplabV3_inria_aug_grid_0_PS(321, 321)_BS5_' \
-                   r'EP100_LR1e-05_DS40_DR0.1_SFN32/inria/pred'
-force_run = False
+cnn_base_dir = r'/hdd/Results/domain_loo_all/UnetCrop_inria_decay_0_PS(572, 572)_BS5_EP100_LR0.0001_' \
+               r'DS60.0_DR0.1_SFN32/inria_large_input/pred'
+deeplab_base_dir = r'/hdd/Results/domain_loo_all/DeeplabV3_inria_decay_0_PS(321, 321)_BS5_EP100_LR1e-05_' \
+                   r'DS40.0_DR0.1_SFN32/inria_large_input/pred'
+force_run = True
 
 result_save_dir = list()
-result_save_dir.append(os.path.join(img_dir, 'unet_deeplab_fn_building', 'both'))
-result_save_dir.append(os.path.join(img_dir, 'unet_deeplab_fn_building', 'unet'))
-result_save_dir.append(os.path.join(img_dir, 'unet_deeplab_fn_building', 'deeplab'))
+result_save_dir.append(os.path.join(img_dir, 'unet_deeplab_fn_building_large', 'both'))
+result_save_dir.append(os.path.join(img_dir, 'unet_deeplab_fn_building_large', 'unet'))
+result_save_dir.append(os.path.join(img_dir, 'unet_deeplab_fn_building_large', 'deeplab'))
 for result_dir in result_save_dir:
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
 
-for city_num in range(4, 5):
+for city_num in range(5):
     both_miss_size = []
     unet_miss_size = []
     deeplab_miss_size = []
@@ -128,8 +128,8 @@ for city_num in range(4, 5):
                                              imageio.imread(deeplab_base_img_name)
 
             truth = truth / 255
-            unet_base = unet_base / 255
-            deeplab_base = deeplab_base / 255
+            #unet_base = unet_base / 255
+            #deeplab_base = deeplab_base / 255
 
             assert np.all(np.unique(truth) == np.array([0, 1])) and np.all(np.unique(unet_base) == np.array([0, 1])) \
                    and np.all(np.unique(deeplab_base) == np.array([0, 1]))
@@ -157,30 +157,31 @@ for city_num in range(4, 5):
 
     colors = util_functions.get_default_colors()
     fig = plt.figure(figsize=(14, 6))
-    grid = plt.GridSpec(2, 2, wspace=0.1, hspace=0.3)
+    grid = plt.GridSpec(2, 2, wspace=0.15, hspace=0.3)
     ax1 = plt.subplot(grid[:, 0])
-    plt.hist(both_miss_size, bins=100, label='Both')
-    plt.hist(unet_miss_size, bins=100, label='U-Net')
-    plt.hist(deeplab_miss_size, bins=100, label='DeepLab')
+    plt.hist(both_miss_size, bins=range(0, 8080, 80), label='Both')
+    plt.hist(unet_miss_size, bins=range(0, 8080, 80), label='U-Net')
+    plt.hist(deeplab_miss_size, bins=range(0, 8080, 80), label='DeepLab')
     plt.legend()
     plt.xlabel('Size of the Building')
     plt.ylabel('CNT')
     plt.title('Size of the Buidings Missed in {}'.format(city_list[city_num].title()))
+    x1, x2, y1, y2 = -30, 2000, 200, 200
     ax2 = plt.subplot(grid[0, 1], sharex=ax1, sharey=ax1)
-    plt.hist(unet_miss_size, bins=100, label='U-Net', facecolor=colors[1])
+    plt.hist(unet_miss_size, bins=range(0, 8080, 80), label='U-Net', facecolor=colors[1])
     plt.axvline(x=1000, color='r', linestyle='--')
-    plt.text(-350, 600, 'FN={}'.format(np.sum(unet_miss_size < 1000)))
-    plt.text(4000, 600, 'FN={}'.format(np.sum(unet_miss_size >= 1000)))
+    plt.text(x1, y1, 'FN={}'.format(np.sum(unet_miss_size < 1000)))
+    plt.text(x2, y2, 'FN={}'.format(np.sum(unet_miss_size >= 1000)))
     plt.title('U-Net FN={}'.format(int(len(unet_miss_size))))
     plt.ylabel('CNT')
     ax3 = plt.subplot(grid[1, 1], sharex=ax1, sharey=ax1)
-    plt.hist(deeplab_miss_size, bins=100, label='DeepLab', facecolor=colors[2])
+    plt.hist(deeplab_miss_size, bins=range(0, 8080, 80), label='DeepLab', facecolor=colors[2])
     plt.axvline(x=1000, color='r', linestyle='--')
-    plt.text(-350, 600, 'FN={}'.format(np.sum(deeplab_miss_size < 1000)))
-    plt.text(4000, 600, 'FN={}'.format(np.sum(deeplab_miss_size >= 1000)))
+    plt.text(x1, y1, 'FN={}'.format(np.sum(deeplab_miss_size < 1000)))
+    plt.text(x2, y2, 'FN={}'.format(np.sum(deeplab_miss_size >= 1000)))
     plt.title('DeepLab FN={}'.format(int(len(deeplab_miss_size))))
     plt.xlabel('Size of the Building')
     plt.ylabel('CNT')
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'miss_building_size_{}.png'.format(city_list[city_num])), bbox_inches='tight')
+    plt.savefig(os.path.join(img_dir, 'miss_building_size_{}_large.png'.format(city_list[city_num])), bbox_inches='tight')
     plt.show()

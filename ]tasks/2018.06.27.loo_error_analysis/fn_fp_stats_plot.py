@@ -103,5 +103,5 @@ plt.legend((base_plt[0], loo_plt[0], mtl_plt[0], base_plt[1], loo_plt[1], mtl_pl
            bbox_to_anchor=(1.1, 1.1), fancybox=True, shadow=True)
 plt.xlabel('FNr')
 plt.ylabel('FPr')
-plt.savefig(os.path.join(img_dir, 'unet_agg_cmp_loo_mtl_base_fn_fp_scatter.png'))
+#plt.savefig(os.path.join(img_dir, 'unet_agg_cmp_loo_mtl_base_fn_fp_scatter.png'))
 plt.show()

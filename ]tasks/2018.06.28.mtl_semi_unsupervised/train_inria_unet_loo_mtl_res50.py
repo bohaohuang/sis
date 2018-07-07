@@ -24,7 +24,7 @@ N_VALID = 1000
 GPU = 0
 DECAY_STEP = 60
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_loo_mtl_res50_{}_{}'
+MODEL_NAME = 'inria_loo_mtl_1st_{}_{}'
 SFN = 32
 LEAVE_CITY = 0
 PRED_FILE_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.06.28.mtl_semi_unsupervised'
@@ -58,7 +58,7 @@ def read_flag():
 
 def main(flags):
     flags.pred_file_dir = os.path.join(flags.pred_file_dir,
-                                       'res50_pred_building_binary_{}.npy'.format(flags.leave_city))
+                                       '1iter_pred_building_binary_{}.npy'.format(flags.leave_city))
 
     # make network
     # define place holder
