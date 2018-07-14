@@ -80,7 +80,7 @@ else:
     model_list = [
         r'/hdd/Results/domain_selection/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
         r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-        r'/hdd/Results/domain_selection/UnetPredict_inria_loo_mtl_cust_{}_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        r'/hdd/Results/domain_selection/UnetPredict_inria_loo_mtl_res50_{}_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
     ]
     model_name_show = ['LOO', 'Base', 'MTL']
 
