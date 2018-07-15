@@ -12,12 +12,12 @@ import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet, uabMakeNetwork_DeepLabV2
 
 RUN_ID = 0
-BATCH_SIZE = 4
+BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
 TILE_SIZE = 5000
 EPOCHS = 100
 NUM_CLASS = 2
-N_VALID = 0
+N_VALID = 10
 GPU = 0
 DECAY_STEP = 60
 DECAY_RATE = 0.1
