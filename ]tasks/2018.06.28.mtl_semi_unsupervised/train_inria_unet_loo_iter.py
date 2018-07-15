@@ -171,10 +171,12 @@ class UnetModelCrop_Iter(uabMakeNetwork_UNet.UnetModelPredict):
                 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
                 file_list_valid = uabCrossValMaker.make_file_list_by_key(
                     idx, file_list, [i for i in range(0, 6)],
-                    filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
+                    filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'] +
+                                [a for a in city_list if a != city_list[flags.leave_city]])
                 file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(
                     idx_truth, file_list_truth, [i for i in range(0, 6)],
-                    filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
+                    filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'] +
+                                [a for a in city_list if a != city_list[flags.leave_city]])
                 img_mean = blCol.getChannelMeans([0, 1, 2])
 
                 self.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth, (572, 572),
@@ -182,6 +184,55 @@ class UnetModelCrop_Iter(uabMakeNetwork_UNet.UnetModelPredict):
                               save_result_parent_dir='domain_selection', ds_name='inria', best_model=False)
                 result_dir = os.path.join(uabRepoPaths.evalPath, self.model_name)
                 make_gt(result_dir, flags.pred_file_dir, 'iter')
+
+    def run(self, train_reader=None, train_reader_building=None, valid_reader=None, test_reader=None,
+            pretrained_model_dir=None, layers2load=None, isTrain=False, img_mean=np.array((0, 0, 0), dtype=np.float32),
+            verb_step=100, save_epoch=5, gpu=None, tile_size=(5000, 5000), patch_size=(572, 572), truth_val=1,
+            continue_dir=None, load_epoch_num=None, valid_iou=False, best_model=True):
+        if gpu is not None:
+            os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
+            os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu)
+        if isTrain:
+            coord = tf.train.Coordinator()
+            with tf.Session(config=self.config) as sess:
+                # init model
+                init = [tf.global_variables_initializer(), tf.local_variables_initializer()]
+                sess.run(init)
+                saver = tf.train.Saver(var_list=tf.global_variables(), max_to_keep=1)
+                # load model
+                if pretrained_model_dir is not None:
+                    if layers2load is not None:
+                        self.load_weights(pretrained_model_dir, layers2load)
+                    else:
+                        self.load(pretrained_model_dir, sess, saver, epoch=load_epoch_num)
+                threads = tf.train.start_queue_runners(coord=coord, sess=sess)
+                try:
+                    train_summary_writer = tf.summary.FileWriter(self.ckdir, sess.graph)
+                    self.train('X', 'Y', 'Y2', self.n_train, sess, train_summary_writer,
+                               n_valid=self.n_valid, train_reader=train_reader, valid_reader=valid_reader,
+                               train_reader_building=train_reader_building,
+                               image_summary=util_functions.image_summary, img_mean=img_mean,
+                               verb_step=verb_step, save_epoch=save_epoch, continue_dir=continue_dir,
+                               valid_iou=valid_iou)
+                finally:
+                    coord.request_stop()
+                    coord.join(threads)
+                    saver.save(sess, '{}/model.ckpt'.format(self.ckdir), global_step=self.global_step)
+        else:
+            if self.config is None:
+                self.config = tf.ConfigProto(allow_soft_placement=True)
+            pad = self.get_overlap()
+            with tf.Session(config=self.config) as sess:
+                init = tf.global_variables_initializer()
+                sess.run(init)
+                result = self.test('X', sess, test_reader)
+            image_pred = uabUtilreader.un_patchify_shrink(result,
+                                                          [tile_size[0] + pad, tile_size[1] + pad],
+                                                          tile_size,
+                                                          patch_size,
+                                                          [patch_size[0] - pad, patch_size[1] - pad],
+                                                          overlap=pad)
+            return util_functions.get_pred_labels(image_pred) * truth_val
 
 
 def read_flag():
