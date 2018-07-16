@@ -1,74 +1,193 @@
 import os
 import time
-import imageio
 import argparse
 import numpy as np
 import tensorflow as tf
-from glob import glob
-from shutil import copyfile
 import uabRepoPaths
+import uabUtilreader
+import util_functions
 import uabCrossValMaker
 import bohaoCustom.uabPreprocClasses as bPreproc
 import uabPreprocClasses
-import uabUtilreader
-import util_functions
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabDataReader
+from bohaoCustom import uabMakeNetwork
 from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 0
-BATCH_SIZE = 5
-LEARNING_RATE = 1e-5
+BATCH_SIZE = 4
+LEARNING_RATE = 1e-4
 INPUT_SIZE = 572
 TILE_SIZE = 5000
-EPOCHS = 40
+EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = 1
+GPU = 0
 DECAY_STEP = 60
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_loo_mtl_iter_{}_{}'
+MODEL_NAME = 'inria_loo_mtl_rot_{}_{}'
 SFN = 32
 LEAVE_CITY = 0
-PRED_FILE_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.06.28.mtl_semi_unsupervised'
-FINETUNE_DIR = r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
-util_functions.tf_warn_level(3)
 
 
-def make_gt(pred_dir, save_dir, prefix, model_name='unet', threshold=0.1):
-    city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-    for city_num in range(5):
-        pred_dir = os.path.join(pred_dir, 'inria_all', 'pred')
-        if model_name == 'unet':
-            patch_size = (572, 572)
-            overlap = 92
-            pad = 92
-        else:
-            patch_size = (321, 321)
-            overlap = 0
-            pad = 0
-        # extract patches
-        tile_files = sorted(glob(os.path.join(pred_dir, '{}*.png'.format(city_list[city_num]))))
-        pred_building_binary = []
-        for file in tile_files:
-            gt = imageio.imread(file)
-            gt = np.expand_dims(gt, axis=2)
-            gt = uabUtilreader.pad_block(gt, np.array([pad, pad]))
-            for patch in uabUtilreader.patchify(gt, (5184, 5184), patch_size, overlap):
-                if model_name == 'deeplab':
-                    pred_raw = np.sum(patch) / (patch_size[0] * patch_size[1])
+class ImageLabelReaderRotation(uabDataReader.ImageLabelReader):
+    def __init__(self, gtInds, dataInds, parentDir, chipFiles, chip_size, batchSize=1,
+                 nChannels=1, padding=np.array((0, 0)), block_mean=None, dataAug=''):
+        super(ImageLabelReaderRotation, self).__init__(gtInds, dataInds, parentDir,
+                                                       chipFiles,
+                                                       chip_size,
+                                                       batchSize, nChannels, padding,
+                                                       block_mean, dataAug)
+
+    def readFromDiskIteratorTrain(self, image_dir, chipFiles, batch_size, patch_size,
+                                  padding=(0, 0), dataAug=''):
+        assert batch_size == 1
+        # this is a iterator for training
+        nDims = len(chipFiles[0])
+        while True:
+            image_batch = np.zeros((4, patch_size[0], patch_size[1], nDims))
+            # select number to sample
+            idx_batch = np.random.permutation(len(chipFiles))
+
+            for cnt, randInd in enumerate(idx_batch):
+                row = chipFiles[randInd]
+
+                blockList = []
+                nDims = 0
+                for file in row:
+                    img = util_functions.uabUtilAllTypeLoad(os.path.join(image_dir, file))
+                    if len(img.shape) == 2:
+                        img = np.expand_dims(img, axis=2)
+                    nDims += img.shape[2]
+                    blockList.append(img)
+                block = np.dstack(blockList).astype(np.float32)
+
+                if self.block_mean is not None:
+                    block -= self.block_mean
+
+                if dataAug != '':
+                    augDat = uabUtilreader.doDataAug(block, nDims, dataAug, is_np=True,
+                                                     img_mean=self.block_mean)
                 else:
-                    pred_raw = np.sum(util_functions.crop_center(patch, 388, 388)) / (patch_size[0] * patch_size[1])
-                if pred_raw > threshold:
-                    pred_building_binary.append(1)
-                else:
-                    pred_building_binary.append(0)
-        np.save(save_dir, pred_building_binary)
+                    augDat = block
+
+                if (np.array(padding) > 0).any():
+                    augDat = uabUtilreader.pad_block(augDat, padding)
+
+                image_batch[0, :, :, :] = augDat
+                for i in range(1, 4):
+                    image_batch[i, :, :, :] = np.rot90(augDat, k=i, axes=(0, 1))
+
+                if (cnt + 1) % batch_size == 0:
+                    yield image_batch[:, :, :, 1:], image_batch[:, :, :, :1]
 
 
-class UnetModelCrop_Iter(uabMakeNetwork_UNet.UnetModelPredict):
+class UnetModelPredictRot(uabMakeNetwork_UNet.UnetModelPredict):
+    def __init__(self, inputs, trainable, input_size, model_name='', dropout_rate=None,
+                 learn_rate=1e-4, decay_step=60, decay_rate=0.1, epochs=100,
+                 batch_size=5, start_filter_num=32):
+        uabMakeNetwork.Network.__init__(self, inputs, trainable, dropout_rate,
+                                        learn_rate, decay_step, decay_rate, epochs, batch_size)
+        self.name = 'UnetPredictRot'
+        self.model_name = self.get_unique_name(model_name)
+        self.sfn = start_filter_num
+        self.learning_rate = None
+        self.valid_cross_entropy = tf.placeholder(tf.float32, [])
+        self.valid_iou = tf.placeholder(tf.float32, [])
+        self.valid_images = tf.placeholder(tf.uint8, shape=[None, input_size[0],
+                                                            input_size[1] * 3, 3], name='validation_images')
+        self.update_ops = None
+        self.config = None
+
+    def create_graph(self, x_name, class_num, start_filter_num=32):
+        self.class_num = class_num
+        sfn = self.sfn
+
+        # downsample
+        conv1, pool1 = self.conv_conv_pool(self.inputs[x_name], [sfn, sfn], self.trainable, name='conv1',
+                                           padding='valid', dropout=self.dropout_rate)
+        conv2, pool2 = self.conv_conv_pool(pool1, [sfn*2, sfn*2], self.trainable, name='conv2',
+                                           padding='valid', dropout=self.dropout_rate)
+        conv3, pool3 = self.conv_conv_pool(pool2, [sfn*4, sfn*4], self.trainable, name='conv3',
+                                           padding='valid', dropout=self.dropout_rate)
+        conv4, pool4 = self.conv_conv_pool(pool3, [sfn*8, sfn*8], self.trainable, name='conv4',
+                                           padding='valid', dropout=self.dropout_rate)
+        self.encoding = self.conv_conv_pool(pool4, [sfn*16, sfn*16], self.trainable, name='conv5', pool=False,
+                                    padding='valid', dropout=self.dropout_rate)
+
+        # upsample
+        up6 = self.crop_upsample_concat(self.encoding, conv4, 8, name='6')
+        conv6 = self.conv_conv_pool(up6, [sfn*8, sfn*8], self.trainable, name='up6', pool=False,
+                                    padding='valid', dropout=self.dropout_rate)
+        up7 = self.crop_upsample_concat(conv6, conv3, 32, name='7')
+        conv7 = self.conv_conv_pool(up7, [sfn*4, sfn*4], self.trainable, name='up7', pool=False,
+                                    padding='valid', dropout=self.dropout_rate)
+        up8 = self.crop_upsample_concat(conv7, conv2, 80, name='8')
+        conv8 = self.conv_conv_pool(up8, [sfn*2, sfn*2], self.trainable, name='up8', pool=False,
+                                    padding='valid', dropout=self.dropout_rate)
+        up9 = self.crop_upsample_concat(conv8, conv1, 176, name='9')
+        conv9 = self.conv_conv_pool(up9, [sfn, sfn], self.trainable, name='up9', pool=False,
+                                    padding='valid', dropout=self.dropout_rate)
+
+        self.pred = tf.layers.conv2d(conv9, class_num, (1, 1), name='final', activation=None, padding='same')
+        self.output = tf.nn.softmax(self.pred)
+
+        with tf.variable_scope('rotation'):
+            self.building_loss = 0
+            images = [conv9[0, :, :, :]]
+            for i in range(1, 4):
+                images.append(tf.image.rot90(conv9[i, :, :, :], k=4-i))
+            images = tf.stack(images)
+            image_mean = tf.reduce_mean(images, axis=0)
+            for i in range(4):
+                self.building_loss += tf.reduce_mean(tf.norm(images[i, :, :, :] - image_mean))
+
+    def make_loss(self, y_name, loss_type='xent', **kwargs):
+        with tf.variable_scope('loss'):
+            pred_flat = tf.reshape(self.pred, [-1, self.class_num])
+            _, w, h, _ = self.inputs[y_name].get_shape().as_list()
+            y = tf.image.resize_image_with_crop_or_pad(self.inputs[y_name], w-self.get_overlap(), h-self.get_overlap())
+            y_flat = tf.reshape(tf.squeeze(y, axis=[3]), [-1, ])
+            indices = tf.squeeze(tf.where(tf.less_equal(y_flat, self.class_num - 1)), 1)
+            gt = tf.gather(y_flat, indices)
+            prediction = tf.gather(pred_flat, indices)
+
+            pred = tf.argmax(prediction, axis=-1, output_type=tf.int32)
+            intersect = tf.cast(tf.reduce_sum(gt * pred), tf.float32)
+            union = tf.cast(tf.reduce_sum(gt), tf.float32) + tf.cast(tf.reduce_sum(pred), tf.float32) \
+                    - tf.cast(tf.reduce_sum(gt * pred), tf.float32)
+            self.loss_iou = tf.convert_to_tensor([intersect, union])
+
+            self.loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=prediction, labels=gt))
+
+    def make_update_ops(self, x_name, y_name):
+        tf.add_to_collection('inputs', self.inputs[x_name])
+        tf.add_to_collection('inputs', self.inputs[y_name])
+        tf.add_to_collection('outputs', self.pred)
+        self.update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+
+    def make_summary(self, hist=False):
+        if hist:
+            tf.summary.histogram('Predicted Prob', tf.argmax(tf.nn.softmax(self.pred), 1))
+        tf.summary.scalar('Cross Entropy', self.loss)
+        tf.summary.scalar('Classify Loss', self.building_loss)
+        tf.summary.scalar('learning rate', self.learning_rate)
+        self.summary = tf.summary.merge_all()
+
+    def train_config(self, x_name, y_name, y_name_2, n_train, n_valid, patch_size, ckdir, loss_type='xent',
+                     train_var_filter=None, hist=False, par_dir=None, **kwargs):
+        self.make_loss(y_name, loss_type, **kwargs)
+        self.make_learning_rate(n_train)
+        self.make_update_ops(x_name, y_name)
+        self.make_optimizer(train_var_filter)
+        self.make_ckdir(ckdir, patch_size, par_dir)
+        self.make_summary(hist)
+        self.config = tf.ConfigProto(allow_soft_placement=True)
+        self.n_train = n_train
+        self.n_valid = n_valid
+
     def train(self, x_name, y_name, y_name_2, n_train, sess, summary_writer, n_valid=1000,
               train_reader=None, train_reader_building=None, valid_reader=None,
               image_summary=None, verb_step=100, save_epoch=5,
@@ -99,16 +218,14 @@ class UnetModelCrop_Iter(uabMakeNetwork_UNet.UnetModelPredict):
                                                      feed_dict={self.inputs[x_name]:X_batch,
                                                                 self.inputs[y_name]:y_batch,
                                                                 self.trainable: True})
-                X_batch, _, building_truth = train_reader_building.readerAction(sess)
+                X_batch, _ = train_reader_building.readerAction(sess)
                 _, self.global_step_value = sess.run([self.optimizer[1], self.global_step],
                                                      feed_dict={self.inputs[x_name]: X_batch,
-                                                                self.inputs[y_name_2]: building_truth,
                                                                 self.trainable: True})
                 if self.global_step_value % verb_step == 0:
                     pred_train, step_cross_entropy, step_summary = sess.run([self.pred, self.loss, self.summary],
                                                                             feed_dict={self.inputs[x_name]: X_batch,
                                                                                        self.inputs[y_name]: y_batch,
-                                                                                       self.inputs[y_name_2]: building_truth,
                                                                                        self.trainable: False})
                     summary_writer.add_summary(step_summary, self.global_step_value)
                     print('Epoch {:d} step {:d}\tcross entropy = {:.3f}'.
@@ -161,112 +278,6 @@ class UnetModelCrop_Iter(uabMakeNetwork_UNet.UnetModelPredict):
                 saver = tf.train.Saver(var_list=tf.global_variables(), max_to_keep=1)
                 saver.save(sess, '{}/model_{}.ckpt'.format(self.ckdir, epoch), global_step=self.global_step)
 
-                # remake gts
-                blCol = uab_collectionFunctions.uabCollection('inria')
-                blCol.readMetadata()
-                file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
-                file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(4)
-                idx, file_list = uabCrossValMaker.uabUtilGetFolds(None, file_list, 'force_tile')
-                idx_truth, file_list_truth = uabCrossValMaker.uabUtilGetFolds(None, file_list_truth, 'force_tile')
-
-                # use first 5 tiles for validation
-                city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-                file_list_valid = uabCrossValMaker.make_file_list_by_key(
-                    idx, file_list, [i for i in range(0, 6)],
-                    filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'] +
-                                [a for a in city_list if a != city_list[flags.leave_city]])
-                file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(
-                    idx_truth, file_list_truth, [i for i in range(0, 6)],
-                    filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'] +
-                                [a for a in city_list if a != city_list[flags.leave_city]])
-                img_mean = blCol.getChannelMeans([0, 1, 2])
-
-                self.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth, (572, 572),
-                              (5000, 5000), 50, img_mean, self.ckdir, flags.GPU,
-                              save_result_parent_dir='domain_selection', ds_name='inria', best_model=False)
-                result_dir = os.path.join(uabRepoPaths.evalPath, self.model_name)
-                make_gt(result_dir, flags.pred_file_dir, 'iter')
-
-    def run(self, train_reader=None, train_reader_building=None, valid_reader=None, test_reader=None,
-            pretrained_model_dir=None, layers2load=None, isTrain=False, img_mean=np.array((0, 0, 0), dtype=np.float32),
-            verb_step=100, save_epoch=5, gpu=None, tile_size=(5000, 5000), patch_size=(572, 572), truth_val=1,
-            continue_dir=None, load_epoch_num=None, valid_iou=False, best_model=True):
-        if gpu is not None:
-            os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
-            os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu)
-        if isTrain:
-            coord = tf.train.Coordinator()
-            with tf.Session(config=self.config) as sess:
-                # init model
-                init = [tf.global_variables_initializer(), tf.local_variables_initializer()]
-                sess.run(init)
-                saver = tf.train.Saver(var_list=tf.global_variables(), max_to_keep=1)
-                # load model
-                if pretrained_model_dir is not None:
-                    if layers2load is not None:
-                        self.load_weights(pretrained_model_dir, layers2load)
-                    else:
-                        self.load(pretrained_model_dir, sess, saver, epoch=load_epoch_num)
-                threads = tf.train.start_queue_runners(coord=coord, sess=sess)
-                try:
-                    train_summary_writer = tf.summary.FileWriter(self.ckdir, sess.graph)
-                    self.train('X', 'Y', 'Y2', self.n_train, sess, train_summary_writer,
-                               n_valid=self.n_valid, train_reader=train_reader, valid_reader=valid_reader,
-                               train_reader_building=train_reader_building,
-                               image_summary=util_functions.image_summary, img_mean=img_mean,
-                               verb_step=verb_step, save_epoch=save_epoch, continue_dir=continue_dir,
-                               valid_iou=valid_iou)
-                finally:
-                    coord.request_stop()
-                    coord.join(threads)
-                    saver.save(sess, '{}/model.ckpt'.format(self.ckdir), global_step=self.global_step)
-        else:
-            if self.config is None:
-                self.config = tf.ConfigProto(allow_soft_placement=True)
-            pad = self.get_overlap()
-            with tf.Session(config=self.config) as sess:
-                init = tf.global_variables_initializer()
-                sess.run(init)
-                result = self.test('X', sess, test_reader)
-            image_pred = uabUtilreader.un_patchify_shrink(result,
-                                                          [tile_size[0] + pad, tile_size[1] + pad],
-                                                          tile_size,
-                                                          patch_size,
-                                                          [patch_size[0] - pad, patch_size[1] - pad],
-                                                          overlap=pad)
-            return util_functions.get_pred_labels(image_pred) * truth_val
-
-    def load_weights(self, ckpt_dir, layers2load):
-        # this is different from network.load()
-        # this function only loads specified layers
-        layers_list = []
-        if isinstance(layers2load, str):
-            layers2load = [int(a) for a in layers2load.split(',')]
-        for layer_id in layers2load:
-            assert 1 <= layer_id <= 9
-            if layer_id <= 5:
-                prefix = 'layerconv'
-            else:
-                prefix = 'layerup'
-            layers_list.append('{}{}'.format(prefix, layer_id))
-            layers_list.append('final')
-
-        load_dict = {}
-        for layer_name in layers_list:
-            feed_layer = layer_name + '/'
-            load_dict[feed_layer] = feed_layer
-        try:
-            latest_check_point = tf.train.latest_checkpoint(ckpt_dir)
-            tf.contrib.framework.init_from_checkpoint(ckpt_dir, load_dict)
-            print('loaded {}'.format(latest_check_point))
-        except tf.errors.NotFoundError:
-            with open(os.path.join(ckpt_dir, 'checkpoint'), 'r') as f:
-                ckpts = f.readlines()
-            ckpt_file_name = ckpts[0].split('/')[-1].strip().strip('\"')
-            latest_check_point = os.path.join(ckpt_dir, ckpt_file_name)
-            tf.contrib.framework.init_from_checkpoint(latest_check_point, load_dict)
-            print('loaded {}'.format(latest_check_point))
-
 
 def read_flag():
     parser = argparse.ArgumentParser()
@@ -285,43 +296,32 @@ def read_flag():
     parser.add_argument('--run-id', type=str, default=RUN_ID, help='id of this run')
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--leave-city', type=int, default=LEAVE_CITY, help='city id to leave-out in training')
-    parser.add_argument('--pred-file-dir', type=str, default=PRED_FILE_DIR, help='building/non-building prediction dir')
-    parser.add_argument('--finetune-dir', type=str, default=FINETUNE_DIR, help='pretrained model dir')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
     flags.tile_size = (flags.tile_size, flags.tile_size)
     flags.model_name = flags.model_name.format(flags.leave_city, flags.run_id)
-    flags.finetune_dir = flags.finetune_dir.format(flags.leave_city)
     return flags
 
 
 def main(flags):
-    copyfile(os.path.join(flags.pred_file_dir,
-                                       '1iter_pred_building_binary_{}.npy'.format(flags.leave_city)),
-             os.path.join(flags.pred_file_dir,
-                          'iter_pred_building_binary_{}.npy'.format(flags.leave_city)))
-    flags.pred_file_dir = os.path.join(flags.pred_file_dir,
-                                       'iter_pred_building_binary_{}.npy'.format(flags.leave_city))
-
     # make network
     # define place holder
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, flags.input_size[0], flags.input_size[1], 1], name='y')
     y2 = tf.placeholder(tf.float32, shape=[None, 1], name='y2')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = UnetModelCrop_Iter({'X':X, 'Y':y, 'Y2':y2},
-                               trainable=mode,
-                               model_name=flags.model_name,
-                               input_size=flags.input_size,
-                               batch_size=flags.batch_size,
-                               learn_rate=flags.learning_rate,
-                               decay_step=flags.decay_step,
-                               decay_rate=flags.decay_rate,
-                               epochs=flags.epochs,
-                               start_filter_num=flags.sfn)
+    model = UnetModelPredictRot({'X':X, 'Y':y, 'Y2':y2},
+                                trainable=mode,
+                                model_name=flags.model_name,
+                                input_size=flags.input_size,
+                                batch_size=flags.batch_size,
+                                learn_rate=flags.learning_rate,
+                                decay_step=flags.decay_step,
+                                decay_rate=flags.decay_rate,
+                                epochs=flags.epochs,
+                                start_filter_num=flags.sfn)
     model.create_graph('X', class_num=flags.num_classes)
-    model.load_weights(flags.finetune_dir, '1,2,3,4,5,6,7,8,9')
 
     # create collection
     # the original file is in /ei-edl01/data/uab_datasets/inria
@@ -333,28 +333,38 @@ def main(flags):
     img_mean = blCol.getChannelMeans([0, 1, 2])         # get mean of rgb info
 
     # extract patches
-    extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 4], # extract all 4 channels
-                                                    cSize=flags.input_size, # patch size as 572*572
-                                                    numPixOverlap=int(model.get_overlap()/2),  # overlap as 92
-                                                    extSave=['jpg', 'jpg', 'jpg', 'png'], # save rgb files as jpg and gt as png
+    extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 4],
+                                                    cSize=flags.input_size,
+                                                    numPixOverlap=int(model.get_overlap()),
+                                                    extSave=['jpg', 'jpg', 'jpg', 'png'],
                                                     isTrain=True,
                                                     gtInd=3,
-                                                    pad=model.get_overlap()) # pad around the tiles
+                                                    pad=model.get_overlap()/2)
     patchDir = extrObj.run(blCol)
 
     # make data reader
     # use uabCrossValMaker to get fileLists for training and validation
-    idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'city')
+    idx_city, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'city')
+    idx_tile, _ = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
+    idx = [j * 10 + i for i, j in zip(idx_city, idx_tile)]
     # use first city for validation
-    file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(5) if i != flags.leave_city])
-    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [flags.leave_city])
+    filter_train = []
+    filter_valid = []
+    for i in range(5):
+        for j in range(1, 37):
+            if i != flags.leave_city and j > 5:
+                filter_train.append(j * 10 + i)
+            elif i == flags.leave_city and j <= 5:
+                filter_valid.append(j * 10 + i)
+    # use first city for validation
+    file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_train)
+    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_valid)
 
     dataReader_train = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, flags.input_size,
                                                       flags.batch_size, dataAug='flip,rotate',
                                                       block_mean=np.append([0], img_mean), batch_code=0)
-    dataReader_train_building = uabDataReader.ImageLabelReaderBuildingCustom(
-        [3], [0, 1, 2], patchDir, file_list_valid, flags.input_size, flags.batch_size, dataAug='flip,rotate',
-        percent_file=flags.pred_file_dir, block_mean=np.append([0], img_mean), patch_prob=0.1, binary=True)
+    dataReader_train_rot = ImageLabelReaderRotation([3], [0, 1, 2], patchDir, file_list_valid, flags.input_size,
+                                                    1, dataAug='flip,rotate', block_mean=np.append([0], img_mean))
     # no augmentation needed for validation
     dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_valid, flags.input_size,
                                                       flags.batch_size, dataAug=' ',
@@ -366,7 +376,7 @@ def main(flags):
     model.train_config('X', 'Y', 'Y2', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
                        loss_type='xent', par_dir='Inria_Domain_LOO')
     model.run(train_reader=dataReader_train,
-              train_reader_building=dataReader_train_building,
+              train_reader_building=dataReader_train_rot,
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,        # train from scratch, no need to load pre-trained model
               isTrain=True,

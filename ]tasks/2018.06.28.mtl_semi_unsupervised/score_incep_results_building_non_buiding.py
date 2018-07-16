@@ -219,10 +219,10 @@ plt.ylabel('True Positive Rate')
 plt.title('ROC Building')
 plt.legend(loc="lower right")
 
-plt.figure()
+'''plt.figure()
 cnf_matrix = confusion_matrix(truth_city_rearrange, pred_city)
 np.set_printoptions(precision=2)
 plot_confusion_matrix(cnf_matrix,
                       classes=['0~10', '10~20', '20~30', '30~40', '40~50', '50~60', '60~100'], normalize=True,
-                      title='CM Building10 ({})'.format(model_name))
+                      title='CM Building10 ({})'.format(model_name))'''
 plt.show()

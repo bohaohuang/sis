@@ -12,7 +12,7 @@ import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 0
-BATCH_SIZE = 4
+BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
 INPUT_SIZE = 572
 TILE_SIZE = 5000
@@ -20,11 +20,11 @@ EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 4000
-GPU = None
+GPU = 1
 DECAY_STEP = 60
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_decay_{}'
-SFN = 64
+MODEL_NAME = 'inria_decay_test_{}'
+SFN = 32
 
 
 def read_flag():
@@ -110,7 +110,7 @@ def main(flags):
     start_time = time.time()
 
     model.train_config('X', 'Y', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
-                       loss_type='xent', par_dir='Inria_decay')
+                       loss_type='xent', par_dir='XSEDE_test')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,

@@ -153,18 +153,19 @@ if __name__ == '__main__':
         incep_pred_building_binary = np.load(os.path.join(task_dir, 'incep_pred_building_binary.npy'))
 
         plt.figure()
+        colors = util_functions.get_default_colors()
 
         fpr_rf, tpr_rf, _ = roc_curve(res50_truth_building, res50_pred_building)
-        plt.plot(fpr_rf, tpr_rf, label='Res50 AUC = {:.2f}'.format(auc(fpr_rf, tpr_rf)))
+        plt.plot(fpr_rf, tpr_rf, '--', label='Res50 AUC = {:.2f}'.format(auc(fpr_rf, tpr_rf)), color=colors[0])
         fpr_rf, tpr_rf, _ = roc_curve(incep_truth_building, incep_pred_building)
-        plt.plot(fpr_rf, tpr_rf, label='Incep AUC = {:.2f}'.format(auc(fpr_rf, tpr_rf)))
+        plt.plot(fpr_rf, tpr_rf, '--', label='Incep AUC = {:.2f}'.format(auc(fpr_rf, tpr_rf)), color=colors[1])
         plt.plot([0, 1], [0, 1], color='grey', lw=2, linestyle='--')
 
-        plt.plot([0.028234771009337484], [0.8338590956887487], color='r', marker='*', label='LOO')
+        plt.plot([0.028234771009337484], [0.8338590956887487], color=colors[2], marker='o', label='LOO')
         fpr_rf, tpr_rf, _ = roc_curve(res50_truth_building, res50_pred_building_binary)
-        plt.plot(fpr_rf[1], tpr_rf[1], label='Res50', marker='*', color='g')
+        plt.plot(fpr_rf[1], tpr_rf[1], label='Res50', marker='o', color=colors[0])
         fpr_rf, tpr_rf, _ = roc_curve(incep_truth_building, incep_pred_building_binary)
-        plt.plot(fpr_rf[1], tpr_rf[1], label='Incep', marker='*', color='b')
+        plt.plot(fpr_rf[1], tpr_rf[1], label='Incep', marker='o', color=colors[1])
 
         plt.xlim([0.0, 1.0])
         plt.ylim([0.0, 1.05])
@@ -172,4 +173,6 @@ if __name__ == '__main__':
         plt.ylabel('True Positive Rate')
         plt.title('ROC Building LOO')
         plt.legend(loc="lower right")
+        plt.tight_layout()
+        plt.savefig(os.path.join(img_dir, 'prescr_cmp.png'))
         plt.show()

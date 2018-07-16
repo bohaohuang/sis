@@ -21,7 +21,7 @@ N_VALID = 10
 GPU = 0
 DECAY_STEP = 60
 DECAY_RATE = 0.1
-CNN_NAME = 'unet'
+CNN_NAME = 'deeplab'
 MODEL_NAME = 'inria_{}_{}'
 SFN = 32
 
