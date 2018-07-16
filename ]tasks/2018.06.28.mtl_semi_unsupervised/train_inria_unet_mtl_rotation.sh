@@ -10,4 +10,4 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=/opt/apps/rhel7/cudnn/lib64:$LD_LIBRARY_PATH
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/uab
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/sis
-python finetune_inria_unet_loo_mtl_res50.py --leave-city=1
+python finetune_inria_unet_loo_mtl_rotation.py --leave-city=1
