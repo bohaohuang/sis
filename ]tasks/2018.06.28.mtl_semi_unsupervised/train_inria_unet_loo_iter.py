@@ -29,21 +29,21 @@ N_VALID = 1000
 GPU = 1
 DECAY_STEP = 60
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_loo_mtl_iter_{}_{}'
+MODEL_NAME = 'inria_loo_mtl_iter_v2_{}_{}'
 SFN = 32
 LEAVE_CITY = 0
 PRED_FILE_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.06.28.mtl_semi_unsupervised'
-FINETUNE_DIR = r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
+FINETUNE_DIR = r'/hdd6/Models/Inria_Domain_LOO/UnetPredict_inria_loo_mtl_1st_{}_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
 util_functions.tf_warn_level(3)
 
 
-def make_gt(pred_dir, save_dir, prefix, model_name='unet', threshold=0.1):
+def make_gt(pred_dir, save_dir, suffix, model_name='unet', threshold=0.1):
     city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
     for city_num in range(5):
-        pred_dir = os.path.join(pred_dir, 'inria_all', 'pred')
+        pred_dir = os.path.join(pred_dir, 'inria_{}'.format(suffix), 'pred')
         if model_name == 'unet':
             patch_size = (572, 572)
-            overlap = 92
+            overlap = 184
             pad = 92
         else:
             patch_size = (321, 321)
@@ -183,7 +183,7 @@ class UnetModelCrop_Iter(uabMakeNetwork_UNet.UnetModelPredict):
 
                 self.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth, (572, 572),
                               (5000, 5000), 50, img_mean, self.ckdir, flags.GPU,
-                              save_result_parent_dir='domain_selection', ds_name='inria', best_model=False)
+                              save_result_parent_dir='domain_selection', ds_name='inria_{}'.format(epoch), best_model=False)
                 result_dir = os.path.join(uabRepoPaths.evalPath, self.model_name)
                 make_gt(result_dir, flags.pred_file_dir, 'iter')
 
@@ -321,7 +321,6 @@ def main(flags):
                                epochs=flags.epochs,
                                start_filter_num=flags.sfn)
     model.create_graph('X', class_num=flags.num_classes)
-    model.load_weights(flags.finetune_dir, '1,2,3,4,5,6,7,8,9')
 
     # create collection
     # the original file is in /ei-edl01/data/uab_datasets/inria
@@ -368,11 +367,11 @@ def main(flags):
     model.run(train_reader=dataReader_train,
               train_reader_building=dataReader_train_building,
               valid_reader=dataReader_valid,
-              pretrained_model_dir=None,        # train from scratch, no need to load pre-trained model
+              pretrained_model_dir=flags.finetune_dir,        # train from scratch, no need to load pre-trained model
               isTrain=True,
               img_mean=img_mean,
-              verb_step=100,                    # print a message every 100 step(sample)
-              save_epoch=5,                     # save the model every 5 epochs
+              verb_step=100,                                  # print a message every 100 step(sample)
+              save_epoch=5,                                   # save the model every 5 epochs
               gpu=GPU,
               tile_size=flags.tile_size,
               patch_size=flags.input_size)

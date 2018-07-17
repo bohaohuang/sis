@@ -144,6 +144,15 @@ class UnetModelPredictRot(uabMakeNetwork_UNet.UnetModelPredict):
             for i in range(4):
                 self.building_loss += tf.reduce_mean(tf.norm(images[i, :, :, :] - image_mean))
 
+    def make_optimizer(self, train_var_filter):
+        with tf.control_dependencies(self.update_ops):
+            if train_var_filter is None:
+                 seg_optm = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss,
+                                                                                global_step=self.global_step)
+                 clf_optm = tf.train.AdamOptimizer(self.learning_rate * 0.01).minimize(self.building_loss,
+                                                                                       global_step=None)
+                 self.optimizer = [seg_optm, clf_optm]
+
     def make_loss(self, y_name, loss_type='xent', **kwargs):
         with tf.variable_scope('loss'):
             pred_flat = tf.reshape(self.pred, [-1, self.class_num])
@@ -218,9 +227,9 @@ class UnetModelPredictRot(uabMakeNetwork_UNet.UnetModelPredict):
                                                      feed_dict={self.inputs[x_name]:X_batch,
                                                                 self.inputs[y_name]:y_batch,
                                                                 self.trainable: True})
-                X_batch, _ = train_reader_building.readerAction(sess)
+                X_batch_rot, _ = train_reader_building.readerAction(sess)
                 _, self.global_step_value = sess.run([self.optimizer[1], self.global_step],
-                                                     feed_dict={self.inputs[x_name]: X_batch,
+                                                     feed_dict={self.inputs[x_name]: X_batch_rot,
                                                                 self.trainable: True})
                 if self.global_step_value % verb_step == 0:
                     pred_train, step_cross_entropy, step_summary = sess.run([self.pred, self.loss, self.summary],
