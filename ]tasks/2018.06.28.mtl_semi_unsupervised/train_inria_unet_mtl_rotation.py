@@ -135,14 +135,19 @@ class UnetModelPredictRot(uabMakeNetwork_UNet.UnetModelPredict):
         self.output = tf.nn.softmax(self.pred)
 
         with tf.variable_scope('rotation'):
-            self.building_loss = 0
+            rot_slice = tf.to_int32(tf.random_uniform([1], 1, 4))[0]
+            self.building_loss = 1e-3 * tf.reduce_mean(
+                tf.norm(conv9[0, :, :, :] - tf.image.rot90(conv9[rot_slice, :, :, :], k=4-rot_slice), axis=2))
+            '''self.building_loss = 0
             images = [conv9[0, :, :, :]]
             for i in range(1, 4):
                 images.append(tf.image.rot90(conv9[i, :, :, :], k=4-i))
             images = tf.stack(images)
             image_mean = tf.reduce_mean(images, axis=0)
             for i in range(4):
-                self.building_loss += tf.reduce_mean(tf.norm(images[i, :, :, :] - image_mean))
+                self.building_loss += tf.reduce_mean(tf.norm(images[i, :, :, :] - image_mean, axis=2))
+            #self.building_loss = self.building_loss * 1e-3 - (tf.exp(tf.reduce_sum(image_mean)))
+            self.building_loss = - (tf.exp(tf.reduce_sum(image_mean)))'''
 
     def make_optimizer(self, train_var_filter):
         with tf.control_dependencies(self.update_ops):
@@ -168,7 +173,6 @@ class UnetModelPredictRot(uabMakeNetwork_UNet.UnetModelPredict):
             union = tf.cast(tf.reduce_sum(gt), tf.float32) + tf.cast(tf.reduce_sum(pred), tf.float32) \
                     - tf.cast(tf.reduce_sum(gt * pred), tf.float32)
             self.loss_iou = tf.convert_to_tensor([intersect, union])
-
             self.loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=prediction, labels=gt))
 
     def make_update_ops(self, x_name, y_name):
@@ -232,16 +236,17 @@ class UnetModelPredictRot(uabMakeNetwork_UNet.UnetModelPredict):
                                                      feed_dict={self.inputs[x_name]: X_batch_rot,
                                                                 self.trainable: True})
                 if self.global_step_value % verb_step == 0:
-                    pred_train, step_cross_entropy, step_summary = sess.run([self.pred, self.loss, self.summary],
-                                                                            feed_dict={self.inputs[x_name]: X_batch,
-                                                                                       self.inputs[y_name]: y_batch,
-                                                                                       self.trainable: False})
+                    step_loss_building, step_cross_entropy, step_summary = \
+                        sess.run([self.building_loss, self.loss, self.summary],
+                                 feed_dict={self.inputs[x_name]: X_batch, self.inputs[y_name]: y_batch,
+                                            self.trainable: False})
                     summary_writer.add_summary(step_summary, self.global_step_value)
-                    print('Epoch {:d} step {:d}\tcross entropy = {:.3f}'.
-                          format(epoch, self.global_step_value, step_cross_entropy))
+                    print('Epoch {:d} step {:d}\tcross entropy = {:.3f}, rotation loss = {:.3f}'.
+                          format(epoch, self.global_step_value, step_cross_entropy, step_loss_building))
             # validation
             cross_entropy_valid_mean = []
             iou_valid_mean = np.zeros(2)
+            X_batch_val, y_batch_val, pred_valid = None, None, None
             for step in range(0, n_valid, self.bs):
                 X_batch_val, y_batch_val = valid_reader.readerAction(sess)
                 pred_valid, cross_entropy_valid, iou_valid = sess.run([self.pred, self.loss, self.loss_iou],
