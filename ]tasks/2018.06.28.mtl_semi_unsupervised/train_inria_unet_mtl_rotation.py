@@ -138,6 +138,7 @@ class UnetModelPredictRot(uabMakeNetwork_UNet.UnetModelPredict):
             rot_slice = tf.to_int32(tf.random_uniform([1], 1, 4))[0]
             self.building_loss = 1e-3 * tf.reduce_mean(
                 tf.norm(conv9[0, :, :, :] - tf.image.rot90(conv9[rot_slice, :, :, :], k=4-rot_slice), axis=2))
+
             '''self.building_loss = 0
             images = [conv9[0, :, :, :]]
             for i in range(1, 4):
