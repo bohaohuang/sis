@@ -155,7 +155,7 @@ class UnetModelPredictRot(uabMakeNetwork_UNet.UnetModelPredict):
             if train_var_filter is None:
                  seg_optm = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss,
                                                                                 global_step=self.global_step)
-                 clf_optm = tf.train.AdamOptimizer(self.learning_rate * 0.01).minimize(self.building_loss,
+                 clf_optm = tf.train.AdamOptimizer(self.learning_rate * 0.05).minimize(self.building_loss,
                                                                                        global_step=None)
                  self.optimizer = [seg_optm, clf_optm]
 
