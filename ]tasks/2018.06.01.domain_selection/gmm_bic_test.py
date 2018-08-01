@@ -16,12 +16,12 @@ import bohaoCustom.uabPreprocClasses as bPreproc
 
 # settings
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-cnn_name = 'unet'
+cnn_name = 'deeplab'
 
 img_dir, task_dir = utils.get_task_img_folder()
 save_file_name = os.path.join(task_dir, 'llh_bic_test.npy')
 force_run = False
-llh_all = []
+test_points = list(range(10, 151, 10)) + list(range(160, 501, 20))
 
 if not os.path.exists(save_file_name) or force_run:
     blCol = uab_collectionFunctions.uabCollection('inria')
@@ -97,7 +97,6 @@ if not os.path.exists(save_file_name) or force_run:
     truth_city_train = truth_city[idx >= 6]
     feature_train = feature[idx >= 6, :]
 
-    test_points = list(range(10, 151, 10)) + list(range(160, 501, 20))
     pbar = tqdm(test_points)
     bic = np.zeros(len(test_points))
     for cnt, n_comp in enumerate(pbar):
@@ -109,3 +108,6 @@ if not os.path.exists(save_file_name) or force_run:
     np.save(save_file_name, bic)
 else:
     bic = np.load(save_file_name)
+
+plt.plot(test_points, bic)
+plt.show()

@@ -17,12 +17,12 @@ import bohaoCustom.uabPreprocClasses as bPreproc
 
 # settings
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-cnn_name = 'unet'
+cnn_name = 'deeplab'
 
 img_dir, task_dir = utils.get_task_img_folder()
 save_file_name = os.path.join(task_dir, 'llh_l2out_building.npy')
-force_run = False
-n_comp = 200
+force_run = True
+n_comp = 70
 llh_all = []
 
 if not os.path.exists(save_file_name) or force_run:
@@ -101,9 +101,9 @@ if not os.path.exists(save_file_name) or force_run:
 
     for city_1 in range(5):
         llh_1 = []
-        pbar = tqdm(range(5))
+        pbar = tqdm(range(1))
         for city_2 in pbar:
-            city_select = [i for i in range(5) if i != city_1 and i != city_2]
+            city_select = [i for i in range(5) if i != city_1]#zzzzzzzzzzz and i != city_2]
             pbar.set_description('Training GMM on {}'.format(city_select))
             train_idx = []
             for s in city_select:
@@ -144,7 +144,7 @@ def softmax(x, T=1):
 fig = plt.figure(figsize=(12, 8))
 grid = Grid(fig, rect=111, nrows_ncols=(5, 5), axes_pad=0.25, label_mode='L', share_all=True)
 for i in range(5):
-    for j in range(5):
+    for j in range(1):
         ax = grid[i*5 + j]
         normalized_data = softmax(llh_all[i][j], T=1000)
         ax.bar(np.arange(5), normalized_data)
