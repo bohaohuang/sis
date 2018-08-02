@@ -3,8 +3,7 @@ import imageio
 from tqdm import tqdm
 from shutil import copy2
 import uabRepoPaths
-import bohaoCustom.uabPreprocClasses as bPreproc
-import uabPreprocClasses
+import uabCrossValMaker
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
 
@@ -32,20 +31,23 @@ if model_name == 'unet':
                 imageio.imsave(os.path.join(new_ds_dir, '{}{}_RGB.png'.format(city_list[city_cnt], img_cnt)), rgb)
 
     blCol = uab_collectionFunctions.uabCollection('inria_unet_retrain')
-    opDetObj = bPreproc.uabOperTileDivide(255)  # inria GT has value 0 and 255, we map it back to 0 and 1
-    # [3] is the channel id of GT
-    rescObj = uabPreprocClasses.uabPreprocMultChanOp([], 'GT_Divide.tif', 'Map GT to (0, 1)', [0], opDetObj)
-    blCol.readMetadata()
-    rescObj.run(blCol)
     blCol.readMetadata()
     img_mean = blCol.getChannelMeans([1, 2, 3])  # get mean of rgb info
 
     # extract patches
-    extrObj = uab_DataHandlerFunctions.uabPatchExtr([1, 2, 3, 4],
+    extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 3],
                                                     cSize=(572, 572),
                                                     numPixOverlap=184,
-                                                    extSave=['jpg', 'jpg', 'jpg', 'png'],
+                                                    extSave=['png', 'jpg', 'jpg', 'jpg'],
                                                     isTrain=True,
                                                     gtInd=3,
                                                     pad=92)
     patchDir = extrObj.run(blCol)
+    _, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'city')
+
+    import imageio
+    import matplotlib.pyplot as plt
+    img = imageio.imread(os.path.join(patchDir, file_list[0][0]))
+    plt.imshow(img)
+    plt.colorbar()
+    plt.show()

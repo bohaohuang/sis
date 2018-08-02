@@ -103,7 +103,7 @@ if not os.path.exists(save_file_name) or force_run:
         llh_1 = []
         pbar = tqdm(range(1))
         for city_2 in pbar:
-            city_select = [i for i in range(5) if i != city_1]#zzzzzzzzzzz and i != city_2]
+            city_select = [i for i in range(5) if i != city_1]# and i != city_2]
             pbar.set_description('Training GMM on {}'.format(city_select))
             train_idx = []
             for s in city_select:

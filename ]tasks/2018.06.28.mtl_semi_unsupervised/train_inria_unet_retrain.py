@@ -259,14 +259,14 @@ def main(flags):
     y2 = tf.placeholder(tf.float32, shape=[None, 1], name='y2')
     mode = tf.placeholder(tf.bool, name='mode')
     model = UnetPredictRetrain({'X':X, 'Y':y},
-                                trainable=mode,
-                                model_name=flags.model_name,
-                                input_size=flags.input_size,
-                                batch_size=flags.batch_size,
-                                learn_rate=flags.learning_rate,
-                                decay_step=flags.decay_step,
-                                decay_rate=flags.decay_rate,
-                                epochs=flags.epochs,
+                               trainable=mode,
+                               model_name=flags.model_name,
+                               input_size=flags.input_size,
+                               batch_size=flags.batch_size,
+                               learn_rate=flags.learning_rate,
+                               decay_step=flags.decay_step,
+                               decay_rate=flags.decay_rate,
+                               epochs=flags.epochs,
                                 start_filter_num=flags.sfn)
     model.create_graph('X', class_num=flags.num_classes)
 
@@ -315,17 +315,13 @@ def main(flags):
                                                       block_mean=np.append([0], img_mean), batch_code=0)
 
     blCol = uab_collectionFunctions.uabCollection('inria_unet_retrain')
-    opDetObj = bPreproc.uabOperTileDivide(255)  # inria GT has value 0 and 255, we map it back to 0 and 1
-    # [3] is the channel id of GT
-    rescObj = uabPreprocClasses.uabPreprocMultChanOp([], 'GT_Divide.tif', 'Map GT to (0, 1)', [0], opDetObj)
-    rescObj.run(blCol)
     img_mean = blCol.getChannelMeans([1, 2, 3])  # get mean of rgb info
 
     # extract patches
-    extrObj = uab_DataHandlerFunctions.uabPatchExtr([1, 2, 3, 4],
+    extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 3],
                                                     cSize=flags.input_size,
                                                     numPixOverlap=int(model.get_overlap()),
-                                                    extSave=['jpg', 'jpg', 'jpg', 'png'],
+                                                    extSave=['png', 'jpg', 'jpg', 'jpg'],
                                                     isTrain=True,
                                                     gtInd=3,
                                                     pad=model.get_overlap() / 2)
@@ -348,7 +344,7 @@ def main(flags):
     # use first city for validation
     file_list_retrain = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_valid)
     # no augmentation needed for validation
-    dataReader_retrain = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_retrain, flags.input_size,
+    dataReader_retrain = uabDataReader.ImageLabelReader([0], [1, 2, 3], patchDir, file_list_retrain, flags.input_size,
                                                       flags.batch_size, dataAug='flip,rotate',
                                                       block_mean=np.append([0], img_mean), batch_code=0)
 
