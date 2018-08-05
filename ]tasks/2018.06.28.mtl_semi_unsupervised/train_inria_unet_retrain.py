@@ -17,19 +17,21 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-5
 INPUT_SIZE = 572
 TILE_SIZE = 5000
-EPOCHS = 100
+EPOCHS = 40
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
 GPU = 1
-DECAY_STEP = 60
+DECAY_STEP = 20
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_loo_mtl_retrain_{}_{}'
+MODEL_NAME = 'inria_loo_mtl_retrain_finetune_{}_{}'
 SFN = 32
 LEAVE_CITY = 0
+PRE_TRAINED_DIR = r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_0_0_PS(572, 572)_BS5_' \
+                  r'EP100_LR0.0001_DS60_DR0.1_SFN32'
 
 
 class UnetPredictRetrain(uabMakeNetwork_UNet.UnetModelPredict):
@@ -87,8 +89,8 @@ class UnetPredictRetrain(uabMakeNetwork_UNet.UnetModelPredict):
             if train_var_filter is None:
                  hard_optm = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss,
                                                                                 global_step=self.global_step)
-                 soft_optm = tf.train.AdamOptimizer(self.learning_rate * 0.1).minimize(self.loss,
-                                                                                       global_step=None)
+                 soft_optm = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss,
+                                                                                 global_step=None)
                  self.optimizer = [hard_optm, soft_optm]
 
     def make_loss(self, y_name, loss_type='xent', **kwargs):
@@ -356,7 +358,7 @@ def main(flags):
     model.run(train_reader=dataReader_train,
               train_reader_building=dataReader_retrain,
               valid_reader=dataReader_valid,
-              pretrained_model_dir=None,        # train from scratch, no need to load pre-trained model
+              pretrained_model_dir=PRE_TRAINED_DIR,
               isTrain=True,
               img_mean=img_mean,
               verb_step=100,                    # print a message every 100 step(sample)

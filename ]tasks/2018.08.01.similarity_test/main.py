@@ -1,5 +1,3 @@
-import os
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import Grid
@@ -14,7 +12,7 @@ perplex = 25
 do_tsne = False
 do_bic = True
 show_bic = False
-city_select = [0, 1, 4]
+only_building = False
 
 # 1. make features
 img_dir, task_dir = utils.get_task_img_folder()
@@ -47,14 +45,14 @@ else:
 
 # 3. train GMM model
 city_list = ['Aus', 'Chi', 'Kit', 'Tyr', 'Vie']
-fig = plt.figure(figsize=(12, 8))
+'''fig = plt.figure(figsize=(12, 8))
 grid = Grid(fig, rect=111, nrows_ncols=(5, 5), axes_pad=0.25, label_mode='L', share_all=True)
 ax_cnt = 0
 for city_1 in range(5):
     for city_2 in range(5):
         city_select = [i for i in range(5) if i != city_1 and i != city_2]
         gmm = train_gmm_source_domain(task_dir, idx, feature, truth_city, truth_building, city_select, n_comp,
-                                      force_run=False)
+                                      force_run=False, only_building=only_building)
         llh = test_gmm_model(idx, patch_names, gmm, feature)
         str2show = 'No {}'.format(city_list[city_2])
         ylab2show = 'No {}'.format(city_list[city_1])
@@ -64,4 +62,50 @@ for city_1 in range(5):
             plot_llh(llh, city_select, ax=grid[ax_cnt], ylab=ylab2show)
         ax_cnt += 1
 plt.tight_layout()
+if only_building:
+    plt.savefig(os.path.join(img_dir, 'similarity_cmp_n{}_building.png'.format(n_comp)))
+else:
+    plt.savefig(os.path.join(img_dir, 'similarity_cmp_n{}_all.png'.format(n_comp)))
+plt.show()'''
+
+
+# train GMM model on test set
+'''fig = plt.figure(figsize=(12, 4))
+grid = Grid(fig, rect=111, nrows_ncols=(1, 5), axes_pad=0.25, label_mode='L', share_all=True)
+for i in range(5):
+    city_select = [i]
+    gmm = train_gmm(task_dir, np.array(idx) < 6, feature, truth_city, truth_building, city_select, n_comp,
+                    force_run=False, only_building=False)
+    llh, bic = test_gmm_model(idx, patch_names, gmm, feature, test_select=np.array(idx) >= 6, use_bic=True)
+    plot_llh(llh, city_select, title='{} score={:.3e}'.format(city_list[i], bic), t=1500, ax=grid[i])
+plt.tight_layout()
+plt.savefig(os.path.join(img_dir, 'similarity_cmp_n{}_all_train6.png'.format(n_comp)))
+plt.show()'''
+
+
+# test GMM score when loo
+'''fig = plt.figure(figsize=(12, 4))
+grid = Grid(fig, rect=111, nrows_ncols=(1, 5), axes_pad=0.25, label_mode='L', share_all=True)
+for i in range(5):
+    city_select = [i]
+    gmm = train_gmm(task_dir, np.array(idx) < 6, feature, truth_city, truth_building, city_select, n_comp,
+                    force_run=False, only_building=False)
+    llh, bic = test_gmm_model(idx, patch_names, gmm, feature, test_select=np.array(idx) >= 6, use_bic=True,
+                              test_city=[city_cnt for city_cnt in range(5) if city_cnt != i])
+    plot_llh(llh, city_select, title='{} score={:.3e}'.format(city_list[i], bic), t=1500, ax=grid[i],
+             x_pos=[city_cnt for city_cnt in range(5) if city_cnt != i])
+plt.tight_layout()
+plt.savefig(os.path.join(img_dir, 'similarity_cmp_n{}_all_train6_loo.png'.format(n_comp)))
+plt.show()'''
+
+for i in tqdm(range(5)):
+    city_select = [i]
+    gmm = train_gmm(task_dir, np.array(idx) < 6, feature, truth_city, truth_building, city_select, n_comp,
+                    force_run=False, only_building=False)
+    llh, train_idx = test_gmm_model_sample_wise(idx, gmm, feature, truth_city, range(5),
+                                                test_select=np.array(idx) >= 6)
+    plt.figure(figsize=(14, 6))
+    plot_sample_wise_llh(llh, train_idx, truth_city)
+    plt.title(city_list[i])
+    plt.savefig(os.path.join(img_dir, 'similarity_cmp_n{}_sample_wise_{}.png'.format(n_comp, city_list[i])))
 plt.show()
