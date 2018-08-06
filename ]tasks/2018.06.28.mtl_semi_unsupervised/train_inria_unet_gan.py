@@ -12,7 +12,7 @@ import uab_DataHandlerFunctions
 from bohaoCustom import uabDataReader
 from bohaoCustom import uabMakeNetwork_UNet
 
-RUN_ID = 0
+RUN_ID = 1
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
 INPUT_SIZE = 572

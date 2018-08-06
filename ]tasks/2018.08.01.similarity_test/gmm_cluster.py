@@ -106,13 +106,15 @@ def test_gmm_model(idx, patch_names, gmm, feature, test_select=None, use_bic=Fal
     city_name_list = [a[:3] for a in patch_valid]
     city_id_list = [city_dict[a] for a in city_name_list]
     llh = np.zeros(len(test_city))
-    bic = 0
+    bic = []
     for cnt, test_city in enumerate(tqdm(test_city)):
         test_city_feature = feature[[i for i in range(len(city_id_list)) if city_id_list[i] == test_city], :]
         llh[cnt] = gmm.score(test_city_feature)
         if use_bic:
-            bic += gmm.score(test_city_feature)
+            bic.append(gmm.score_samples(test_city_feature))
     if use_bic:
+        bic = np.concatenate(bic)
+        bic = np.mean(bic)
         return llh, bic
     else:
         return llh

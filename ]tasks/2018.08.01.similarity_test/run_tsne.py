@@ -38,4 +38,3 @@ def plot_tsne(feature_encode, patch_name_list, rand_percent=1):
     plt.legend()
     # plt.axis('off')
     plt.tight_layout()
-    plt.show()

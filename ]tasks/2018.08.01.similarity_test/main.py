@@ -12,7 +12,7 @@ perplex = 25
 do_tsne = False
 do_bic = True
 show_bic = False
-only_building = False
+only_building = True
 
 # 1. make features
 img_dir, task_dir = utils.get_task_img_folder()
@@ -27,6 +27,8 @@ if do_tsne:
     file_name = os.path.join(task_dir, '{}_inria_p{}.npy'.format(model_name, perplex))
     feature_encode = run_tsne(feature, file_name, perplex=perplex, force_run=False)
     plot_tsne(feature_encode, patch_names, rand_percent=1)
+    plt.savefig(os.path.join(img_dir, 'tsne_unet_inria_n{}_all'.format(perplex)))
+    plt.show()
 
 # 2. make city and building truth
 truth_city = make_city_truth(task_dir, model_name, patch_names, force_run=False)
@@ -70,17 +72,21 @@ plt.show()'''
 
 
 # train GMM model on test set
-'''fig = plt.figure(figsize=(12, 4))
+llh_all = np.zeros((5, 5))
+fig = plt.figure(figsize=(12, 4))
 grid = Grid(fig, rect=111, nrows_ncols=(1, 5), axes_pad=0.25, label_mode='L', share_all=True)
 for i in range(5):
     city_select = [i]
     gmm = train_gmm(task_dir, np.array(idx) < 6, feature, truth_city, truth_building, city_select, n_comp,
                     force_run=False, only_building=False)
     llh, bic = test_gmm_model(idx, patch_names, gmm, feature, test_select=np.array(idx) >= 6, use_bic=True)
-    plot_llh(llh, city_select, title='{} score={:.3e}'.format(city_list[i], bic), t=1500, ax=grid[i])
+    llh_all[i, :] = llh
+    t = (-bic/150) ** 3
+    plot_llh(llh, city_select, title='{} score={:.3e}'.format(city_list[i], bic), t=t, ax=grid[i])
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'similarity_cmp_n{}_all_train6.png'.format(n_comp)))
-plt.show()'''
+#plt.savefig(os.path.join(img_dir, 'similarity_cmp_n{}_all_train6_adjust.png'.format(n_comp)))
+plt.show()
+np.save(os.path.join(task_dir, 'llh_unet_inria_n{}.npy'.format(n_comp)), llh_all)
 
 
 # test GMM score when loo
@@ -98,6 +104,7 @@ plt.tight_layout()
 plt.savefig(os.path.join(img_dir, 'similarity_cmp_n{}_all_train6_loo.png'.format(n_comp)))
 plt.show()'''
 
+'''T = [5278, 1103, 48317, 11534, 1538]
 for i in tqdm(range(5)):
     city_select = [i]
     gmm = train_gmm(task_dir, np.array(idx) < 6, feature, truth_city, truth_building, city_select, n_comp,
@@ -105,7 +112,7 @@ for i in tqdm(range(5)):
     llh, train_idx = test_gmm_model_sample_wise(idx, gmm, feature, truth_city, range(5),
                                                 test_select=np.array(idx) >= 6)
     plt.figure(figsize=(14, 6))
-    plot_sample_wise_llh(llh, train_idx, truth_city)
+    plot_sample_wise_llh(llh, train_idx, truth_city, t=T[i])
     plt.title(city_list[i])
-    plt.savefig(os.path.join(img_dir, 'similarity_cmp_n{}_sample_wise_{}.png'.format(n_comp, city_list[i])))
-plt.show()
+    plt.savefig(os.path.join(img_dir, 'similarity_cmp_n{}_sample_wise_{}_adjust.png'.format(n_comp, city_list[i])))
+plt.show()'''
