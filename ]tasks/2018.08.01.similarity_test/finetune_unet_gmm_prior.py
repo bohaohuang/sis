@@ -16,17 +16,17 @@ BATCH_SIZE = 5
 LEARNING_RATE = 1e-5
 INPUT_SIZE = 572
 TILE_SIZE = 5000
-EPOCHS = 40
+EPOCHS = 30
 NUM_CLASS = 2
 N_TRAIN = 8000
-N_VALID = 1000
+N_VALID = 1280
 GPU = 0
-DECAY_STEP = 30
+DECAY_STEP = 20
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_{}_t{}_{}'
 SFN = 32
 PRED_DIR = r'/hdd6/Models/Inria_decay/UnetCrop_inria_decay_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60.0_DR0.1_SFN32'
-TRAIN_CITY = 'chicago'
+TRAIN_CITY = 'austin'
 LLH_FILE = r'/media/ei-edl01/user/bh163/tasks/2018.08.01.similarity_test/llh_unet_inria_n50.npy'
 T = 1500
 
@@ -107,18 +107,29 @@ def main(flags):
 
     # make data reader
     # use uabCrossValMaker to get fileLists for training and validation
-    idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
-    # use first 5 tiles for validation
-    file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(6, 37)])
-    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 6)])
+    idx_city, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'city')
+    idx_tile, _ = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
+    idx = [j * 10 + i for i, j in zip(idx_city, idx_tile)]
+    # use first city for validation
+    filter_train = []
+    filter_valid = []
+    for i in range(5):
+        for j in range(1, 37):
+            if i == city_dict[flags.train_city] and j <= 5:
+                filter_valid.append(j * 10 + i)
+            elif j > 5:
+                filter_train.append(j * 10 + i)
+    # use first city for validation
+    file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_train)
+    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_valid)
 
     dataReader_train = uabDataReader.ImageLabelReaderCitySampleControl(
         [3], [0, 1, 2], patchDir, file_list_train, flags.input_size, flags.batch_size,
         city_dict, city_llh, dataAug='flip,rotate', block_mean=np.append([0], img_mean))
     # no augmentation needed for validation
-    dataReader_valid = uabDataReader.ImageLabelReaderCitySampleControl(
-        [3], [0, 1, 2], patchDir, file_list_valid, flags.input_size, flags.batch_size,
-        city_dict, city_llh, dataAug=' ', block_mean=np.append([0], img_mean))
+    dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_valid, flags.input_size,
+                                                      flags.batch_size, dataAug=' ',
+                                                      block_mean=np.append([0], img_mean), batch_code=0)
 
     # train
     start_time = time.time()
