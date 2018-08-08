@@ -20,7 +20,7 @@ EPOCHS = 30
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1280
-GPU = 0
+GPU = 1
 DECAY_STEP = 20
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_{}_t{}_{}'
@@ -28,7 +28,7 @@ SFN = 32
 PRED_DIR = r'/hdd6/Models/Inria_decay/UnetCrop_inria_decay_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60.0_DR0.1_SFN32'
 TRAIN_CITY = 'austin'
 LLH_FILE = r'/media/ei-edl01/user/bh163/tasks/2018.08.01.similarity_test/llh_unet_inria_n50.npy'
-T = 1500
+T = 3000
 
 
 def read_flag():
