@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import utils
 import util_functions
+from gmm_cluster import softmax
 
 
 def read_iou(model_dir):
@@ -20,68 +21,62 @@ def read_iou(model_dir):
     city_iou = city_iou_a / city_iou_b * 100
     return city_iou
 
+
 img_dir, task_dir = utils.get_task_img_folder()
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 model_type = 'unet'
 colors = util_functions.get_default_colors()
-T = [100, 500, 1500, 3000, 5000, 10000, 20000, 40000]
+T = [100, 500, 1500, 3000, 5000, 10000, 20000]
+save_fig = False
 target_iou = np.zeros((6, len(T)))
+softmax_llh = np.zeros((5, len(T)))
+llh_all_record = np.load(os.path.join(task_dir, 'llh_unet_inria_n50.npy'))
 
 
-for city_id in [1]:
+for city_id in [2]:
+    llh_all = llh_all_record[city_id, :]
     for cnt, t in enumerate(T):
         model_dir = r'/hdd/Results/Inria_Domain_Selection/UnetCrop_inria_{}_t{:.1f}_0_PS(572, 572)_BS5_' \
-                     r'EP40_LR1e-05_DS30_DR0.1_SFN32/inria'.format(city_list[city_id], t)
+                     r'EP30_LR1e-05_DS20_DR0.1_SFN32/inria'.format(city_list[city_id], t)
         city_iou = read_iou(model_dir)
         target_iou[:, cnt] = city_iou
 
-    plt.plot(np.arange(len(T)), target_iou[city_id, :], '-o', label=city_list[city_id])
-    other_city = [i for i in range(5) if i != city_id]
-    '''for i in other_city:
-        plt.plot(T, target_iou[i, :], '--o', label=city_list[i])'''
-    #plt.plot(T, target_iou[-1, :], '--o', label='overall')
-    plt.legend()
-    plt.xticks(np.arange(len(T)), T)
+        # make softmax llh matrix
+        softmax_llh[:, cnt] = softmax(llh_all, t)
+
+    plt.figure(figsize=(18, 8))
+
+    plt.subplot(211)
+    width = 0.15
+    X = np.arange(len(T))
+    for plt_cnt in range(5):
+        plt.bar(X + width * plt_cnt, softmax_llh[plt_cnt, :], width=width, color=colors[0], edgecolor='k')
+        for cnt, llh in enumerate(softmax_llh[plt_cnt, :]):
+            plt.text(X[cnt] + width * (plt_cnt - 0.4), llh, '{:.1f}'.format(llh*100), fontsize=8)
+    for plt_cnt in range(len(T)):
+        plt.vlines(X[plt_cnt] - width, 0, 1.2)
+        plt.vlines(X[plt_cnt] + 5*width, 0, 1.2)
+    plt.xticks(X + width * 2, ['T={}'.format(a) for a in T])
+    plt.ylim([0, 1.2])
     plt.xlabel('Temperature')
-    plt.ylabel('IoU')
-    plt.grid('on')
-    plt.tight_layout()
-    plt.show()
+    plt.ylabel('Prior')
+    plt.title('Finetune on {}'.format(city_list[city_id]))
 
-'''model_list = [
-    r'/hdd/Results/domain_selection/UnetCrop_inria_aug_leave_0_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-    r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-    #r'/hdd/Results/domain_selection/UnetCrop_inria_austin_loo_patch_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-    r'/hdd/Results/domain_selection/UnetPredict_inria_loo_mtl_0_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-]
-model_name_show = ['LOO', 'Base', 'MTL']
-
-fig = plt.figure()
-for plt_cnt, model_name in enumerate(model_list):
-    city_iou_a = np.zeros(6)
-    city_iou_b = np.zeros(6)
-
-    model_dir = model_name + '/inria'
-    result_file = os.path.join(model_dir, 'result.txt')
-    with open(result_file, 'r') as f:
-        result_record = f.readlines()
-    for cnt, line in enumerate(result_record[:-1]):
-        A, B = line.split('(')[1].strip().strip(')').split(',')
-        city_iou_a[cnt // 5] += float(A)
-        city_iou_b[cnt // 5] += float(B)
-    city_iou_a[-1] = np.sum(city_iou_a[:-1])
-    city_iou_b[-1] = np.sum(city_iou_b[:-1])
-    city_iou = city_iou_a / city_iou_b * 100
-
-    width = 0.3
+    plt.subplot(212)
+    width = 0.1
     X = np.arange(6)
-    plt.bar(X + width * plt_cnt, city_iou, width=width, label=model_name_show[plt_cnt])
-    plt.xticks(X + width, city_list + ['Over All'])
-    plt.xlabel('City')
-    plt.ylabel('IoU')
-plt.legend(loc='upper right')
-plt.ylim([50, 85])
-plt.title('IoU Comparison UNet Austin')
-plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'unet_austin_cmp_loo_mtl.png'))
-plt.show()'''
+    for plt_cnt, t in enumerate(T):
+        plt.bar(X + width * plt_cnt, target_iou[:, plt_cnt], width=width, label='T={}'.format(t),
+                color=colors[plt_cnt + 1])
+        plt.xticks(X + width * (len(T) / 2 - 0.5), city_list + ['Over All'])
+        plt.xlabel('City')
+        plt.ylabel('IoU')
+        for cnt, iou in enumerate(target_iou[:, plt_cnt]):
+            plt.text(X[cnt] + width * (plt_cnt - 0.5), iou, '{:.1f}'.format(iou), fontsize=8)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05), ncol=9, fancybox=True, shadow=True)
+    plt.ylim([55, 85])
+    plt.tight_layout()
+    if save_fig:
+        plt.savefig(os.path.join(img_dir, 'finetune_t_{}_comparison_on_{}.png'.format(
+            '_'.join([str(a) for a in T]), city_list[city_id])))
+    plt.show()

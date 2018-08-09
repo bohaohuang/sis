@@ -6,7 +6,7 @@ import math
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from cvxopt import matrix, solvers
+from cvxopt import matrix, solvers, spmatrix
 from make_res50_features import make_res50_features
 from city_building_truth import make_building_truth, make_city_truth
 from gmm_cluster import  *
@@ -29,6 +29,9 @@ def kernel_mean_matching(X, Z, kern='lin', B=1.0, sigma=1.0, eps=None):
 
     K = matrix(K)
     kappa = matrix(kappa)
+    #i = [0 for _ in range(nz)] + [1 for _ in range(nz)] + list(range(2, 2 + nz)) + list(range(2 + nz, 2 + 2* nz))
+    #j = [i for i in range(nz)] + [i for i in range(nz)] + [i for i in range(nz)] + [i for i in range(nz)]
+    #G = spmatrix(np.r_[np.ones((1, nz)), -np.ones((1, nz)), np.eye(nz), -np.eye(nz)], i, j)
     G = matrix(np.r_[np.ones((1, nz)), -np.ones((1, nz)), np.eye(nz), -np.eye(nz)])
     h = matrix(np.r_[nz * (1 + eps), nz * (eps - 1), B * np.ones((nz,)), np.zeros((nz,))])
 
@@ -68,11 +71,12 @@ truth_city = make_city_truth(task_dir, model_name, patch_names, force_run=False)
 truth_building = make_building_truth(ps, task_dir, model_name, patchDir, patch_names, force_run=False)
 
 # 3. do feature mapping
-source_feature = select_feature(feature, np.array(idx) >= 6, truth_city, truth_building, range(5), False)
 # mean_dist = compute_median_distance(source_feature)
 # print(mean_dist)
 for target_city in tqdm(range(5)):
+    source_feature = select_feature(feature, np.array(idx) >= 6, truth_city, truth_building,
+                                    [i for i in range(5) if i != target_city], False)
     target_feature = select_feature(feature, np.array(idx) < 6, truth_city, truth_building, [target_city], False)
     weight = kernel_mean_matching(target_feature, source_feature, kern='rbf', B=1000.0, sigma=21.16)
-    save_file_name = os.path.join(task_dir, 'target_{}_weight.npy'.format(target_city))
+    save_file_name = os.path.join(task_dir, 'target_{}_weight_loo.npy'.format(target_city))
     np.save(save_file_name, weight)

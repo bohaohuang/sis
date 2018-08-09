@@ -2,6 +2,7 @@ import tensorflow as tf
 import uabCrossValMaker
 import uab_collectionFunctions
 from bohaoCustom import uabMakeNetwork_UNet
+import util_functions
 
 # settings
 gpu = 1
@@ -9,13 +10,14 @@ batch_size = 5
 input_size = [572, 572]
 tile_size = [5000, 5000]
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-T = [10000, 20000, 40000]
+T = [40000, 60000]
+util_functions.tf_warn_level()
 
 
-for city_id in [1]:
+for city_id in [2]:
     for t in T:
         model_dir = r'/hdd6/Models/Inria_Domain_Selection/UnetCrop_inria_{}_t{:.1f}_0_PS(572, 572)_BS5_' \
-                    r'EP40_LR1e-05_DS30_DR0.1_SFN32'.format(city_list[city_id], t)
+                    r'EP30_LR1e-05_DS20_DR0.1_SFN32'.format(city_list[city_id], t)
 
         tf.reset_default_graph()
 
@@ -50,4 +52,4 @@ for city_id in [1]:
         model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                        input_size, tile_size, batch_size, img_mean, model_dir, gpu,
                        save_result_parent_dir='Inria_Domain_Selection', ds_name='inria',
-                       best_model=True)
+                       best_model=False, load_epoch_num=25)
