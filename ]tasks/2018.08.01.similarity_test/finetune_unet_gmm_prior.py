@@ -102,7 +102,7 @@ def main(flags):
                                                     extSave=['jpg', 'jpg', 'jpg', 'png'],
                                                     isTrain=True,
                                                     gtInd=3,
-                                                    pad=model.get_overlap()/2)
+                                                    pad=model.get_overlap()//2)
     patchDir = extrObj.run(blCol)
 
     # make data reader

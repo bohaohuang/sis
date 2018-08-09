@@ -10,7 +10,7 @@ batch_size = 5
 input_size = [572, 572]
 tile_size = [5000, 5000]
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-T = [40000, 60000]
+T = [80000]
 util_functions.tf_warn_level()
 
 
