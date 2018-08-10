@@ -15,8 +15,8 @@ feature_file_name, patch_file_name, ps, patchDir, idx = make_res50_features(mode
 xlim_record = [2000, 300, 1500, 1000]
 ylim_record = [2, 0.3, 5, 3]
 
-for target_city in [0, 1, 2, 3]:
-    save_file_name = os.path.join(task_dir, 'target_{}_weight.npy'.format(target_city))
+for target_city in [0, 1]:
+    save_file_name = os.path.join(task_dir, 'target_{}_weight_loo.npy'.format(target_city))
     weight = np.load(save_file_name)
     weight = weight[:, 0]
 
@@ -28,11 +28,12 @@ for target_city in [0, 1, 2, 3]:
 
     # plot feature weights
     sort_idx = np.argsort(weight)[::-1]
-    truth_city = truth_city[np.array(idx) >= 26]
+    truth_city = truth_city[np.array(idx) >= 6]
+    truth_city = truth_city[truth_city != target_city]
     truth_city = truth_city[sort_idx]
 
     plt.figure()
-    for city_cnt in range(5):
+    for city_cnt in [a for a in range(5) if a != target_city]:
         city_ind = [a for a in np.arange(weight.shape[0]) if truth_city[a] == city_cnt]
         plt.bar(city_ind, weight[sort_idx[city_ind]], label=city_list[city_cnt])
     plt.legend()
@@ -40,5 +41,5 @@ for target_city in [0, 1, 2, 3]:
     plt.ylim([0, ylim_record[target_city]])
     plt.tight_layout()
     plt.title('Target {} / Source 5 Cites (>26)'.format(city_list[target_city]))
-    plt.savefig(os.path.join(img_dir, 'target_{}_source_5g26.png'.format(target_city)))
+    # plt.savefig(os.path.join(img_dir, 'target_{}_source_5g26.png'.format(target_city)))
 plt.show()

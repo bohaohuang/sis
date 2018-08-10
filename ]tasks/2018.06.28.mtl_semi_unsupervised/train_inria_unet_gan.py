@@ -12,9 +12,9 @@ import uab_DataHandlerFunctions
 from bohaoCustom import uabDataReader
 from bohaoCustom import uabMakeNetwork_UNet
 
-RUN_ID = 1
-BATCH_SIZE = 5
-LEARNING_RATE = '1e-4,1e-5,1e-4'
+RUN_ID = 2
+BATCH_SIZE = 4
+LEARNING_RATE = '1e-5,1e-6,1e-6'
 INPUT_SIZE = 572
 TILE_SIZE = 5000
 EPOCHS = 30
@@ -27,7 +27,8 @@ DECAY_RATE = '0.1,0.1,0.1'
 MODEL_NAME = 'inria_gan_{}_{}'
 SFN = 32
 FINETUNE_CITY = 0
-PRED_MODEL_DIR = r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_0_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
+PRED_MODEL_DIR = r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
+                 r'EP100_LR0.0001_DS60_DR0.1_SFN32'
 
 
 def read_flag():
@@ -128,7 +129,8 @@ def main(flags):
 
     # train
     start_time = time.time()
-    model.load_weights(flags.pred_model_dir, layers2load='1,2,3,4,5,6,7,8,9', load_final_layer=True)
+    model.load_weights(flags.pred_model_dir.format(flags.finetune_city), layers2load='1,2,3,4,5,6,7,8,9',
+                       load_final_layer=True)
     model.train_config('X', 'Y', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
                        loss_type='xent', par_dir='Inria_GAN')
     model.run(train_reader=dataReader_train,

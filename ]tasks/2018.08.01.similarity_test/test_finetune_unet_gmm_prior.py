@@ -10,11 +10,11 @@ batch_size = 5
 input_size = [572, 572]
 tile_size = [5000, 5000]
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-T = [80000]
+T = [100, 500, 1500, 3000, 5000, 10000, 20000, 40000, 60000]
 util_functions.tf_warn_level()
 
 
-for city_id in [2]:
+for city_id in [1]:
     for t in T:
         model_dir = r'/hdd6/Models/Inria_Domain_Selection/UnetCrop_inria_{}_t{:.1f}_0_PS(572, 572)_BS5_' \
                     r'EP30_LR1e-05_DS20_DR0.1_SFN32'.format(city_list[city_id], t)
