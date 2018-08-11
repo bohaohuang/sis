@@ -55,7 +55,7 @@ def compute_median_distance(X):
     return dist
 
 
-model_name = 'deeplab'
+model_name = 'unet'
 perplex = 25
 
 # 1. make features
@@ -78,5 +78,5 @@ for target_city in tqdm(range(5)):
                                     [i for i in range(5) if i != target_city], True)
     target_feature = select_feature(feature, np.array(idx) < 6, truth_city, truth_building, [target_city], False)
     weight = kernel_mean_matching(target_feature, source_feature, kern='rbf', B=1000.0, sigma=21.16)
-    save_file_name = os.path.join(task_dir, 'target_{}_weight_loo_building.npy'.format(target_city))
+    save_file_name = os.path.join(task_dir, '{}_target_{}_weight_loo_building.npy'.format(model_name, target_city))
     np.save(save_file_name, weight)

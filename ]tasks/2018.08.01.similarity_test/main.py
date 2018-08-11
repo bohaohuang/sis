@@ -7,10 +7,10 @@ from run_tsne import run_tsne, plot_tsne
 from city_building_truth import make_building_truth, make_city_truth
 from gmm_cluster import *
 
-model_name = 'deeplab'
+model_name = 'unet'
 perplex = 25
-do_tsne = False
-do_bic = True
+do_tsne = True
+do_bic = False
 show_bic = False
 only_building = True
 
@@ -34,7 +34,7 @@ if do_tsne:
 truth_city = make_city_truth(task_dir, model_name, patch_names, force_run=False)
 truth_building = make_building_truth(ps, task_dir, model_name, patchDir, patch_names, force_run=False)
 
-if do_bic:
+'''if do_bic:
     # 3. do bic
     bic, test_points = gmm_bic_test(idx, feature, task_dir, truth_building, file_name='llh_bic_test.npy',
                                     test_comp=None, force_run=False)
@@ -43,7 +43,7 @@ if do_bic:
         plt.plot(test_points, bic)
         plt.show()
 else:
-    n_comp = 40
+    n_comp = 40'''
 
 # 3. train GMM model
 city_list = ['Aus', 'Chi', 'Kit', 'Tyr', 'Vie']
@@ -72,7 +72,7 @@ plt.show()'''
 
 
 # train GMM model on test set
-llh_all = np.zeros((5, 5))
+'''llh_all = np.zeros((5, 5))
 fig = plt.figure(figsize=(12, 4))
 grid = Grid(fig, rect=111, nrows_ncols=(1, 5), axes_pad=0.25, label_mode='L', share_all=True)
 for i in range(5):
@@ -86,7 +86,7 @@ for i in range(5):
 plt.tight_layout()
 #plt.savefig(os.path.join(img_dir, 'similarity_cmp_n{}_all_train6_adjust.png'.format(n_comp)))
 plt.show()
-np.save(os.path.join(task_dir, 'llh_unet_inria_n{}.npy'.format(n_comp)), llh_all)
+np.save(os.path.join(task_dir, 'llh_unet_inria_n{}.npy'.format(n_comp)), llh_all)'''
 
 
 # test GMM score when loo

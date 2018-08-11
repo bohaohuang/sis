@@ -10,7 +10,7 @@ from city_building_truth import make_city_truth, make_building_truth
 
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 img_dir, task_dir = utils.get_task_img_folder()
-model_name = 'deeplab'
+model_name = 'unet'
 feature_file_name, patch_file_name, ps, patchDir, idx = make_res50_features(model_name, task_dir, GPU=0,
                                                                             force_run=False)
 file_name = os.path.join(patchDir, 'fileList.txt')
@@ -18,7 +18,7 @@ with open(file_name, 'r') as f:
     files = f.readlines()
 
 for target_city in [1]:
-    save_file_name = os.path.join(task_dir, 'target_{}_weight_loo_building.npy'.format(target_city))
+    save_file_name = os.path.join(task_dir, '{}_target_{}_weight_loo_building.npy'.format(model_name, target_city))
     weight = np.load(save_file_name)
     weight = weight[:, 0]
 
@@ -37,9 +37,13 @@ for target_city in [1]:
 
     remake_weight = np.zeros(np.sum(np.array(idx) >= 6) // 5 * 4)
     tb = [truth_building[i] for i in range(len(truth_building)) if truth_city[i] != target_city]
-    remake_weight[np.where(tb == 1)] = weight
-
-    print(weight.shape[0], len(patch_names), remake_weight.shape, np.sum(remake_weight))
+    weight_cnt = 0
+    for i in range(remake_weight.shape[0]):
+        if tb[i] == 1:
+            remake_weight[i] = weight[weight_cnt]
+            weight_cnt += 1
+    remake_weight = remake_weight / np.sum(remake_weight)
+    np.save(os.path.join(task_dir, '{}_loo_mmd_target_{}.npy'.format(model_name, target_city)), remake_weight)
 
     # plot feature weights
     plt.figure(figsize=(14, 6.5))
