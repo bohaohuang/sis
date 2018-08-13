@@ -26,14 +26,14 @@ img_dir, task_dir = utils.get_task_img_folder()
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 model_type = 'unet'
 colors = util_functions.get_default_colors()
-T = [100, 500, 1500, 3000, 5000, 10000, 40000, 60000]
+T = [100, 500, 1500, 3000, 5000, 10000, 40000, 80000]
 save_fig = True
 target_iou = np.zeros((6, len(T)))
 softmax_llh = np.zeros((5, len(T)))
 llh_all_record = np.load(os.path.join(task_dir, 'llh_unet_inria_n50.npy'))
 
 
-for city_id in [1]:
+for city_id in [3]:
     llh_all = llh_all_record[city_id, :]
     for cnt, t in enumerate(T):
         model_dir = r'/hdd/Results/Inria_Domain_Selection/UnetCrop_inria_{}_t{:.1f}_0_PS(572, 572)_BS5_' \

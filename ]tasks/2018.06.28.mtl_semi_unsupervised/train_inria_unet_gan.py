@@ -14,15 +14,15 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 2
 BATCH_SIZE = 4
-LEARNING_RATE = '1e-5,1e-6,1e-6'
+LEARNING_RATE = '1e-4,1e-5,1e-6'
 INPUT_SIZE = 572
 TILE_SIZE = 5000
-EPOCHS = 30
+EPOCHS = 60
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1280
-GPU = 0
-DECAY_STEP = '20,20,20'
+GPU = 1
+DECAY_STEP = '30,60,30'
 DECAY_RATE = '0.1,0.1,0.1'
 MODEL_NAME = 'inria_gan_{}_{}'
 SFN = 32

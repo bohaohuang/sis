@@ -29,9 +29,6 @@ def kernel_mean_matching(X, Z, kern='lin', B=1.0, sigma=1.0, eps=None):
 
     K = matrix(K)
     kappa = matrix(kappa)
-    #i = [0 for _ in range(nz)] + [1 for _ in range(nz)] + list(range(2, 2 + nz)) + list(range(2 + nz, 2 + 2* nz))
-    #j = [i for i in range(nz)] + [i for i in range(nz)] + [i for i in range(nz)] + [i for i in range(nz)]
-    #G = spmatrix(np.r_[np.ones((1, nz)), -np.ones((1, nz)), np.eye(nz), -np.eye(nz)], i, j)
     G = matrix(np.r_[np.ones((1, nz)), -np.ones((1, nz)), np.eye(nz), -np.eye(nz)])
     h = matrix(np.r_[nz * (1 + eps), nz * (eps - 1), B * np.ones((nz,)), np.zeros((nz,))])
 

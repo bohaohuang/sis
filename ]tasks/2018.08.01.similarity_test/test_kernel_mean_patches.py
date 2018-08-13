@@ -17,7 +17,7 @@ file_name = os.path.join(patchDir, 'fileList.txt')
 with open(file_name, 'r') as f:
     files = f.readlines()
 
-for target_city in [1]:
+for target_city in [0, 1, 2, 3, 4]:
     save_file_name = os.path.join(task_dir, '{}_target_{}_weight_loo_building.npy'.format(model_name, target_city))
     weight = np.load(save_file_name)
     weight = weight[:, 0]
@@ -32,6 +32,8 @@ for target_city in [1]:
     truth_city = truth_city[np.array(idx) >= 6]
     truth_building = truth_building[np.array(idx) >= 6]
     patch_names = [patch_names[i] for i in range(len(patch_names)) if idx[i] >= 6]
+    patch_names_target = [patch_names[i] for i in range(len(patch_names))
+                          if truth_city[i] == target_city and truth_building[i] == 1]
     patch_names = [patch_names[i] for i in range(len(patch_names)) if
                    truth_city[i] != target_city and truth_building[i] == 1]
 
@@ -42,21 +44,34 @@ for target_city in [1]:
         if tb[i] == 1:
             remake_weight[i] = weight[weight_cnt]
             weight_cnt += 1
+    remake_weight = remake_weight / np.sum(remake_weight) / 2
+    remake_weight[remake_weight == 0] = 1 / 2 / np.sum(remake_weight == 0)
+
     remake_weight = remake_weight / np.sum(remake_weight)
-    np.save(os.path.join(task_dir, '{}_loo_mmd_target_{}.npy'.format(model_name, target_city)), remake_weight)
+    np.save(os.path.join(task_dir, '{}_loo_mmd_target_{}_5050.npy'.format(model_name, target_city)), remake_weight)
 
     # plot feature weights
-    plt.figure(figsize=(14, 6.5))
+    '''plt.figure(figsize=(16, 5.5))
+    for plt_cnt, patch_name in enumerate(np.random.permutation(patch_names_target)[:2]):
+        img = []
+        for channel in range(3):
+            img.append(imageio.imread(os.path.join(patchDir, '{}_RGB{}.jpg'.format(patch_name[:-1], channel))))
+        img = np.dstack(img)
+
+        plt.subplot(2, 6, plt_cnt * 6 + 1)
+        plt.imshow(img)
+        plt.axis('off')
+        plt.title(patch_name.split('_')[0])
     for plt_cnt, patch_idx in enumerate(sort_idx[:10]):
         img = []
         for channel in range(3):
             img.append(imageio.imread(os.path.join(patchDir, '{}_RGB{}.jpg'.format(patch_names[patch_idx][:-1], channel))))
         img = np.dstack(img)
 
-        plt.subplot(2, 5, plt_cnt + 1)
+        plt.subplot(2, 6, plt_cnt // 5 * 6 + plt_cnt % 5 + 2)
         plt.imshow(img)
         plt.axis('off')
         plt.title(patch_names[patch_idx].split('_')[0])
-    plt.suptitle('Similar Patches to {}'.format(city_list[target_city]))
     plt.tight_layout()
-    plt.show()
+    plt.savefig(os.path.join(img_dir, 'similar_patches_{}_unet'.format(city_list[target_city])))
+    plt.show()'''
