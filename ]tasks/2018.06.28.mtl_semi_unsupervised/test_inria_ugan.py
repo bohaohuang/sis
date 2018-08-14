@@ -12,14 +12,16 @@ tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 
-model_list = [r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-06_1e-06_DS30.0_30.0_20.0_DR0.1_0.1_0.1',
-              r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-06_1e-06_DS20.0_30.0_20.0_DR0.1_0.1_0.1',
-              r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-05_1e-06_DS30.0_10.0_20.0_DR0.1_0.1_0.1',
-              r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1',
-              r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-06_1e-06_DS20.0_20.0_20.0_DR0.1_0.1_0.1',
-              r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-05_1e-06_DS20.0_20.0_20.0_DR0.1_0.1_0.1',
-              r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR1e-05_1e-05_1e-06_DS20.0_20.0_20.0_DR0.1_0.1_0.1',
-              r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR1e-05_1e-06_1e-06_DS20.0_20.0_20.0_DR0.1_0.1_0.1',
+model_list = [#r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-06_1e-06_DS30.0_30.0_20.0_DR0.1_0.1_0.1',
+              #r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-06_1e-06_DS20.0_30.0_20.0_DR0.1_0.1_0.1',
+              #r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-05_1e-06_DS30.0_10.0_20.0_DR0.1_0.1_0.1',
+              #r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1',
+              #r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-06_1e-06_DS20.0_20.0_20.0_DR0.1_0.1_0.1',
+              #r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-05_1e-06_DS20.0_20.0_20.0_DR0.1_0.1_0.1',
+              #r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR1e-05_1e-05_1e-06_DS20.0_20.0_20.0_DR0.1_0.1_0.1',
+              #r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR1e-05_1e-06_1e-06_DS20.0_20.0_20.0_DR0.1_0.1_0.1',
+              r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP60_LR0.0001_1e-06_1e-06_DS30.0_30.0_30.0_DR0.1_0.1_0.1',
+              r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP60_LR0.0001_1e-06_1e-06_DS60.0_30.0_30.0_DR0.1_0.1_0.1',
               ]
 
 for model_dir in model_list:

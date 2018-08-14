@@ -47,7 +47,7 @@ for city_id in [0]:
                     r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria'.format(city_id)
     city_ious[0, :] = read_iou(model_dir_loo, target_city=city_id)
 
-    model_dir_ugan = r'/hdd/Results/ugan/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP30_LR1e-05_1e-06_1e-06_DS20.0_20.0_20.0_DR0.1_0.1_0.1/inria'
+    model_dir_ugan = r'/hdd/Results/ugan/UnetGAN_inria_gan_0_2_PS(572, 572)_BS4_EP60_LR0.0001_1e-06_1e-06_DS30.0_30.0_30.0_DR0.1_0.1_0.1/inria'
     city_ious[1, :] = read_iou(model_dir_ugan, target_city=city_id)
 
     model_dir_base = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \

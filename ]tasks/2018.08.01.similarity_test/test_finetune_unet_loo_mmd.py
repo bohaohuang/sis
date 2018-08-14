@@ -13,10 +13,10 @@ util_functions.tf_warn_level(3)
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 
 for leave_city in [1]:
-    for lr in ['5e-07']:
+    for lr in ['1e-06']:
         tf.reset_default_graph()
 
-        model_dir = r'/hdd6/Models/Inria_Domain_Selection/UnetCrop_inria_mmd_loo_{}_1_PS(572, 572)_BS5_' \
+        model_dir = r'/hdd6/Models/Inria_Domain_Selection/UnetCrop_inria_mmd_loo_5050_{}_1_PS(572, 572)_BS5_' \
                     r'EP40_LR{}_DS30_DR0.1_SFN32'.format(leave_city, lr)
         blCol = uab_collectionFunctions.uabCollection('inria')
         blCol.readMetadata()

@@ -37,7 +37,7 @@ city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 model_type = 'unet'
 colors = util_functions.get_default_colors()
 save_fig = True
-LR = '5e-07'
+LR = '1e-06'
 
 plt.figure(figsize=(8, 6))
 for city_id in [1]:
@@ -49,7 +49,7 @@ for city_id in [1]:
                     r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria'.format(city_id)
     city_ious[0, :] = read_iou(model_dir_loo, target_city=city_id)
 
-    model_dir_mmd = r'/hdd/Results/mmd/UnetCrop_inria_mmd_loo_{}_1_PS(572, 572)_BS5_EP40_LR{}_DS30_DR0.1_SFN32/inria'.\
+    model_dir_mmd = r'/hdd/Results/mmd/UnetCrop_inria_mmd_loo_5050_{}_1_PS(572, 572)_BS5_EP40_LR{}_DS30_DR0.1_SFN32/inria'.\
         format(city_id, LR)
     city_ious[1, :] = read_iou(model_dir_mmd, target_city=city_id)
 
@@ -71,5 +71,5 @@ for city_id in [1]:
     plt.legend()
     plt.title('Finetune on {}'.format(city_list[city_id].capitalize()))
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'mmd_iou_compare_{}_lr{}.png'.format(city_list[city_id], LR)))
+    plt.savefig(os.path.join(img_dir, 'mmd_iou_compare_5050_{}_lr{}.png'.format(city_list[city_id], LR)))
     plt.show()
