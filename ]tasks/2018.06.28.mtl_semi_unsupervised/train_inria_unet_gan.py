@@ -14,17 +14,17 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 2
 BATCH_SIZE = 4
-LEARNING_RATE = '1e-4,1e-5,1e-6'
+LEARNING_RATE = '1e-4,1e-6,1e-6'
 INPUT_SIZE = 572
 TILE_SIZE = 5000
-EPOCHS = 60
+EPOCHS = 30
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1280
 GPU = 1
-DECAY_STEP = '30,60,30'
+DECAY_STEP = '30,30,30'
 DECAY_RATE = '0.1,0.1,0.1'
-MODEL_NAME = 'inria_gan_{}_{}'
+MODEL_NAME = 'inria_gan_real_{}_{}'
 SFN = 32
 FINETUNE_CITY = 0
 PRED_MODEL_DIR = r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \

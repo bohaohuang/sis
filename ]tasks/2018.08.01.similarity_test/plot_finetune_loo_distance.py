@@ -36,19 +36,22 @@ img_dir, task_dir = utils.get_task_img_folder()
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 model_type = 'unet'
 colors = util_functions.get_default_colors()
+save_fig = True
+LR = '1e-06'
 
 plt.figure(figsize=(8, 6))
-for city_id in [0]:
+for city_id in [1]:
     xtick_list = ['{}{}'.format(city_list[city_id].capitalize(), a+1) for a in range(5)] + ['Overall']
-    legend_list = ['LOO', 'UGan', 'Base']
+    legend_list = ['LOO', 'MMD', 'Base']
 
     city_ious = np.zeros((3, 6))
     model_dir_loo = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
                     r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria'.format(city_id)
     city_ious[0, :] = read_iou(model_dir_loo, target_city=city_id)
 
-    model_dir_ugan = r'/hdd/Results/ugan/UnetGAN_inria_gan_real_0_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1/inria'
-    city_ious[1, :] = read_iou(model_dir_ugan, target_city=city_id)
+    model_dir_mmd = r'/hdd/Results/mmd/UnetCrop_inria_distance_loo_5050_{}_1_PS(572, 572)_BS5_EP40_LR{}_DS30_DR0.1_SFN32/inria'.\
+        format(city_id, LR)
+    city_ious[1, :] = read_iou(model_dir_mmd, target_city=city_id)
 
     model_dir_base = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \
                      r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria'
@@ -61,13 +64,12 @@ for city_id in [0]:
                 label=legend_list[plt_cnt])
         for cnt, llh in enumerate(city_ious[plt_cnt, :]):
             plt.text(X[cnt] + width * (plt_cnt - 0.5), llh, '{:.1f}'.format(llh), fontsize=8)
-    plt.xticks(X + width * 2, xtick_list)
-    plt.ylim([45, 85])
+    plt.xticks(X + width, xtick_list)
+    plt.ylim([50, 75])
     plt.xlabel('City Name')
     plt.ylabel('IoUs')
     plt.legend()
     plt.title('Finetune on {}'.format(city_list[city_id].capitalize()))
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'ugan_iou_compare_{}_{}.png'.format(city_list[city_id],
-                                                                          model_dir_ugan.split('/')[-2])))
+    plt.savefig(os.path.join(img_dir, 'distance_iou_compare_5050_{}_lr{}.png'.format(city_list[city_id], LR)))
     plt.show()

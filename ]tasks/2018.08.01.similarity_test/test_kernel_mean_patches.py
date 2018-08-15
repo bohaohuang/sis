@@ -10,14 +10,14 @@ from city_building_truth import make_city_truth, make_building_truth
 
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 img_dir, task_dir = utils.get_task_img_folder()
-model_name = 'unet'
+model_name = 'deeplab'
 feature_file_name, patch_file_name, ps, patchDir, idx = make_res50_features(model_name, task_dir, GPU=0,
                                                                             force_run=False)
 file_name = os.path.join(patchDir, 'fileList.txt')
 with open(file_name, 'r') as f:
     files = f.readlines()
 
-for target_city in [0, 1, 2, 3, 4]:
+for target_city in [0, 1, 2]:
     save_file_name = os.path.join(task_dir, '{}_target_{}_weight_loo_building.npy'.format(model_name, target_city))
     weight = np.load(save_file_name)
     weight = weight[:, 0]

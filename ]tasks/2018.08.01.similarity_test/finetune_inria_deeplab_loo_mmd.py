@@ -12,7 +12,7 @@ import uab_DataHandlerFunctions
 from bohaoCustom import uabDataReader
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
-RUN_ID = 3
+RUN_ID = 1
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-6
 INPUT_SIZE = 321
@@ -21,15 +21,15 @@ EPOCHS = 40
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1280
-GPU = 1
+GPU = 0
 DECAY_STEP = 30
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_mmd_loo_{}_{}'
+MODEL_NAME = 'inria_mmd_loo_5050_{}_{}'
 SFN = 32
-FINETUNE_CITY = 1
+FINETUNE_CITY = 0
 PRED_MODEL_DIR = r'/hdd6/Models/Inria_Domain_LOO/DeeplabV3_inria_{}_loo_0_PS(321, 321)_BS5_' \
                  r'EP100_LR1e-05_DS40_DR0.1_SFN32'
-LLH_FILE_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.08.01.similarity_test/loo_mmd_target_{}.npy'
+LLH_FILE_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.08.01.similarity_test/deeplab_loo_mmd_target_{}_5050.npy'
 
 
 def read_flag():

@@ -37,7 +37,7 @@ city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 model_type = 'unet'
 colors = util_functions.get_default_colors()
 save_fig = True
-LR = '1e-06'
+LR = '1e-05'
 
 plt.figure(figsize=(8, 6))
 for city_id in [1]:
