@@ -14,7 +14,7 @@ from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 RUN_ID = 1
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-6
+LEARNING_RATE = 1e-5
 INPUT_SIZE = 321
 TILE_SIZE = 5000
 EPOCHS = 40

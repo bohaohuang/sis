@@ -112,7 +112,7 @@ for result_dir in result_save_dir:
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
 
-for city_num in [0, 1]:
+for city_num in [2, 3, 4]:
     both_miss_size = []
     unet_miss_size = []
     deeplab_miss_size = []

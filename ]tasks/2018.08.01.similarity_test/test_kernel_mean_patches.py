@@ -17,7 +17,7 @@ file_name = os.path.join(patchDir, 'fileList.txt')
 with open(file_name, 'r') as f:
     files = f.readlines()
 
-for target_city in [0, 1, 2]:
+for target_city in [4]:
     save_file_name = os.path.join(task_dir, '{}_target_{}_weight_loo_building.npy'.format(model_name, target_city))
     weight = np.load(save_file_name)
     weight = weight[:, 0]

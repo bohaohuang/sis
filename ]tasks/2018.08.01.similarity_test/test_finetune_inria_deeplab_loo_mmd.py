@@ -2,21 +2,21 @@ import tensorflow as tf
 import uabCrossValMaker
 import uab_collectionFunctions
 import util_functions
-from bohaoCustom import uabMakeNetwork_UNet
+from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 # settings
-gpu = 1
+gpu = 0
 batch_size = 5
-input_size = [572, 572]
+input_size = [321, 321]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 
-for leave_city in [0, 1, 2, 3, 4]:
-    for lr in ['1e-05']:
+for leave_city in [0, 1, 2, 3]:
+    for lr in ['1e-06']:
         tf.reset_default_graph()
 
-        model_dir = r'/hdd6/Models/Inria_Domain_Selection/UnetCrop_inria_distance_loo_5050_{}_1_PS(572, 572)_BS5_' \
+        model_dir = r'/hdd6/Models/Inria_Domain_Selection/DeeplabV3_inria_mmd_loo_5050_{}_1_PS(321, 321)_BS5_' \
                     r'EP40_LR{}_DS30_DR0.1_SFN32'.format(leave_city, lr)
         blCol = uab_collectionFunctions.uabCollection('inria')
         blCol.readMetadata()
@@ -38,11 +38,11 @@ for leave_city in [0, 1, 2, 3, 4]:
         X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
         y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
         mode = tf.placeholder(tf.bool, name='mode')
-        model = uabMakeNetwork_UNet.UnetModelCrop({'X':X, 'Y':y},
-                                                  trainable=mode,
-                                                  input_size=input_size,
-                                                  batch_size=batch_size,
-                                                  start_filter_num=32)
+        model = uabMakeNetwork_DeepLabV2.DeeplabV3({'X':X, 'Y':y},
+                                                   trainable=mode,
+                                                   input_size=input_size,
+                                                   batch_size=batch_size,
+                                                   start_filter_num=32)
         # create graph
         model.create_graph('X', class_num=2)
 
