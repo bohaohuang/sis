@@ -37,10 +37,10 @@ city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 model_type = 'unet'
 colors = util_functions.get_default_colors()
 save_fig = True
-LR = '1e-06'
+LR = '1e-05'
 
 plt.figure(figsize=(8, 6))
-for city_id in [1]:
+for city_id in [4]:
     xtick_list = ['{}{}'.format(city_list[city_id].capitalize(), a+1) for a in range(5)] + ['Overall']
     legend_list = ['LOO', 'MMD', 'Base']
 
@@ -65,7 +65,7 @@ for city_id in [1]:
         for cnt, llh in enumerate(city_ious[plt_cnt, :]):
             plt.text(X[cnt] + width * (plt_cnt - 0.5), llh, '{:.1f}'.format(llh), fontsize=8)
     plt.xticks(X + width, xtick_list)
-    plt.ylim([50, 75])
+    plt.ylim([65, 85])
     plt.xlabel('City Name')
     plt.ylabel('IoUs')
     plt.legend()

@@ -87,7 +87,7 @@ else:
               r'EP100_LR1e-05_DS40_DR0.1_SFN32/inria/pred'
     mtl_dir = None
 
-for city_num in [0, 1]:
+for city_num in [4]:
     for val_img_cnt in range(1, 6):
         img_save_dir = os.path.join(img_dir, 'base_mmd_loo', city_list[city_num])
         if not os.path.exists(img_save_dir):

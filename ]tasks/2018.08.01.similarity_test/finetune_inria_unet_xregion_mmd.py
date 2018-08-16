@@ -1,4 +1,3 @@
-import os
 import time
 import argparse
 import numpy as np
@@ -10,26 +9,26 @@ import uabPreprocClasses
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabDataReader
-from bohaoCustom import uabMakeNetwork_DeepLabV2
+from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 1
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-5
-INPUT_SIZE = 321
+INPUT_SIZE = 572
 TILE_SIZE = 5000
 EPOCHS = 40
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1280
-GPU = 1
+GPU = 0
 DECAY_STEP = 30
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_mmd_loo_5050_{}_{}'
+MODEL_NAME = 'inria_mmd_xregion_5050_{}_{}'
 SFN = 32
 FINETUNE_CITY = 0
-PRED_MODEL_DIR = r'/hdd6/Models/Inria_Domain_LOO/DeeplabV3_inria_{}_loo_0_PS(321, 321)_BS5_' \
-                 r'EP100_LR1e-05_DS40_DR0.1_SFN32'
-LLH_FILE_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.08.01.similarity_test/deeplab_loo_mmd_target_{}_5050.npy'
+PRED_MODEL_DIR = r'/hdd6/Models/Inria_decay/UnetCrop_inria_decay_0_PS(572, 572)_BS5_' \
+                 r'EP100_LR0.0001_DS60.0_DR0.1_SFN32'
+LLH_FILE_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.08.01.similarity_test/unet_xregion_mmd_target_{}_5050.npy'
 
 
 def read_flag():
@@ -69,16 +68,16 @@ def main(flags):
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, flags.input_size[0], flags.input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_DeepLabV2.DeeplabV3({'X': X, 'Y': y},
-                                               trainable=mode,
-                                               model_name=flags.model_name,
-                                               input_size=flags.input_size,
-                                               batch_size=flags.batch_size,
-                                               learn_rate=flags.learning_rate,
-                                               decay_step=flags.decay_step,
-                                               decay_rate=flags.decay_rate,
-                                               epochs=flags.epochs,
-                                               start_filter_num=flags.sfn)
+    model = uabMakeNetwork_UNet.UnetModelCrop({'X': X, 'Y': y},
+                                              trainable=mode,
+                                              model_name=flags.model_name,
+                                              input_size=flags.input_size,
+                                              batch_size=flags.batch_size,
+                                              learn_rate=flags.learning_rate,
+                                              decay_step=flags.decay_step,
+                                              decay_rate=flags.decay_rate,
+                                              epochs=flags.epochs,
+                                              start_filter_num=flags.sfn)
     model.create_graph('X', class_num=flags.num_classes)
 
     # create collection
@@ -110,9 +109,9 @@ def main(flags):
     filter_valid = []
     for i in range(5):
         for j in range(1, 37):
-            if i != flags.finetune_city and j > 5:
+            if j > 5:
                 filter_train.append(j * 10 + i)
-            elif i == flags.finetune_city and j <= 5:
+            elif j <= 5:
                 filter_valid.append(j * 10 + i)
     # use first city for validation
     file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_train)
@@ -132,7 +131,7 @@ def main(flags):
                        loss_type='xent', par_dir='Inria_Domain_Selection')
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
-              pretrained_model_dir=flags.pred_model_dir.format(city_list[flags.finetune_city]),
+              pretrained_model_dir=flags.pred_model_dir,
               isTrain=True,
               img_mean=img_mean,
               verb_step=100,  # print a message every 100 step(sample)
