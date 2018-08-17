@@ -5,15 +5,15 @@ import util_functions
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 # settings
-gpu = 0
+gpu = 1
 batch_size = 5
 input_size = [321, 321]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 
-for leave_city in [0, 1, 2, 3]:
-    for lr in ['1e-06']:
+for leave_city in [0, 1, 2, 3, 4]:
+    for lr in ['1e-05']:
         tf.reset_default_graph()
 
         model_dir = r'/hdd6/Models/Inria_Domain_Selection/DeeplabV3_inria_mmd_loo_5050_{}_1_PS(321, 321)_BS5_' \

@@ -26,7 +26,7 @@ def distance_matching(f_s, f_t, top_cnt=5):
     return match_record, dist_record
 
 
-model_name = 'unet'
+model_name = 'deeplab'
 top_cnt = 5
 force_run = False
 
@@ -48,8 +48,8 @@ for target_city in tqdm(range(5)):
                                     [i for i in range(5) if i != target_city], True)
     target_feature = select_feature(feature, np.array(idx) < 6, truth_city, truth_building, [target_city], False)
 
-    match_file_name = os.path.join(task_dir, 'match_{}_top{}.npy'.format(target_city, top_cnt))
-    dist_file_name = os.path.join(task_dir, 'dist_{}_top{}.npy'.format(target_city, top_cnt))
+    match_file_name = os.path.join(task_dir, '{}_match_{}_top{}.npy'.format(model_name, target_city, top_cnt))
+    dist_file_name = os.path.join(task_dir, '{}_dist_{}_top{}.npy'.format(model_name, target_city, top_cnt))
     if not os.path.exists(match_file_name) or not os.path.exists(dist_file_name) or force_run:
         match_record, dist_record = distance_matching(source_feature, target_feature, top_cnt=top_cnt)
         np.save(match_file_name, match_record)

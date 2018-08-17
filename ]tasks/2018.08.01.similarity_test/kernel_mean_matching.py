@@ -52,7 +52,7 @@ def compute_median_distance(X):
     return dist
 
 
-model_name = 'unet'
+model_name = 'deeplab'
 perplex = 25
 
 # 1. make features
