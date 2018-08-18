@@ -16,7 +16,7 @@ for leave_city in [0, 1, 2, 3, 4]:
     for lr in ['1e-05']:
         tf.reset_default_graph()
 
-        model_dir = r'/hdd6/Models/Inria_Domain_Selection/UnetCrop_inria_distance_loo_5050_{}_1_PS(572, 572)_BS5_' \
+        model_dir = r'/hdd6/Models/Inria_Domain_Selection/UnetCrop_inria_mmd_xregion_5050_{}_1_PS(572, 572)_BS5_' \
                     r'EP40_LR{}_DS30_DR0.1_SFN32'.format(leave_city, lr)
         blCol = uab_collectionFunctions.uabCollection('inria')
         blCol.readMetadata()
