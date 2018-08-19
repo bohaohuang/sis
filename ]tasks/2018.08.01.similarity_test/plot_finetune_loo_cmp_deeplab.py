@@ -32,11 +32,14 @@ def read_iou(model_dir, target_city=None):
     return city_iou
 
 
-def read_loo_iou(model_dir):
+def read_loo_iou(model_dir, city_list=None):
     city_iou_a_all = np.zeros(6)
     city_iou_b_all = np.zeros(6)
     for target_city in range(5):
-        load_dir = model_dir.format(target_city)
+        if city_list is None:
+            load_dir = model_dir.format(target_city)
+        else:
+            load_dir = model_dir.format(city_list[target_city])
         result_file = os.path.join(load_dir, 'result.txt')
         city_iou_a = np.zeros(5)
         city_iou_b = np.zeros(5)
@@ -64,25 +67,25 @@ LR = '1e-05'
 
 plt.figure(figsize=(10, 6))
 xtick_list = city_list + ['Overall']
-legend_list = ['LOO', 'MMD', 'DIS', 'Base', 'XRegion MMD']
+legend_list = ['LOO', 'MMD', 'DIS', 'Base']
 
 city_ious = np.zeros((len(legend_list), 6))
-model_dir_loo = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
-                r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria'
-city_ious[0, :] = read_loo_iou(model_dir_loo)
+model_dir_loo = r'/hdd/Results/domain_selection/DeeplabV3_inria_{}_loo_0_PS(321, 321)_BS5_' \
+                r'EP100_LR1e-05_DS40_DR0.1_SFN32/inria'
+city_ious[0, :] = read_loo_iou(model_dir_loo, city_list)
 
-model_dir_mmd = r'/hdd/Results/mmd/UnetCrop_inria_mmd_loo_5050_{}_1_PS(572, 572)_BS5_EP40_LR'+LR+'_DS30_DR0.1_SFN32/inria'
+model_dir_mmd = r'/hdd/Results/mmd/DeeplabV3_inria_mmd_loo_5050_{}_1_PS(321, 321)_BS5_EP40_LR'+LR+'_DS30_DR0.1_SFN32/inria'
 city_ious[1, :] = read_loo_iou(model_dir_mmd)
 
-model_dir_dis = r'/hdd/Results/mmd/UnetCrop_inria_distance_loo_5050_{}_1_PS(572, 572)_BS5_EP40_LR'+LR+'_DS30_DR0.1_SFN32/inria'
+model_dir_dis = r'/hdd/Results/mmd/DeeplabV3_inria_distance_loo_5050_{}_1_PS(321, 321)_BS5_EP40_LR'+LR+'_DS30_DR0.1_SFN32/inria'
 city_ious[2, :] = read_loo_iou(model_dir_dis)
 
-model_dir_base = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \
-                 r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria'
+model_dir_base = r'/hdd/Results/domain_selection/DeeplabV3_inria_aug_grid_0_PS(321, 321)_BS5_' \
+                 r'EP100_LR1e-05_DS40_DR0.1_SFN32/inria'
 city_ious[3, :] = read_iou(model_dir_base, target_city=None)
 
-model_dir_xregion = r'/hdd/Results/mmd/UnetCrop_inria_mmd_xregion_5050_{}_1_PS(572, 572)_BS5_EP40_LR'+LR+'_DS30_DR0.1_SFN32/inria'
-city_ious[4, :] = read_loo_iou(model_dir_xregion)
+'''model_dir_xregion = r'/hdd/Results/mmd/UnetCrop_inria_mmd_xregion_5050_{}_1_PS(572, 572)_BS5_EP40_LR'+LR+'_DS30_DR0.1_SFN32/inria'
+city_ious[4, :] = read_loo_iou(model_dir_xregion)'''
 
 width = 0.18
 X = np.arange(6)
@@ -98,5 +101,5 @@ plt.ylabel('IoUs')
 plt.legend(ncol=len(legend_list))
 plt.title('LOO Performance Comparison')
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'mmd_distance_iou_compare_5050_lr{}.png'))
+#plt.savefig(os.path.join(img_dir, 'mmd_distance_iou_compare_5050_lr{}.png'))
 plt.show()

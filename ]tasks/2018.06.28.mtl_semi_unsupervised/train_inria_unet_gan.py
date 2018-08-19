@@ -21,12 +21,12 @@ EPOCHS = 50
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1280
-GPU =0
+GPU = 0
 DECAY_STEP = '30,10,30'
 DECAY_RATE = '0.1,0.1,0.1'
 MODEL_NAME = 'inria_gan_real_{}_{}'
 SFN = 32
-FINETUNE_CITY = 0
+FINETUNE_CITY = 4
 PRED_MODEL_DIR = r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
                  r'EP100_LR0.0001_DS60_DR0.1_SFN32'
 
