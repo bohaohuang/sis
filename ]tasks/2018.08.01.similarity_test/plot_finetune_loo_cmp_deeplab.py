@@ -67,7 +67,7 @@ LR = '1e-05'
 
 plt.figure(figsize=(10, 6))
 xtick_list = city_list + ['Overall']
-legend_list = ['LOO', 'MMD', 'DIS', 'Base']
+legend_list = ['LOO', 'MMD', 'DIS', 'Base', 'XRegion MMD']
 
 city_ious = np.zeros((len(legend_list), 6))
 model_dir_loo = r'/hdd/Results/domain_selection/DeeplabV3_inria_{}_loo_0_PS(321, 321)_BS5_' \
@@ -84,8 +84,8 @@ model_dir_base = r'/hdd/Results/domain_selection/DeeplabV3_inria_aug_grid_0_PS(3
                  r'EP100_LR1e-05_DS40_DR0.1_SFN32/inria'
 city_ious[3, :] = read_iou(model_dir_base, target_city=None)
 
-'''model_dir_xregion = r'/hdd/Results/mmd/UnetCrop_inria_mmd_xregion_5050_{}_1_PS(572, 572)_BS5_EP40_LR'+LR+'_DS30_DR0.1_SFN32/inria'
-city_ious[4, :] = read_loo_iou(model_dir_xregion)'''
+model_dir_xregion = r'/hdd/Results/mmd/DeeplabV3_inria_mmd_xregion_5050_{}_1_PS(321, 321)_BS5_EP40_LR'+LR+'_DS30_DR0.1_SFN32/inria'
+city_ious[4, :] = read_loo_iou(model_dir_xregion)
 
 width = 0.18
 X = np.arange(6)
@@ -101,5 +101,5 @@ plt.ylabel('IoUs')
 plt.legend(ncol=len(legend_list))
 plt.title('LOO Performance Comparison')
 plt.tight_layout()
-#plt.savefig(os.path.join(img_dir, 'mmd_distance_iou_compare_5050_lr{}.png'))
+plt.savefig(os.path.join(img_dir, 'deeplab_mmd_distance_iou_compare_5050_lr{}.png'))
 plt.show()

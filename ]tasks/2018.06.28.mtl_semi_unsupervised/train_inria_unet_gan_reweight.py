@@ -17,18 +17,19 @@ BATCH_SIZE = 4
 LEARNING_RATE = '1e-4,1e-5,1e-6'
 INPUT_SIZE = 572
 TILE_SIZE = 5000
-EPOCHS = 50
+EPOCHS = 30
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1280
 GPU = 0
 DECAY_STEP = '30,10,30'
 DECAY_RATE = '0.1,0.1,0.1'
-MODEL_NAME = 'inria_gan_real_{}_{}'
+MODEL_NAME = 'inria_gan_control_{}_{}'
 SFN = 32
-FINETUNE_CITY = 4
+FINETUNE_CITY = 0
 PRED_MODEL_DIR = r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
                  r'EP100_LR0.0001_DS60_DR0.1_SFN32'
+LLH_FILE_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.08.01.similarity_test/unet_loo_mmd_target_{}_5050.npy'
 
 
 def read_flag():
@@ -49,6 +50,7 @@ def read_flag():
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--finetune-city', type=int, default=FINETUNE_CITY, help='city id to leave-out in training')
     parser.add_argument('--pred-model-dir', type=str, default=PRED_MODEL_DIR, help='pretrained model dir')
+    parser.add_argument('--llh-file-dir', type=str, default=LLH_FILE_DIR, help='weights directory')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
@@ -58,6 +60,9 @@ def read_flag():
 
 
 def main(flags):
+    flags.llh_file_dir = flags.llh_file_dir.format(flags.finetune_city)
+    weight = np.load(flags.llh_file_dir)
+
     # make network
     # define place holder
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
@@ -101,26 +106,29 @@ def main(flags):
     idx = [j * 10 + i for i, j in zip(idx_city, idx_tile)]
     # use first city for validation
     filter_train = []
-    filter_train_valid = []
+    filter_train_target = []
     filter_valid = []
     for i in range(5):
         for j in range(1, 37):
             if i != flags.finetune_city and j > 5:
                 filter_train.append(j * 10 + i)
             elif i == flags.finetune_city and j > 5:
-                filter_train_valid.append(j * 10 + i)
+                filter_train_target.append(j * 10 + i)
             elif i == flags.finetune_city and j <= 5:
                 filter_valid.append(j * 10 + i)
     # use first city for validation
     file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_train)
-    filter_list_train_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_train_valid)
+    filter_list_train_target = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_train_target)
     file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_valid)
 
     dataReader_train = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, flags.input_size,
                                                       flags.batch_size, dataAug='flip,rotate',
                                                       block_mean=np.append([0], img_mean), batch_code=0)
-    dataReader_train_valid = uabDataReader.ImageLabelReader(
-        [3], [0, 1, 2], patchDir, filter_list_train_valid, flags.input_size, flags.batch_size, dataAug='flip,rotate',
+    dataReader_train_source = uabDataReader.ImageLabelReaderPatchSampleControl(
+        [3], [0, 1, 2], patchDir, file_list_train, flags.input_size, flags.batch_size,
+        weight, dataAug='flip,rotate', block_mean=np.append([0], img_mean))
+    dataReader_train_target = uabDataReader.ImageLabelReader(
+        [3], [0, 1, 2], patchDir, filter_list_train_target, flags.input_size, flags.batch_size, dataAug='flip,rotate',
         block_mean=np.append([0], img_mean), batch_code=0)
     # no augmentation needed for validation
     dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_valid, flags.input_size,
@@ -134,8 +142,8 @@ def main(flags):
     model.train_config('X', 'Y', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
                        loss_type='xent', par_dir='Inria_GAN')
     model.run(train_reader=dataReader_train,
-              train_reader_source=dataReader_train,
-              train_reader_target=dataReader_train_valid,
+              train_reader_source=dataReader_train_source,
+              train_reader_target=dataReader_train_target,
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,        # train from scratch, no need to load pre-trained model
               isTrain=True,
