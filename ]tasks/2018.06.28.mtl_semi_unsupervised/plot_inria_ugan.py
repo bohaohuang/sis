@@ -38,7 +38,7 @@ model_type = 'unet'
 colors = util_functions.get_default_colors()
 
 plt.figure(figsize=(8, 6))
-for city_id in [0]:
+for city_id in [1]:
     xtick_list = ['{}{}'.format(city_list[city_id].capitalize(), a+1) for a in range(5)] + ['Overall']
     legend_list = ['LOO', 'UGan', 'Base']
 
@@ -47,7 +47,7 @@ for city_id in [0]:
                     r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria'.format(city_id)
     city_ious[0, :] = read_iou(model_dir_loo, target_city=city_id)
 
-    model_dir_ugan = r'/hdd/Results/ugan/UnetGAN_inria_gan_control_{}_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1/inria'.format(city_id)
+    model_dir_ugan = r'/hdd/Results/ugan/UnetGAN_inria_gan_0821_{}_2_PS(572, 572)_BS4_EP50_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1/inria'.format(city_id)
     city_ious[1, :] = read_iou(model_dir_ugan, target_city=city_id)
 
     model_dir_base = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \

@@ -18,11 +18,11 @@ def down_sample(img, mult_num, dim=3):
     return img
 
 
-def read_polygon_info(file_name):
+def read_polygon_info(file_name, city_name):
     with open(file_name, 'r') as f:
         reader = csv.reader(f)
         for line in reader:
-            if 'Atlanta' in line[0]:
+            if city_name in line[0]:
                 line_num = int(line[2])
                 line_record = []
                 for i in range(line_num - 1):
@@ -46,13 +46,14 @@ def add_polygons(img, reader):
 
 
 if __name__ == '__main__':
-    img_dir = r'/home/lab/Documents/bohao/data/Atlanta'
+    city_name = 'DC'
+    img_dir = r'/home/lab/Documents/bohao/data/DC'
     check_result = True
-    for img_id in [3]:
-        img_name = 'Atlanta_0{}.tif'.format(img_id)
-        gt_file_name = 'Atlanta_0{}_buildingCoord.csv'.format(img_id)
+    for img_id in [1, 2]:
+        img_name = '{}_0{}.tif'.format(city_name, img_id)
+        gt_file_name = '{}_0{}_buildingCoord.csv'.format(city_name, img_id)
 
-        info_reader = read_polygon_info(os.path.join(img_dir, gt_file_name))
+        info_reader = read_polygon_info(os.path.join(img_dir, gt_file_name), city_name)
         img = imageio.imread(os.path.join(img_dir, img_name))
 
         gt_img = np.zeros(img.shape, np.uint8)
@@ -61,8 +62,8 @@ if __name__ == '__main__':
         img = down_sample(img, 2)
         gt_img = down_sample(gt_img, 2, dim=2)
 
-        new_img_name = 'atlanta{}_RGB.tif'.format(img_id)
-        new_gt_name = 'atlanta{}_GT.png'.format(img_id)
+        new_img_name = '{}{}_RGB.tif'.format(city_name, img_id)
+        new_gt_name = '{}{}_GT.png'.format(city_name, img_id)
 
         imageio.imsave(os.path.join(img_dir, new_img_name), img)
         imageio.imsave(os.path.join(img_dir, new_gt_name), gt_img)

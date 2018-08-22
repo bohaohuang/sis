@@ -58,10 +58,10 @@ def compute_median_distance(X):
     return dist
 
 
-def make_res50_features(model_name, task_dir, city_name, GPU=0, force_run=False):
+def make_res50_features(model_name, task_dir, GPU=0, force_run=False):
     tf.reset_default_graph()
-    feature_file_name = os.path.join(task_dir, 'res50_{}_{}.csv'.format(city_name, model_name))
-    patch_file_name = os.path.join(task_dir, 'res50_{}_{}.txt'.format(city_name, model_name))
+    feature_file_name = os.path.join(task_dir, 'res50_atlanta_{}.csv'.format(model_name))
+    patch_file_name = os.path.join(task_dir, 'res50_atlanta_{}.txt'.format(model_name))
 
     if model_name == 'deeplab':
         input_size = (321, 321)
@@ -69,7 +69,7 @@ def make_res50_features(model_name, task_dir, city_name, GPU=0, force_run=False)
     else:
         input_size = (572, 572)
         overlap = 184
-    blCol = uab_collectionFunctions.uabCollection(city_name)
+    blCol = uab_collectionFunctions.uabCollection('atlanta')
     img_mean = blCol.getChannelMeans([0, 1, 2])
     extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 3],
                                                     cSize=input_size,
@@ -111,9 +111,26 @@ def make_res50_features(model_name, task_dir, city_name, GPU=0, force_run=False)
     return feature_file_name, patch_file_name, input_size[0], patchDir
 
 
+def compute_distance(m, f):
+    return np.linalg.norm((m-f), axis=1)
+
+
+def distance_matching(f_s, f_t, top_cnt=5):
+    n, _ = f_s.shape
+    match_record = np.zeros((n, top_cnt), dtype=np.uint32)
+    dist_record = np.zeros(n)
+    for i in range(n):
+        dist = compute_distance(f_t, f_s[i, :])
+        match_record[i, :] = np.argsort(dist)[:top_cnt]
+        dist_record[i] = np.mean(dist[match_record[i, :]])
+    return match_record, dist_record
+
+
 model_name = 'unet'
 perplex = 25
-city_name = 'dc'
+top_cnt = 5
+target_city = 'atlanta'
+force_run = False
 
 # 1. make features
 img_dir, task_dir = utils.get_task_img_folder()
@@ -121,7 +138,7 @@ feature_file_name, patch_file_name, ps, patchDir, idx = mrf(model_name, task_dir
 feature = pd.read_csv(feature_file_name, sep=',', header=None).values
 with open(patch_file_name, 'r') as f:
     patch_names = f.readlines()
-target_feature_file_name, _, _, _ = make_res50_features(model_name, task_dir, city_name, GPU=1, force_run=True)
+target_feature_file_name, _, _, _ = make_res50_features(model_name, task_dir, GPU=1, force_run=True)
 target_feature = pd.read_csv(target_feature_file_name, sep=',', header=None).values
 
 # 2. make city and building truth
@@ -129,10 +146,55 @@ truth_city = make_city_truth(task_dir, model_name, patch_names, force_run=False)
 truth_building = make_building_truth(ps, task_dir, model_name, patchDir, patch_names, force_run=False)
 
 # 3. do feature mapping
-# mean_dist = compute_median_distance(feature)
+# mean_dist = compute_median_distance(source_feature)
 # print(mean_dist)
 source_feature = select_feature(feature, np.array(idx) >= 6, truth_city, truth_building,
                                 [i for i in range(5)], True)
-weight = kernel_mean_matching(target_feature, source_feature, kern='rbf', B=1000.0, sigma=21.16)
-save_file_name = os.path.join(task_dir, '{}_target_{}_weight_xregion_building.npy'.format(model_name, city_name))
-np.save(save_file_name, weight)
+match_file_name = os.path.join(task_dir, '{}_match_{}_top{}.npy'.format(model_name, target_city, top_cnt))
+dist_file_name = os.path.join(task_dir, '{}_dist_{}_top{}.npy'.format(model_name, target_city, top_cnt))
+if not os.path.exists(match_file_name) or not os.path.exists(dist_file_name) or force_run:
+    match_record, dist_record = distance_matching(source_feature, target_feature, top_cnt=top_cnt)
+    np.save(match_file_name, match_record)
+    np.save(dist_file_name, dist_record)
+else:
+    match_record = np.load(match_file_name)
+    dist_record = np.load(dist_file_name)
+
+sample_prior = softmax(-dist_record, t=50)
+remake_weight = np.zeros(np.sum(np.array(idx) >= 6))
+tb = [truth_building[i] for i in range(len(truth_building)) if truth_city[i] != target_city]
+weight_cnt = 0
+for i in range(remake_weight.shape[0]):
+    if tb[i] == 1:
+        remake_weight[i] = sample_prior[weight_cnt]
+        weight_cnt += 1
+remake_weight = remake_weight / np.sum(remake_weight) / 2
+remake_weight[remake_weight == 0] = 1 / 2 / np.sum(remake_weight == 0)
+remake_weight = remake_weight / np.sum(remake_weight)
+print(np.sum(remake_weight))
+np.save(os.path.join(task_dir, '{}_loo_distance_target_{}_5050.npy'.format(model_name, target_city)), remake_weight)
+
+plt.bar(np.arange(len(remake_weight)), np.sort(remake_weight)[::-1])
+plt.show()
+
+patch_names = [patch_names[a] for a in range(len(idx)) if idx[a] >= 6]
+sort_idx = np.argsort(remake_weight)[::-1]
+cnt = 0
+while True:
+    plt.figure(figsize=(12, 4))
+    for i in range(5):
+        img = []
+        for channel in range(3):
+            img.append(imageio.imread(os.path.join(patchDir, '{}_RGB{}.jpg'.format(patch_names[sort_idx[cnt]][:-1], channel))))
+        img = np.dstack(img)
+
+        gt = imageio.imread(os.path.join(patchDir, '{}_GT_Divide.png'.format(patch_names[sort_idx[cnt]][:-1])))
+        plt.subplot(2, 5, 1 + i)
+        plt.imshow(img)
+        plt.axis('off')
+        plt.subplot(2, 5, 6 + i)
+        plt.imshow(gt)
+        plt.axis('off')
+        cnt += 1
+    plt.tight_layout()
+    plt.show()
