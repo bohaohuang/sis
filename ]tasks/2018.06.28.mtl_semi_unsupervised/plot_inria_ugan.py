@@ -38,7 +38,7 @@ model_type = 'unet'
 colors = util_functions.get_default_colors()
 
 plt.figure(figsize=(8, 6))
-for city_id in [1]:
+for city_id in [4]:
     xtick_list = ['{}{}'.format(city_list[city_id].capitalize(), a+1) for a in range(5)] + ['Overall']
     legend_list = ['LOO', 'UGan', 'Base']
 

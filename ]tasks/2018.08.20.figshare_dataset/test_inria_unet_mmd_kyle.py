@@ -37,4 +37,4 @@ model.create_graph('X', class_num=2)
 # evaluate on tiles
 model.evaluate(file_list, file_list_truth, parent_dir, parent_dir_truth,
                input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-               save_result_parent_dir='kyle', ds_name='atlanta', load_epoch_num=15)
+               save_result_parent_dir='kyle', ds_name='atlanta', best_model=False)

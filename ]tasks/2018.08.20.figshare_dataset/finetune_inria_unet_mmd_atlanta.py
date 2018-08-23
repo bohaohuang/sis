@@ -23,11 +23,12 @@ N_VALID = 1280
 GPU = 1
 DECAY_STEP = 30
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_mmd_xregion_5050_atlanta_{}'
+CITY_NAME = 'dc'
+MODEL_NAME = 'inria_mmd_xregion_5050_'+CITY_NAME+'_{}'
 SFN = 32
 PRED_MODEL_DIR = r'/hdd6/Models/Inria_decay/UnetCrop_inria_decay_0_PS(572, 572)_BS5_' \
                  r'EP100_LR0.0001_DS60.0_DR0.1_SFN32'
-LLH_FILE_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.08.20.figshare_dataset/unet_xregion_mmd_target_atlanta_5050.npy'
+LLH_FILE_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.08.20.figshare_dataset/unet_xregion_mmd_target_'+CITY_NAME+'_5050.npy'
 
 
 def read_flag():

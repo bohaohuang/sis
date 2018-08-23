@@ -24,7 +24,7 @@ N_VALID = 1280
 GPU = 0
 DECAY_STEP = '30,10,30'
 DECAY_RATE = '0.1,0.1,0.1'
-MODEL_NAME = 'inria_gan_soft_{}_{}'
+MODEL_NAME = 'inria_gan_0955pm_{}_{}'
 SFN = 32
 FINETUNE_CITY = 1
 PRED_MODEL_DIR = r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
@@ -134,7 +134,7 @@ def main(flags):
     model.train_config('X', 'Y', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
                        loss_type='xent', par_dir='Inria_GAN')
     model.run(train_reader=dataReader_train,
-              train_reader_source=dataReader_train_target,
+              train_reader_source=dataReader_train,
               train_reader_target=dataReader_train_target,
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,        # train from scratch, no need to load pre-trained model

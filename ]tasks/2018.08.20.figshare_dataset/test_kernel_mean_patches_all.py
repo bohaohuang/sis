@@ -13,11 +13,12 @@ img_dir, task_dir = utils.get_task_img_folder()
 model_name = 'unet'
 feature_file_name, patch_file_name, ps, patchDir, idx = make_res50_features(model_name, task_dir, GPU=0,
                                                                             force_run=False)
+city_name = 'dc'
 file_name = os.path.join(patchDir, 'fileList.txt')
 with open(file_name, 'r') as f:
     files = f.readlines()
 
-save_file_name = os.path.join(task_dir, '{}_target_{}_weight_xregion_building.npy'.format(model_name, 'atlanta'))
+save_file_name = os.path.join(task_dir, '{}_target_{}_weight_xregion_building.npy'.format(model_name, city_name))
 weight = np.load(save_file_name)
 weight = weight[:, 0]
 
@@ -47,7 +48,7 @@ remake_weight = remake_weight / np.sum(remake_weight) / 2
 remake_weight[remake_weight == 0] = 1 / 2 / np.sum(remake_weight == 0)
 
 remake_weight = remake_weight / np.sum(remake_weight)
-np.save(os.path.join(task_dir, '{}_xregion_mmd_target_{}_5050.npy'.format(model_name, 'atlanta')), remake_weight)
+np.save(os.path.join(task_dir, '{}_xregion_mmd_target_{}_5050.npy'.format(model_name, city_name)), remake_weight)
 
 # plot feature weights
 '''plt.figure(figsize=(16, 5.5))

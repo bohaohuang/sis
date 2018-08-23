@@ -71,6 +71,8 @@ def make_res50_features(model_name, task_dir, city_name, GPU=0, force_run=False)
         overlap = 184
     blCol = uab_collectionFunctions.uabCollection(city_name)
     img_mean = blCol.getChannelMeans([0, 1, 2])
+    print(blCol.readMetadata())
+    print(img_mean)
     extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 3],
                                                     cSize=input_size,
                                                     numPixOverlap=overlap,
@@ -125,8 +127,8 @@ target_feature_file_name, _, _, _ = make_res50_features(model_name, task_dir, ci
 target_feature = pd.read_csv(target_feature_file_name, sep=',', header=None).values
 
 # 2. make city and building truth
-truth_city = make_city_truth(task_dir, model_name, patch_names, force_run=False)
-truth_building = make_building_truth(ps, task_dir, model_name, patchDir, patch_names, force_run=False)
+truth_city = make_city_truth(task_dir, model_name, patch_names, force_run=True)
+truth_building = make_building_truth(ps, task_dir, model_name, patchDir, patch_names, force_run=True)
 
 # 3. do feature mapping
 # mean_dist = compute_median_distance(feature)

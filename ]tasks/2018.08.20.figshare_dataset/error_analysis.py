@@ -57,9 +57,9 @@ def make_cmp_plot(rgb, truth, base, loo, mtl, x, y, window_size, city_str):
     plt.subplot(142)
     make_subplot(base_patch, base, truth_patch, 'Base')
     plt.subplot(143)
-    make_subplot(loo_patch, loo, truth_patch, 'LOO')
+    make_subplot(loo_patch, loo, truth_patch, 'MMD')
     plt.subplot(144)
-    make_subplot(mtl_patch, mtl, truth_patch, 'MMD')
+    make_subplot(mtl_patch, mtl, truth_patch, 'DIS')
     plt.tight_layout()
 
     return fig
@@ -69,52 +69,50 @@ cnn_name = 'unet'
 top_patch_check = 15
 window_size = 500
 stride = 200
-city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
+city_name = 'atlanta'
 img_dir, task_dir = utils.get_task_img_folder()
 
-truth_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/Original_Tiles'
+truth_dir = r'/media/ei-edl01/data/uab_datasets/{}/data/Original_Tiles'.format(city_name)
 if cnn_name == 'unet':
-    base_dir = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \
-               r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria/pred'
-    loo_dir = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
-              r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria/pred'
-    mtl_dir = r'/hdd/Results/mmd/UnetCrop_inria_mmd_loo_5050_{}_1_PS(572, 572)_BS5_' \
-              r'EP40_LR1e-05_DS30_DR0.1_SFN32/inria/pred'
+    base_dir = r'/hdd/Results/kyle/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \
+               r'EP100_LR0.0001_DS60_DR0.1_SFN32/{}/pred'.format(city_name)
+    mmd_dir = r'/hdd/Results/kyle/UnetCrop_inria_mmd_xregion_5050_atlanta_1_PS(572, 572)_BS5_' \
+              r'EP40_LR1e-05_DS30_DR0.1_SFN32/{}/pred'.format(city_name)
+    dis_dir = r'/hdd/Results/kyle/UnetCrop_inria_distance_xregion_5050_atlanta_1_PS(572, 572)_BS5_' \
+              r'EP40_LR1e-05_DS30_DR0.1_SFN32/{}/pred'.format(city_name)
 else:
-    base_dir = r'/hdd/Results/domain_selection/DeeplabV3_inria_aug_grid_0_PS(321, 321)_BS5_' \
-               r'EP100_LR1e-05_DS40_DR0.1_SFN32/inria/pred'
-    loo_dir = r'/hdd/Results/domain_selection/DeeplabV3_inria_aug_train_leave_{}_0_PS(321, 321)_BS5_' \
-              r'EP100_LR1e-05_DS40_DR0.1_SFN32/inria/pred'
-    mtl_dir = None
+    base_dir = r'/hdd/Results/kyle/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \
+               r'EP100_LR0.0001_DS60_DR0.1_SFN32/{}/pred'.format(city_name)
+    mmd_dir = r'/hdd/Results/kyle/UnetCrop_inria_mmd_xregion_5050_atlanta_1_PS(572, 572)_BS5_' \
+              r'EP40_LR1e-05_DS30_DR0.1_SFN32/{}/pred'.format(city_name)
+    dis_dir = r'/hdd/Results/kyle/UnetCrop_inria_distance_xregion_5050_atlanta_1_PS(572, 572)_BS5_' \
+              r'EP40_LR1e-05_DS30_DR0.1_SFN32/{}/pred'.format(city_name)
 
-for city_num in [4]:
-    for val_img_cnt in range(1, 6):
-        img_save_dir = os.path.join(img_dir, 'base_mmd_loo', city_list[city_num])
-        if not os.path.exists(img_save_dir):
-            os.makedirs(img_save_dir)
+for val_img_cnt in range(1, 4):
+    img_save_dir = os.path.join(img_dir, 'base_mmd_dis', city_name)
+    if not os.path.exists(img_save_dir):
+        os.makedirs(img_save_dir)
 
-        rgb = imageio.imread(os.path.join(truth_dir, '{}{}_RGB.tif'.format(city_list[city_num], val_img_cnt)))
+    rgb = imageio.imread(os.path.join(truth_dir, '{}{}_RGB.tif'.format(city_name, val_img_cnt)))
 
-        truth_img_name = os.path.join(truth_dir, '{}{}_GT.tif'.format(city_list[city_num], val_img_cnt))
-        base_img_name = os.path.join(base_dir, '{}{}.png'.format(city_list[city_num], val_img_cnt))
-        loo_img_name = os.path.join(loo_dir.format(city_num), '{}{}.png'.format(city_list[city_num], val_img_cnt))
-        mtl_img_name = os.path.join(mtl_dir.format(city_num), '{}{}.png'.format(city_list[city_num], val_img_cnt))
+    truth_img_name = os.path.join(truth_dir, '{}{}_GT.png'.format(city_name, val_img_cnt))
+    base_img_name = os.path.join(base_dir, '{}{}.png'.format(city_name, val_img_cnt))
+    mmd_img_name = os.path.join(mmd_dir, '{}{}.png'.format(city_name, val_img_cnt))
+    dis_img_name = os.path.join(dis_dir, '{}{}.png'.format(city_name, val_img_cnt))
 
-        truth, base, loo, mtl = imageio.imread(truth_img_name), imageio.imread(base_img_name), \
-                                imageio.imread(loo_img_name), imageio.imread(mtl_img_name)
-        truth = truth / 255
-        base = base / 255
+    truth, base, mmd, dis = imageio.imread(truth_img_name), imageio.imread(base_img_name), \
+                            imageio.imread(mmd_img_name), imageio.imread(dis_img_name)
 
-        assert np.all(np.unique(truth) == np.array([0, 1])) and np.all(np.unique(base) == np.array([0, 1])) \
-               and np.all(np.unique(loo) == np.array([0, 1])) and np.all(np.unique(mtl) == np.array([0, 1]))
+    assert np.all(np.unique(truth) == np.array([0, 1])) and np.all(np.unique(base) == np.array([0, 1])) \
+           and np.all(np.unique(mmd) == np.array([0, 1])) and np.all(np.unique(dis) == np.array([0, 1]))
 
-        erp_base, erp_dict_base = error_region_proposals(base, truth, window_size, stride)
-        erp_loo, erp_dict_loo = error_region_proposals(loo, truth, window_size, stride)
-        erp_mtl, erp_dict_mtl = error_region_proposals(mtl, truth, window_size, stride)
+    erp_base, erp_dict_base = error_region_proposals(base, truth, window_size, stride)
+    erp_loo, erp_dict_loo = error_region_proposals(mmd, truth, window_size, stride)
+    erp_mtl, erp_dict_mtl = error_region_proposals(dis, truth, window_size, stride)
 
-        for patch_cnt in range(top_patch_check):
-            x, y = erp_loo[patch_cnt, :][:2]
-            fig = make_cmp_plot(rgb, truth, base, loo, mtl, x, y, window_size,
-                                '{}{}'.format(city_list[city_num], val_img_cnt))
-            plt.savefig(os.path.join(img_save_dir, '{}{}_h{}_w{}.png'.format(city_list[city_num], val_img_cnt, x, y)))
-            plt.close(fig)
+    for patch_cnt in range(top_patch_check):
+        x, y = erp_loo[patch_cnt, :][:2]
+        fig = make_cmp_plot(rgb, truth, base, mmd, dis, x, y, window_size,
+                            '{}{}'.format(city_name, val_img_cnt))
+        plt.savefig(os.path.join(img_save_dir, '{}{}_h{}_w{}.png'.format(city_name, val_img_cnt, x, y)))
+        plt.close(fig)
