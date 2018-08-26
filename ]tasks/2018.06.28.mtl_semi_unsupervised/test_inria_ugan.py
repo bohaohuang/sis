@@ -41,11 +41,13 @@ model_list = [#r'/hdd6/Models/Inria_GAN/new/UnetGAN_inria_gan_0_2_PS(572, 572)_B
               #r'/hdd6/Models/Inria_GAN/UnetGAN_inria_gan_control_0_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1',
               #r'/hdd6/Models/Inria_GAN/UnetGAN_inria_gan_0821_1_2_PS(572, 572)_BS4_EP50_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1',
               #r'/hdd6/Models/Inria_GAN/UnetGAN_inria_gan_soft_1_2_PS(572, 572)_BS4_EP30_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1',
-              r'/hdd6/Models/Inria_GAN/0823/UnetGAN_inria_gan_0821_0_2_PS(572, 572)_BS4_EP50_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1',
-              r'/hdd6/Models/Inria_GAN/0823/UnetGAN_inria_gan_0821_1_2_PS(572, 572)_BS4_EP50_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1',
-              r'/hdd6/Models/Inria_GAN/0823/UnetGAN_inria_gan_0821_2_2_PS(572, 572)_BS4_EP50_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1',
-              r'/hdd6/Models/Inria_GAN/0823/UnetGAN_inria_gan_0821_3_2_PS(572, 572)_BS4_EP50_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1',
-              r'/hdd6/Models/Inria_GAN/0823/UnetGAN_inria_gan_0821_4_2_PS(572, 572)_BS4_EP50_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1',
+              #r'/hdd6/Models/Inria_GAN/0823/UnetGAN_inria_gan_0821_0_2_PS(572, 572)_BS4_EP50_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1',
+              #r'/hdd6/Models/Inria_GAN/0823/UnetGAN_inria_gan_0821_1_2_PS(572, 572)_BS4_EP50_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1',
+              #r'/hdd6/Models/Inria_GAN/0823/UnetGAN_inria_gan_0821_2_2_PS(572, 572)_BS4_EP50_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1',
+              #r'/hdd6/Models/Inria_GAN/0823/UnetGAN_inria_gan_0821_3_2_PS(572, 572)_BS4_EP50_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1',
+              #r'/hdd6/Models/Inria_GAN/0823/UnetGAN_inria_gan_0821_4_2_PS(572, 572)_BS4_EP50_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1',
+              r'/hdd6/Models/Inria_GAN/0955pm/UnetGAN_inria_gan_1038am_1_2_PS(572, 572)_BS4_EP30_LR0.0001_0.0001_0.0001_DS30.0_20.0_20.0_DR0.1_0.1_0.1',
+              r'/hdd6/Models/Inria_GAN/0955pm/UnetGAN_inria_gan_1038am_1_2_PS(572, 572)_BS4_EP30_LR0.0001_0.0001_0.0001_DS30.0_10.0_10.0_DR0.1_0.1_0.1',
               ]
 
 for model_dir in model_list:
