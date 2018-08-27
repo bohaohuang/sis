@@ -26,7 +26,7 @@ def distance_matching(f_s, f_t, top_cnt=5):
     return match_record, dist_record
 
 
-model_name = 'deeplab'
+model_name = 'unet'
 top_cnt = 5
 force_run = False
 
@@ -45,11 +45,11 @@ for target_city in tqdm(range(5)):
 
     # 3. do feature mapping
     source_feature = select_feature(feature, np.array(idx) >= 6, truth_city, truth_building,
-                                    [i for i in range(5) if i != target_city], True)
+                                    [i for i in range(5)], True)
     target_feature = select_feature(feature, np.array(idx) < 6, truth_city, truth_building, [target_city], False)
 
-    match_file_name = os.path.join(task_dir, '{}_match_{}_top{}.npy'.format(model_name, target_city, top_cnt))
-    dist_file_name = os.path.join(task_dir, '{}_dist_{}_top{}.npy'.format(model_name, target_city, top_cnt))
+    match_file_name = os.path.join(task_dir, '{}_match_{}_top{}_xregion.npy'.format(model_name, target_city, top_cnt))
+    dist_file_name = os.path.join(task_dir, '{}_dist_{}_top{}_xregion.npy'.format(model_name, target_city, top_cnt))
     if not os.path.exists(match_file_name) or not os.path.exists(dist_file_name) or force_run:
         match_record, dist_record = distance_matching(source_feature, target_feature, top_cnt=top_cnt)
         np.save(match_file_name, match_record)
@@ -73,39 +73,9 @@ for target_city in tqdm(range(5)):
     patch_names = [patch_names[i] for i in range(len(patch_names)) if
                    truth_city[i] != target_city and truth_building[i] == 1]
 
-    '''img2show = 5
-    plt.figure(figsize=(15, 10))
-    for i in range(img2show):
-        source_img_name = patch_names[sort_idx[i]][:-1]
-        img = []
-        for channel in range(3):
-            img.append(imageio.imread(os.path.join(patchDir, '{}_RGB{}.jpg'.format(source_img_name, channel))))
-        img = np.dstack(img)
-
-        plt.subplot(img2show, (top_cnt + 1), i * (top_cnt + 1) + 1)
-        plt.imshow(img)
-        plt.axis('off')
-        plt.title(source_img_name.split('_')[0])
-
-        for j in range(top_cnt):
-            target_img_name = patch_names_target[match_record[sort_idx[i], j]][:-1]
-            img = []
-            for channel in range(3):
-                img.append(imageio.imread(os.path.join(patchDir, '{}_RGB{}.jpg'.format(target_img_name, channel))))
-            img = np.dstack(img)
-
-            plt.subplot(img2show, (top_cnt + 1), i * (top_cnt + 1) + j + 1 + 1)
-            plt.imshow(img)
-            plt.axis('off')
-            plt.title(target_img_name.split('_')[0])
-
-    plt.tight_layout()'''
-    #plt.savefig(os.path.join(img_dir, 'distance_match_{}_top{}.png'.format(target_city, top_cnt)))
-    # plt.show()
-
-    '''sample_prior = softmax(-dist_record, t=100)
-    remake_weight = np.zeros(np.sum(np.array(idx) >= 6) // 5 * 4)
-    tb = [truth_building[i] for i in range(len(truth_building)) if truth_city[i] != target_city]
+    sample_prior = softmax(-dist_record, t=100)
+    remake_weight = np.zeros(np.sum(np.array(idx) >= 6))
+    tb = [truth_building[i] for i in range(len(truth_building))]
     weight_cnt = 0
     for i in range(remake_weight.shape[0]):
         if tb[i] == 1:
@@ -115,8 +85,4 @@ for target_city in tqdm(range(5)):
     remake_weight[remake_weight == 0] = 1 / 2 / np.sum(remake_weight == 0)
     remake_weight = remake_weight / np.sum(remake_weight)
     print(np.sum(remake_weight))
-    np.save(os.path.join(task_dir, '{}_loo_distance_target_{}_5050.npy'.format(model_name, target_city)), remake_weight)'''
-
-    #plt.figure()
-    #plt.hist(np.sort(softmax(-dist_record, t=100)), bins=1000)
-    #plt.show()
+    np.save(os.path.join(task_dir, '{}_xregion_distance_target_{}_5050.npy'.format(model_name, target_city)), remake_weight)

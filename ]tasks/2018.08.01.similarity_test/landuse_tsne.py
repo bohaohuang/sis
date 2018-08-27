@@ -43,22 +43,22 @@ def get_image_mean(file_list):
 
 
 def plot_tsne(feature_encode, id_list, cat_dict):
+    id_list = np.array(id_list)
     cat_list = ['' for i in range(len(cat_dict))]
     for key, val in cat_dict.items():
         cat_list[val] = key
-    print(np.unique(id_list), len(cat_dict), cat_dict)
 
     cmap = plt.get_cmap('Set1').colors
+    marker_list = ['s', 'v', 'D']
     plt.figure(figsize=(15, 8))
     for i in range(len(cat_dict)):
-        print(i)
-        plt.scatter(feature_encode[id_list == i, 0], feature_encode[id_list == i, 1], color=cmap[i],
-                    label=cat_list[i], edgecolors='k')
+        plt.scatter(feature_encode[id_list == i, 0], feature_encode[id_list == i, 1], color=cmap[i % 7],
+                    marker=marker_list[i // 7], label=cat_list[i], edgecolors='k')
 
     plt.xlabel('Feature 1')
     plt.ylabel('Feature 2')
     plt.title('TSNE Projection Result')
-    plt.legend()
+    plt.legend(ncol=3)
     plt.tight_layout()
 
 
@@ -93,8 +93,8 @@ if __name__ == '__main__':
         with open(patch_file_name, 'r') as f:
             patch_names = f.readlines()
 
-    perplex = 25
+    perplex = 40
     file_name = os.path.join(task_dir, 'land_inria_p{}.npy'.format(perplex))
     feature_encode = run_tsne(feature, patch_file_name, perplex=perplex, force_run=True)
-    print(len(file_list), feature_encode.shape)
     plot_tsne(feature_encode, id_list, cat_dict)
+    plt.show()
