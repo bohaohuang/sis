@@ -8,4 +8,4 @@
 module load Python-GPU/3.6.5
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/uab
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/sis
-python finetune_inria_deeplab_xregion_mmd.py --learning-rate=1e-5 --finetune-city=0 --llh-file=/dscrhome/bh163/misc/temp_files/deeplab_xregion_mmd_target_\{\}_5050.npy --pred-model-dir=/dscrhome/bh163/misc/unet_xregion
+python finetune_inria_deeplab_xregion_mmd.py --learning-rate=1e-6 --finetune-city=0 --llh-file=/dscrhome/bh163/misc/temp_files/deeplab_xregion_mmd_target_\{\}_5050.npy --pred-model-dir=/dscrhome/bh163/misc/unet_xregion

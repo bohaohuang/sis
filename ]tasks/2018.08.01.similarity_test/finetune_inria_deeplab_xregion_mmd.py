@@ -1,4 +1,3 @@
-import os
 import time
 import argparse
 import numpy as np
@@ -14,7 +13,7 @@ from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 RUN_ID = 1
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-6
 INPUT_SIZE = 321
 TILE_SIZE = 5000
 EPOCHS = 40
@@ -29,7 +28,7 @@ SFN = 32
 FINETUNE_CITY = 0
 PRED_MODEL_DIR = r'/hdd6/Models/Inria_Domain_LOO/DeeplabV3_inria_{}_loo_0_PS(321, 321)_BS5_' \
                  r'EP100_LR1e-05_DS40_DR0.1_SFN32'
-LLH_FILE_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.08.01.similarity_test/deeplab_loo_mmd_target_{}_5050.npy'
+LLH_FILE_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.08.01.similarity_test/deeplab_xregion_mmd_target_{}_5050.npy'
 
 
 def read_flag():
