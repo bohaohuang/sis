@@ -78,7 +78,7 @@ if __name__ == '__main__':
     patch_file_name = os.path.join(task_dir, 'ucmerced_res50_inria.txt')
     res50 = keras.applications.resnet50.ResNet50(include_top=True, weights='imagenet')
     fc2048 = keras.models.Model(inputs=res50.input, outputs=res50.get_layer('flatten_1').output)
-    if not os.path.exists(feature_file_name) and not os.path.join(patch_file_name):
+    if not os.path.exists(feature_file_name) and not os.path.exists(os.path.join(patch_file_name)):
         with open(feature_file_name, 'w+') as f, open(patch_file_name, 'w+') as f2:
             for file_line in tqdm(file_list):
                 img = imageio.imread(file_line)
@@ -88,13 +88,14 @@ if __name__ == '__main__':
                 writer = csv.writer(f, lineterminator='\n')
                 writer.writerow(['{}'.format(x) for x in fc1000])
                 f2.write('{}\n'.format(file_line.split('/')[-1]))
-    else:
-        feature = pd.read_csv(feature_file_name, sep=',', header=None).values
-        with open(patch_file_name, 'r') as f:
-            patch_names = f.readlines()
+
+    feature = pd.read_csv(feature_file_name, sep=',', header=None).values
+    with open(patch_file_name, 'r') as f:
+        patch_names = f.readlines()
 
     perplex = 40
     file_name = os.path.join(task_dir, 'land_inria_p{}.npy'.format(perplex))
-    feature_encode = run_tsne(feature, patch_file_name, perplex=perplex, force_run=True)
+    feature_encode = run_tsne(feature, file_name, perplex=perplex, force_run=False)
     plot_tsne(feature_encode, id_list, cat_dict)
+    plt.savefig(os.path.join(img_dir, 'land_use_tsne_p{}.png'.format(perplex)))
     plt.show()
