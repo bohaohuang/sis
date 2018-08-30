@@ -12,8 +12,8 @@ from bohaoCustom import uabDataReader
 from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 2
-BATCH_SIZE = 10
-LEARNING_RATE = '1e-5,1e-6,1e-6'
+BATCH_SIZE = 20
+LEARNING_RATE = '1e-5,1e-5,1e-5'
 INPUT_SIZE = 572
 TILE_SIZE = 5000
 EPOCHS = 30
