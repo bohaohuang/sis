@@ -26,7 +26,7 @@ def distance_matching(f_s, f_t, top_cnt=5):
     return match_record, dist_record
 
 
-model_name = 'unet'
+model_name = 'deeplab'
 top_cnt = 5
 force_run = False
 

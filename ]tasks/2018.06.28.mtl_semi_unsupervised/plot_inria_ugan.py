@@ -47,8 +47,8 @@ for city_id in [1]:
                     r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria'.format(city_id)
     city_ious[0, :] = read_iou(model_dir_loo, target_city=city_id)
 
-    model_dir_ugan = r'/hdd/Results/ugan/UnetGAN_V2_inria_gan_base_{}_2_PS(572, 572)_BS4_' \
-                     r'EP30_LR0.0001_1e-05_1e-05_DS30.0_10.0_10.0_DR0.1_0.1_0.1/inria'.format(city_id)
+    model_dir_ugan = r'/hdd/Results/ugan/UnetGAN_V3_inria_gan_base_{}_2_PS(572, 572)_BS20_' \
+                     r'EP30_LR1e-05_1e-05_1e-05_DS30.0_30.0_30.0_DR0.1_0.1_0.1/inria'.format(city_id)
     city_ious[1, :] = read_iou(model_dir_ugan, target_city=city_id)
 
     model_dir_base = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \
@@ -63,7 +63,7 @@ for city_id in [1]:
         for cnt, llh in enumerate(city_ious[plt_cnt, :]):
             plt.text(X[cnt] + width * (plt_cnt - 0.5), llh, '{:.1f}'.format(llh), fontsize=8)
     plt.xticks(X + width * 2, xtick_list)
-    plt.ylim([45, 85])
+    plt.ylim([50, 75])
     plt.xlabel('City Name')
     plt.ylabel('IoUs')
     plt.legend()
