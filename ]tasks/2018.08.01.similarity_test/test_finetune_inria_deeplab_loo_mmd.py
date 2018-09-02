@@ -13,7 +13,7 @@ util_functions.tf_warn_level(3)
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 
 for leave_city in [0, 1, 2, 3, 4]:
-    for lr in ['1e-05']:
+    for lr in ['1e-06']:
         tf.reset_default_graph()
 
         model_dir = r'/hdd6/Models/Inria_Domain_Selection/DeeplabV3_inria_mmd_xregion_5050_{}_1_PS(321, 321)_BS5_' \
@@ -49,4 +49,4 @@ for leave_city in [0, 1, 2, 3, 4]:
         # evaluate on tiles
         model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                        input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                       save_result_parent_dir='mmd', ds_name='inria')
+                       save_result_parent_dir='mmd', ds_name='inria', best_model=True)
