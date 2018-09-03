@@ -78,8 +78,8 @@ if cnn_name == 'unet':
                r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria/pred'
     loo_dir = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
               r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria/pred'
-    mtl_dir = r'/hdd/Results/ugan/UnetGAN_inria_gan_0821_{}_2_PS(572, 572)_BS4_' \
-              r'EP50_LR0.0001_1e-05_1e-06_DS30.0_10.0_30.0_DR0.1_0.1_0.1/inria/pred'
+    mtl_dir = r'/hdd/Results/ugan/UnetGAN_V3Shrink_inria_gan_loo_{}_0_PS(572, 572)_BS20_' \
+              r'EP30_LR0.0001_1e-06_1e-06_DS15.0_30.0_30.0_DR0.1_0.1_0.1/inria/pred'
 else:
     base_dir = r'/hdd/Results/domain_selection/DeeplabV3_inria_aug_grid_0_PS(321, 321)_BS5_' \
                r'EP100_LR1e-05_DS40_DR0.1_SFN32/inria/pred'
@@ -87,9 +87,9 @@ else:
               r'EP100_LR1e-05_DS40_DR0.1_SFN32/inria/pred'
     mtl_dir = None
 
-for city_num in [2]:
+for city_num in [0, 1, 2]:
     for val_img_cnt in range(1, 6):
-        img_save_dir = os.path.join(img_dir, 'base_ugan_loo', city_list[city_num])
+        img_save_dir = os.path.join(img_dir, 'uganv3shrink_loo', city_list[city_num])
         if not os.path.exists(img_save_dir):
             os.makedirs(img_save_dir)
 
