@@ -67,7 +67,7 @@ LR = '1e-05'
 
 plt.figure(figsize=(10, 6))
 xtick_list = city_list + ['Overall']
-legend_list = ['LOO', 'MMD', 'DIS', 'Base', 'XRegion MMD']
+legend_list = ['LOO', 'MMD', 'DIS', 'Base', 'XRegion MMD', 'XRegion DIS']
 
 city_ious = np.zeros((len(legend_list), 6))
 model_dir_loo = r'/hdd/Results/domain_selection/DeeplabV3_inria_{}_loo_0_PS(321, 321)_BS5_' \
@@ -87,14 +87,17 @@ city_ious[3, :] = read_iou(model_dir_base, target_city=None)
 model_dir_xregion = r'/hdd/Results/mmd/DeeplabV3_inria_mmd_xregion_5050_{}_1_PS(321, 321)_BS5_EP40_LR'+'1e-06'+'_DS30_DR0.1_SFN32/inria'
 city_ious[4, :] = read_loo_iou(model_dir_xregion)
 
-width = 0.18
+model_dir_xregion_dis = r'/hdd/Results/mmd/DeeplabV3_inria_distance_xregion_5050_{}_1_PS(321, 321)_BS5_EP40_LR'+'1e-06'+'_DS30_DR0.1_SFN32/inria'
+city_ious[5, :] = read_loo_iou(model_dir_xregion_dis)
+
+width = 0.15
 X = np.arange(6)
 for plt_cnt in range(len(legend_list)):
     plt.bar(X + width * plt_cnt, city_ious[plt_cnt, :], width=width, color=colors[plt_cnt],
             label=legend_list[plt_cnt])
     for cnt, llh in enumerate(city_ious[plt_cnt, :]):
-        plt.text(X[cnt] + width * (plt_cnt - 0.5), llh, '{:.1f}'.format(llh), fontsize=8)
-plt.xticks(X + width * 2, xtick_list, fontsize=10)
+        plt.text(X[cnt] + width * (plt_cnt - 0.5), llh, '{:.1f}'.format(llh), fontsize=6)
+plt.xticks(X + width * 2.5, xtick_list, fontsize=10)
 plt.ylim([50, 85])
 plt.xlabel('City Name')
 plt.ylabel('IoUs')

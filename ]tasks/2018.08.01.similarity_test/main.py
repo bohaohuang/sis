@@ -7,8 +7,9 @@ from run_tsne import run_tsne, plot_tsne
 from city_building_truth import make_building_truth, make_city_truth
 from gmm_cluster import *
 
-model_name = 'unet'
-perplex = 25
+model_name = 'deeplab'
+perplex = 50
+lr = 500
 do_tsne = True
 do_bic = False
 show_bic = False
@@ -24,9 +25,9 @@ with open(patch_file_name, 'r') as f:
 
 if do_tsne:
     # (2. do tsne)
-    file_name = os.path.join(task_dir, '{}_inria_p{}.npy'.format(model_name, perplex))
-    feature_encode = run_tsne(feature, file_name, perplex=perplex, force_run=False)
-    plot_tsne(feature_encode, patch_names, rand_percent=1)
+    file_name = os.path.join(task_dir, '{}_inria_p{}_lr{}.npy'.format(model_name, perplex, lr))
+    feature_encode = run_tsne(feature, file_name, perplex=perplex, force_run=False, learn_rate=lr)
+    plot_tsne(feature_encode, patch_names, rand_percent=1, show_id=False)
     plt.savefig(os.path.join(img_dir, 'tsne_unet_inria_n{}_all'.format(perplex)))
     plt.show()
 

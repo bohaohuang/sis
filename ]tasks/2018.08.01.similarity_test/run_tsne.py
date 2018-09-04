@@ -7,9 +7,10 @@ from mpl_toolkits.axes_grid1 import Grid
 from make_res50_features import crop_center
 
 
-def run_tsne(features, file_name, perplex=25, force_run=False):
+def run_tsne(features, file_name, perplex=25, force_run=False, learn_rate=200):
     if not os.path.exists(file_name) or force_run:
-        feature_encode = TSNE(n_components=2, perplexity=perplex, verbose=True).fit_transform(features)
+        feature_encode = TSNE(n_components=2, perplexity=perplex, learning_rate=learn_rate, verbose=True).\
+            fit_transform(features)
         np.save(file_name, feature_encode)
     else:
         feature_encode = np.load(file_name)

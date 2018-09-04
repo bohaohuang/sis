@@ -85,7 +85,7 @@ model_dir_xregion = r'/hdd/Results/mmd/UnetCrop_inria_mmd_xregion_5050_{}_1_PS(5
 city_ious[4, :] = read_loo_iou(model_dir_xregion)
 
 model_dir_xregion_dis = r'/hdd/Results/mmd/UnetCrop_inria_distance_xregion_5050_{}_1_PS(572, 572)_BS5_EP40_LR'+LR+'_DS30_DR0.1_SFN32/inria'
-city_ious[5, :] = read_loo_iou(model_dir_xregion)
+city_ious[5, :] = read_loo_iou(model_dir_xregion_dis)
 
 width = 0.15
 X = np.arange(6)

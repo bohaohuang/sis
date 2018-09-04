@@ -22,7 +22,7 @@ loo_err_list = np.zeros(len(trimap_width))
 ugan_err_list = np.zeros(len(trimap_width))
 img_dir, task_dir = utils.get_task_img_folder()
 
-for city_id in [1, 2]:
+for city_id in [3, 4]:
     gt_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/TilePreproc/MultChanOp_chans3_Divide_dF255p000'
 
     model_dir_loo = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \

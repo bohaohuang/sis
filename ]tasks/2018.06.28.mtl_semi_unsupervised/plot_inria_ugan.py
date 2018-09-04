@@ -36,10 +36,10 @@ img_dir, task_dir = utils.get_task_img_folder()
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 model_type = 'unet'
 colors = util_functions.get_default_colors()
-xlim_array = [[45, 85], [55, 75], [25, 85], [45, 85], [60, 85]]
+xlim_array = [[45, 85], [55, 75], [25, 85], [45, 85], [65, 85]]
 
 plt.figure(figsize=(8, 6))
-for city_id in [2]:
+for city_id in [3]:
     xtick_list = ['{}{}'.format(city_list[city_id].capitalize(), a+1) for a in range(5)] + ['Overall']
     legend_list = ['LOO', 'UGan', 'Base']
 

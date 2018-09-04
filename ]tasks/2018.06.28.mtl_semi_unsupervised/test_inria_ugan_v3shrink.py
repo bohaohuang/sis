@@ -14,7 +14,7 @@ util_functions.tf_warn_level(3)
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 
 model_list = [
-    r'UnetGAN_V3Shrink_inria_gan_loo_2_0_PS(572, 572)_BS20_EP30_LR0.0001_1e-06_1e-06_DS15.0_30.0_30.0_DR0.1_0.1_0.1',
+    r'UnetGAN_V3Shrink_inria_gan_loo_reweight_0_0_PS(572, 572)_BS20_EP30_LR0.0001_1e-06_1e-06_DS15.0_30.0_30.0_DR0.1_0.1_0.1',
 ]
 
 for model_dir in model_list:
@@ -51,4 +51,4 @@ for model_dir in model_list:
     # evaluate on tiles
     model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                    input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                   save_result_parent_dir='ugan', ds_name='inria', best_model=True)
+                   save_result_parent_dir='ugan', ds_name='inria')
