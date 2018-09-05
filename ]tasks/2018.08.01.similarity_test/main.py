@@ -27,8 +27,8 @@ if do_tsne:
     # (2. do tsne)
     file_name = os.path.join(task_dir, '{}_inria_p{}_lr{}.npy'.format(model_name, perplex, lr))
     feature_encode = run_tsne(feature, file_name, perplex=perplex, force_run=False, learn_rate=lr)
-    plot_tsne(feature_encode, patch_names, rand_percent=1, show_id=False)
-    plt.savefig(os.path.join(img_dir, 'tsne_unet_inria_n{}_all'.format(perplex)))
+    plot_tsne(feature_encode, patch_names, rand_percent=1, show_id=True)
+    # plt.savefig(os.path.join(img_dir, 'tsne_unet_inria_n{}_lr{}'.format(perplex, lr)))
     plt.show()
 
 # 2. make city and building truth

@@ -15,19 +15,21 @@ RUN_ID = 0
 BATCH_SIZE = 20
 LEARNING_RATE = '1e-4,1e-6,1e-6'
 INPUT_SIZE = 572
-TILE_SIZE = 1500
-EPOCHS = 60
+TILE_SIZE = 5000
+EPOCHS = 30
 NUM_CLASS = 2
 N_TRAIN = 8000
-N_VALID = 1000
+N_VALID = 1280
 GPU = 0
-DECAY_STEP = '40,40,40'
+DECAY_STEP = '15,30,30'
 DECAY_RATE = '0.1,0.1,0.1'
-MODEL_NAME = 'road_gan_{}'
+MODEL_NAME = 'inria_gan_loo_{}_{}'
 SFN = 32
 PAD = 24
 SAVE_EPOCH = 5
-PRED_MODEL_DIR = r'/hdd6/Models/Inria_GAN/Road/UnetCrop_road_0_PS(572, 572)_BS5_EP80_LR0.0001_DS60_DR0.1_SFN32'
+FINETUNE_CITY = 3
+PRED_MODEL_DIR = r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
+                 r'EP100_LR0.0001_DS60_DR0.1_SFN32'
 
 
 def read_flag():
@@ -48,12 +50,13 @@ def read_flag():
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--pad', type=int, default=PAD, help='padding in the attachment network')
     parser.add_argument('--save-epoch', type=int, default=SAVE_EPOCH, help='#epochs between two model saving events')
+    parser.add_argument('--finetune-city', type=int, default=FINETUNE_CITY, help='city id to leave-out in training')
     parser.add_argument('--pred-model-dir', type=str, default=PRED_MODEL_DIR, help='pretrained model dir')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
     flags.tile_size = (flags.tile_size, flags.tile_size)
-    flags.model_name = flags.model_name.format(flags.run_id)
+    flags.model_name = flags.model_name.format(flags.finetune_city, flags.run_id)
     return flags
 
 
@@ -63,22 +66,22 @@ def main(flags):
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, flags.input_size[0], flags.input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_UNet.UnetModelGAN_V3Shrink({'X': X, 'Y': y},
-                                                      trainable=mode,
-                                                      model_name=flags.model_name,
-                                                      input_size=flags.input_size,
-                                                      batch_size=flags.batch_size,
-                                                      learn_rate=flags.learning_rate,
-                                                      decay_step=flags.decay_step,
-                                                      decay_rate=flags.decay_rate,
-                                                      epochs=flags.epochs,
-                                                      start_filter_num=flags.sfn,
-                                                      pad=flags.pad,)
+    model = uabMakeNetwork_UNet.UnetModelGAN_V3ShrinkRGB({'X': X, 'Y': y},
+                                                         trainable=mode,
+                                                         model_name=flags.model_name,
+                                                         input_size=flags.input_size,
+                                                         batch_size=flags.batch_size,
+                                                         learn_rate=flags.learning_rate,
+                                                         decay_step=flags.decay_step,
+                                                         decay_rate=flags.decay_rate,
+                                                         epochs=flags.epochs,
+                                                         start_filter_num=flags.sfn,
+                                                         pad=flags.pad,)
     model.create_graph(['X', 'Y'], class_num=flags.num_classes)
 
     # create collection
     # the original file is in /ei-edl01/data/uab_datasets/inria
-    blCol = uab_collectionFunctions.uabCollection('Mass_road')
+    blCol = uab_collectionFunctions.uabCollection('inria')
     opDetObj = bPreproc.uabOperTileDivide(255)
     # [3] is the channel id of GT
     rescObj = uabPreprocClasses.uabPreprocMultChanOp([], 'GT_Divide.tif', 'Map GT to (0, 1)', [3], opDetObj)
@@ -97,16 +100,31 @@ def main(flags):
 
     # make data reader
     # use uabCrossValMaker to get fileLists for training and validation
-    idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'city')
-    file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [1])
-    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [2])
-    file_list_test = uabCrossValMaker.make_file_list_by_key(idx, file_list, [0])
+    idx_city, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'city')
+    idx_tile, _ = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
+    idx = [j * 10 + i for i, j in zip(idx_city, idx_tile)]
+    # use first city for validation
+    filter_train = []
+    filter_train_target = []
+    filter_valid = []
+    for i in range(5):
+        for j in range(1, 37):
+            if i != flags.finetune_city and j > 5:
+                filter_train.append(j * 10 + i)
+            elif i == flags.finetune_city and j > 5:
+                filter_train_target.append(j * 10 + i)
+            elif i == flags.finetune_city and j <= 5:
+                filter_valid.append(j * 10 + i)
+    # use first city for validation
+    file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_train)
+    filter_list_train_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_train_target)
+    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_valid)
 
     dataReader_train = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, flags.input_size,
                                                       flags.batch_size, dataAug='flip,rotate',
                                                       block_mean=np.append([0], img_mean), batch_code=0)
     dataReader_train_target = uabDataReader.ImageLabelReader(
-        [3], [0, 1, 2], patchDir, file_list_test, flags.input_size, flags.batch_size, dataAug='flip,rotate',
+        [3], [0, 1, 2], patchDir, filter_list_train_valid, flags.input_size, flags.batch_size, dataAug='flip,rotate',
         block_mean=np.append([0], img_mean), batch_code=0)
     # no augmentation needed for validation
     dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_valid, flags.input_size,
@@ -115,10 +133,10 @@ def main(flags):
 
     # train
     start_time = time.time()
-    model.load_weights(flags.pred_model_dir, layers2load='1,2,3,4,5,6,7,8,9',
+    model.load_weights(flags.pred_model_dir.format(flags.finetune_city), layers2load='1,2,3,4,5,6,7,8,9',
                        load_final_layer=True)
     model.train_config('X', 'Y', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
-                       loss_type='xent', par_dir='Inria_GAN/Road')
+                       loss_type='xent', par_dir='Inria_GAN/V3LOO')
     model.run(train_reader=dataReader_train,
               train_reader_source=dataReader_train,
               train_reader_target=dataReader_train_target,

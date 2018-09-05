@@ -45,7 +45,7 @@ def plot_tsne(feature_encode, patch_name_list, rand_percent=1, show_id=False):
 
     plt.xlabel('Feature 1')
     plt.ylabel('Feature 2')
-    plt.title('TSNE Projection Result')
+    # plt.title('TSNE Projection Result')
     plt.legend()
     plt.tight_layout()
 

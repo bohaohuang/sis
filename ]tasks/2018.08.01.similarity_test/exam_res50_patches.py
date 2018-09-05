@@ -26,5 +26,5 @@ if do_tsne:
     plt.show()
 
 # view patches
-img_ids = [43944, 1812, 2299, 7920, 3315, 42467]
+img_ids = [17098, 31759, 23864, 43949, 30788, 28843]
 view_encoded_patches(img_ids, patch_names, patchDir, model_name, img_dir, 'tsne_encoded')
