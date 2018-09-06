@@ -25,7 +25,7 @@ DECAY_STEP = 60
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_loo_portion_{}_{}_{}'
 SFN = 32
-PORTION = 1
+PORTION = 5
 FINETUNE_CITY = 0
 
 
