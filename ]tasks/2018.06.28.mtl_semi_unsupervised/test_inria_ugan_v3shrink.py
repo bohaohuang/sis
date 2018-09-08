@@ -6,7 +6,7 @@ import util_functions
 from bohaoCustom import uabMakeNetwork_UNet
 
 # settings
-gpu = 0
+gpu = 1
 batch_size = 5
 input_size = [572, 572]
 tile_size = [5000, 5000]
@@ -14,7 +14,7 @@ util_functions.tf_warn_level(3)
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 
 model_list = [
-    r'UnetGAN_V3ShrinkRGB_inria_gan_loo_0_0_PS(572, 572)_BS20_EP30_LR0.0001_1e-06_1e-06_DS15.0_30.0_30.0_DR0.1_0.1_0.1',
+    r'UnetGAN_V3ShrinkRGB_inria_gan_loo_4_0_PS(572, 572)_BS20_EP30_LR0.0001_1e-06_1e-06_DS15.0_30.0_30.0_DR0.1_0.1_0.1',
 ]
 
 for model_dir in model_list:

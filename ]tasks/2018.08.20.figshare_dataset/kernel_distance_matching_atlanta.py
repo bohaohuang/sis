@@ -129,7 +129,7 @@ def distance_matching(f_s, f_t, top_cnt=5):
 model_name = 'unet'
 perplex = 25
 top_cnt = 5
-target_city = 'atlanta'
+target_city = 'dc'
 force_run = False
 
 # 1. make features
