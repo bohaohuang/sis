@@ -14,7 +14,7 @@ util_functions.tf_warn_level(3)
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 
 model_list = [
-    r'UnetGAN_V3ShrinkRGB_inria_gan_loo_4_0_PS(572, 572)_BS20_EP30_LR0.0001_1e-06_1e-06_DS15.0_30.0_30.0_DR0.1_0.1_0.1',
+    r'UnetGAN_V4_inria_gan_loo_1_0_PS(572, 572)_BS20_EP30_LR0.0001_1e-06_1e-06_DS15.0_30.0_30.0_DR0.1_0.1_0.1',
 ]
 
 for model_dir in model_list:
@@ -40,7 +40,7 @@ for model_dir in model_list:
     X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_UNet.UnetModelGAN_V3ShrinkRGB({'X': X, 'Y': y},
+    model = uabMakeNetwork_UNet.UnetModelGAN_V4RGB({'X': X, 'Y': y},
                                                          trainable=mode,
                                                          input_size=input_size,
                                                          batch_size=batch_size,
