@@ -48,7 +48,7 @@ for city_id in [3]:
                     r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria'.format(city_id)
     city_ious[0, :] = read_iou(model_dir_loo, target_city=city_id)
 
-    model_dir_ugan = r'/hdd/Results/ugan/UnetGAN_V3Shrink_inria_gan_loo_{}_0_PS(572, 572)_BS20_EP30_' \
+    model_dir_ugan = r'/hdd/Results/ugan/UnetGAN_V5_inria_gan_loo_{}_0_PS(572, 572)_BS20_EP30_' \
                      r'LR0.0001_1e-06_1e-06_DS15.0_30.0_30.0_DR0.1_0.1_0.1/inria'.format(city_id)
     city_ious[1, :] = read_iou(model_dir_ugan, target_city=city_id)
 
@@ -70,6 +70,6 @@ for city_id in [3]:
     plt.legend()
     plt.title('Finetune on {}'.format(city_list[city_id].capitalize()))
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'uganv3shrink_iou_compare_{}_{}.png'.format(city_list[city_id],
-                                                                                  model_dir_ugan.split('/')[-2])))
+    #plt.savefig(os.path.join(img_dir, 'uganv3shrink_iou_compare_{}_{}.png'.format(city_list[city_id],
+    #                                                                              model_dir_ugan.split('/')[-2])))
     plt.show()

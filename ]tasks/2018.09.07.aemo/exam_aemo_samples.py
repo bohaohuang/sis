@@ -32,17 +32,17 @@ gpu = 0
 nn_utils.set_gpu(gpu)
 
 # get test data
-gammas = [2.5, 1, 2.5]
+# gammas = [2.5, 1, 2.5]
 sample_id = 3
 data_dir = r'/media/ei-edl01/data/aemo/samples/0584007740{}0_01'.format(sample_id)
-files = sorted(glob(os.path.join(data_dir, 'TILES', '*.tif')))
+files = sorted(glob(os.path.join(data_dir, 'hist_match_ct', '*.tif')))
 
 # adjust gamma
-gamma_save_dir = os.path.join(data_dir, 'gamma_adjust')
+'''gamma_save_dir = os.path.join(data_dir, 'gamma_adjust')
 ersa_utils.make_dir_if_not_exist(gamma_save_dir)
 ga = gammaAdjust.GammaAdjust(gamma=gammas[sample_id - 1], path=gamma_save_dir)
 ga.run(force_run=False, file_list=files)
-files = sorted(glob(os.path.join(gamma_save_dir, '*.tif')))
+files = sorted(glob(os.path.join(gamma_save_dir, '*.tif')))'''
 
 # get image mean
 img_mean = cm.get_channel_mean('', [[f] for f in files])
@@ -58,7 +58,7 @@ unet.evaluate([[f] for f in files], patch_size, tile_size, bs, img_mean, model_d
               sfn=sfn, force_run=False, score_results=False, split_char='.', best_model=False)'''
 
 
-my_dir = os.path.join(data_dir, 'bh_pred')
+my_dir = os.path.join(data_dir, 'bh_pred_ct')
 
 # make dirs
 if not os.path.exists(my_dir):
@@ -90,7 +90,7 @@ for test_file in file_list_valid:
         reader = uabDataReader.ImageLabelReader(gtInds=[0],
                                                 dataInds=[0],
                                                 nChannels=3,
-                                                parentDir=gamma_save_dir,
+                                                parentDir=os.path.join(data_dir, 'hist_match_ct'),
                                                 chipFiles=[test_file],
                                                 chip_size=patch_size,
                                                 tile_size=tile_size,

@@ -8,13 +8,18 @@ import utils
 img_dir, task_dir = utils.get_task_img_folder()
 
 plt.figure(figsize=(6, 10))
+gammas = ['2p5', '1', '2p5']
+force_run = False
 for sample_id in range(1, 4):
-    file_name = os.path.join(task_dir, 'sample_{}_dist.npy'.format(sample_id))
+    file_name = os.path.join(task_dir, 'sample_{}_dist_{}.npy'.format(sample_id, gammas[sample_id-1]))
 
-    if not os.path.exists(file_name):
+    if not os.path.exists(file_name) or force_run:
         dist = np.zeros((3, 256))
         data_dir = r'/media/ei-edl01/data/aemo/samples/0584007740{}0_01'.format(sample_id)
-        files = sorted(glob(os.path.join(data_dir, 'TILES', '*.tif')))
+        if sample_id == 2:
+            files = sorted(glob(os.path.join(data_dir, 'gamma_adjust', '*{}.tif'.format(gammas[sample_id-1]))))
+        else:
+            files = sorted(glob(os.path.join(data_dir, 'hist', '*{}.tif'.format(gammas[sample_id - 1]))))
 
         for f in files:
             img = ersa_utils.load_file(f)
@@ -33,5 +38,5 @@ for sample_id in range(1, 4):
     plt.title('Sample {}'.format(sample_id))
 
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'samples_channel_distribution.png'))
+plt.savefig(os.path.join(img_dir, 'samples_channel_distribution_gamma.png'))
 plt.show()

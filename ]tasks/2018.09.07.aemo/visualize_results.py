@@ -14,7 +14,7 @@ files = sorted(glob(os.path.join(data_dir, 'TILES', '*.tif')))
 # adjust gamma
 gamma_save_dir = os.path.join(data_dir, 'gamma_adjust')
 orig_files = sorted(glob(os.path.join(gamma_save_dir, '*.tif')))
-pred_files = sorted(glob(os.path.join(data_dir, 'bh_pred', '*{}.tif'.format(ersa_utils.float2str(gammas[sample_id-1])))))
+pred_files = sorted(glob(os.path.join(data_dir, 'bh_pred_ct', '*histRGB.tif')))
 
 b_cnt = 0
 for rgb, pred in zip(orig_files, pred_files):
