@@ -20,13 +20,13 @@ EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 2000
-GPU = 0
+GPU = 1
 DECAY_STEP = 60
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_loo_portion_{}_{}_{}'
 SFN = 32
 PORTION = 35
-FINETUNE_CITY = 0
+FINETUNE_CITY = 1
 
 
 def read_flag():

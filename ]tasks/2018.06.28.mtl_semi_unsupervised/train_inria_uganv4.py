@@ -13,7 +13,7 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 0
 BATCH_SIZE = 20
-LEARNING_RATE = '1e-4,1e-6,1e-6'
+LEARNING_RATE = '1e-5,1e-6,1e-6'
 INPUT_SIZE = 572
 TILE_SIZE = 5000
 EPOCHS = 30
@@ -23,14 +23,14 @@ N_VALID = 1280
 GPU = 0
 DECAY_STEP = '15,30,30'
 DECAY_RATE = '0.1,0.1,0.1'
-MODEL_NAME = 'inria_gan_loo_{}_{}'
+MODEL_NAME = 'inria_gan_loo_unet_{}_{}'
 SFN = 32
 PAD = 24
+TRAIN_UNET = False
 SAVE_EPOCH = 5
 FINETUNE_CITY = 1
 PRED_MODEL_DIR = r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
                  r'EP100_LR0.0001_DS60_DR0.1_SFN32'
-
 
 def read_flag():
     parser = argparse.ArgumentParser()
@@ -49,6 +49,7 @@ def read_flag():
     parser.add_argument('--run-id', type=str, default=RUN_ID, help='id of this run')
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--pad', type=int, default=PAD, help='padding in the attachment network')
+    parser.add_argument('--train-unet', type=bool, default=TRAIN_UNET, help='train segment netwrok or not')
     parser.add_argument('--save-epoch', type=int, default=SAVE_EPOCH, help='#epochs between two model saving events')
     parser.add_argument('--finetune-city', type=int, default=FINETUNE_CITY, help='city id to leave-out in training')
     parser.add_argument('--pred-model-dir', type=str, default=PRED_MODEL_DIR, help='pretrained model dir')
@@ -76,7 +77,8 @@ def main(flags):
                                                    decay_rate=flags.decay_rate,
                                                    epochs=flags.epochs,
                                                    start_filter_num=flags.sfn,
-                                                   pad=flags.pad,)
+                                                   pad=flags.pad,
+                                                   train_unet=flags.train_unet)
     model.create_graph(['X', 'Y'], class_num=flags.num_classes)
 
     # create collection
