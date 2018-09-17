@@ -71,12 +71,12 @@ class myImageLabelReader(uabDataReader.ImageLabelReader):
 
 
 # settings
-gpu = 0
+gpu = 1
 batch_size = 1
 input_size = [572, 572]
 tile_size = [5000, 5000]
 block_size = 4656
-for slide_step in [70, 35, 21, 14, 7]:
+for slide_step in [388]:
     util_functions.tf_warn_level(3)
     city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
     model_dir = r'/hdd6/Models/Inria_decay/UnetCrop_inria_decay_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60.0_DR0.1_SFN32'

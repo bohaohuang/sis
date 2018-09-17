@@ -1,0 +1,51 @@
+import os
+import utils
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+img_dir, task_dir = utils.get_task_img_folder()
+save_dir = os.path.join(r'/media/ei-edl01/user/bh163/tasks/2018.01.23.score_results', 'train_patch')
+runs = [2]
+sizes = [572, 828, 1084, 1340, 1596, 1852, 2092, 2332, 2636]
+iou_record = np.zeros((len(runs), len(sizes)))
+duration_record = np.zeros((len(runs), len(sizes)))
+
+for cnt_run, run_repeat in enumerate(runs):
+    for cnt_size, size in enumerate(sizes):
+        file_name = 'TUnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32_{}_{}.npy'.format(
+            size, run_repeat
+        )
+        iou, duration = np.load(os.path.join(save_dir, file_name))
+
+        A = 0
+        B = 0
+        for item in iou:
+            A += iou[item][0]
+            B += iou[item][1]
+
+        iou_record[cnt_run][cnt_size] = A/B*100
+        duration_record[cnt_run][cnt_size] = duration
+
+np.save(os.path.join(save_dir, 'inria_unet_test_patch.npy'), [sizes, iou_record, duration_record])
+
+plt.figure(figsize=(10, 6))
+plt.rcParams.update({'font.size': 14})
+plt.rc('grid', linestyle='--')
+plt.subplot(211)
+plt.plot(sizes, iou_record[0], '-o')
+plt.xticks(sizes, sizes)
+plt.grid()
+plt.xlabel('Test Patch Size')
+plt.ylabel('IoU')
+
+plt.subplot(212)
+plt.plot([14, 21, 35, 70, 140], [76.05, 75.90, 75.51, 74.47, 72.46], '-o')
+plt.grid()
+plt.xticks([14, 21, 35, 70, 140], [14, 21, 35, 70, 140])
+plt.xlabel('Test Stride')
+plt.ylabel('IoU')
+
+plt.tight_layout()
+#plt.savefig(os.path.join(img_dir, 'test_patch_frrn.png'))
+plt.show()
