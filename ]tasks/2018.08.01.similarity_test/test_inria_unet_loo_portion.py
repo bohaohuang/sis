@@ -5,16 +5,16 @@ from bohaoCustom import uabMakeNetwork_UNet
 import util_functions
 
 # settings
-gpu = 1
+gpu = 0
 batch_size = 5
-input_size = [572, 572]
+input_size = [924, 924]
 tile_size = [5000, 5000]
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 T = [10, 15, 20, 25, 30, 35]
 util_functions.tf_warn_level()
 
 
-for city_id in [0]:
+for city_id in [0, 1]:
     for t in T:
         model_dir = r'/hdd6/Models/Inria_Domain_Selection/Portion/UnetCrop_inria_loo_portion_{}_{}_0_PS(572, 572)_BS5_' \
                     r'EP100_LR0.0001_DS60_DR0.1_SFN32'.format(city_id, t)
@@ -51,4 +51,5 @@ for city_id in [0]:
         # evaluate on tiles
         model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                        input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                       save_result_parent_dir='LOO_PORTION/{}'.format(t), ds_name='inria')
+                       save_result_parent_dir='LOO_PORTION/{}'.format(t), ds_name='inria', best_model=False,
+                       load_epoch_num=80)
