@@ -23,13 +23,11 @@ N_VALID = 1280
 GPU = 1
 DECAY_STEP = '30,30,30'
 DECAY_RATE = '0.1,0.1,0.1'
-MODEL_NAME = 'inria_gan_loo_{}_{}'
+MODEL_NAME = 'inria_gan_xregion_{}'
 SFN = 32
 PAD = 40
 SAVE_EPOCH = 5
-FINETUNE_CITY = 1
-PRED_MODEL_DIR = r'/hdd6/Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
-                 r'EP100_LR0.0001_DS60_DR0.1_SFN32'
+PRED_MODEL_DIR = r'/hdd6/Models/Inria_decay/UnetCrop_inria_decay_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60.0_DR0.1_SFN32'
 
 
 def read_flag():
@@ -50,13 +48,12 @@ def read_flag():
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--pad', type=int, default=PAD, help='padding in the attachment network')
     parser.add_argument('--save-epoch', type=int, default=SAVE_EPOCH, help='#epochs between two model saving events')
-    parser.add_argument('--finetune-city', type=int, default=FINETUNE_CITY, help='city id to leave-out in training')
     parser.add_argument('--pred-model-dir', type=str, default=PRED_MODEL_DIR, help='pretrained model dir')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
     flags.tile_size = (flags.tile_size, flags.tile_size)
-    flags.model_name = flags.model_name.format(flags.finetune_city, flags.run_id)
+    flags.model_name = flags.model_name.format(flags.run_id)
     return flags
 
 
@@ -100,31 +97,16 @@ def main(flags):
 
     # make data reader
     # use uabCrossValMaker to get fileLists for training and validation
-    idx_city, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'city')
-    idx_tile, _ = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
-    idx = [j * 10 + i for i, j in zip(idx_city, idx_tile)]
-    # use first city for validation
-    filter_train = []
-    filter_train_target = []
-    filter_valid = []
-    for i in range(5):
-        for j in range(1, 37):
-            if i != flags.finetune_city and j > 5:
-                filter_train.append(j * 10 + i)
-            elif i == flags.finetune_city and j > 5:
-                filter_train_target.append(j * 10 + i)
-            elif i == flags.finetune_city and j <= 5:
-                filter_valid.append(j * 10 + i)
-    # use first city for validation
-    file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_train)
-    filter_list_train_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_train_target)
-    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_valid)
+    idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
+    # use first 5 tiles for validation
+    file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(6, 37)])
+    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(0, 6)])
 
     dataReader_train = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, flags.input_size,
                                                       flags.batch_size, dataAug='flip,rotate',
                                                       block_mean=np.append([0], img_mean), batch_code=0)
     dataReader_train_target = uabDataReader.ImageLabelReader(
-        [3], [0, 1, 2], patchDir, filter_list_train_valid, flags.input_size, flags.batch_size, dataAug='flip,rotate',
+        [3], [0, 1, 2], patchDir, file_list_train, flags.input_size, flags.batch_size, dataAug='flip,rotate',
         block_mean=np.append([0], img_mean), batch_code=0)
     # no augmentation needed for validation
     dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_valid, flags.input_size,
@@ -133,8 +115,7 @@ def main(flags):
 
     # train
     start_time = time.time()
-    model.load_weights(flags.pred_model_dir.format(flags.finetune_city), layers2load='1,2,3,4,5,6,7,8,9',
-                       load_final_layer=True)
+    model.load_weights(flags.pred_model_dir, layers2load='1,2,3,4,5,6,7,8,9', load_final_layer=True)
     model.train_config('X', 'Y', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
                        loss_type='xent', par_dir='Inria_GAN/V3LOO')
     model.run(train_reader=dataReader_train,

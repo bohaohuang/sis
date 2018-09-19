@@ -12,7 +12,7 @@ from bohaoCustom import uabDataReader
 from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 0
-LADA = 2
+LADA = 0.1
 BATCH_SIZE = 10
 LEARNING_RATE = '1e-3,1e-3'
 INPUT_SIZE = 224
@@ -47,7 +47,7 @@ def read_flag():
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--save-epoch', type=int, default=SAVE_EPOCH, help='#epochs between two model saving events')
     parser.add_argument('--finetune-city', type=int, default=FINETUNE_CITY, help='city id to leave-out in training')
-    parser.add_argument('--lada', type=int, default=LADA, help='lambda used in the loss function')
+    parser.add_argument('--lada', type=float, default=LADA, help='lambda used in the loss function')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)

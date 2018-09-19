@@ -14,11 +14,11 @@ util_functions.tf_warn_level(3)
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 
 model_list = [
-    r'UnetGAN_V3_inria_gan_base_1_2_PS(572, 572)_BS20_EP30_LR1e-05_1e-05_1e-05_DS30.0_30.0_30.0_DR0.1_0.1_0.1',
+    r'UnetGAN_V3_inria_gan_xregion_0_PS(572, 572)_BS20_EP30_LR0.0001_1e-06_1e-06_DS30.0_30.0_30.0_DR0.1_0.1_0.1',
 ]
 
 for model_dir in model_list:
-    model_dir = os.path.join(r'/hdd6/Models/Inria_GAN/V3/', model_dir)
+    model_dir = os.path.join(r'/hdd6/Models/Inria_GAN/V3LOO/', model_dir)
     tf.reset_default_graph()
     blCol = uab_collectionFunctions.uabCollection('inria')
     blCol.readMetadata()

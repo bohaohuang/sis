@@ -40,6 +40,7 @@ for cnt, s in enumerate(slide):
         ious[:, cnt] = get_ious(results)
 
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol', 'vienna', 'overall']
+
 plt.figure(figsize=(12, 6))
 for i in range(6):
     plt.subplot(231+i)
@@ -53,4 +54,17 @@ for i in range(6):
         plt.xlabel('Slide Stride')
 plt.tight_layout()
 #plt.savefig(os.path.join(img_dir, 'shift_variance_ious.png'))
+plt.show()
+
+plt.figure(figsize=(12, 6))
+for i in range(6):
+    plt.subplot(231+i)
+    plt.plot(slide[:16], ious[i, :16]-ious[i, -16:], '-o')
+    plt.title(city_list[i].capitalize())
+    if i % 3 == 0:
+        plt.ylabel('IoU')
+    if i // 3 == 1:
+        plt.xlabel('Slide Stride')
+    plt.ylim(-0.001, 0.001)
+plt.tight_layout()
 plt.show()

@@ -71,8 +71,8 @@ model_dir_loo = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_leave_{}_0_PS
                 r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria'
 city_ious[0, :] = read_loo_iou(model_dir_loo)
 
-model_dir_ugan = r'/hdd/Results/ugan/UnetGAN_V3ShrinkRGB_inria_gan_loo_{}_0_PS(572, 572)_BS20_EP30_' \
-                 r'LR0.0001_1e-06_1e-06_DS15.0_30.0_30.0_DR0.1_0.1_0.1/inria'
+model_dir_ugan = r'/hdd/Results/ugan/UnetGAN_V3_inria_gan_xregion_0_PS(572, 572)_BS20_' \
+                 r'EP30_LR0.0001_1e-06_1e-06_DS30.0_30.0_30.0_DR0.1_0.1_0.1/inria'
 city_ious[1, :] = read_loo_iou(model_dir_ugan)
 
 model_dir_base = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \
@@ -93,5 +93,5 @@ plt.ylabel('IoUs')
 plt.legend(ncol=len(legend_list))
 plt.title('Performance Comparison')
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'ugan_cmp_rgb.png'))
+plt.savefig(os.path.join(img_dir, 'ugan_cmp_v3_xregion.png'))
 plt.show()
