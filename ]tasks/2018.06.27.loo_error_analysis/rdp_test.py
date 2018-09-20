@@ -10,7 +10,7 @@ import utils
 import ersa_utils
 
 
-TEST_LIST = '0,5'
+TEST_LIST = '5,0'
 MIN_SIZE = 400
 
 
@@ -90,5 +90,5 @@ if __name__ == '__main__':
                 obj_points = np.transpose(obj_points)
 
                 vert += rdp(obj_points).shape[0]
-            with open(save_file, 'w+') as f:
+            with open(save_file, 'a+') as f:
                 f.write('{} {}\n'.format(city_name, vert))
