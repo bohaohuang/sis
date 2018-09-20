@@ -20,12 +20,12 @@ EPOCHS = 60
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = 1
+GPU = 0
 DECAY_STEP = '60,60,60'
 DECAY_RATE = '0.1,0.1,0.1'
 MODEL_NAME = 'road_xregion_gan_{}'
 SFN = 32
-PAD = 24
+PAD = 40
 SAVE_EPOCH = 5
 PRED_MODEL_DIR = r'/hdd6/Models/Inria_GAN/Road/UnetCrop_road_0_PS(572, 572)_BS5_EP80_LR0.0001_DS60_DR0.1_SFN32'
 
@@ -63,17 +63,17 @@ def main(flags):
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, flags.input_size[0], flags.input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_UNet.UnetModelGAN_V3ShrinkRGB({'X': X, 'Y': y},
-                                                      trainable=mode,
-                                                      model_name=flags.model_name,
-                                                      input_size=flags.input_size,
-                                                      batch_size=flags.batch_size,
-                                                      learn_rate=flags.learning_rate,
-                                                      decay_step=flags.decay_step,
-                                                      decay_rate=flags.decay_rate,
-                                                      epochs=flags.epochs,
-                                                      start_filter_num=flags.sfn,
-                                                      pad=flags.pad,)
+    model = uabMakeNetwork_UNet.UnetModelGAN_V3({'X': X, 'Y': y},
+                                                trainable=mode,
+                                                model_name=flags.model_name,
+                                                input_size=flags.input_size,
+                                                batch_size=flags.batch_size,
+                                                learn_rate=flags.learning_rate,
+                                                decay_step=flags.decay_step,
+                                                decay_rate=flags.decay_rate,
+                                                epochs=flags.epochs,
+                                                start_filter_num=flags.sfn,
+                                                pad=flags.pad,)
     model.create_graph(['X', 'Y'], class_num=flags.num_classes)
 
     # create collection
