@@ -14,18 +14,19 @@ from bohaoCustom import uabMakeNetwork_ASSN
 
 RUN_ID = 0
 LADA = 1
+SLOW_ITER = 500
 BATCH_SIZE = 5
-LEARNING_RATE = '1e-6,1e-6'
+LEARNING_RATE = '1e-8,1e-8'
 INPUT_SIZE = 572
 TILE_SIZE = 5000
-EPOCHS = 100
+EPOCHS = 30
 NUM_CLASS = 2
-N_TRAIN = 8000
+N_TRAIN = 7500
 N_VALID = 1280
 GPU = 0
-DECAY_STEP = '60,60'
+DECAY_STEP = '20,20'
 DECAY_RATE = '0.1,0.1'
-MODEL_NAME = 'inria_loo_{}_{}'
+MODEL_NAME = 'inria_loo_slow_{}_{}'
 SFN = 32
 SAVE_EPOCH = 5
 FINETUNE_CITY = 0
@@ -52,6 +53,7 @@ def read_flag():
     parser.add_argument('--finetune-city', type=int, default=FINETUNE_CITY, help='city id to leave-out in training')
     parser.add_argument('--lada', type=float, default=LADA, help='lambda used in the loss function')
     parser.add_argument('--pred-model-dir', type=str, default=PRED_MODEL_DIR, help='pretrained model dir')
+    parser.add_argument('--slow-iter', type=int, default=SLOW_ITER, help='#iterations per loss')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
@@ -76,7 +78,8 @@ def main(flags):
                                           decay_rate=flags.decay_rate,
                                           epochs=flags.epochs,
                                           start_filter_num=flags.sfn,
-                                          lada=flags.lada)
+                                          lada=flags.lada,
+                                          slow_iter=flags.slow_iter)
     model.create_graph(['X', 'Y'], class_num=flags.num_classes)
 
     # create collection
