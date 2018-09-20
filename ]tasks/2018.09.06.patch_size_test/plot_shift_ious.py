@@ -17,19 +17,29 @@ def get_avg_iou(lines):
         a_temp, b_temp = get_single_iou(line)
         a += a_temp
         b += b_temp
-    return a/b
+    return a/b, a, b
 
 
 def get_ious(results):
     overall_iou = np.zeros(6)
+    a_all = 0
+    b_all = 0
     for i in range(5):
-        iou = get_avg_iou(results[i*5:(i+1)*5])
+        iou, a, b = get_avg_iou(results[i*5:(i+1)*5])
+        a_all += a
+        b_all += b
         overall_iou[i] = iou
-    overall_iou[-1] = float(results[-1])
+    overall_iou[-1] = float(a_all / b_all)
     return overall_iou
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+result_dir = r'/hdd/Results/Road/UnetCrop_road_0_PS(572, 572)_BS5_EP80_LR0.0001_DS60_DR0.1_SFN32/Mass_road'
+with open(os.path.join(result_dir, 'result.txt'), 'r') as f:
+    results = f.readlines()
+print(get_avg_iou(results[:-1]))
+
+
+'''img_dir, task_dir = utils.get_task_img_folder()
 slide = range(32)
 ious = np.zeros((6, len(slide)))
 
@@ -67,4 +77,4 @@ for i in range(6):
         plt.xlabel('Slide Stride')
     plt.ylim(-0.001, 0.001)
 plt.tight_layout()
-plt.show()
+plt.show()'''
