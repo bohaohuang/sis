@@ -10,7 +10,7 @@ import utils
 import ersa_utils
 
 
-TEST_LIST = '5,0'
+TEST_LIST = '0,1,2'
 MIN_SIZE = 400
 
 
@@ -51,23 +51,18 @@ def read_flag():
 
 if __name__ == '__main__':
     flags = read_flag()
-    model_dirs = [r'UnetCrop_inria_aug_leave_0_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-                 r'UnetCrop_inria_aug_leave_1_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-                 r'UnetCrop_inria_aug_leave_2_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-                 r'UnetCrop_inria_aug_leave_3_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-                 r'UnetCrop_inria_aug_leave_4_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
-                 r'UnetGAN_V3Shrink_inria_gan_loo_0_0_PS(572, 572)_BS20_EP30_LR0.0001_1e-06_1e-06_DS15.0_30.0_30.0_DR0.1_0.1_0.1',
-                 r'UnetGAN_V3Shrink_inria_gan_loo_1_0_PS(572, 572)_BS20_EP30_LR0.0001_1e-06_1e-06_DS15.0_30.0_30.0_DR0.1_0.1_0.1',
-                 r'UnetGAN_V3Shrink_inria_gan_loo_2_0_PS(572, 572)_BS20_EP30_LR0.0001_1e-06_1e-06_DS15.0_30.0_30.0_DR0.1_0.1_0.1',
-                 r'UnetGAN_V3Shrink_inria_gan_loo_3_0_PS(572, 572)_BS20_EP30_LR0.0001_1e-06_1e-06_DS15.0_30.0_30.0_DR0.1_0.1_0.1',
-                 r'UnetGAN_V3Shrink_inria_gan_loo_4_0_PS(572, 572)_BS20_EP30_LR0.0001_1e-06_1e-06_DS15.0_30.0_30.0_DR0.1_0.1_0.1',]
+    model_dirs = [
+        r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        r'/hdd/Results/domain_selection/DeeplabV3_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32',
+        r'/hdd/Results/ugan/UnetGAN_V3_inria_gan_xregion_0_PS(572, 572)_BS20_EP30_LR0.0001_1e-06_1e-06_DS30.0_30.0_30.0_DR0.1_0.1_0.1',
+    ]
     model_list = ersa_utils.str2list(flags.test_list)
     model_dirs = [model_dirs[x] for x in model_list]
     img_dir, task_dir = utils.get_task_img_folder()
 
     for cnt, model_dir in enumerate(model_dirs):
-        pred_files = sorted(glob(os.path.join(r'/hdd/Results/ugan', model_dir, 'inria', 'pred', '*.png')))
-        save_file = os.path.join(task_dir, '{}_wolverine.txt'.format(model_dir))
+        pred_files = sorted(glob(os.path.join(model_dir, 'inria', 'pred', '*.png')))
+        save_file = os.path.join(task_dir, '{}_xregion_wolverine.txt'.format(model_dir))
         with open(save_file, 'w'):
             pass
 
