@@ -106,7 +106,7 @@ for slide_step in range(shift_max):
                                               start_filter_num=32)
     # create graph
     model.create_graph('X', class_num=2)
-    score_save_dir = os.path.join(task_dir, 'unet_patch_test_4', 'slide_step_{}'.format(slide_step))
+    score_save_dir = os.path.join(task_dir, 'unet_patch_test_5', 'slide_step_{}'.format(slide_step))
 
     iou_record = []
     if not os.path.exists(score_save_dir):
@@ -150,11 +150,11 @@ for slide_step in range(shift_max):
                                                       overlap=pad)
         pred_overall = util_functions.get_pred_labels(image_pred) * 1
         pred_overall = np.roll(pred_overall, shift=slide_step, axis=1)
-        pred_overall = pred_overall[:, shift_max:]
+        pred_overall = pred_overall[:, shift_max:-input_size[0]]
         #pred_overall = pred_overall[:, shift_max-slide_step:-slide_step-1]
         truth_label_img = imageio.imread(os.path.join(parent_dir_truth, file_name_truth))
         #truth_label_img = np.roll(truth_label_img, -slide_step, axis=1)
-        truth_label_img = truth_label_img[:, shift_max:]
+        truth_label_img = truth_label_img[:, shift_max:-input_size[0]]
         iou = util_functions.iou_metric(truth_label_img, pred_overall, divide_flag=True)
         duration = time.time() - start_time
         print('{} mean IoU={:.3f}, duration: {:.3f}'.format(tile_name, iou[0] / iou[1], duration))

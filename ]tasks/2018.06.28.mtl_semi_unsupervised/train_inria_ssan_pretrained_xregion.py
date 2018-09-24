@@ -13,17 +13,17 @@ from bohaoCustom import uabDataReader
 from bohaoCustom import uabMakeNetwork_ASSN
 
 RUN_ID = 0
-LADA = 0.5
+LADA = 0.1
 SLOW_ITER = 500
 BATCH_SIZE = 5
-LEARNING_RATE = '1e-7,1e-7'
+LEARNING_RATE = '5e-8,5e-8'
 INPUT_SIZE = 572
 TILE_SIZE = 5000
 EPOCHS = 30
 NUM_CLASS = 2
 N_TRAIN = 7500
 N_VALID = 1280
-GPU = 0
+GPU = 1
 DECAY_STEP = '20,20'
 DECAY_RATE = '0.1,0.1'
 MODEL_NAME = 'inria_xregion_newdis_slow_{}_{}_ld{}'

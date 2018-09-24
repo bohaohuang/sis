@@ -36,10 +36,9 @@ def get_ious(results):
 result_dir = r'/hdd/Results/Road/UnetCrop_road_0_PS(572, 572)_BS5_EP80_LR0.0001_DS60_DR0.1_SFN32/Mass_road'
 with open(os.path.join(result_dir, 'result.txt'), 'r') as f:
     results = f.readlines()
-print(get_avg_iou(results[:-1]))
 
 
-'''img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = utils.get_task_img_folder()
 slide = range(32)
 ious = np.zeros((6, len(slide)))
 
@@ -66,7 +65,7 @@ plt.tight_layout()
 #plt.savefig(os.path.join(img_dir, 'shift_variance_ious.png'))
 plt.show()
 
-plt.figure(figsize=(12, 6))
+'''plt.figure(figsize=(12, 6))
 for i in range(6):
     plt.subplot(231+i)
     plt.plot(slide[:16], ious[i, :16]-ious[i, -16:], '-o')
