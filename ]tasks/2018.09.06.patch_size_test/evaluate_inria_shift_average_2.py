@@ -41,6 +41,8 @@ class myImageLabelReader(uabDataReader.ImageLabelReader):
                 nDims += img.shape[2]
                 blockList.append(img)
             block = np.dstack(blockList).astype(np.float32)
+            block = block[:, :4576, :]
+            tile_dim = np.array((5000, 4576))
             block = self.shift_block(block, self.shift)
             if self.block_mean is not None:
                 block -= self.block_mean
@@ -65,11 +67,15 @@ class myImageLabelReader(uabDataReader.ImageLabelReader):
 
 # settings
 gpu = 0
-batch_size = 1
+batch_size = 49
 input_size = [572, 572]
 tile_size = [5000, 5000]
 shift_max = 32
-for slide_step in range(shift_max):
+shift_list = []
+for i in range(shift_max // 2):
+    shift_list.append(i)
+    shift_list.append(i+16)
+for slide_step in shift_list:
     util_functions.tf_warn_level(3)
     city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
     model_dir = r'/hdd6/Models/Inria_decay/UnetCrop_inria_decay_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60.0_DR0.1_SFN32'
@@ -106,7 +112,7 @@ for slide_step in range(shift_max):
                                               start_filter_num=32)
     # create graph
     model.create_graph('X', class_num=2)
-    score_save_dir = os.path.join(task_dir, 'unet_patch_test_5', 'slide_step_{}'.format(slide_step))
+    score_save_dir = os.path.join(task_dir, 'unet_patch_test_8', 'slide_step_{}'.format(slide_step))
 
     iou_record = []
     if not os.path.exists(score_save_dir):
@@ -143,18 +149,19 @@ for slide_step in range(shift_max):
             result = model.test('X', sess, rManager)
         pad = model.get_overlap()
         image_pred = uabUtilreader.un_patchify_shrink(result,
-                                                      [tile_size[0] + pad, tile_size[1] + pad],
-                                                      tile_size,
+                                                      [tile_size[0] + pad, 4576 + pad],
+                                                      [5000, 4576],
                                                       input_size,
                                                       [input_size[0] - pad, input_size[1] - pad],
                                                       overlap=pad)
         pred_overall = util_functions.get_pred_labels(image_pred) * 1
         pred_overall = np.roll(pred_overall, shift=slide_step, axis=1)
-        pred_overall = pred_overall[:, shift_max:-input_size[0]]
+        pred_overall = pred_overall[:, 1000:-1000]
         #pred_overall = pred_overall[:, shift_max-slide_step:-slide_step-1]
         truth_label_img = imageio.imread(os.path.join(parent_dir_truth, file_name_truth))
         #truth_label_img = np.roll(truth_label_img, -slide_step, axis=1)
-        truth_label_img = truth_label_img[:, shift_max:-input_size[0]]
+        truth_label_img = truth_label_img[:, :4576]
+        truth_label_img = truth_label_img[:, 1000:-1000]
         iou = util_functions.iou_metric(truth_label_img, pred_overall, divide_flag=True)
         duration = time.time() - start_time
         print('{} mean IoU={:.3f}, duration: {:.3f}'.format(tile_name, iou[0] / iou[1], duration))

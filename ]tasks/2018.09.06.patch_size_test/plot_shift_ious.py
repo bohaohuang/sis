@@ -43,7 +43,7 @@ slide = range(32)
 ious = np.zeros((6, len(slide)))
 
 for cnt, s in enumerate(slide):
-    result_file = os.path.join(task_dir, 'unet_patch_test_4', 'slide_step_{}'.format(s), 'result.txt')
+    result_file = os.path.join(task_dir, 'unet_patch_test_7', 'slide_step_{}'.format(s), 'result.txt')
     with open(result_file, 'r') as f:
         results = f.readlines()
         ious[:, cnt] = get_ious(results)
@@ -62,10 +62,10 @@ for i in range(6):
     if i // 3 == 1:
         plt.xlabel('Slide Stride')
 plt.tight_layout()
-#plt.savefig(os.path.join(img_dir, 'shift_variance_ious.png'))
+plt.savefig(os.path.join(img_dir, 'shift_steps_ious.png'))
 plt.show()
 
-'''plt.figure(figsize=(12, 6))
+plt.figure(figsize=(12, 6))
 for i in range(6):
     plt.subplot(231+i)
     plt.plot(slide[:16], ious[i, :16]-ious[i, -16:], '-o')
@@ -76,4 +76,5 @@ for i in range(6):
         plt.xlabel('Slide Stride')
     plt.ylim(-0.001, 0.001)
 plt.tight_layout()
-plt.show()'''
+plt.savefig(os.path.join(img_dir, 'shift_steps_diff.png'))
+plt.show()
