@@ -147,7 +147,7 @@ class CollectionMakerCityscapes(object):
 
 
 if __name__ == '__main__':
-    root = r'/media/ei-edl01/data/remoteSensingDatasets/Cityscapes'
+    root = r'/hdd/cityscapes'
     rgb_type = 'leftImg8bit'
     gt_type = 'gtFine'
     rgb_ext = rgb_type

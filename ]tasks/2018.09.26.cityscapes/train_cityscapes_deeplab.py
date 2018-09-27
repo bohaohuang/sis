@@ -1,10 +1,11 @@
 import time
 import argparse
 import scipy.misc
+import numpy as np
 import ersaPath
 from nn import deeplab, hook, nn_utils
 from reader import dataReaderSegmentation, reader_utils
-import cityscapes_reader
+import cityscapes_reader, cityscapes_labels
 
 
 # define parameters
@@ -13,18 +14,18 @@ DS_NAME = 'cityscapes'
 LEARNING_RATE = 1e-5
 TILE_SIZE = (512, 1024)
 EPOCHS = 30
-NUM_CLASS = 30
+NUM_CLASS = 19
 PAR_DIR = DS_NAME
 SUFFIX = 'test'
 N_TRAIN = 2995
 N_VALID = 500
 VAL_MULT = 5
-GPU = 1
+GPU = 0
 DECAY_STEP = 15
 DECAY_RATE = 0.1
 VERB_STEP = 100
 SAVE_EPOCH = 5
-DATA_DIR = r'/media/ei-edl01/data/remoteSensingDatasets/Cityscapes'
+DATA_DIR = r'/hdd/cityscapes'
 RGB_TYPE = 'leftImg8bit'
 GT_TYPE = 'gtFine'
 RGB_EXT = RGB_TYPE
@@ -62,7 +63,14 @@ def read_flag():
 
 
 def resize_image(img, size):
-    return scipy.misc.imresize(img, size)
+    if img.shape[2] == 4:
+        # resize rgb and gt separately
+        resize_img = np.zeros((size[0], size[1], 4))
+        resize_img[:, :, :3] = scipy.misc.imresize(img[:, :, :3], size)
+        resize_img[:, :, -1] = scipy.misc.imresize(img[:, :, -1], size, 'nearest')
+        return resize_img
+    else:
+        return scipy.misc.imresize(img, size)
 
 
 def main(flags):
@@ -94,18 +102,17 @@ def main(flags):
 
     model.create_graph(feature)
     model.compile(feature, label, flags.n_train, flags.n_valid, flags.tile_size, ersaPath.PATH['model'],
-                  par_dir=flags.model_par_dir, loss_type='xent')
-    train_hook = hook.ValueSummaryHook(flags.verb_step, [model.loss, model.lr_op], value_names=['train_loss', 'learning_rate'],
-                                       print_val=[0])
+                  par_dir=flags.model_par_dir, val_mult=flags.val_mult, loss_type='xent')
+    train_hook = hook.ValueSummaryHook(flags.verb_step, [model.loss, model.lr_op],
+                                       value_names=['train_loss', 'learning_rate'], print_val=[0])
     model_save_hook = hook.ModelSaveHook(model.get_epoch_step()*flags.save_epoch, model.ckdir)
     valid_loss_hook = hook.ValueSummaryHook(model.get_epoch_step(), [model.loss],
-                                            value_names=['valid_loss'], log_time=True, run_time=model.n_valid)
-    valid_iou_hook = hook.IoUSummaryHook(model.get_epoch_step(), model.loss_iou, log_time=True, run_time=model.n_valid,
-                                         cust_str='\t')
+                                            value_names=['valid_loss'], log_time=True,
+                                            run_time=model.n_valid)
     image_hook = hook.ImageValidSummaryHook(model.get_epoch_step(), model.valid_images, feature, label, model.pred,
-                                            nn_utils.image_summary, img_mean=cm_train.meta_data['chan_mean'])
+                                            cityscapes_labels.image_summary, img_mean=cm_train.meta_data['chan_mean'])
     start_time = time.time()
-    model.train(train_hooks=[train_hook, model_save_hook], valid_hooks=[valid_loss_hook, valid_iou_hook, image_hook],
+    model.train(train_hooks=[train_hook, model_save_hook], valid_hooks=[valid_loss_hook, image_hook],
                train_init=train_init_op, valid_init=valid_init_op)
     print('Duration: {:.3f}'.format((time.time() - start_time)/3600))
 
