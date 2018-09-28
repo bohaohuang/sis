@@ -11,17 +11,17 @@ import cityscapes_reader, cityscapes_labels
 # define parameters
 BATCH_SIZE = 1
 DS_NAME = 'cityscapes'
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-4
 TILE_SIZE = (512, 1024)
-EPOCHS = 30
+EPOCHS = 40
 NUM_CLASS = 19
-PAR_DIR = DS_NAME
+PAR_DIR = DS_NAME+'/res101'
 SUFFIX = 'test'
 N_TRAIN = 2995
 N_VALID = 500
 VAL_MULT = 5
 GPU = 0
-DECAY_STEP = 15
+DECAY_STEP = 40
 DECAY_RATE = 0.1
 VERB_STEP = 100
 SAVE_EPOCH = 5
@@ -31,6 +31,7 @@ GT_TYPE = 'gtFine'
 RGB_EXT = RGB_TYPE
 GT_EXT = 'labelTrainIds'
 FORCE_RUN = False
+RES_DIR = r'/hdd6/Models/resnet_v1_101.ckpt'
 
 
 def read_flag():
@@ -57,6 +58,7 @@ def read_flag():
     parser.add_argument('--rgb-ext', type=str, default=RGB_EXT, help='rgb extension in their file names')
     parser.add_argument('--gt-ext', type=str, default=GT_EXT, help='gt extensions in their file names')
     parser.add_argument('--force-run', type=bool, default=FORCE_RUN, help='force run collection maker or not')
+    parser.add_argument('--res-dir', type=str, default=RES_DIR, help='path to ckpt of Res101 model')
 
     flags = parser.parse_args()
     return flags
@@ -101,15 +103,16 @@ def main(flags):
     feature, label = reader_op
 
     model.create_graph(feature)
+    model.load_resnet(flags.res_dir)
     model.compile(feature, label, flags.n_train, flags.n_valid, flags.tile_size, ersaPath.PATH['model'],
                   par_dir=flags.model_par_dir, val_mult=flags.val_mult, loss_type='xent')
     train_hook = hook.ValueSummaryHook(flags.verb_step, [model.loss, model.lr_op],
                                        value_names=['train_loss', 'learning_rate'], print_val=[0])
     model_save_hook = hook.ModelSaveHook(model.get_epoch_step()*flags.save_epoch, model.ckdir)
-    valid_loss_hook = hook.ValueSummaryHook(model.get_epoch_step(), [model.loss],
-                                            value_names=['valid_loss'], log_time=True,
-                                            run_time=model.n_valid)
-    image_hook = hook.ImageValidSummaryHook(model.get_epoch_step(), model.valid_images, feature, label, model.pred,
+    valid_loss_hook = hook.ValueSummaryHook(model.get_epoch_step(), [model.loss, model.loss_iou],
+                                            value_names=['valid_loss', 'valid_mIoU'], log_time=True,
+                                            run_time=model.n_valid, iou_pos=1)
+    image_hook = hook.ImageValidSummaryHook(model.input_size, model.get_epoch_step(), feature, label, model.pred,
                                             cityscapes_labels.image_summary, img_mean=cm_train.meta_data['chan_mean'])
     start_time = time.time()
     model.train(train_hooks=[train_hook, model_save_hook], valid_hooks=[valid_loss_hook, image_hook],

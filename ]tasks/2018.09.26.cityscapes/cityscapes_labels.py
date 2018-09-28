@@ -135,7 +135,7 @@ def image_summary(image, truth, prediction, img_mean=np.array((0, 0, 0), dtype=n
 
     pred_labels = nn_utils.get_pred_labels(prediction)
     pred_img = decode_labels(pred_labels, label_num)
-    return np.concatenate([image+img_mean, truth_img, pred_img], axis=2)
+    return np.concatenate([image+img_mean, truth_img, pred_img], axis=1)
 
 
 def get_label_color_dict():

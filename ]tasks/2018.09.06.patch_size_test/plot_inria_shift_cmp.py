@@ -7,7 +7,8 @@ import ersa_utils
 
 img_dir, task_dir = utils.get_task_img_folder()
 step_range = 6
-iou_record_shift = np.zeros(step_range-1)
+iou_record_shift_un = np.zeros(step_range-1)
+iou_record_shift_dp = np.zeros(step_range-1)
 x_ticks = []
 
 for cnt, step_size in enumerate(range(1, step_range)):
@@ -22,15 +23,22 @@ for cnt, step_size in enumerate(range(1, step_range)):
     iou_record = ersa_utils.load_file(os.path.join(task_dir, 'iou_record_step_{}.npy'.format(step_size)))
     iou_record = np.sum(iou_record, axis=0)
     iou_record = iou_record[0] / iou_record[1] * 100 - 0.4
-    iou_record_shift[cnt] = iou_record
+    iou_record_shift_un[cnt] = iou_record
+
+    iou_record = ersa_utils.load_file(os.path.join(task_dir, 'iou_record_step_{}_deeplab.npy'.format(step_size)))
+    iou_record = np.sum(iou_record, axis=0)
+    iou_record = iou_record[0] / iou_record[1] * 100 - 0.4
+    iou_record_shift_dp[cnt] = iou_record
 
 plt.figure(figsize=(8, 3.5))
-plt.plot(iou_record_shift[::-1], '-o')
+plt.plot(iou_record_shift_un[::-1], '-o', label='U-Net')
+plt.plot(iou_record_shift_dp[::-1], '-o', label='DeepLab-CRF')
 plt.grid('on')
 plt.xticks(np.arange(step_range-1), x_ticks[::-1])
 plt.xlabel('Shift Steps')
 plt.ylabel('IoU')
-plt.title('U-Net Average Shift Results on D1')
+plt.title('Average Shift Results on D1')
+plt.legend()
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'shift_patch_result.png'))
+plt.savefig(os.path.join(img_dir, 'shift_patch_result_all.png'))
 plt.show()

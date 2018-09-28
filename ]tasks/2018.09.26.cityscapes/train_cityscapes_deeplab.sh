@@ -8,4 +8,4 @@
 module load Python-GPU/3.6.5
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/ersa
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/sis
-python train_cityscapes_deeplab.py --decay-step=15 --learning-rate=1e-4 --data-dir=/work/bh163/uab_datasets/Cityscapes
+python train_cityscapes_deeplab.py --decay-step=40 --learning-rate=1e-5 --res-dir=/dscrhome/bh163/resnet_v1_101.ckpt --data-dir=/work/bh163/uab_datasets/Cityscapes
