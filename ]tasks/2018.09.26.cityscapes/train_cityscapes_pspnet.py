@@ -3,7 +3,7 @@ import argparse
 import scipy.misc
 import numpy as np
 import ersaPath
-from nn import deeplab, hook, nn_utils
+from nn import pspnet, hook, nn_utils
 from reader import dataReaderSegmentation, reader_utils
 import cityscapes_reader, cityscapes_labels
 
@@ -11,18 +11,18 @@ import cityscapes_reader, cityscapes_labels
 # define parameters
 BATCH_SIZE = 1
 DS_NAME = 'cityscapes'
-LEARNING_RATE = 1e-5
-TILE_SIZE = (512, 1024)
+LEARNING_RATE = 1e-3
+TILE_SIZE = (713, 713)
 EPOCHS = 40
 NUM_CLASS = 19
-PAR_DIR = DS_NAME+'/res101'
+PAR_DIR = DS_NAME+'/psp101'
 SUFFIX = 'test'
-N_TRAIN = 2995
+N_TRAIN = 2996
 N_VALID = 500
 VAL_MULT = 5
 GPU = 0
-DECAY_STEP = 20
-DECAY_RATE = 0.1
+DECAY_STEP = 3
+DECAY_RATE = 0.9
 VERB_STEP = 100
 SAVE_EPOCH = 5
 DATA_DIR = r'/hdd/cityscapes'
@@ -31,7 +31,9 @@ GT_TYPE = 'gtFine'
 RGB_EXT = RGB_TYPE
 GT_EXT = 'labelTrainIds'
 FORCE_RUN = False
-RES_DIR = r'/hdd6/Models/resnet_v1_101.ckpt'
+RES_DIR = r'/hdd6/Models/pspnet101'
+WEIGHT_DECAY = 1e-4
+MOMENTUM = 0.9
 
 
 def read_flag():
@@ -59,6 +61,8 @@ def read_flag():
     parser.add_argument('--gt-ext', type=str, default=GT_EXT, help='gt extensions in their file names')
     parser.add_argument('--force-run', type=bool, default=FORCE_RUN, help='force run collection maker or not')
     parser.add_argument('--res-dir', type=str, default=RES_DIR, help='path to ckpt of Res101 model')
+    parser.add_argument('--weight-decay', type=float, default=WEIGHT_DECAY, help='decay for l2 loss')
+    parser.add_argument('--momentum', type=float, default=MOMENTUM, help='momentum for optimizer')
 
     flags = parser.parse_args()
     return flags
@@ -79,9 +83,9 @@ def main(flags):
     nn_utils.set_gpu(GPU)
 
     # define network
-    model = deeplab.DeepLab(flags.num_classes, flags.tile_size, suffix=flags.model_suffix, learn_rate=flags.learning_rate,
-                            decay_step=flags.decay_step, decay_rate=flags.decay_rate,
-                            epochs=flags.epochs, batch_size=flags.batch_size)
+    model = pspnet.PSPNet(flags.num_classes, flags.tile_size, suffix=flags.model_suffix, learn_rate=flags.learning_rate,
+                          decay_step=flags.decay_step, decay_rate=flags.decay_rate, epochs=flags.epochs,
+                          batch_size=flags.batch_size, weight_decay=flags.weight_decay, momentum=flags.momentum)
 
     cm_train = cityscapes_reader.CollectionMakerCityscapes(flags.data_dir, flags.rgb_type, flags.gt_type, 'train',
                                                            flags.rgb_ext, flags.gt_ext, ['png', 'png'],
@@ -106,6 +110,7 @@ def main(flags):
     model.load_resnet(flags.res_dir)
     model.compile(feature, label, flags.n_train, flags.n_valid, flags.tile_size, ersaPath.PATH['model'],
                   par_dir=flags.model_par_dir, val_mult=flags.val_mult, loss_type='xent')
+    #print(model.get_epoch_step())
     train_hook = hook.ValueSummaryHook(flags.verb_step, [model.loss, model.lr_op],
                                        value_names=['train_loss', 'learning_rate'], print_val=[0])
     model_save_hook = hook.ModelSaveHook(model.get_epoch_step()*flags.save_epoch, model.ckdir)
@@ -116,7 +121,7 @@ def main(flags):
                                             cityscapes_labels.image_summary, img_mean=cm_train.meta_data['chan_mean'])
     start_time = time.time()
     model.train(train_hooks=[train_hook, model_save_hook], valid_hooks=[valid_loss_hook, image_hook],
-               train_init=train_init_op, valid_init=valid_init_op)
+                train_init=train_init_op, valid_init=valid_init_op)
     print('Duration: {:.3f}'.format((time.time() - start_time)/3600))
 
 

@@ -107,15 +107,28 @@ def decode_labels(label, label_num=2):
     :param label_num: #distinct classes in ground truth
     :return:
     """
-    n, h, w, c = label.shape
-    outputs = np.zeros((n, h, w, 3), dtype=np.uint8)
     label_colors = get_label_color_dict()
-    for i in range(n):
-        pixels = np.zeros((h, w, 3), dtype=np.uint8)
+    if len(label.shape) == 4:
+        n, h, w, c = label.shape
+        outputs = np.zeros((n, h, w, 3), dtype=np.uint8)
+        for i in range(n):
+            pixels = np.zeros((h, w, 3), dtype=np.uint8)
+            for j in range(h):
+                for k in range(w):
+                    pixels[j, k] = label_colors[np.int(label[i, j, k, 0])]
+            outputs[i] = pixels
+    elif len(label.shape) == 3:
+        h, w, c = label.shape
+        outputs = np.zeros((h, w, 3), dtype=np.uint8)
         for j in range(h):
             for k in range(w):
-                pixels[j, k] = label_colors[np.int(label[i, j, k, 0])]
-        outputs[i] = pixels
+                outputs[j, k] = label_colors[np.int(label[j, k, 0])]
+    else:
+        h, w = label.shape
+        outputs = np.zeros((h, w, 3), dtype=np.uint8)
+        for j in range(h):
+            for k in range(w):
+                outputs[j, k] = label_colors[np.int(label[j, k])]
     return outputs
 
 
@@ -135,7 +148,12 @@ def image_summary(image, truth, prediction, img_mean=np.array((0, 0, 0), dtype=n
 
     pred_labels = nn_utils.get_pred_labels(prediction)
     pred_img = decode_labels(pred_labels, label_num)
-    return np.concatenate([image+img_mean, truth_img, pred_img], axis=1)
+    _, h, w, _ = image.shape
+    if w / h > 1.5:
+        # concatenate image horizontally if it is too wide
+        return np.concatenate([image + img_mean, truth_img, pred_img], axis=1)
+    else:
+        return np.concatenate([image + img_mean, truth_img, pred_img], axis=2)
 
 
 def get_label_color_dict():
