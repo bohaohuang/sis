@@ -1,3 +1,4 @@
+import numpy as np
 import argparse
 import skimage.transform
 from nn import deeplab, nn_utils, nn_processor
@@ -17,8 +18,8 @@ RGB_TYPE = 'leftImg8bit'
 GT_TYPE = 'gtFine'
 RGB_EXT = RGB_TYPE
 GT_EXT = 'labelTrainIds'
-FORCE_RUN = False
-RES_DIR = r'/hdd6/Models/cityscapes/res101/deeplab_test_PS(512, 1024)_BS1_EP40_LR0.0001_DS20.0_DR0.1'
+FORCE_RUN = True
+RES_DIR = r'/hdd6/Models/cityscapes/res101/deeplab_test_PS(512, 1024)_BS1_EP40_LR0.0001_DS10.0_DR0.1'
 
 
 def read_flag():
@@ -41,6 +42,22 @@ def read_flag():
     return flags
 
 
+def make_general_id_map(pred):
+    label_dict = {}
+    for l in cityscapes_labels.labels:
+        if l.trainId == 255:
+            label_dict[l.trainId] = 0
+        else:
+            label_dict[l.trainId] = l.id
+
+    h, w = pred.shape
+    outputs = np.zeros((h, w), dtype=np.uint8)
+    for j in range(h):
+        for k in range(w):
+            outputs[j, k] = label_dict[np.int(pred[j, k])]
+    return outputs
+
+
 def main(flags):
     nn_utils.set_gpu(GPU)
 
@@ -50,24 +67,24 @@ def main(flags):
     cm_train = cityscapes_reader.CollectionMakerCityscapes(flags.data_dir, flags.rgb_type, flags.gt_type, 'train',
                                                            flags.rgb_ext, flags.gt_ext, ['png', 'png'],
                                                            clc_name='{}_train'.format(flags.ds_name),
-                                                           force_run=flags.force_run)
+                                                           force_run=False)
     cm_test = cityscapes_reader.CollectionMakerCityscapes(flags.data_dir, flags.rgb_type, flags.gt_type, 'val',
                                                           flags.rgb_ext, flags.gt_ext, ['png', 'png'],
                                                           clc_name='{}_valid'.format(flags.ds_name),
-                                                          force_run=flags.force_run)
+                                                          force_run=False)
     cm_test.print_meta_data()
     resize_func_train = lambda img: skimage.transform.resize(img, flags.tile_size, mode='reflect')
     resize_func_test = lambda img: skimage.transform.resize(img, cm_test.meta_data['tile_dim'], order=0,
                                                             preserve_range=True, mode='reflect')
 
     init_op, reader_op = dataReaderSegmentation.DataReaderSegmentation(
-        flags.tile_size, cm_test.meta_data['file_list'], batch_size=flags.batch_size,
+        flags.tile_size, cm_test.meta_data['file_list'], batch_size=flags.batch_size, random=False,
         chan_mean=cm_train.meta_data['chan_mean'], is_train=False, has_gt=True, gt_dim=1, include_gt=True,
         global_func=resize_func_train).read_op()
     estimator = nn_processor.NNEstimatorSegmentScene(
         model, cm_test.meta_data['file_list'], flags.res_dir, init_op, reader_op, ds_name='city_scapes',
         save_result_parent_dir='Cityscapes', gpu=flags.GPU, score_result=True, split_char='.',
-        post_func=resize_func_test, save_func=cityscapes_labels.decode_labels, ignore_label=(-1, 255))
+        post_func=resize_func_test, save_func=make_general_id_map, ignore_label=(-1, 255))
     estimator.run(force_run=flags.force_run)
 
 

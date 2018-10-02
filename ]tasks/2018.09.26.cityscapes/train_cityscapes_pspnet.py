@@ -11,7 +11,7 @@ import cityscapes_reader, cityscapes_labels
 # define parameters
 BATCH_SIZE = 1
 DS_NAME = 'cityscapes'
-LEARNING_RATE = 1e-3
+LEARNING_RATE = 5e-3
 TILE_SIZE = (713, 713)
 EPOCHS = 40
 NUM_CLASS = 19
@@ -21,8 +21,8 @@ N_TRAIN = 2996
 N_VALID = 500
 VAL_MULT = 5
 GPU = 0
-DECAY_STEP = 3
-DECAY_RATE = 0.9
+DECAY_STEP = 40
+DECAY_RATE = 0.1
 VERB_STEP = 100
 SAVE_EPOCH = 5
 DATA_DIR = r'/hdd/cityscapes'
@@ -50,7 +50,7 @@ def read_flag():
     parser.add_argument('--n-valid', type=int, default=N_VALID, help='# patches to valid')
     parser.add_argument('--val-mult', type=int, default=VAL_MULT, help='validation_bs=val_mult*train_bs')
     parser.add_argument('--GPU', type=str, default=GPU, help="GPU used for computation.")
-    parser.add_argument('--decay-step', type=float, default=DECAY_STEP, help='Learning rate decay step in number of epochs.')
+    parser.add_argument('--decay-step', type=int, default=DECAY_STEP, help='Learning rate decay step in number of epochs.')
     parser.add_argument('--decay-rate', type=float, default=DECAY_RATE, help='Learning rate decay rate')
     parser.add_argument('--verb-step', type=int, default=VERB_STEP, help='#steps between two verbose prints')
     parser.add_argument('--save-epoch', type=int, default=SAVE_EPOCH, help='#epochs between two model save')
@@ -110,7 +110,6 @@ def main(flags):
     model.load_resnet(flags.res_dir)
     model.compile(feature, label, flags.n_train, flags.n_valid, flags.tile_size, ersaPath.PATH['model'],
                   par_dir=flags.model_par_dir, val_mult=flags.val_mult, loss_type='xent')
-    #print(model.get_epoch_step())
     train_hook = hook.ValueSummaryHook(flags.verb_step, [model.loss, model.lr_op],
                                        value_names=['train_loss', 'learning_rate'], print_val=[0])
     model_save_hook = hook.ModelSaveHook(model.get_epoch_step()*flags.save_epoch, model.ckdir)

@@ -161,3 +161,26 @@ def get_label_color_dict():
     for l in labels:
         label_colors[l.trainId] = l.color
     return label_colors
+
+
+def get_label_color_dict_regular():
+    label_colors = {}
+    for l in labels:
+        label_colors[l.id] = l.color
+    return label_colors
+
+
+def decode_labels_regular(label):
+    """
+    Decode label prediction map into rgb color map
+    :param label: label prediction map
+    :param label_num: #distinct classes in ground truth
+    :return:
+    """
+    label_colors = get_label_color_dict_regular()
+    h, w = label.shape
+    outputs = np.zeros((h, w, 3), dtype=np.uint8)
+    for j in range(h):
+        for k in range(w):
+            outputs[j, k] = label_colors[np.int(label[j, k])]
+    return outputs
