@@ -1,6 +1,7 @@
 import os
 import imageio
 import numpy as np
+import scipy.signal
 import matplotlib
 import matplotlib.pyplot as plt
 from glob import glob
@@ -65,30 +66,36 @@ crop_error_2 = crop_error_2/np.sum(crop_error_2) * 100
 crop_error = crop_error/np.sum(crop_error) * 100
 
 matplotlib.rcParams.update({'font.size': 14})
-plt.figure(figsize=(8, 4))
 #plt.subplot(211)
 #plt.subplot2grid((6, 1), (0, 0), rowspan=3)
-plt.plot(np.array(nocrop_dist), np.array(nocrop_error), label='U-Net Zero-padding')
-plt.plot(np.array(crop_dist_2), np.array(crop_error_2), label='U-Net Non Zero-padding')
-plt.plot(np.array(crop_dist), np.array(crop_error), label='DeepLab-CRF')
-plt.legend(loc='center right', prop={'size': 10})
-plt.xlabel('Horizontal Dist to Center')
-plt.grid('on')
-#plt.text(-300, 20, '(a)')
-plt.ylabel('%Errors')
+for smooth in range(1, 22, 2):
+    fig = plt.figure(figsize=(8, 4))
+    plt.plot(np.array(nocrop_dist), scipy.signal.medfilt(np.array(nocrop_error), [smooth]),
+             label='U-Net Padding', linewidth=2)
+    plt.plot(np.array(crop_dist_2), scipy.signal.medfilt(np.array(crop_error_2), [smooth]),
+             label='U-Net No padding', linewidth=2)
+    plt.plot(np.array(crop_dist), scipy.signal.medfilt(np.array(crop_error), [smooth]),
+             label='DeepLabV2', linewidth=2)
+    plt.legend(loc='upper left', prop={'size': 12}, ncol=3)
+    plt.xlabel('Horizontal Dist to Center')
+    plt.grid('on')
+    #plt.text(-300, 20, '(a)')
+    plt.ylabel('%Errors')
 
-#plt.subplot(212)
-'''plt.subplot2grid((6, 1), (4, 0), rowspan=2)
-ind = np.arange(2)
-run_time = np.array([732.06, 624.62])
-plt.bar(ind[0], run_time[0], 0.2)
-plt.bar(ind[1], run_time[1], 0.2)
-plt.xticks(ind, ['Zero Padding', 'No Zero Padding'])
-plt.xlim([-0.5, 1.5])
-plt.ylim([500, 800])
-plt.xlabel('')
-plt.ylabel('Time:s')
-plt.text(-0.45, 600, '(b)')'''
-plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'error_vs_dist_tgrs.png'))
-plt.show()
+    #plt.subplot(212)
+    '''plt.subplot2grid((6, 1), (4, 0), rowspan=2)
+    ind = np.arange(2)
+    run_time = np.array([732.06, 624.62])
+    plt.bar(ind[0], run_time[0], 0.2)
+    plt.bar(ind[1], run_time[1], 0.2)
+    plt.xticks(ind, ['Zero Padding', 'No Zero Padding'])
+    plt.xlim([-0.5, 1.5])
+    plt.ylim([500, 800])
+    plt.xlabel('')
+    plt.ylabel('Time:s')
+    plt.text(-0.45, 600, '(b)')'''
+    plt.ylim([0.15, 0.38])
+    plt.tight_layout()
+    plt.savefig(os.path.join(img_dir, 'error_vs_dist_tgrs_smooth{}.png'.format(smooth)))
+    plt.close(fig)
+    # plt.show()

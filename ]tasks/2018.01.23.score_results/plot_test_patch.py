@@ -11,7 +11,7 @@ save_dir = os.path.join(task_dir, 'train_patch')
 
 plt.rcParams.update({'font.size': 14})
 plt.rc('grid', linestyle='--')
-model_name2show = ['U-Net', 'DeepLab-CRF']
+model_name2show = ['U-Net', 'DeepLabV2']
 
 dataset = 'inria'
 plt.subplot(211)
@@ -42,7 +42,7 @@ plt.xlabel('Input Size')
 plt.ylabel('IoU')
 
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'test_patch_iou_cmp.png'))
+plt.savefig(os.path.join(img_dir, 'test_patch_iou_cmp_2.png'))
 plt.show()
 
 dataset = 'inria'
@@ -74,5 +74,5 @@ plt.xlabel('Input Size')
 plt.ylabel('Time:s')
 
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'test_patch_time_cmp.png'))
+plt.savefig(os.path.join(img_dir, 'test_patch_time_cmp_2.png'))
 plt.show()

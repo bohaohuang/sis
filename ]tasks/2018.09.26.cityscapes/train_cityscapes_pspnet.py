@@ -11,7 +11,7 @@ import cityscapes_reader, cityscapes_labels
 # define parameters
 BATCH_SIZE = 1
 DS_NAME = 'cityscapes'
-LEARNING_RATE = 5e-3
+LEARNING_RATE = 1e-3
 TILE_SIZE = (713, 713)
 EPOCHS = 40
 NUM_CLASS = 19
@@ -20,7 +20,7 @@ SUFFIX = 'test'
 N_TRAIN = 2996
 N_VALID = 500
 VAL_MULT = 5
-GPU = 0
+GPU = 1
 DECAY_STEP = 40
 DECAY_RATE = 0.1
 VERB_STEP = 100
@@ -101,7 +101,8 @@ def main(flags):
     resize_func = lambda img: resize_image(img, flags.tile_size)
     train_init_op, valid_init_op, reader_op = dataReaderSegmentation.DataReaderSegmentationTrainValid(
             flags.tile_size, cm_train.meta_data['file_list'], cm_valid.meta_data['file_list'],
-            flags.batch_size, cm_train.meta_data['chan_mean'], aug_func=[reader_utils.image_flipping_hori],
+            flags.batch_size, cm_train.meta_data['chan_mean'], aug_func=[reader_utils.image_flipping_hori,
+                                                                         reader_utils.image_scaling_with_label],
             random=True, has_gt=True, gt_dim=1, include_gt=True, valid_mult=flags.val_mult, global_func=resize_func)\
         .read_op()
     feature, label = reader_op
@@ -116,7 +117,7 @@ def main(flags):
     valid_loss_hook = hook.ValueSummaryHook(model.get_epoch_step(), [model.loss, model.loss_iou],
                                             value_names=['valid_loss', 'valid_mIoU'], log_time=True,
                                             run_time=model.n_valid, iou_pos=1)
-    image_hook = hook.ImageValidSummaryHook(model.input_size, model.get_epoch_step(), feature, label, model.pred,
+    image_hook = hook.ImageValidSummaryHook(model.input_size, model.get_epoch_step(), feature, label, model.output,
                                             cityscapes_labels.image_summary, img_mean=cm_train.meta_data['chan_mean'])
     start_time = time.time()
     model.train(train_hooks=[train_hook, model_save_hook], valid_hooks=[valid_loss_hook, image_hook],

@@ -11,17 +11,17 @@ import cityscapes_reader, cityscapes_labels
 # define parameters
 BATCH_SIZE = 1
 DS_NAME = 'cityscapes'
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-4
 TILE_SIZE = (512, 1024)
 EPOCHS = 40
 NUM_CLASS = 19
 PAR_DIR = DS_NAME+'/res101'
-SUFFIX = 'test'
+SUFFIX = 'rand_scale'
 N_TRAIN = 2995
 N_VALID = 500
 VAL_MULT = 5
 GPU = 0
-DECAY_STEP = 20
+DECAY_STEP = 10
 DECAY_RATE = 0.1
 VERB_STEP = 100
 SAVE_EPOCH = 5
@@ -97,7 +97,8 @@ def main(flags):
     resize_func = lambda img: resize_image(img, flags.tile_size)
     train_init_op, valid_init_op, reader_op = dataReaderSegmentation.DataReaderSegmentationTrainValid(
             flags.tile_size, cm_train.meta_data['file_list'], cm_valid.meta_data['file_list'],
-            flags.batch_size, cm_train.meta_data['chan_mean'], aug_func=[reader_utils.image_flipping_hori],
+            flags.batch_size, cm_train.meta_data['chan_mean'], aug_func=[reader_utils.image_flipping_hori,
+                                                                         reader_utils.image_scaling_with_label],
             random=True, has_gt=True, gt_dim=1, include_gt=True, valid_mult=flags.val_mult, global_func=resize_func)\
         .read_op()
     feature, label = reader_op
