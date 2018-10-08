@@ -19,7 +19,7 @@ GT_TYPE = 'gtFine'
 RGB_EXT = RGB_TYPE
 GT_EXT = 'labelTrainIds'
 FORCE_RUN = True
-RES_DIR = r'/hdd6/Models/cityscapes/psp101/deeplab_test_PS(713, 713)_BS1_EP40_LR0.001_DS3_DR0.9'
+RES_DIR = r'/hdd6/Models/cityscapes/psp_github'
 
 
 def read_flag():
