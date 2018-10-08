@@ -12,7 +12,7 @@ ds = 20
 dr = 0.1
 epochs = 10
 bs = 5
-gpu = 0
+gpu = 1
 
 # define network
 unet = unet.UNet(class_num, patch_size, suffix=suffix, learn_rate=lr, decay_step=ds, decay_rate=dr,
@@ -36,6 +36,6 @@ file_list_valid = cm.load_files(field_id='', field_ext='.*rgb,.*gt_d255')
 chan_mean = cm.meta_data['chan_mean'][:3]
 
 nn_utils.tf_warn_level(3)
-model_dir = r'/hdd6/Models/Inria_decay/UnetCrop_inria_decay_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60.0_DR0.1_SFN32'
+model_dir = r'/hdd6/Models/aemo/unet_aemo_PS(572, 572)_BS5_EP60_LR0.001_DS40_DR0.1'
 unet.evaluate(file_list_valid, patch_size, tile_size, bs, chan_mean, model_dir, gpu, save_result_parent_dir='aemo',
               sfn=32, force_run=True, score_results=True)
