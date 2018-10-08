@@ -65,7 +65,7 @@ def main(flags):
     nn_utils.set_gpu(GPU)
 
     # define network
-    model = pspnet.PSPNet(flags.num_classes, flags.tile_size, suffix=flags.model_suffix, learn_rate=flags.learning_rate,
+    model = pspnet.PSPNet(flags.num_classes, flags.patch_size, suffix=flags.model_suffix, learn_rate=flags.learning_rate,
                           decay_step=flags.decay_step, decay_rate=flags.decay_rate, epochs=flags.epochs,
                           batch_size=flags.batch_size, weight_decay=flags.weight_decay, momentum=flags.momentum)
     overlap = model.get_overlap()
@@ -100,8 +100,8 @@ def main(flags):
     feature, label = reader_op
 
     model.create_graph(feature)
-    model.load_resnet(flags.res_dir)
-    model.compile(feature, label, flags.n_train, flags.n_valid, flags.tile_size, ersaPath.PATH['model'],
+    model.load_resnet(flags.res_dir, keep_last=False)
+    model.compile(feature, label, flags.n_train, flags.n_valid, flags.patch_size, ersaPath.PATH['model'],
                   par_dir=flags.model_par_dir, val_mult=flags.val_mult, loss_type='xent')
     train_hook = hook.ValueSummaryHook(flags.verb_step, [model.loss, model.lr_op],
                                        value_names=['train_loss', 'learning_rate'], print_val=[0])
