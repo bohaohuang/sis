@@ -2,7 +2,7 @@ import time
 import numpy as np
 import ersaPath
 from nn import unet, hook, nn_utils
-from preprocess import patchExtractor
+from preprocess import patchExtractor, histMatching
 from reader import dataReaderSegmentation, reader_utils
 from collection import collectionMaker, collectionEditor
 
@@ -10,15 +10,15 @@ from collection import collectionMaker, collectionEditor
 class_num = 2
 patch_size = (572, 572)
 tile_size = (5000, 5000)
-suffix = 'aemo'
+suffix = 'aemo_hist_rgb'
 ds_name = 'aemo'
 lr = 1e-3
-ds = 60
+ds = 40
 dr = 0.1
 epochs = 60
 bs = 5
 valid_mult = 5
-gpu = 0
+gpu = 1
 n_train = 785
 n_valid = 395
 verb_step = 50
@@ -42,11 +42,17 @@ cm = collectionMaker.read_collection(raw_data_path=r'/home/lab/Documents/bohao/d
 gt_d255 = collectionEditor.SingleChanMult(cm.clc_dir, 1/255, ['.*gt', 'gt_d255']).\
     run(force_run=False, file_ext='tif', d_type=np.uint8,)
 cm.replace_channel(gt_d255.files, True, ['gt', 'gt_d255'])
+# hist matching
+ref_file = r'/media/ei-edl01/data/uab_datasets/spca/data/Original_Tiles/Fresno1_RGB.jpg'
+ga = histMatching.HistMatching(ref_file, color_space='RGB', ds_name=suffix)
+file_list = [f[0] for f in cm.meta_data['rgb_files']]
+hist_match = ga.run(force_run=False, file_list=file_list)
+cm.add_channel(hist_match.get_files(), '.*rgb_hist')
 cm.print_meta_data()
 
-file_list_train = cm.load_files(field_name='aus10,aus30', field_id='', field_ext='.*rgb,.*gt_d255')
-file_list_valid = cm.load_files(field_name='aus50', field_id='', field_ext='.*rgb,.*gt_d255')
-chan_mean = cm.meta_data['chan_mean'][:3]
+file_list_train = cm.load_files(field_name='aus10,aus30', field_id='', field_ext='.*rgb_hist,.*gt_d255')
+file_list_valid = cm.load_files(field_name='aus50', field_id='', field_ext='.*rgb_hist,.*gt_d255')
+chan_mean = cm.meta_data['chan_mean'][-3:]
 
 patch_list_train = patchExtractor.PatchExtractor(patch_size, tile_size, ds_name+'_train', overlap, overlap//2).\
     run(file_list=file_list_train, file_exts=['jpg', 'png'], force_run=False).get_filelist()
@@ -61,7 +67,7 @@ train_init_op, valid_init_op, reader_op = \
 feature, label = reader_op
 
 unet.create_graph(feature)
-unet.compile(feature, label, n_train, n_valid, patch_size, ersaPath.PATH['model'], par_dir=suffix, loss_type='xent')
+unet.compile(feature, label, n_train, n_valid, patch_size, ersaPath.PATH['model'], par_dir=ds_name, loss_type='xent')
 train_hook = hook.ValueSummaryHook(verb_step, [unet.loss, unet.lr_op], value_names=['train_loss', 'learning_rate'],
                                    print_val=[0])
 model_save_hook = hook.ModelSaveHook(unet.get_epoch_step()*save_epoch, unet.ckdir)

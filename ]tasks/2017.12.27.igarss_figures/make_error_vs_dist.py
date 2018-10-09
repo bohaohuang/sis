@@ -68,13 +68,13 @@ crop_error = crop_error/np.sum(crop_error) * 100
 matplotlib.rcParams.update({'font.size': 14})
 #plt.subplot(211)
 #plt.subplot2grid((6, 1), (0, 0), rowspan=3)
-for smooth in range(1, 22, 2):
+for smooth in range(3, 4):
     fig = plt.figure(figsize=(8, 4))
-    plt.plot(np.array(nocrop_dist), scipy.signal.medfilt(np.array(nocrop_error), [smooth]),
+    plt.plot(np.array(nocrop_dist), scipy.signal.medfilt(np.array(nocrop_error), [smooth]) * 100,
              label='U-Net Padding', linewidth=2)
-    plt.plot(np.array(crop_dist_2), scipy.signal.medfilt(np.array(crop_error_2), [smooth]),
+    plt.plot(np.array(crop_dist_2), scipy.signal.medfilt(np.array(crop_error_2), [smooth]) * 100,
              label='U-Net No padding', linewidth=2)
-    plt.plot(np.array(crop_dist), scipy.signal.medfilt(np.array(crop_error), [smooth]),
+    plt.plot(np.array(crop_dist), scipy.signal.medfilt(np.array(crop_error), [smooth]) * 100,
              label='DeepLabV2', linewidth=2)
     plt.legend(loc='upper left', prop={'size': 12}, ncol=3)
     plt.xlabel('Horizontal Dist to Center')
@@ -94,8 +94,8 @@ for smooth in range(1, 22, 2):
     plt.xlabel('')
     plt.ylabel('Time:s')
     plt.text(-0.45, 600, '(b)')'''
-    plt.ylim([0.15, 0.38])
+    plt.ylim([15, 38])
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'error_vs_dist_tgrs_smooth{}.png'.format(smooth)))
-    plt.close(fig)
-    # plt.show()
+    plt.savefig(os.path.join(img_dir, 'error_vs_dist_tgrs_smooth{}_rescale.png'.format(smooth)))
+    # plt.close(fig)
+    plt.show()
