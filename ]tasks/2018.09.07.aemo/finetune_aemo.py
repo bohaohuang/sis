@@ -10,12 +10,12 @@ from collection import collectionMaker, collectionEditor
 class_num = 2
 patch_size = (572, 572)
 tile_size = (5000, 5000)
-suffix = 'aemo_hist_rgb'
+suffix = 'aemo_hist_rgb_finetune_bn'
 ds_name = 'aemo'
-lr = 1e-3
-ds = 40
+lr = 5e-3
+ds = 60
 dr = 0.1
-epochs = 60
+epochs = 130
 bs = 5
 valid_mult = 5
 gpu = 1
@@ -23,6 +23,8 @@ n_train = 785
 n_valid = 395
 verb_step = 50
 save_epoch = 5
+model_dir = r'/hdd6/Models/spca/UnetCropWeighted_GridChipPretrained6Weighted4_PS(572, 572)_BS5_' \
+            r'EP100_LR0.0001_DS50_DR0.1_SFN32'
 
 nn_utils.set_gpu(gpu)
 
@@ -78,6 +80,7 @@ valid_iou_hook = hook.IoUSummaryHook(unet.get_epoch_step(), unet.loss_iou, log_t
 image_hook = hook.ImageValidSummaryHook(unet.input_size, unet.get_epoch_step(), feature, label, unet.pred,
                                         nn_utils.image_summary, img_mean=chan_mean)
 start_time = time.time()
+unet.load(model_dir)
 unet.train(train_hooks=[train_hook, model_save_hook], valid_hooks=[valid_loss_hook, valid_iou_hook, image_hook],
            train_init=train_init_op, valid_init=valid_init_op)
 print('Duration: {:.3f}'.format((time.time() - start_time)/3600))

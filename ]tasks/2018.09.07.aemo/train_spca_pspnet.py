@@ -10,17 +10,17 @@ from collection import collectionMaker
 # define parameters
 BATCH_SIZE = 5
 DS_NAME = 'spca'
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-3
 TILE_SIZE = (5000, 5000)
 PATCH_SIZE = (384, 384)
 EPOCHS = 100
 NUM_CLASS = 2
 PAR_DIR = DS_NAME+'/psp101'
-SUFFIX = 'spca'
+SUFFIX = 'spca_2'
 N_TRAIN = 8000
-N_VALID = 1000
+N_VALID = 8000
 VAL_MULT = 5
-GPU = 0
+GPU = 1
 DECAY_STEP = 100
 DECAY_RATE = 0.1
 VERB_STEP = 200
@@ -78,8 +78,6 @@ def main(flags):
                                          file_ext='jpg,png',
                                          force_run=False,
                                          clc_name=flags.ds_name)
-    cm.print_meta_data()
-
     cm.print_meta_data()
     file_list_train = cm.load_files(field_id=','.join(str(i) for i in range(0, 250)), field_ext='RGB,GT')
     file_list_valid = cm.load_files(field_id=','.join(str(i) for i in range(250, 500)), field_ext='RGB,GT')
