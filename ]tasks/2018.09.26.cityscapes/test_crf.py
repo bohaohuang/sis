@@ -1,3 +1,9 @@
+"""
+Find tutorial at
+http://warmspringwinds.github.io/tensorflow/tf-slim/2016/12/18/image-segmentation-with-tensorflow-using-cnns-and-conditional-random-fields/
+"""
+
+
 import os
 import numpy as np
 from glob import glob
