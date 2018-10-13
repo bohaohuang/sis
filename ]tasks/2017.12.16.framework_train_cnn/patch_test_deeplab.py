@@ -13,15 +13,15 @@ from bohaoCustom import uabMakeNetwork_DeepLabV2
 gpu = 1
 util_functions.tf_warn_level()
 batch_size = 1
-input_sizes = [544]
+input_sizes = [321]
 for size in input_sizes:
     print('Evaluating at size {} ...'.format(size))
     input_size = [size, size]
     tile_size = [5000, 5000]
-    save_dir = '/hdd/Temp/IGARSS2018/Deeplab{}'.format(size)
+    save_dir = '/hdd/Temp/IGARSS2018/Deeplab{}_2'.format(size)
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
-    model_dir = r'/hdd6/Models/DeepLab_rand_grid/DeeplabV3_res101_inria_aug_grid_1_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
+    model_dir = r'/hdd6/Models/Inria_decay/DeeplabV3_inria_decay_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40.0_DR0.1_SFN32'
 
     # prepare data
     blCol = uab_collectionFunctions.uabCollection('inria')
