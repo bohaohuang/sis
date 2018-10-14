@@ -13,16 +13,16 @@ tile_size = (5000, 5000)
 suffix = 'aemo_pad'
 ds_name = 'aemo_pad'
 lr = 1e-3
-ds = 100
+ds = 180
 dr = 0.1
-epochs = 130
+epochs = 200
 bs = 5
 valid_mult = 5
 gpu = 1
 n_train = 785
 n_valid = 395
 verb_step = 50
-save_epoch = 5
+save_epoch = 150
 model_dir = r'/hdd6/Models/spca/UnetCropWeighted_GridChipPretrained6Weighted4_PS(572, 572)_BS5_' \
             r'EP100_LR0.0001_DS50_DR0.1_SFN32'
 
