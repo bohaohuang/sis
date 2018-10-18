@@ -16,11 +16,11 @@ PATCH_SIZE = (384, 384)
 EPOCHS = 100
 NUM_CLASS = 2
 PAR_DIR = DS_NAME+'/psp101'
-SUFFIX = 'spca_2'
+SUFFIX = 'spca'
 N_TRAIN = 8000
 N_VALID = 8000
 VAL_MULT = 5
-GPU = 1
+GPU = 0
 DECAY_STEP = 100
 DECAY_RATE = 0.1
 VERB_STEP = 200
@@ -104,9 +104,9 @@ def main(flags):
     train_hook = hook.ValueSummaryHook(flags.verb_step, [model.loss, model.lr_op],
                                        value_names=['train_loss', 'learning_rate'], print_val=[0])
     model_save_hook = hook.ModelSaveHook(model.get_epoch_step()*flags.save_epoch, model.ckdir)
-    valid_loss_hook = hook.ValueSummaryHook(model.get_epoch_step(), [model.loss, model.loss_iou],
-                                            value_names=['valid_loss', 'valid_mIoU'], log_time=True,
-                                            run_time=model.n_valid, iou_pos=1)
+    valid_loss_hook = hook.ValueSummaryHookIters(model.get_epoch_step(), [model.loss_xent, model.loss_iou],
+                                                 value_names=['valid_loss', 'valid_mIoU'], log_time=True,
+                                                 run_time=model.n_valid)
     image_hook = hook.ImageValidSummaryHook(model.input_size, model.get_epoch_step(), feature, label, model.output,
                                             nn_utils.image_summary, img_mean=cm.meta_data['chan_mean'])
     start_time = time.time()

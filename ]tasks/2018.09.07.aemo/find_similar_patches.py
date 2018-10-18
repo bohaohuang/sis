@@ -17,7 +17,7 @@ def crop_center(img, cropx, cropy):
 
 # settings
 img_dir, task_dir = utils.get_task_img_folder()
-show_figure = False
+show_figure = True
 
 aemo_img_dir = os.path.join(img_dir, 'aemo_patches')
 aemo_ftr_dir = os.path.join(task_dir, 'aemo_patches')
@@ -41,9 +41,9 @@ spca_feature = np.genfromtxt(spca_feature_name_file, delimiter=',')
 
 top_range = np.arange(20)
 patch_select_record = np.zeros(len(top_range))
-for top_num in top_range:
+for top_num in [5]:
     select_patches = []
-    for cnt in range(len(aemo_patch_names)):
+    for cnt in range(25, 26, 5): #range(len(aemo_patch_names)):
         aemo_ftr = aemo_feature[cnt, :]
 
         dist = np.sum(np.square(spca_feature - aemo_ftr), axis=1)
@@ -52,7 +52,7 @@ for top_num in top_range:
         if show_figure:
             aemo_img = ersa_utils.load_file(os.path.join(aemo_img_dir, aemo_patch_names[cnt].strip()))
 
-            fig = plt.figure(figsize=(16, 4))
+            fig = plt.figure(figsize=(16, 3))
             plt.subplot(1, top_num+1, 1)
             plt.imshow(aemo_img)
             plt.axis('off')
@@ -64,6 +64,7 @@ for top_num in top_range:
                 plt.axis('off')
 
             plt.tight_layout()
+            plt.savefig(os.path.join(img_dir, 'similar_aemo{}_spca_top{}.png'.format(cnt, top_num)))
             plt.show()
 
         select_patches.append(sort_idx[:top_num])
@@ -72,11 +73,11 @@ for top_num in top_range:
     total_num = spca_feature.shape[0]
     patch_select_record[top_num] = select_num / total_num
 
-plt.figure(figsize=(8, 4))
+'''plt.figure(figsize=(8, 4))
 plt.plot(top_range, patch_select_record, '-o', linewidth=2)
 plt.xlabel('#Top Patches')
 plt.ylabel('%Patches Selected')
 plt.title('Patch Selection Result in California')
 plt.grid(True)
 plt.tight_layout()
-plt.show()
+plt.show()'''
