@@ -12,6 +12,7 @@ fields = 'Wall time'
 n_train = 8000
 epoch = 100
 resolution = 0.3 * 1e-3
+np.random.seed(8)
 
 plt.figure(figsize=(8, 6))
 matplotlib.rcParams.update({'font.size': 12})
@@ -30,9 +31,11 @@ for model in model_list:
         size = 384
 
     area_epoch = n_train * (resolution * size) ** 2
-    plt.plot(np.arange(epoch)*area_epoch, time/60/60, linewidth=2, label=model)
+    plt.plot(np.arange(epoch)*n_train//5, time/60/60, '-o', linewidth=2, label=model)
+    print(100*n_train//5, time[-1]/60/60)
 plt.grid(True)
 plt.legend()
+plt.xlabel('#Iters')
 plt.ylabel('Time:hr')
 plt.title('Run Time Comparison (Training)')
 
@@ -40,12 +43,14 @@ time_list = [6.08, 6.9, 7.04]
 plt.subplot(212)
 for cnt, model in enumerate(model_list):
     time = time_list[cnt] * 5 * 2.25 * np.arange(5) + np.random.random(5) * 50
+    time = time - time[0]
     plt.plot(5 * 2.25 * np.arange(5), time, '-o', linewidth=2, label=model)
+    print(5*2.25*5, time[-1])
 plt.grid(True)
 plt.xlabel('Area:km^2')
 plt.ylabel('Time:s')
 plt.title('Run Time Comparison (Inference)')
 
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'run_time_cmp_curve.png'))
+plt.savefig(os.path.join(img_dir, 'run_time_cmp_curve_iter.png'))
 plt.show()

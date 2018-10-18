@@ -66,26 +66,25 @@ window_size = 200
 stride = 200
 img_dir, task_dir = utils.get_task_img_folder()
 
-truth_dir = r'/home/lab/Documents/bohao/data/aemo'
+truth_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_pad'
 base_dir = r'/hdd/Results/aemo/UnetCropWeighted_GridChipPretrained6Weighted4_PS(572, 572)_BS5_' \
            r'EP100_LR0.0001_DS50_DR0.1_SFN32/default/pred'
-ft_dir = r'/hdd/Results/aemo/unet_aemo_hist_rgb_finetune_bn_PS(572, 572)_BS5_EP130_LR0.001_DS60_DR0.1/default/pred'
+ft_dir = r'/hdd/Results/aemo/unet_aemo_pad_PS(572, 572)_BS5_EP130_LR0.001_DS100_DR0.1/default/pred'
 
 eval_files = ['_'.join(os.path.basename(f)[:-4].split('_')[:2]) for f in glob(os.path.join(base_dir, '*.png'))]
 
 for f in eval_files:
-    img_save_dir = os.path.join(img_dir, 'cmp_1')
+    img_save_dir = os.path.join(img_dir, 'cmp_pad_good_1')
     if not os.path.exists(img_save_dir):
         os.makedirs(img_save_dir)
 
     rgb = imageio.imread(os.path.join(truth_dir, '{}_rgb.tif'.format(f)))
 
-    truth_img_name = os.path.join(truth_dir, '{}_gt.tif'.format(f))
+    truth_img_name = os.path.join(truth_dir, '{}_gt_d255.tif'.format(f))
     base_img_name = os.path.join(base_dir, '{}_gt_d255.png'.format(f))
     ft_img_name = os.path.join(ft_dir, '{}_gt_d255.png'.format(f))
 
     truth, base, ft = imageio.imread(truth_img_name), imageio.imread(base_img_name), imageio.imread(ft_img_name)
-    truth = truth / 255
 
     assert np.all(np.unique(truth) == np.array([0, 1])) and np.all(np.unique(base) == np.array([0, 1])) \
            and np.all(np.unique(ft) == np.array([0, 1]))

@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import tensorflow as tf
 import ersaPath
 from nn import unet, hook, nn_utils
 from preprocess import patchExtractor, histMatching
@@ -10,23 +11,31 @@ from collection import collectionMaker, collectionEditor
 class_num = 2
 patch_size = (572, 572)
 tile_size = (5000, 5000)
-suffix = 'aemo_pad'
+suffix = 'aemo_spca'
 ds_name = 'aemo_pad'
+par_dir = 'aemo/new2'
+use_hist = False
+from_scratch = False
 lr = 1e-3
-ds = 180
+ds = 50
 dr = 0.1
 epochs = 200
 bs = 5
 valid_mult = 5
-gpu = 1
+gpu = 0
 n_train = 785
 n_valid = 395
 verb_step = 50
-save_epoch = 150
+save_epoch = 50
 model_dir = r'/hdd6/Models/spca/UnetCropWeighted_GridChipPretrained6Weighted4_PS(572, 572)_BS5_' \
             r'EP100_LR0.0001_DS50_DR0.1_SFN32'
 
 nn_utils.set_gpu(gpu)
+np.random.seed(1004)
+tf.set_random_seed(1004)
+
+if use_hist:
+    suffix += '_hist'
 
 # define network
 unet = unet.UNet(class_num, patch_size, suffix=suffix, learn_rate=lr, decay_step=ds, decay_rate=dr,
@@ -52,14 +61,26 @@ hist_match = ga.run(force_run=False, file_list=file_list)
 cm.add_channel(hist_match.get_files(), '.*rgb_hist')
 cm.print_meta_data()
 
-file_list_train = cm.load_files(field_name='aus10,aus30', field_id='', field_ext='.*rgb_hist,.*gt_d255')
-file_list_valid = cm.load_files(field_name='aus50', field_id='', field_ext='.*rgb_hist,.*gt_d255')
-chan_mean = cm.meta_data['chan_mean'][:3]
+if use_hist:
+    file_list_train = cm.load_files(field_name='aus10,aus30', field_id='', field_ext='.*rgb_hist,.*gt_d255')
+    file_list_valid = cm.load_files(field_name='aus50', field_id='', field_ext='.*rgb_hist,.*gt_d255')
 
-patch_list_train = patchExtractor.PatchExtractor(patch_size, tile_size, ds_name+'_train', overlap, overlap//2).\
-    run(file_list=file_list_train, file_exts=['jpg', 'png'], force_run=False).get_filelist()
-patch_list_valid = patchExtractor.PatchExtractor(patch_size, tile_size, ds_name+'_valid', overlap, overlap//2).\
-    run(file_list=file_list_valid, file_exts=['jpg', 'png'], force_run=False).get_filelist()
+    patch_list_train = patchExtractor.PatchExtractor(patch_size, tile_size, ds_name+'_train_hist',
+                                                     overlap, overlap//2).\
+        run(file_list=file_list_train, file_exts=['jpg', 'png'], force_run=False).get_filelist()
+    patch_list_valid = patchExtractor.PatchExtractor(patch_size, tile_size, ds_name+'_valid_hist',
+                                                     overlap, overlap//2).\
+        run(file_list=file_list_valid, file_exts=['jpg', 'png'], force_run=False).get_filelist()
+    chan_mean = cm.meta_data['chan_mean'][-3:]
+else:
+    file_list_train = cm.load_files(field_name='aus10,aus30', field_id='', field_ext='.*rgb(?=[^_]),.*gt_d255')
+    file_list_valid = cm.load_files(field_name='aus50', field_id='', field_ext='.*rgb(?=[^_]),.*gt_d255')
+
+    patch_list_train = patchExtractor.PatchExtractor(patch_size, tile_size, ds_name+'_train', overlap, overlap // 2). \
+        run(file_list=file_list_train, file_exts=['jpg', 'png'], force_run=False).get_filelist()
+    patch_list_valid = patchExtractor.PatchExtractor(patch_size, tile_size, ds_name+'_valid', overlap, overlap // 2). \
+        run(file_list=file_list_valid, file_exts=['jpg', 'png'], force_run=False).get_filelist()
+    chan_mean = cm.meta_data['chan_mean'][:3]
 
 train_init_op, valid_init_op, reader_op = \
     dataReaderSegmentation.DataReaderSegmentationTrainValid(
@@ -69,17 +90,17 @@ train_init_op, valid_init_op, reader_op = \
 feature, label = reader_op
 
 unet.create_graph(feature)
-unet.compile(feature, label, n_train, n_valid, patch_size, ersaPath.PATH['model'], par_dir='aemo', loss_type='xent')
+unet.compile(feature, label, n_train, n_valid, patch_size, ersaPath.PATH['model'], par_dir=par_dir, loss_type='xent')
 train_hook = hook.ValueSummaryHook(verb_step, [unet.loss, unet.lr_op], value_names=['train_loss', 'learning_rate'],
                                    print_val=[0])
 model_save_hook = hook.ModelSaveHook(unet.get_epoch_step()*save_epoch, unet.ckdir)
-valid_loss_hook = hook.ValueSummaryHook(unet.get_epoch_step(), [unet.loss, unet.loss_iou],
-                                        value_names=['valid_loss', 'IoU'], log_time=True, run_time=unet.n_valid,
-                                        iou_pos=1)
+valid_loss_hook = hook.ValueSummaryHookIters(unet.get_epoch_step(), [unet.loss_xent, unet.loss_iou],
+                                             value_names=['valid_loss', 'IoU'], log_time=True, run_time=unet.n_valid)
 image_hook = hook.ImageValidSummaryHook(unet.input_size, unet.get_epoch_step(), feature, label, unet.pred,
                                         nn_utils.image_summary, img_mean=chan_mean)
 start_time = time.time()
-unet.load(model_dir)
+if not from_scratch:
+    unet.load(model_dir)
 unet.train(train_hooks=[train_hook, model_save_hook], valid_hooks=[valid_loss_hook, image_hook],
            train_init=train_init_op, valid_init=valid_init_op)
 print('Duration: {:.3f}'.format((time.time() - start_time)/3600))

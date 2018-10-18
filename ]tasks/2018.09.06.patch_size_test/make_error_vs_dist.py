@@ -81,6 +81,6 @@ for smooth in range(1, 2):
     plt.xlim([20, 300])
     #plt.ylim([30, 80])
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'error_vs_dist_tgrs_smooth{}_rescale_new.png'.format(smooth)))
+    #plt.savefig(os.path.join(img_dir, 'error_vs_dist_tgrs_smooth{}_rescale_new.png'.format(smooth)))
     # plt.close(fig)
     plt.show()

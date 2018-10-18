@@ -52,7 +52,7 @@ patch_size = (572, 572)
 tile_size = (5000, 5000)
 suffix = 'aemo_pad'
 bs = 5
-gpu = -1
+gpu = 1
 
 # define network
 unet = unet.UNet(class_num, patch_size, suffix=suffix, batch_size=bs)
@@ -92,6 +92,6 @@ file_list_valid = cm.load_files(field_name='aus50', field_id='', field_ext='.*rg
 chan_mean = cm.meta_data['chan_mean'][:3]
 
 nn_utils.tf_warn_level(3)
-model_dir = r'/hdd6/Models/spca/UnetCropWeighted_GridChipPretrained6Weighted4_PS(572, 572)_BS5_EP100_LR0.0001_DS50_DR0.1_SFN32'
+model_dir = r'/hdd6/Models/aemo/new/unet_aemo_pad_PS(572, 572)_BS5_EP200_LR0.001_DS50_DR0.1'
 unet.evaluate(file_list_valid, patch_size, tile_size, bs, chan_mean, model_dir, gpu, save_result_parent_dir='aemo',
               sfn=32, force_run=True, score_results=True, split_char='.')

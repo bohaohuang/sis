@@ -10,18 +10,18 @@ from preprocess import histMatching
 from collection import collectionMaker, collectionEditor
 
 
-suffix = 'aemo'
+suffix = 'aemo_pad'
 np.random.seed(1004)
 img_dir, task_dir = utils.get_task_img_folder()
 
-cm = collectionMaker.read_collection(raw_data_path=r'/home/lab/Documents/bohao/data/aemo',
+cm = collectionMaker.read_collection(raw_data_path=r'/home/lab/Documents/bohao/data/{}'.format(suffix),
                                      field_name='aus10,aus30,aus50',
                                      field_id='',
                                      rgb_ext='.*rgb',
                                      gt_ext='.*gt',
                                      file_ext='tif',
                                      force_run=False,
-                                     clc_name='aemo')
+                                     clc_name=suffix)
 gt_d255 = collectionEditor.SingleChanMult(cm.clc_dir, 1/255, ['.*gt', 'gt_d255']).\
     run(force_run=False, file_ext='tif', d_type=np.uint8,)
 cm.replace_channel(gt_d255.files, True, ['gt', 'gt_d255'])
@@ -54,38 +54,6 @@ def get_spcastats():
     return spca
 spca = processBlock.ValueComputeProcess('spca_rgb_stats', task_dir, save_file, get_spcastats).run().val
 
-'''for rgb_file, rgb_hist_file in zip(rgb_files, rgb_hist_files):
-    fig = plt.figure(figsize=(12, 8))
-    c_list = ['r', 'g', 'b']
-    for c in range(3):
-        plt.subplot(331 + 3 * c)
-        plt.bar(np.arange(255), spca[c, :], color=c_list[c])
-        plt.ylim([0, 40e4])
-        if c == 0:
-            plt.title('California')
-
-    rgb = ersa_utils.load_file(rgb_file[0])
-    rgb_hist = ersa_utils.load_file(rgb_hist_file[0])
-
-    for c in range(3):
-        rgb_cnt, _ = np.histogram(rgb[:, :, c], bins=np.arange(256))
-        rgb_hist_cnt, _ = np.histogram(rgb_hist[:, :, c], bins=np.arange(256))
-
-        plt.subplot(331 + 1 + 3*c)
-        plt.bar(np.arange(255), rgb_cnt, color=c_list[c])
-        plt.ylim([0, 40e4])
-        if c == 0:
-            plt.title('AEMO')
-        plt.subplot(331 + 2 + 3*c)
-        plt.bar(np.arange(255), rgb_hist_cnt, color=c_list[c])
-        plt.ylim([0, 40e4])
-        if c == 0:
-            plt.title('AEMO Hist Adjust')
-
-    plt.tight_layout()
-    plt.show()'''
-
-
 n_col = 1 + len(rgb_files)
 fig = plt.figure(figsize=(18, 8))
 c_list = ['r', 'g', 'b']
@@ -108,5 +76,5 @@ for plt_cnt, rgb_file in enumerate(rgb_hist_files):
             plt.title('AEMO HAdj Fig #{}'.format(plt_cnt))
 
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'aemo_stats_rgb_hist.png'))
+plt.savefig(os.path.join(img_dir, 'aemo_stats_rgb_pad_hist.png'))
 plt.show()
