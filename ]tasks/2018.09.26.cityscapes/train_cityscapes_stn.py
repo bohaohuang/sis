@@ -123,12 +123,12 @@ class DataReaderSegmentationTrainValid(object):
                                                            ((self.input_size[0], self.input_size[1],
                                                              self.channel_num - 2 * self.gt_dim),
                                                             (self.input_size[0], self.input_size[1], self.gt_dim),
-                                                            (self.input_size[0], self.input_size[1], 19),))
+                                                            (self.input_size[0], self.input_size[1], self.gt_dim),))
             dataset_valid = tf.data.Dataset.from_generator(generator_valid, (tf.float32, tf.int32, tf.float32),
                                                            ((self.input_size[0], self.input_size[1],
                                                              self.channel_num - 2 * self.gt_dim),
                                                             (self.input_size[0], self.input_size[1], self.gt_dim),
-                                                            (self.input_size[0], self.input_size[1], 19),))
+                                                            (self.input_size[0], self.input_size[1], self.gt_dim),))
         elif self.has_gt and not self.include_gt:
             dataset_train = tf.data.Dataset.from_generator(generator_train, (tf.float32, ),
                                                            ((self.input_size[0], self.input_size[1],
@@ -243,7 +243,7 @@ def main(flags):
     train_pred_dir = r'/home/lab/Documents/bohao/data/deeplab_model/vis_train/raw_segmentation_results'
     valid_pred_dir = r'/home/lab/Documents/bohao/data/deeplab_model/vis/raw_segmentation_results'
     file_list_train = get_image_list(flags.data_dir, train_pred_dir, 'train')
-    file_list_valid = get_image_list(flags.data_dir, valid_pred_dir, 'valid')
+    file_list_valid = get_image_list(flags.data_dir, valid_pred_dir, 'val')
 
     resize_func = lambda img: resize_image(img, flags.tile_size)
     train_init_op, valid_init_op, reader_op = DataReaderSegmentationTrainValid(
@@ -253,15 +253,22 @@ def main(flags):
             random=True, has_gt=True, gt_dim=1, include_gt=True, valid_mult=flags.val_mult, global_func=resize_func)\
         .read_op()
     feature, label, pred = reader_op
+    train_init_op_valid, _, reader_op = DataReaderSegmentationTrainValid(
+        flags.tile_size, file_list_valid, file_list_train,
+        flags.batch_size, cm_valid.meta_data['chan_mean'], aug_func=[reader_utils.image_flipping_hori,
+                                                                     reader_utils.image_scaling_with_label],
+        random=True, has_gt=True, gt_dim=1, include_gt=True, valid_mult=flags.val_mult, global_func=resize_func) \
+        .read_op()
+    feature_valid, label_valid, pred_valid = reader_op
 
     with tf.Session() as sess:
         sess.run(train_init_op)
         p = sess.run(pred)
         print(np.unique(p))
 
-    '''model.create_graph(feature, feature_valid=pred)
+    model.create_graph(feature, feature_valid=pred_valid)
 
-    model.compile(feature, label, flags.n_train, flags.n_valid, flags.tile_size, ersaPath.PATH['model'],
+    '''model.compile(feature, label, flags.n_train, flags.n_valid, flags.tile_size, ersaPath.PATH['model'],
                   par_dir=flags.model_par_dir, val_mult=flags.val_mult, loss_type='xent')
     train_hook = hook.ValueSummaryHook(flags.verb_step, [model.loss, model.lr_op],
                                        value_names=['train_loss', 'learning_rate'], print_val=[0])

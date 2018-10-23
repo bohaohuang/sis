@@ -38,7 +38,7 @@ def read_flag():
     parser.add_argument('--patch-size', default=PATCH_SIZE, type=tuple, help='patch size 572')
     parser.add_argument('--epochs', default=EPOCHS, type=int, help='# epochs (1)')
     parser.add_argument('--num-classes', type=int, default=NUM_CLASS, help='# classes (including background)')
-    parser.add_argument('--model-par-dir', type=str, default=PAR_DIR, help='parent directory name to save the model')
+    parser.add_argument('--par-dir', type=str, default=PAR_DIR, help='parent directory name to save the model')
     parser.add_argument('--n-train', type=int, default=N_TRAIN, help='# samples per epoch')
     parser.add_argument('--n-valid', type=int, default=N_VALID, help='# patches to valid')
     parser.add_argument('--val-mult', type=int, default=VAL_MULT, help='validation_bs=val_mult*train_bs')

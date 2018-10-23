@@ -63,7 +63,8 @@ class STN(basicNetwork.SegmentationNetwork):
 
             refine = nn_utils.conv_conv_pool(tf.concat([pred, orig], axis=-1), [self.class_num], self.mode, '3', (9, 9), pool=False,
                                              activation=tf.nn.sigmoid)
-        return refine
+            refine_pred =tf.expand_dims(tf.argmax(refine, axis=-1), axis=-1)
+        return refine, refine_pred
 
     def create_dis(self, refine, reuse):
         with tf.variable_scope('discr', reuse=reuse):
@@ -90,10 +91,10 @@ class STN(basicNetwork.SegmentationNetwork):
         :param start_filter_num: #filters at the start layer, #filters in U-Net grows exponentially
         :return:
         """
-        self.refine = self.stn_func(feature)
+        self.refine, refine_pred = self.stn_func(feature)
 
         self.true_logit = self.create_dis(kwargs['feature_valid'], reuse=False)
-        self.fake_logit = self.create_dis(self.refine, reuse=True)
+        self.fake_logit = self.create_dis(refine_pred, reuse=True)
 
     @staticmethod
     def res_block(input_, n_filter, name):
