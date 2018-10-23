@@ -5,7 +5,7 @@ from glob import glob
 from tqdm import tqdm
 import ersa_utils
 import processBlock
-from nn import unet, nn_utils
+from nn import unet, deeplab, nn_utils
 from preprocess import histMatching
 from collection import collectionMaker, collectionEditor
 
@@ -48,14 +48,19 @@ class UpSampling(processBlock.BasicProcess):
 
 # settings
 class_num = 2
-patch_size = (572, 572)
 tile_size = (5000, 5000)
 suffix = 'aemo_pad'
 bs = 5
 gpu = 1
+model_name = 'unet'
 
 # define network
-unet = unet.UNet(class_num, patch_size, suffix=suffix, batch_size=bs)
+if model_name == 'unet':
+    patch_size = (572, 572)
+    unet = unet.UNet(class_num, patch_size, suffix=suffix, batch_size=bs)
+else:
+    patch_size = (321, 321)
+    unet = deeplab.DeepLab(class_num, patch_size, suffix=suffix, batch_size=bs)
 overlap = unet.get_overlap()
 
 cm = collectionMaker.read_collection(raw_data_path=r'/home/lab/Documents/bohao/data/aemo/aemo_pad',
@@ -89,9 +94,9 @@ cm.print_meta_data()
 file_list_train = cm.load_files(field_name='aus10,aus30', field_id='', field_ext='.*rgb_hist,.*gt_d255')
 #file_list_valid = cm.load_files(field_name='aus50', field_id='', field_ext='.*rgb_hist,.*gt_d255')
 file_list_valid = cm.load_files(field_name='aus50', field_id='', field_ext='.*rgb_hist,.*gt_d255')
-chan_mean = cm.meta_data['chan_mean'][:3]
+chan_mean = cm.meta_data['chan_mean'][-3:]
 
 nn_utils.tf_warn_level(3)
-model_dir = r'/hdd6/Models/aemo/new/unet_aemo_pad_PS(572, 572)_BS5_EP200_LR0.001_DS50_DR0.1'
+model_dir = r'/hdd6/Models/aemo/new3/unet_aemo_hist_0_hist_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1'
 unet.evaluate(file_list_valid, patch_size, tile_size, bs, chan_mean, model_dir, gpu, save_result_parent_dir='aemo',
               sfn=32, force_run=True, score_results=True, split_char='.')

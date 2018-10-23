@@ -11,7 +11,7 @@ from preprocess import patchExtractor, histMatching
 from collection import collectionMaker, collectionEditor
 
 
-model_dir = r'/hdd6/Models/aemo/unet_aemo_pad_PS(572, 572)_BS5_EP130_LR0.001_DS100_DR0.1'
+model_dir = r'/hdd6/Models/aemo/new3/unet_aemo_hist_0_hist_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1'
 img_dir, task_dir = utils.get_task_img_folder()
 SAVE_DIR = os.path.join(task_dir, 'conf_map_{}'.format(os.path.basename(model_dir)))
 ersa_utils.make_dir_if_not_exist(SAVE_DIR)

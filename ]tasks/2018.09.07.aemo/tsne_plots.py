@@ -7,7 +7,7 @@ import ersa_utils
 import processBlock
 
 
-def get_tsne_features(perplex=40, learn_rate=200):
+def get_tsne_features(features, perplex=40, learn_rate=200):
     feature_encode = TSNE(n_components=2, perplexity=perplex, learning_rate=learn_rate, verbose=True).\
         fit_transform(features)
     return feature_encode
@@ -18,6 +18,9 @@ img_dir, task_dir = utils.get_task_img_folder()
 show_figure = False
 perplex = 40
 learn_rate = 200
+top_num = 5
+select_patch_file = os.path.join(task_dir, 'top{}_select_patch.npy'.format(top_num))
+select_patch = ersa_utils.load_file(select_patch_file)
 
 aemo_img_dir = os.path.join(img_dir, 'aemo_hist_patches')
 aemo_ftr_dir = os.path.join(task_dir, 'aemo_hist_patches')
@@ -38,12 +41,14 @@ spca_patch_names = ersa_utils.load_file(spca_patch_name_file)
 
 spca_feature_name_file = os.path.join(spca_ftr_dir, 'res50_feature.csv')
 spca_feature = np.genfromtxt(spca_feature_name_file, delimiter=',')
+spca_feature = spca_feature[select_patch, :]
 
 # do tsne
 features = np.concatenate([aemo_feature, spca_feature], axis=0)
-save_file = os.path.join(task_dir, 'hist_tsne_pp{}_lr{}.npy'.format(perplex, learn_rate))
-feature_encode = processBlock.ValueComputeProcess('hist_tsnp_pp{}_lr{}'.format(perplex, learn_rate), task_dir, save_file,
-                                                  lambda: get_tsne_features(perplex, learn_rate)).run().val
+save_file = os.path.join(task_dir, 'hist_tsne_pp{}_lr{}_top{}.npy'.format(perplex, learn_rate, top_num))
+feature_encode = processBlock.ValueComputeProcess('hist_tsnp_pp{}_lr{}_top{}'.format(perplex, learn_rate, top_num),
+                                                  task_dir, save_file,
+                                                  lambda: get_tsne_features(features, perplex, learn_rate)).run().val
 
 aemo_num = len(aemo_patch_names)
 
@@ -56,5 +61,5 @@ plt.ylabel('Feature 1')
 plt.legend()
 plt.title('TSNE Projection with ResNet50 Features')
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'hist_tsne_project_pp{}_lr{}.png'.format(perplex, learn_rate)))
+plt.savefig(os.path.join(img_dir, 'hist_tsne_project_pp{}_lr{}_top{}.png'.format(perplex, learn_rate, top_num)))
 plt.show()

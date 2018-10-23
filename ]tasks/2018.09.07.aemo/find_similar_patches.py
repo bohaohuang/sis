@@ -17,7 +17,7 @@ def crop_center(img, cropx, cropy):
 
 # settings
 img_dir, task_dir = utils.get_task_img_folder()
-show_figure = True
+show_figure = False
 
 aemo_img_dir = os.path.join(img_dir, 'aemo_patches')
 aemo_ftr_dir = os.path.join(task_dir, 'aemo_patches')
@@ -43,7 +43,7 @@ top_range = np.arange(20)
 patch_select_record = np.zeros(len(top_range))
 for top_num in [5]:
     select_patches = []
-    for cnt in range(25, 26, 5): #range(len(aemo_patch_names)):
+    for cnt in range(len(aemo_patch_names)):
         aemo_ftr = aemo_feature[cnt, :]
 
         dist = np.sum(np.square(spca_feature - aemo_ftr), axis=1)
@@ -68,6 +68,9 @@ for top_num in [5]:
             plt.show()
 
         select_patches.append(sort_idx[:top_num])
+
+    select_patch_file = os.path.join(task_dir, 'top{}_select_patch.npy'.format(top_num))
+    ersa_utils.save_file(select_patch_file, np.unique(select_patches))
 
     select_num = len(np.unique(select_patches))
     total_num = spca_feature.shape[0]
