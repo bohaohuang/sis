@@ -10,26 +10,26 @@ import stn
 import ersaPath
 import ersa_utils
 from nn import hook, nn_utils
-from reader import dataReaderSegmentation, reader_utils
+from reader import reader_utils
 import cityscapes_reader, cityscapes_labels
 
 
 # define parameters
-BATCH_SIZE = 1
+BATCH_SIZE = 4
 DS_NAME = 'cityscapes'
-LEARNING_RATE = 1e-4
+LEARNING_RATE = (1e-6, 1e-6, 1e-6)
 TILE_SIZE = (512, 1024)
 EPOCHS = 40
 NUM_CLASS = 19
 PAR_DIR = DS_NAME+'/stn'
 SUFFIX = 'rand_scale'
-N_TRAIN = 2995
+N_TRAIN = 2996
 N_VALID = 500
 VAL_MULT = 5
 GPU = 0
-DECAY_STEP = 10
-DECAY_RATE = 0.1
-VERB_STEP = 100
+DECAY_STEP = (10, 10, 10)
+DECAY_RATE = (0.1, 0.1, 0.1)
+VERB_STEP = 120
 SAVE_EPOCH = 5
 DATA_DIR = r'/hdd/cityscapes'
 RGB_TYPE = 'leftImg8bit'
@@ -88,6 +88,8 @@ class DataReaderSegmentationTrainValid(object):
             ftr_block = ftr_block - self.chan_mean
             lbl_block = data_block[:, :, -2*self.gt_dim:-self.gt_dim]
             prd_block = data_block[:, :, -self.gt_dim:]
+            for cnt, id in enumerate(CITYSCAPES_TRAIN_ID_TO_EVAL_ID):
+                np.place(prd_block, prd_block == id, cnt)
             if self.include_gt:
                 return ftr_block, lbl_block, prd_block
             else:
@@ -166,7 +168,7 @@ def read_flag():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch-size', default=BATCH_SIZE, type=int, help='batch size (10)')
     parser.add_argument('--ds-name', default=DS_NAME, type=str, help='dataset name')
-    parser.add_argument('--learning-rate', type=float, default=LEARNING_RATE, help='learning rate (1e-3)')
+    parser.add_argument('--learning-rate', type=tuple, default=LEARNING_RATE, help='learning rate (1e-3)')
     parser.add_argument('--tile-size', default=TILE_SIZE, type=tuple, help='tile size 5000')
     parser.add_argument('--epochs', default=EPOCHS, type=int, help='# epochs (1)')
     parser.add_argument('--num-classes', type=int, default=NUM_CLASS, help='# classes (including background)')
@@ -176,8 +178,8 @@ def read_flag():
     parser.add_argument('--n-valid', type=int, default=N_VALID, help='# patches to valid')
     parser.add_argument('--val-mult', type=int, default=VAL_MULT, help='validation_bs=val_mult*train_bs')
     parser.add_argument('--GPU', type=str, default=GPU, help="GPU used for computation.")
-    parser.add_argument('--decay-step', type=float, default=DECAY_STEP, help='Learning rate decay step in number of epochs.')
-    parser.add_argument('--decay-rate', type=float, default=DECAY_RATE, help='Learning rate decay rate')
+    parser.add_argument('--decay-step', type=tuple, default=DECAY_STEP, help='Learning rate decay step in number of epochs.')
+    parser.add_argument('--decay-rate', type=tuple, default=DECAY_RATE, help='Learning rate decay rate')
     parser.add_argument('--verb-step', type=int, default=VERB_STEP, help='#steps between two verbose prints')
     parser.add_argument('--save-epoch', type=int, default=SAVE_EPOCH, help='#epochs between two model save')
     parser.add_argument('--data-dir', type=str, default=DATA_DIR, help='root directory of cityscapes')
@@ -248,40 +250,35 @@ def main(flags):
     resize_func = lambda img: resize_image(img, flags.tile_size)
     train_init_op, valid_init_op, reader_op = DataReaderSegmentationTrainValid(
             flags.tile_size, file_list_train, file_list_valid,
-            flags.batch_size, cm_train.meta_data['chan_mean'], aug_func=[reader_utils.image_flipping_hori,
-                                                                         reader_utils.image_scaling_with_label],
+            flags.batch_size, cm_train.meta_data['chan_mean'], aug_func=[reader_utils.image_flipping_hori],
             random=True, has_gt=True, gt_dim=1, include_gt=True, valid_mult=flags.val_mult, global_func=resize_func)\
         .read_op()
     feature, label, pred = reader_op
     train_init_op_valid, _, reader_op = DataReaderSegmentationTrainValid(
         flags.tile_size, file_list_valid, file_list_train,
-        flags.batch_size, cm_valid.meta_data['chan_mean'], aug_func=[reader_utils.image_flipping_hori,
-                                                                     reader_utils.image_scaling_with_label],
+        flags.batch_size, cm_valid.meta_data['chan_mean'], aug_func=[reader_utils.image_flipping_hori],
         random=True, has_gt=True, gt_dim=1, include_gt=True, valid_mult=flags.val_mult, global_func=resize_func) \
         .read_op()
-    feature_valid, label_valid, pred_valid = reader_op
+    _, _, pred_valid = reader_op
 
-    with tf.Session() as sess:
-        sess.run(train_init_op)
-        p = sess.run(pred)
-        print(np.unique(p))
+    model.create_graph(pred, feature_valid=pred_valid, rgb=feature)
 
-    model.create_graph(feature, feature_valid=pred_valid)
-
-    '''model.compile(feature, label, flags.n_train, flags.n_valid, flags.tile_size, ersaPath.PATH['model'],
+    model.compile(pred, label, flags.n_train, flags.n_valid, flags.tile_size, ersaPath.PATH['model'],
                   par_dir=flags.model_par_dir, val_mult=flags.val_mult, loss_type='xent')
-    train_hook = hook.ValueSummaryHook(flags.verb_step, [model.loss, model.lr_op],
-                                       value_names=['train_loss', 'learning_rate'], print_val=[0])
+    train_hook = hook.ValueSummaryHook(flags.verb_step, [model.loss, model.g_loss, model.d_loss, model.lr_op[0],
+                                                         model.lr_op[1], model.lr_op[2]],
+                                       value_names=['seg_loss', 'g_loss', 'd_loss', 'lr_seg', 'lr_g', 'lr_d'],
+                                       print_val=[0, 1, 2])
     model_save_hook = hook.ModelSaveHook(model.get_epoch_step()*flags.save_epoch, model.ckdir)
     valid_loss_hook = hook.ValueSummaryHookIters(model.get_epoch_step(), [model.loss_xent, model.loss_iou],
                                                  value_names=['valid_loss', 'valid_mIoU'], log_time=True,
                                                  run_time=model.n_valid)
-    image_hook = hook.ImageValidSummaryHook(model.input_size, model.get_epoch_step(), feature, label, model.pred,
+    image_hook = hook.ImageValidSummaryHook(model.input_size, model.get_epoch_step(), feature, label, model.refine,
                                             cityscapes_labels.image_summary, img_mean=cm_train.meta_data['chan_mean'])
     start_time = time.time()
     model.train(train_hooks=[train_hook, model_save_hook], valid_hooks=[valid_loss_hook, image_hook],
-               train_init=train_init_op, valid_init=valid_init_op)
-    print('Duration: {:.3f}'.format((time.time() - start_time)/3600))'''
+                train_init=[train_init_op, train_init_op_valid], valid_init=valid_init_op)
+    print('Duration: {:.3f}'.format((time.time() - start_time)/3600))
 
 
 if __name__ == '__main__':

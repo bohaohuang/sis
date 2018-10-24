@@ -3,31 +3,34 @@ import argparse
 import numpy as np
 import tensorflow as tf
 import ersaPath
+import ersa_utils
 from nn import unet, hook, nn_utils
 from preprocess import patchExtractor
-from reader import dataReaderSegmentation, reader_utils
 from collection import collectionMaker
+from reader import dataReaderSegmentation, reader_utils
 
 # settings
 NUM_CLASS = 2
 PATCH_SIZE = (572, 572)
 TILE_SIZE = (5000, 5000)
-DS_NAME = 'aemo_hist'
-PAR_DIR = 'aemo/new4'
+DS_NAME = 'aemo_hist2'
+PAR_DIR = 'aemo/new5'
 FROM_SCRATCH = False
 DECAY_STEP = 30
 DECAY_RATE = 0.1
 EPOCHS = 80
 BATCH_SIZE = 5
 VAL_MULT = 5
-START_LAYER = 6
+START_LAYER = 10
 GPU = 0
 N_TRAIN = 785
 N_VALID = 395
 VERB_STEP = 50
 SAVE_EPOCH = 20
-MODEL_DIR = r'/work/bh163/misc/unet_reweight'
-DATA_DIR = r'/work/bh163/data/aemo_hist'
+LEARN_RATE = '1e-3'
+MODEL_DIR = r'/hdd6/Models/spca/UnetCropWeighted_GridChipPretrained6Weighted4_PS(572, 572)_BS5_' \
+            r'EP100_LR0.0001_DS50_DR0.1_SFN32'
+DATA_DIR = r'/home/lab/Documents/bohao/data/aemo/aemo_hist2'
 
 
 def read_flag():
@@ -51,8 +54,10 @@ def read_flag():
     parser.add_argument('--from-scratch', type=bool, default=FROM_SCRATCH, help='from scratch or not')
     parser.add_argument('--start-layer', type=int, default=START_LAYER, help='start layer to unfreeze')
     parser.add_argument('--model-dir', type=str, default=MODEL_DIR, help='pretrained model directory')
+    parser.add_argument('--learn-rate', type=str, default=LEARN_RATE, help='learning rate')
 
     flags = parser.parse_args()
+    flags.learn_rate = ersa_utils.str2list(flags.learn_rate, d_type=float)
     return flags
 
 
@@ -64,7 +69,7 @@ def main(flags):
         suffix_base = 'aemo_up{}'.format(flags.start_layer)
     if flags.from_scratch:
         suffix_base += '_scratch'
-    for lr in [1e-3, 1e-4]:
+    for lr in flags.learn_rate:
         for run_id in range(4):
             suffix = '{}_{}'.format(suffix_base, run_id)
             tf.reset_default_graph()

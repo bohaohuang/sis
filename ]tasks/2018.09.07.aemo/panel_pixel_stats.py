@@ -18,7 +18,8 @@ spca_files = glob(os.path.join(spca_dir, '*_RGB.jpg'))
 idx = np.random.permutation(len(spca_files))
 spca_files = [spca_files[i] for i in idx]
 aemo_files = glob(os.path.join(aemo_dir, '*rgb.tif'))
-aemo_hist_files = glob(os.path.join(aemohist_dir, '*histRGB.tif'))
+#aemo_hist_files = glob(os.path.join(aemohist_dir, '*histRGB.tif'))
+aemo_hist_files = glob(os.path.join(r'/home/lab/Documents/bohao/data/aemo/aemo_hist2', '*rgb.tif'))
 
 save_file = os.path.join(task_dir, 'spca_panel_stats.npy')
 def get_spcastats():
@@ -53,7 +54,7 @@ def get_spcastats():
     return aemo_stats
 aemo = processBlock.ValueComputeProcess('aemo_panel_stats', task_dir, save_file, get_spcastats).run().val
 
-save_file = os.path.join(task_dir, 'aemohist_panel_stats.npy')
+'''save_file = os.path.join(task_dir, 'aemohist_panel_stats.npy')
 def get_spcastats():
     print('Extracting panel pixels in aemo...')
     aemo_stats = np.zeros((3, 255))
@@ -67,7 +68,23 @@ def get_spcastats():
             aemo_stats[c, :] += cnt / np.sum(gt)
         aemo_stats = aemo_stats / len(aemo_files)
     return aemo_stats
-aemohist = processBlock.ValueComputeProcess('aemohist_panel_stats', task_dir, save_file, get_spcastats).run().val
+aemohist = processBlock.ValueComputeProcess('aemohist_panel_stats', task_dir, save_file, get_spcastats).run().val'''
+
+save_file = os.path.join(task_dir, 'aemohist3_panel_stats.npy')
+def get_spcastats():
+    print('Extracting panel pixels in aemo...')
+    aemo_stats = np.zeros((3, 255))
+    for rgb_file in tqdm(aemo_hist_files):
+        gt_file = os.path.join(aemo_dir, os.path.basename(rgb_file[:-7]) + 'gt_d255.tif')
+        rgb = ersa_utils.load_file(rgb_file)
+        gt = ersa_utils.load_file(gt_file)
+
+        for c in range(3):
+            cnt, _ = np.histogram(rgb[:, :, c] * gt, bins=np.arange(256))
+            aemo_stats[c, :] += cnt / np.sum(gt)
+        aemo_stats = aemo_stats / len(aemo_files)
+    return aemo_stats
+aemohist = processBlock.ValueComputeProcess('aemohist3_panel_stats', task_dir, save_file, get_spcastats).run().val
 
 plt.figure(figsize=(8, 6))
 color_list = ['r', 'g', 'b']
@@ -89,5 +106,5 @@ for i in range(3):
 plt.xlabel('Intensity')
 plt.ylabel('cnt/#panel pixels')
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'panel_rgb_stats.png'))
+#plt.savefig(os.path.join(img_dir, 'panel_rgb_stats2.png'))
 plt.show()
