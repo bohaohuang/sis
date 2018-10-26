@@ -11,15 +11,14 @@ from collection import collectionMaker, collectionEditor
 class_num = 2
 patch_size = (572, 572)
 tile_size = (5000, 5000)
-ds_name = 'aemo_hist'
-par_dir = 'aemo/new4'
+ds_name = 'aemo_pad'
+par_dir = 'aemo/new3'
 from_scratch = False
 ds = 30
 dr = 0.1
 epochs = 80
 bs = 5
 valid_mult = 5
-start_layer = 8
 gpu = 1
 n_train = 785
 n_valid = 395
@@ -32,10 +31,10 @@ nn_utils.set_gpu(gpu)
 
 for use_hist in [False]:
     if use_hist:
-        suffix_base = 'aemo_hist_up{}'.format(start_layer)
+        suffix_base = 'aemo_hist'
     else:
-        suffix_base = 'aemo_up{}'.format(start_layer)
-    for lr in [1e-3, 1e-4]:
+        suffix_base = 'aemo'
+    for lr in [1e-2, 1e-5]:
         for run_id in range(4):
             suffix = '{}_{}'.format(suffix_base, run_id)
             tf.reset_default_graph()
@@ -101,7 +100,7 @@ for use_hist in [False]:
 
             model.create_graph(feature)
             model.compile(feature, label, n_train, n_valid, patch_size, ersaPath.PATH['model'], par_dir=par_dir,
-                          loss_type='xent', train_var_filter=['layerup{}'.format(i) for i in range(start_layer, 10)])
+                          loss_type='xent')
             train_hook = hook.ValueSummaryHook(verb_step, [model.loss, model.lr_op], value_names=['train_loss', 'learning_rate'],
                                                print_val=[0])
             model_save_hook = hook.ModelSaveHook(model.get_epoch_step()*save_epoch, model.ckdir)

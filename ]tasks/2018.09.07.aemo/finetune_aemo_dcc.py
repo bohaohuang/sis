@@ -14,7 +14,7 @@ NUM_CLASS = 2
 PATCH_SIZE = (572, 572)
 TILE_SIZE = (5000, 5000)
 DS_NAME = 'aemo_hist'
-PAR_DIR = 'aemo/new4'
+PAR_DIR = 'new4'
 FROM_SCRATCH = True
 DECAY_STEP = 30
 DECAY_RATE = 0.1
@@ -57,6 +57,7 @@ def read_flag():
     parser.add_argument('--learn-rate', type=str, default=LEARN_RATE, help='learning rate')
 
     flags = parser.parse_args()
+    flags.par_dir = 'aemo/' + flags.par_dir
     flags.learn_rate = ersa_utils.str2list(flags.learn_rate, d_type=float)
     return flags
 

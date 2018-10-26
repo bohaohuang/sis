@@ -149,11 +149,13 @@ def scoring_func2(gtObj, ppObj, iou_th=0.5):
             iou = inter.shape[0] / union.shape[0]
             if iou >= iou_th:
                 conf.append(pl_pp_cf[pp_i])
+                true.append(1)
             else:
-                conf.append(0)
+                conf.append(pl_pp_cf[pp_i])
+                true.append(0)
         else:
-            conf.append(0)
-        true.append(1)
+            conf.append(-1000)
+            true.append(1)
     for i in range(len(pp_house_id)):
         if pp_house_id[i] == -1:
             true.append(0)
@@ -205,7 +207,7 @@ if __name__ == '__main__':
             true_all.append(true)
 
         p, r, _ = precision_recall_curve(np.concatenate(true_all), np.concatenate(conf_all))
-        plt.plot(r, p, linewidth=3, label=mn)
+        plt.plot(r[1:], p[1:], linewidth=3, label=mn)
 
     plt.xlim([0, 1])
     plt.ylim([0, 1])
@@ -214,7 +216,7 @@ if __name__ == '__main__':
     plt.title('Object-wise PR Curve Comparison')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'pr_cmp2.png'))
+    plt.savefig(os.path.join(img_dir, 'pr_cmp3.png'))
     plt.show()
     
     print('duration = {}'.format(time.time() - start_time))

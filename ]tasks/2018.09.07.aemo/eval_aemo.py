@@ -97,6 +97,6 @@ file_list_valid = cm.load_files(field_name='aus50', field_id='', field_ext='.*rg
 chan_mean = cm.meta_data['chan_mean'][-3:]
 
 nn_utils.tf_warn_level(3)
-model_dir = r'/hdd6/Models/aemo/new3/unet_aemo_hist_0_hist_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1'
+model_dir = r'/hdd6/Models/aemo/new3/unet_aemo_4_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1'
 unet.evaluate(file_list_valid, patch_size, tile_size, bs, chan_mean, model_dir, gpu, save_result_parent_dir='aemo',
               sfn=32, force_run=True, score_results=True, split_char='.')
