@@ -13,9 +13,9 @@ from reader import dataReaderSegmentation, reader_utils
 NUM_CLASS = 2
 PATCH_SIZE = (572, 572)
 TILE_SIZE = (5000, 5000)
-DS_NAME = 'aemo_hist2'
-PAR_DIR = 'aemo/new5'
-FROM_SCRATCH = False
+DS_NAME = 'aemo_hist'
+PAR_DIR = 'aemo/new4'
+FROM_SCRATCH = True
 DECAY_STEP = 30
 DECAY_RATE = 0.1
 EPOCHS = 80
@@ -70,7 +70,7 @@ def main(flags):
     if flags.from_scratch:
         suffix_base += '_scratch'
     for lr in flags.learn_rate:
-        for run_id in range(4):
+        for run_id in range(1):
             suffix = '{}_{}'.format(suffix_base, run_id)
             tf.reset_default_graph()
 

@@ -8,4 +8,4 @@
 module load Python-GPU/3.6.5
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/ersa
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/sis
-python finetune_aemo_dcc.py --from-scratch=True --learn-rate=1e-3 --start-layer=10 --model-dir=/work/bh163/misc/unet_reweight --data-dir=/work/bh163/data/aemo_hist2
+python eval_pretrained_dcc.py
