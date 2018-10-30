@@ -1,3 +1,4 @@
+import os
 import time
 import argparse
 import numpy as np
@@ -5,7 +6,6 @@ import tensorflow as tf
 import ersaPath
 import ersa_utils
 from nn import unet, hook, nn_utils
-from preprocess import patchExtractor
 from collection import collectionMaker
 from reader import dataReaderSegmentation, reader_utils
 
@@ -13,9 +13,8 @@ from reader import dataReaderSegmentation, reader_utils
 NUM_CLASS = 2
 PATCH_SIZE = (572, 572)
 TILE_SIZE = (5000, 5000)
-DS_NAME = 'aemo_hist_align'
-PAR_DIR = 'hist_align'
 FROM_SCRATCH = False
+PAR_DIR = 'aemo_resize_new_loss'
 DECAY_STEP = 30
 DECAY_RATE = 0.1
 EPOCHS = 80
@@ -30,13 +29,12 @@ SAVE_EPOCH = 20
 LEARN_RATE = '1e-3'
 MODEL_DIR = r'/hdd6/Models/spca/UnetCropWeighted_GridChipPretrained6Weighted4_PS(572, 572)_BS5_' \
             r'EP100_LR0.0001_DS50_DR0.1_SFN32'
-DATA_DIR = r'/home/lab/Documents/bohao/data/aemo/aemo_hist_align'
+DATA_DIR = r'/hdd/ersa/patch_extractor/aemo_resize'
 
 
 def read_flag():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch-size', default=BATCH_SIZE, type=int, help='batch size (10)')
-    parser.add_argument('--ds-name', default=DS_NAME, type=str, help='dataset name')
     parser.add_argument('--tile-size', default=TILE_SIZE, type=tuple, help='tile size 5000')
     parser.add_argument('--patch-size', default=PATCH_SIZE, type=tuple, help='patch size 572')
     parser.add_argument('--epochs', default=EPOCHS, type=int, help='# epochs (1)')
@@ -67,13 +65,13 @@ def main(flags):
     nn_utils.set_gpu(flags.GPU)
     for start_layer in flags.start_layer:
         if start_layer >= 10:
-            suffix_base = 'aemo_newloss'
+            suffix_base = 'aemo'
         else:
-            suffix_base = 'aemo_newloss_up{}'.format(start_layer)
+            suffix_base = 'aemo_up{}'.format(start_layer)
         if flags.from_scratch:
             suffix_base += '_scratch'
         for lr in flags.learn_rate:
-            for run_id in range(4):
+            for run_id in range(1):
                 suffix = '{}_{}'.format(suffix_base, run_id)
                 tf.reset_default_graph()
 
@@ -84,29 +82,25 @@ def main(flags):
                 model = unet.UNet(flags.num_classes, flags.patch_size, suffix=suffix, learn_rate=lr,
                                   decay_step=flags.decay_step, decay_rate=flags.decay_rate,
                                   epochs=flags.epochs, batch_size=flags.batch_size)
-                overlap = model.get_overlap()
 
-                cm = collectionMaker.read_collection(raw_data_path=flags.data_dir,
-                                                     field_name='aus10,aus30,aus50',
-                                                     field_id='',
-                                                     rgb_ext='.*rgb',
-                                                     gt_ext='.*gt',
-                                                     file_ext='tif',
-                                                     force_run=False,
-                                                     clc_name=flags.ds_name)
-                cm.print_meta_data()
+                file_list = os.path.join(flags.data_dir, 'file_list.txt')
+                lines = ersa_utils.load_file(file_list)
 
-                file_list_train = cm.load_files(field_name='aus10,aus30', field_id='', field_ext='.*rgb,.*gt')
-                file_list_valid = cm.load_files(field_name='aus50', field_id='', field_ext='.*rgb,.*gt')
+                patch_list_train = []
+                patch_list_valid = []
+                train_tile_names = ['aus10', 'aus30']
+                valid_tile_names = ['aus50']
 
-                patch_list_train = patchExtractor.PatchExtractor(flags.patch_size, flags.tile_size,
-                                                                 flags.ds_name + '_train_hist',
-                                                                 overlap, overlap // 2). \
-                    run(file_list=file_list_train, file_exts=['jpg', 'png'], force_run=False).get_filelist()
-                patch_list_valid = patchExtractor.PatchExtractor(flags.patch_size, flags.tile_size,
-                                                                 flags.ds_name + '_valid_hist',
-                                                                 overlap, overlap // 2). \
-                    run(file_list=file_list_valid, file_exts=['jpg', 'png'], force_run=False).get_filelist()
+                for line in lines:
+                    tile_name = os.path.basename(line.split(' ')[0]).split('_')[0].strip()
+                    if tile_name in train_tile_names:
+                        patch_list_train.append(line.strip().split(' '))
+                    elif tile_name in valid_tile_names:
+                        patch_list_valid.append(line.strip().split(' '))
+                    else:
+                        raise ValueError
+
+                cm = collectionMaker.read_collection('aemo_align')
                 chan_mean = cm.meta_data['chan_mean']
 
                 train_init_op, valid_init_op, reader_op = \

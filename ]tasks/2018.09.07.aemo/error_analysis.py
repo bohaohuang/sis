@@ -69,13 +69,13 @@ img_dir, task_dir = utils.get_task_img_folder()
 truth_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_pad'
 base_dir = r'/hdd/Results/aemo/UnetCropWeighted_GridChipPretrained6Weighted4_PS(572, 572)_BS5_' \
            r'EP100_LR0.0001_DS50_DR0.1_SFN32/default/pred'
-ft_dir = r'/hdd/Results/aemo/unet_aemo_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1/train/pred'
+ft_dir = r'/hdd/Results/aemo/unet_aemo_3_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1/default/pred'
 
 #eval_files = ['_'.join(os.path.basename(f)[:-4].split('_')[:2]) for f in glob(os.path.join(base_dir, '*.png'))]
 eval_files = ['_'.join(os.path.basename(f)[:-4].split('_')[:2]) for f in glob(os.path.join(ft_dir, '*.png'))]
 
 for f in eval_files:
-    img_save_dir = os.path.join(img_dir, 'cmp_train')
+    img_save_dir = os.path.join(img_dir, 'cmp_align_1')
     if not os.path.exists(img_save_dir):
         os.makedirs(img_save_dir)
 

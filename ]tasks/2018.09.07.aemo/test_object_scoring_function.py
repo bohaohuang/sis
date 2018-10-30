@@ -170,8 +170,9 @@ if __name__ == '__main__':
 
     model_dir = ['conf_map_unet_aemo_hist_0_hist_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1',
                  'conf_map_unet_aemo_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1',
+                 'conf_map_unet_aemo_scratch_2_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1',
                  'conf_map_unet_aemo_scratch_3_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1']
-    model_name = ['naive', 'panel', 'tile']
+    model_name = ['Raw Finetune 1e-3', 'Hist Finetune 1e-3', 'Raw Scratch 1e-3', 'Hist Scratch 1e-3']
 
     for md, mn in zip(model_dir, model_name):
         conf_dir = os.path.join(task_dir, md)
@@ -216,7 +217,7 @@ if __name__ == '__main__':
     plt.title('Object-wise PR Curve Comparison')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'pr_cmp3.png'))
+    plt.savefig(os.path.join(img_dir, 'pr_cmp_all.png'))
     plt.show()
     
     print('duration = {}'.format(time.time() - start_time))

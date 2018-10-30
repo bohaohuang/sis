@@ -11,8 +11,8 @@ from collection import collectionMaker, collectionEditor
 class_num = 2
 patch_size = (572, 572)
 tile_size = (5000, 5000)
-ds_name = 'aemo_pad'
-par_dir = 'aemo/new3'
+ds_name = 'aemo'
+par_dir = 'aemo/old'
 from_scratch = False
 ds = 30
 dr = 0.1
@@ -34,7 +34,7 @@ for use_hist in [False]:
         suffix_base = 'aemo_hist'
     else:
         suffix_base = 'aemo'
-    for lr in [1e-2, 1e-5]:
+    for lr in [1e-2, 1e-3, 1e-4, 1e-5]:
         for run_id in range(4):
             suffix = '{}_{}'.format(suffix_base, run_id)
             tf.reset_default_graph()
@@ -50,7 +50,7 @@ for use_hist in [False]:
                              epochs=epochs, batch_size=bs)
             overlap = model.get_overlap()
 
-            cm = collectionMaker.read_collection(raw_data_path=r'/home/lab/Documents/bohao/data/aemo/aemo_hist',
+            cm = collectionMaker.read_collection(raw_data_path=r'/home/lab/Documents/bohao/data/aemo/aemo',
                                                  field_name='aus10,aus30,aus50',
                                                  field_id='',
                                                  rgb_ext='.*rgb',

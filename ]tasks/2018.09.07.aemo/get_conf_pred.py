@@ -11,7 +11,7 @@ from preprocess import patchExtractor, histMatching
 from collection import collectionMaker, collectionEditor
 
 
-model_dir = r'/hdd6/Models/aemo/new3/unet_aemo_hist_0_hist_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1'
+model_dir = r'/hdd6/Models/aemo/new5/unet_aemo_scratch_3_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1'
 img_dir, task_dir = utils.get_task_img_folder()
 SAVE_DIR = os.path.join(task_dir, 'conf_map_{}'.format(os.path.basename(model_dir)))
 ersa_utils.make_dir_if_not_exist(SAVE_DIR)
@@ -206,9 +206,9 @@ cm.print_meta_data()
 
 file_list_train = cm.load_files(field_name='aus10,aus30', field_id='', field_ext='.*rgb_hist,.*gt_d255')
 file_list_valid = cm.load_files(field_name='aus50', field_id='', field_ext='.*rgb_hist,.*gt_d255')
-chan_mean = cm.meta_data['chan_mean'][:3]
+chan_mean = cm.meta_data['chan_mean'][-3:]
 
 nn_utils.tf_warn_level(3)
 estimator = myNNEstimatorSegment(unet, file_list_valid, patch_size, tile_size, bs, chan_mean, model_dir, 'default',
-                                 'aemo', gpu=gpu, score_results=True, split_char='.')
+                                 'aemo', gpu=gpu, score_results=True, split_char='.', load_epoch_num=4)
 tile_dict, field_dict, overall = estimator.run(force_run=True).load_results()

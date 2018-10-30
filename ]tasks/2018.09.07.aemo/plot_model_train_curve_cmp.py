@@ -173,5 +173,134 @@ def plot_new3():
     plt.show()
 
 
+def plot_old_curves():
+    plt.figure(figsize=(10, 6))
+    colors = ersa_utils.get_default_colors()
+
+    # finetune files name
+    file_name_temp = 'run_unet_aemo_{}_PS(572, 572)_BS5_EP80_LR0.01_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='old')
+    plt.plot(step, val, '-', label='Raw Finetune 1e-2', linewidth=2, color=colors[0])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[0], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_unet_aemo_{}_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='new3')
+    plt.plot(step, val, '-', label='Raw Finetune 1e-3', linewidth=2, color=colors[1])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[1], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_unet_aemo_{}_PS(572, 572)_BS5_EP80_LR0.0001_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='new3')
+    plt.plot(step, val, '-', label='Raw Finetune 1e-4', linewidth=2, color=colors[2])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[2], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_unet_aemo_{}_PS(572, 572)_BS5_EP80_LR1e-05_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='old')
+    plt.plot(step, val, '-', label='Raw Finetune 1e-5', linewidth=2, color=colors[3])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[3], alpha=0.1, interpolate=True)
+
+    plt.title('Validation IoU on Raw Data')
+    plt.xlabel('Step')
+    plt.ylabel('IoU')
+    plt.ylim([0.48, 0.74])
+    plt.legend(loc='upper left', ncol=1)
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(os.path.join(img_dir, 'old_all_run_cmp.png'))
+    plt.show()
+
+
+def plot_old_cmp_new():
+    plt.figure(figsize=(10, 6))
+    colors = ersa_utils.get_default_colors()
+
+    # finetune files name
+    file_name_temp = 'run_unet_aemo_{}_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='new3')
+    plt.plot(step, val, '-', label='Raw Finetune 1e-3', linewidth=2, color=colors[1])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[1], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_unet_aemo_{}_PS(572, 572)_BS5_EP80_LR0.0001_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='new3')
+    plt.plot(step, val, '-', label='Raw Finetune 1e-4', linewidth=2, color=colors[2])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[2], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_unet_aemo_hist_{}_hist_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='new3')
+    plt.plot(step, val, '-', label='Hist Finetune 1e-3', linewidth=2, color=colors[4])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[4], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_unet_aemo_hist_{}_hist_PS(572, 572)_BS5_EP80_LR0.0001_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='new3')
+    plt.plot(step, val, '-', label='Hist Finetune 1e-4', linewidth=2, color=colors[5])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[5], alpha=0.1, interpolate=True)
+
+    plt.title('Validation IoU Raw Hist Comparison')
+    plt.xlabel('Step')
+    plt.ylabel('IoU')
+    plt.ylim([0.48, 0.74])
+    plt.legend(loc='upper left', ncol=1)
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(os.path.join(img_dir, 'old_all_run_cmp_new.png'))
+    plt.show()
+
+
+def plot_old_cmp_new_scratch():
+    plt.figure(figsize=(10, 6))
+    colors = ersa_utils.get_default_colors()
+
+    # finetune files name
+    file_name_temp = 'run_unet_aemo_{}_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='new3')
+    plt.plot(step, val, '-', label='Raw Finetune 1e-3', linewidth=2, color=colors[1])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[1], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_unet_aemo_{}_PS(572, 572)_BS5_EP80_LR0.0001_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='new3')
+    plt.plot(step, val, '-', label='Raw Finetune 1e-4', linewidth=2, color=colors[2])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[2], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_unet_aemo_hist_{}_hist_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='new3')
+    plt.plot(step, val, '-', label='Hist Finetune 1e-3', linewidth=2, color=colors[4])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[4], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_unet_aemo_hist_{}_hist_PS(572, 572)_BS5_EP80_LR0.0001_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='new3')
+    plt.plot(step, val, '-', label='Hist Finetune 1e-4', linewidth=2, color=colors[5])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[5], alpha=0.1, interpolate=True)
+
+    # scratch
+    file_name_temp = 'run_unet_aemo_scratch_{}_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='new4')
+    plt.plot(step, val, '-.', label='Raw Scratch 1e-3', linewidth=2, color=colors[1])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[1], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_unet_aemo_scratch_{}_PS(572, 572)_BS5_EP80_LR0.0001_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='new4')
+    plt.plot(step, val, '-.', label='Raw Scratch 1e-4', linewidth=2, color=colors[2])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[2], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_unet_aemo_scratch_{}_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp)
+    plt.plot(step, val, '-.', label='Hist Scratch 1e-3', linewidth=2, color=colors[4])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[4], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_unet_aemo_scratch_{}_PS(572, 572)_BS5_EP80_LR0.0001_DS30_DR0.1-tag-IoU.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp)
+    plt.plot(step, val, '-.', label='Hist Scratch 1e-4', linewidth=2, color=colors[5])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[5], alpha=0.1, interpolate=True)
+
+    plt.title('Validation IoU')
+    plt.xlabel('Step')
+    plt.ylabel('IoU')
+    plt.ylim([0.48, 0.74])
+    plt.legend(loc='lower right', ncol=2)
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(os.path.join(img_dir, 'old_all_run_cmp_new_scratch.png'))
+    plt.show()
+
+
 if __name__ == '__main__':
-    plot_new3()
+    plot_old_cmp_new()
