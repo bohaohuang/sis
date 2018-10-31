@@ -57,7 +57,8 @@ def read_flag():
 
 
 def main(flags):
-    tf.set_random_seed(flags.run_id)
+    np.random.seed(int(flags.run_id))
+    tf.set_random_seed(int(flags.run_id))
 
     if flags.start_layer >= 10:
         pass
@@ -69,7 +70,7 @@ def main(flags):
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, flags.input_size[0], flags.input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_UNet.UnetModelCrop({'X':X, 'Y':y},
+    model = uabMakeNetwork_UNet.UnetModelCrop({'X': X, 'Y': y},
                                               trainable=mode,
                                               model_name=flags.model_name,
                                               input_size=flags.input_size,
