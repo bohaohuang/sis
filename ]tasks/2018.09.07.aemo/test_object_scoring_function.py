@@ -168,11 +168,11 @@ if __name__ == '__main__':
 
     img_dir, task_dir = utils.get_task_img_folder()
 
-    model_dir = ['conf_map_unet_aemo_hist_0_hist_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1',
-                 'conf_map_unet_aemo_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1',
-                 'conf_map_unet_aemo_scratch_2_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1',
-                 'conf_map_unet_aemo_scratch_3_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1']
-    model_name = ['Raw Finetune 1e-3', 'Hist Finetune 1e-3', 'Raw Scratch 1e-3', 'Hist Scratch 1e-3']
+    model_dir = ['confmap_uab_UnetCrop_aemo_ft_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
+                 'confmap_uab_UnetCrop_aemo_sc_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
+                 'confmap_uab_UnetCrop_aemo_ft_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
+                 ]
+    model_name = ['Raw Finetune 1e-3', 'Raw Scratch 1e-3', 'Hist Finetune 1e-3']
 
     for md, mn in zip(model_dir, model_name):
         conf_dir = os.path.join(task_dir, md)
@@ -217,7 +217,7 @@ if __name__ == '__main__':
     plt.title('Object-wise PR Curve Comparison')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'pr_cmp_all.png'))
+    plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_1.png'))
     plt.show()
     
     print('duration = {}'.format(time.time() - start_time))

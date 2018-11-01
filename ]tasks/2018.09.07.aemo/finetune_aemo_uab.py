@@ -63,7 +63,7 @@ def main(flags):
     if flags.start_layer >= 10:
         pass
     else:
-        flags.start_layer += '_up{}'.format(flags.start_layer)
+        flags.model_name += '_up{}'.format(flags.start_layer)
 
     # make network
     # define place holder

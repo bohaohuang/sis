@@ -302,5 +302,84 @@ def plot_old_cmp_new_scratch():
     plt.show()
 
 
+def plot_uab_ft():
+    plt.figure(figsize=(10, 6))
+    colors = ersa_utils.get_default_colors()
+
+    # finetune files name
+    file_name_temp = 'run_UnetCrop_aemo_ft_{}_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32-tag-iou_validation.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='aemo_hist')
+    plt.plot(step, val, '-', label='Hist Finetune 1e-3', linewidth=2, color=colors[0])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[0], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_UnetCrop_aemo_ft_{}_PS(572, 572)_BS5_EP80_LR0.0005_DS30_DR0.1_SFN32-tag-iou_validation.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='aemo_hist')
+    plt.plot(step, val, '-', label='Hist Finetune 5e-4', linewidth=2, color=colors[1])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[1], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_UnetCrop_aemo_ft_{}_PS(572, 572)_BS5_EP80_LR0.0001_DS30_DR0.1_SFN32-tag-iou_validation.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='aemo_hist')
+    plt.plot(step, val, '-', label='Hist Finetune 1e-4', linewidth=2, color=colors[2])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[2], alpha=0.1, interpolate=True)
+
+    # scratch files name
+    file_name_temp = 'run_UnetCrop_aemo_sc_{}_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32-tag-iou_validation.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='aemo_hist')
+    plt.plot(step, val, '--', label='Hist Scratch 1e-3', linewidth=2, color=colors[0])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[0], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_UnetCrop_aemo_sc_{}_PS(572, 572)_BS5_EP80_LR0.0005_DS30_DR0.1_SFN32-tag-iou_validation.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='aemo_hist')
+    plt.plot(step, val, '--', label='Hist Scratch 5e-4', linewidth=2, color=colors[1])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[1], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_UnetCrop_aemo_sc_{}_PS(572, 572)_BS5_EP80_LR0.0001_DS30_DR0.1_SFN32-tag-iou_validation.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='aemo_hist')
+    plt.plot(step, val, '--', label='Hist Scratch 1e-4', linewidth=2, color=colors[2])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[2], alpha=0.1, interpolate=True)
+
+    # finetune files name
+    file_name_temp = 'run_UnetCrop_aemo_ft_{}_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32-tag-iou_validation.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='aemo')
+    plt.plot(step, val, '-.', label='Raw Finetune 1e-3', linewidth=2, color=colors[0])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[0], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_UnetCrop_aemo_ft_{}_PS(572, 572)_BS5_EP80_LR0.0005_DS30_DR0.1_SFN32-tag-iou_validation.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='aemo')
+    plt.plot(step, val, '-.', label='Raw Finetune 5e-4', linewidth=2, color=colors[1])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[1], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_UnetCrop_aemo_ft_{}_PS(572, 572)_BS5_EP80_LR0.0001_DS30_DR0.1_SFN32-tag-iou_validation.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='aemo')
+    plt.plot(step, val, '-.', label='Raw Finetune 1e-4', linewidth=2, color=colors[2])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[2], alpha=0.1, interpolate=True)
+
+    # scratch files name
+    file_name_temp = 'run_UnetCrop_aemo_sc_{}_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32-tag-iou_validation.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='aemo')
+    plt.plot(step, val, '--.', label='Raw Scratch 1e-3', linewidth=2, color=colors[0])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[0], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_UnetCrop_aemo_sc_{}_PS(572, 572)_BS5_EP80_LR0.0005_DS30_DR0.1_SFN32-tag-iou_validation.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='aemo_hist')
+    plt.plot(step, val, '--.', label='Raw Scratch 5e-4', linewidth=2, color=colors[1])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[1], alpha=0.1, interpolate=True)
+
+    file_name_temp = 'run_UnetCrop_aemo_sc_{}_PS(572, 572)_BS5_EP80_LR0.0001_DS30_DR0.1_SFN32-tag-iou_validation.csv'
+    val, val_min, val_max, step = get_plot_vals(file_name_temp, fold_name='aemo_hist')
+    plt.plot(step, val, '--.', label='Raw Scratch 1e-4', linewidth=2, color=colors[2])
+    plt.fill_between(step, val_max, val_min, facecolor=colors[2], alpha=0.1, interpolate=True)
+
+    plt.title('Validation IoU')
+    plt.xlabel('Step')
+    plt.ylabel('IoU')
+    plt.ylim([0.5, 0.6])
+    plt.legend(loc='lower right', ncol=2)
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(os.path.join(img_dir, 'uab_cmp_all_ylim.png'))
+    plt.show()
+
+
 if __name__ == '__main__':
-    plot_old_cmp_new()
+    plot_uab_ft()
