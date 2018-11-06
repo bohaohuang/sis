@@ -19,8 +19,8 @@ class spClass_confMapToPolygonStructure_v2:
     version = 1
     # ------------ panel params ------------
     minRegion = 5  # any detected regions must be at least this large
-    maxThreshold = 0.5 # 50
-    minThreshold = 0.2 # 20
+    maxThreshold = 0.4  # 50
+    minThreshold = 0.2  # 20
     # ------------ polygon params ------------
     epsilon = 2
     linkingRadius = 55
@@ -44,6 +44,7 @@ class spClass_confMapToPolygonStructure_v2:
             self.commercialPanelDensityThreshold, self.commercialNeighborhoodRadius)
 
     """  MAP THE POLYGONS ONTO AN IMAGE FOR DISPLAY """
+
     def polygonStructureToImage(self, confidenceImage):  # polygon cords in form of xy
         H, W = confidenceImage.shape
         polygonImage = np.zeros((H, W))
@@ -54,6 +55,7 @@ class spClass_confMapToPolygonStructure_v2:
         return polygonImage
 
     """  CREATE REGIONS FROM CONFIDENCE MAPS """
+
     def confidenceImageToObjectStructure(self, confidenceImage):
         imThresh = confidenceImage >= self.minThreshold
         imLabel = measure.label(imThresh)
@@ -106,10 +108,13 @@ class spClass_confMapToPolygonStructure_v2:
             pixl = reg['pixelList'].transpose()
             dummyImage[pixl[0], pixl[1]] = 1
             _, contours, _ = cv2.findContours(dummyImage.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+            if len(np.array(contours).shape) == 1:
+                contours = np.expand_dims(np.concatenate(contours, axis=0), axis=0)
             polygons[r] = measure.approximate_polygon(np.squeeze(contours), self.epsilon)  # Douglas Peucker
         self.objectStructure['polygon'] = pd.Series(polygons, index=self.objectStructure.index).astype(object)
 
     """ LINK EACH HOUSE WITH ONE (OR MORE) DETECTED PANELS """
+
     def linkHousesToObjects(self, housePixelCoordinates, houseIdList):
         i_coords = np.array(self.objectStructure['iLocation'])
         j_coords = np.array(self.objectStructure['jLocation'])
@@ -131,13 +136,6 @@ def get_intersection(A, B):
     inter = np.array([x for x in set(tuple(x) for x in A) & set(tuple(x) for x in B)])
     union = np.array([x for x in set(tuple(x) for x in A) | set(tuple(x) for x in B)])
     return inter, union
-
-
-def get_blank_regions(img):
-    img_tmp = img.astype(np.float32)
-    img_tmp = np.sum(img_tmp, axis=2)
-    blank_mask = (img_tmp < 0.1).astype(np.int)
-    return blank_mask
 
 
 def scoring_func2(gtObj, ppObj, iou_th=0.5):
@@ -175,34 +173,33 @@ if __name__ == '__main__':
 
     img_dir, task_dir = utils.get_task_img_folder()
 
-    '''model_dir = ['confmap_uab_UnetCrop_aemo_ft_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
-                 'confmap_uab_UnetCrop_aemo_sc_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
-                 'confmap_uab_UnetCrop_aemo_ft_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
-                 'confmap_uab_UnetCrop_aemo_hd_0_PS(572, 572)_BS5_EP20_LR1e-05_DS10_DR0.1_SFN32'
+    '''corner_case = ersa_utils.load_file(os.path.join(img_dir, 'corner_case.png'))
+    #corner_case = np.pad(corner_case, ((2, 2), (2, 2)), 'constant')
+    _, contours, _ = cv2.findContours(corner_case.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    print(np.array(contours).shape)
+    print(np.squeeze(contours))
+
+    stack = np.expand_dims(np.concatenate(contours, axis=0), axis=0)
+    print(stack.shape)
+
+    print(contours[0].shape, contours[1].shape)'''
+
+    model_dir = ['confmap_uab_UnetCrop_aemo_ft_0_xregion_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
                  ]
-    model_name = ['Raw Finetune 1e-3', 'Raw Scratch 1e-3', 'Hist Finetune 1e-3', 'Hard Sample']'''
-    model_dir = ['confmap_uab_UnetCrop_aemo_reweight_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32']
-    model_name = ['Hard']
+    model_name = ['Raw Finetune 1e-3']
 
     for md, mn in zip(model_dir, model_name):
         conf_dir = os.path.join(task_dir, md)
         gt_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_hist/'
-        rgb_dir = r'/home/lab/Documents/bohao/data/aemo'
         conf_files = glob(os.path.join(conf_dir, '*.npy'))
         true_all = []
         conf_all = []
 
         for i_name in conf_files:
             conf_im = ersa_utils.load_file(i_name)
+
             gt_file = os.path.join(gt_dir, '{}.tif'.format(os.path.basename(i_name)[:-4]))
             gt = ersa_utils.load_file(gt_file)
-
-            rgb_file = os.path.join(rgb_dir, '{}_rgb.tif'.format(os.path.basename(i_name)[:-12]))
-            rgb = ersa_utils.load_file(rgb_file)
-            bm = 1- get_blank_regions(rgb)
-
-            conf_im = bm * conf_im
-            gt = bm * gt
 
             # Instantiate the class
             ppObj = spClass_confMapToPolygonStructure_v2()
@@ -235,7 +232,7 @@ if __name__ == '__main__':
     plt.title('Object-wise PR Curve Comparison')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_2.png'))
+    plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xregion.png'))
     plt.show()
-    
+
     print('duration = {}'.format(time.time() - start_time))

@@ -24,7 +24,7 @@ DECAY_STEP = 30
 DECAY_RATE = 0.1
 START_LAYER = 4
 MODEL_NAME = 'aemo_ft_0'
-DS_NAME = 'aemo_hist'
+DS_NAME = 'aemo'
 SFN = 32
 MODEL_DIR = None
 

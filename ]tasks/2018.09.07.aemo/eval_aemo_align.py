@@ -14,7 +14,7 @@ class_num = 2
 tile_size = (5000, 5000)
 clc_name = 'aemo_align'
 bs = 5
-gpu = 0
+gpu = -1
 
 # define network
 patch_size = (572, 572)
@@ -36,6 +36,6 @@ file_list_valid = cm.load_files(field_name='aus50', field_id='', field_ext='.*rg
 chan_mean = cm.meta_data['chan_mean']
 
 nn_utils.tf_warn_level(3)
-model_dir = r'/hdd6/Models/aemo/aemo_resize/unet_aemo_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1'
+model_dir = r'/hdd6/Models/aemo/aemo/UnetCrop_aemo_ft_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32'
 unet.evaluate(file_list_valid, patch_size, tile_size, bs, chan_mean, model_dir, gpu, save_result_parent_dir='aemo',
-              sfn=32, force_run=True, score_results=True, split_char='.', load_epoch_num=4)
+              sfn=32, force_run=True, score_results=True, split_char='.', load_epoch_num=75)
