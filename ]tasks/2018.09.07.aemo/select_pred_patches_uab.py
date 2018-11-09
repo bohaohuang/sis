@@ -72,7 +72,7 @@ if __name__ == '__main__':
     bad_th = 10
 
     truth_dir = r'/media/ei-edl01/data/uab_datasets/aemo/data/Original_Tiles'
-    ft_dir = r'/hdd/Results/aemo/uab/UnetCrop_aemo_ft_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32/aemo_hist/pred'
+    ft_dir = r'/hdd/Results/aemo/uab/UnetCrop_aemo_reweight_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32/aemo/pred'
 
     img_save_dir = os.path.join(img_dir, 'uab_pred_patches', ft_dir.split('/')[-3])
     ersa_utils.make_dir_if_not_exist(img_save_dir)

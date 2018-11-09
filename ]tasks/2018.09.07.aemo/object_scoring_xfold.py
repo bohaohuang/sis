@@ -18,8 +18,8 @@ import ersa_utils
 class spClass_confMapToPolygonStructure_v2:
     version = 1
     # ------------ panel params ------------
-    minRegion = 300  # any detected regions must be at least this large
-    minThreshold = 0.4
+    minRegion = 5  # any detected regions must be at least this large
+    minThreshold = 0.2
     # ------------ polygon params ------------
     epsilon = 2
     linkingRadius = 55
@@ -173,69 +173,63 @@ if __name__ == '__main__':
 
     img_dir, task_dir = utils.get_task_img_folder()
 
-    model_dir = ['confmap_uab_UnetCrop_aemo_ft_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
-                 'confmap_uab_UnetCrop_aemo_sc_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
-                 'confmap_uab_UnetCrop_aemo_ft_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
-                 'confmap_uab_UnetCrop_aemo_hd_0_PS(572, 572)_BS5_EP20_LR1e-05_DS10_DR0.1_SFN32'
+    model_dir = ['confmap_uab_UnetCrop_aemo_xfold0_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
+                 'confmap_uab_UnetCrop_aemo_xfold1_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
+                 'confmap_uab_UnetCrop_aemo_xfold2_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
                  ]
-    model_name = ['Raw Finetune 1e-3', 'Raw Scratch 1e-3', 'Hist Finetune 1e-3', 'Hard Sample']
+    model_name = ['Fold 0', 'Fold 1', 'Fold 2']
 
-    for iou_mt in tqdm([0.5]):
-        try:
-            for md, mn in zip(model_dir, model_name):
-                conf_dir = os.path.join(task_dir, md)
-                gt_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_hist/'
-                rgb_dir = r'/home/lab/Documents/bohao/data/aemo'
-                conf_files = glob(os.path.join(conf_dir, '*.npy'))
-                true_all = []
-                conf_all = []
+    iou_mt = 0.5
+    for md, mn in zip(model_dir, model_name):
+        conf_dir = os.path.join(task_dir, md)
+        gt_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_hist/'
+        rgb_dir = r'/home/lab/Documents/bohao/data/aemo'
+        conf_files = glob(os.path.join(conf_dir, '*.npy'))
+        true_all = []
+        conf_all = []
 
-                for i_name in conf_files:
-                    conf_im = ersa_utils.load_file(i_name)
-                    gt_file = os.path.join(gt_dir, '{}.tif'.format(os.path.basename(i_name)[:-4]))
-                    gt = ersa_utils.load_file(gt_file)
+        for i_name in conf_files:
+            conf_im = ersa_utils.load_file(i_name)
+            gt_file = os.path.join(gt_dir, '{}.tif'.format(os.path.basename(i_name)[:-4]))
+            gt = ersa_utils.load_file(gt_file)
 
-                    rgb_file = os.path.join(rgb_dir, '{}_rgb.tif'.format(os.path.basename(i_name)[:-12]))
-                    rgb = ersa_utils.load_file(rgb_file)
-                    bm = 1 - get_blank_regions(rgb)
+            rgb_file = os.path.join(rgb_dir, '{}_rgb.tif'.format(os.path.basename(i_name)[:-12]))
+            rgb = ersa_utils.load_file(rgb_file)
+            bm = 1 - get_blank_regions(rgb)
 
-                    conf_im = bm * conf_im
-                    gt = bm * gt
+            conf_im = bm * conf_im
+            gt = bm * gt
 
-                    # Instantiate the class
-                    ppObj = spClass_confMapToPolygonStructure_v2(iou_mt)
-                    # Map tp objects
-                    ppObj.confidenceImageToObjectStructure(conf_im)
-                    # APPROXIMATE EACH OBJECT WITH POLYGON
-                    ppObj.addPolygonToObjectStructure(conf_im)
-                    gtObj = spClass_confMapToPolygonStructure_v2(iou_mt)
-                    gtObj.confidenceImageToObjectStructure(gt)
-                    gtObj.addPolygonToObjectStructure(gt)
+            # Instantiate the class
+            ppObj = spClass_confMapToPolygonStructure_v2(iou_mt)
+            # Map tp objects
+            ppObj.confidenceImageToObjectStructure(conf_im)
+            # APPROXIMATE EACH OBJECT WITH POLYGON
+            ppObj.addPolygonToObjectStructure(conf_im)
+            gtObj = spClass_confMapToPolygonStructure_v2(iou_mt)
+            gtObj.confidenceImageToObjectStructure(gt)
+            gtObj.addPolygonToObjectStructure(gt)
 
-                    # link the house
-                    i_coords = np.array(gtObj.objectStructure['iLocation'])
-                    j_coords = np.array(gtObj.objectStructure['jLocation'])
-                    housePixelCoordinates = np.stack([i_coords, j_coords], axis=1)
-                    houseId = np.arange(housePixelCoordinates.shape[0])
-                    ppObj.linkHousesToObjects(housePixelCoordinates, houseId)
+            # link the house
+            i_coords = np.array(gtObj.objectStructure['iLocation'])
+            j_coords = np.array(gtObj.objectStructure['jLocation'])
+            housePixelCoordinates = np.stack([i_coords, j_coords], axis=1)
+            houseId = np.arange(housePixelCoordinates.shape[0])
+            ppObj.linkHousesToObjects(housePixelCoordinates, houseId)
 
-                    conf, true = scoring_func2(gtObj, ppObj)
-                    conf_all.append(conf)
-                    true_all.append(true)
+            conf, true = scoring_func2(gtObj, ppObj)
+            conf_all.append(conf)
+            true_all.append(true)
 
-                p, r, _ = precision_recall_curve(np.concatenate(true_all), np.concatenate(conf_all))
-                plt.plot(r[1:], p[1:], linewidth=3, label=mn)
+        p, r, _ = precision_recall_curve(np.concatenate(true_all), np.concatenate(conf_all))
+        plt.plot(r[1:], p[1:], linewidth=3, label=mn)
 
-            plt.xlim([0, 1])
-            plt.ylim([0, 1])
-            plt.xlabel('recall')
-            plt.ylabel('precision')
-            plt.title('Object-wise PR Curve Comparison')
-            plt.legend()
-            plt.tight_layout()
-            plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_iou_mt{}_commercial.png'.format(iou_mt)))
-            plt.close()
-
-            # print('duration = {}'.format(time.time() - start_time))
-        except IndexError:
-            continue
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.xlabel('recall')
+    plt.ylabel('precision')
+    plt.title('Object-wise PR Curve Comparison')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold.png'))
+    plt.close()

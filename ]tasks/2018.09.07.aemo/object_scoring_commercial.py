@@ -18,14 +18,14 @@ import ersa_utils
 class spClass_confMapToPolygonStructure_v2:
     version = 1
     # ------------ panel params ------------
-    minRegion = 300  # any detected regions must be at least this large
-    minThreshold = 0.4
+    minRegion = 5  # any detected regions must be at least this large
+    minThreshold = 0.5
     # ------------ polygon params ------------
     epsilon = 2
     linkingRadius = 55
     # ------------ commercial params ------------
-    commercialAreaThreshold = 1500
-    commercialPanelDensityThreshold = 0.2  # Any panel that is within a region with panel density above this threshold is labeled as commercial
+    commercialAreaThreshold = 400
+    commercialPanelDensityThreshold = 0.1
     commercialNeighborhoodRadius = 50
 
     def __init__(self, mt):
@@ -49,6 +49,22 @@ class spClass_confMapToPolygonStructure_v2:
             polygonImage += np.array(img, dtype=bool)
         return polygonImage
 
+    def polygonStructureToImage_commercial(self, confidenceImage):  # polygon cords in form of xy
+        H, W = confidenceImage.shape
+        polygonImage = np.zeros((H, W))
+        polygons_commercial = self.objectStructure.loc[self.objectStructure['isCommercial'] == True]['polygon']
+        for poly in polygons_commercial:
+            img = Image.new('L', (W, H), 0)
+            ImageDraw.Draw(img).polygon(poly.ravel().tolist(), outline=1, fill=1)
+            polygonImage += np.array(img)
+
+        polygons_residential = self.objectStructure.loc[self.objectStructure['isCommercial'] == False]['polygon']
+        for poly in polygons_residential:
+            img = Image.new('L', (W, H), 0)
+            ImageDraw.Draw(img).polygon(poly.ravel().tolist(), outline=2, fill=2)
+            polygonImage += np.array(img)
+        return polygonImage
+
     """  CREATE REGIONS FROM CONFIDENCE MAPS """
     def confidenceImageToObjectStructure(self, confidenceImage):
         imThresh = confidenceImage >= self.minThreshold
@@ -62,7 +78,7 @@ class spClass_confMapToPolygonStructure_v2:
                         ['iLocation', 'jLocation', 'pixelList', 'confidence', 'area', 'maxIntensity', 'isCommercial'],
                         temp)), ignore_index=True)
 
-    def addCommercialLabelToObjectStructure(self, confidenceImage, return_sum=False):
+    def addCommercialLabelToObjectStructure(self, confidenceImage, commercial, clear_coords=False):
         if not self.objectStructure.empty:
             """ IDENTIFY USING CONNECTED COMPONENT SIZE """
             objAreas = self.objectStructure['area']
@@ -92,8 +108,8 @@ class spClass_confMapToPolygonStructure_v2:
 
             self.objectStructure.isCommercial = isCommercialSize & isCommercialDensity
 
-            if return_sum:
-                non_commercial = self.objectStructure.loc[self.objectStructure['isCommercial'] is False]
+            if clear_coords:
+                self.objectStructure = self.objectStructure.loc[self.objectStructure['isCommercial'] == commercial]
 
     def addPolygonToObjectStructure(self, predIm):
         polygons = [list() for _ in range(self.objectStructure.shape[0])]
@@ -138,31 +154,34 @@ def get_blank_regions(img):
     return blank_mask
 
 
-def scoring_func2(gtObj, ppObj, iou_th=0.5):
+def scoring_func2(gtObj, ppObj, iou_th=0.5, commercial=False):
     conf = []
     true = []
     pl_gt = np.array(gtObj.objectStructure['pixelList'])
     pl_pp = np.array(ppObj.objectStructure['pixelList'])
     pl_pp_cf = np.array(ppObj.objectStructure['confidence'])
+    cm_idc = np.array(gtObj.objectStructure['isCommercial'])
 
     panel_num = pl_gt.shape[0]
     pp_house_id = ppObj.objectStructure['iOut'].tolist()
+    gt_house_id = gtObj.objectStructure['iOut'].tolist()
     for i in range(panel_num):
-        if i in pp_house_id:
-            pp_i = pp_house_id.index(i)
-            inter, union = get_intersection(pl_gt[i], pl_pp[pp_i])
-            iou = inter.shape[0] / union.shape[0]
-            if iou >= iou_th:
-                conf.append(pl_pp_cf[pp_i])
-                true.append(1)
+        if cm_idc[i] == commercial:
+            if i in pp_house_id:
+                pp_i = pp_house_id.index(i)
+                inter, union = get_intersection(pl_gt[i], pl_pp[pp_i])
+                iou = inter.shape[0] / union.shape[0]
+                if iou >= iou_th:
+                    conf.append(pl_pp_cf[pp_i])
+                    true.append(1)
+                else:
+                    conf.append(pl_pp_cf[pp_i])
+                    true.append(0)
             else:
-                conf.append(pl_pp_cf[pp_i])
-                true.append(0)
-        else:
-            conf.append(-1000)
-            true.append(1)
+                conf.append(-1000)
+                true.append(1)
     for i in range(len(pp_house_id)):
-        if pp_house_id[i] == -1:
+        if pp_house_id[i] == -1 and cm_idc[gt_house_id.index(i)] == commercial:
             true.append(0)
             conf.append(pl_pp_cf[i])
     return np.array(conf), np.array(true)
@@ -170,72 +189,78 @@ def scoring_func2(gtObj, ppObj, iou_th=0.5):
 
 if __name__ == '__main__':
     start_time = time.time()
+    commercial = True
 
     img_dir, task_dir = utils.get_task_img_folder()
+    iou_mt = 0.5
 
-    model_dir = ['confmap_uab_UnetCrop_aemo_ft_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
+    '''model_dir = ['confmap_uab_UnetCrop_aemo_ft_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
                  'confmap_uab_UnetCrop_aemo_sc_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
                  'confmap_uab_UnetCrop_aemo_ft_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
                  'confmap_uab_UnetCrop_aemo_hd_0_PS(572, 572)_BS5_EP20_LR1e-05_DS10_DR0.1_SFN32'
                  ]
-    model_name = ['Raw Finetune 1e-3', 'Raw Scratch 1e-3', 'Hist Finetune 1e-3', 'Hard Sample']
+    model_name = ['Raw Finetune 1e-3', 'Raw Scratch 1e-3', 'Hist Finetune 1e-3', 'Hard Sample']'''
 
-    for iou_mt in tqdm([0.5]):
-        try:
-            for md, mn in zip(model_dir, model_name):
-                conf_dir = os.path.join(task_dir, md)
-                gt_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_hist/'
-                rgb_dir = r'/home/lab/Documents/bohao/data/aemo'
-                conf_files = glob(os.path.join(conf_dir, '*.npy'))
-                true_all = []
-                conf_all = []
+    model_dir = ['confmap_uab_UnetCrop_aemo_ft_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',]
+    model_name = ['Raw Finetune 1e-3']
 
-                for i_name in conf_files:
-                    conf_im = ersa_utils.load_file(i_name)
-                    gt_file = os.path.join(gt_dir, '{}.tif'.format(os.path.basename(i_name)[:-4]))
-                    gt = ersa_utils.load_file(gt_file)
+    for md, mn in zip(model_dir, model_name):
+        conf_dir = os.path.join(task_dir, md)
+        gt_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_hist/'
+        rgb_dir = r'/home/lab/Documents/bohao/data/aemo'
+        conf_files = glob(os.path.join(conf_dir, '*.npy'))
+        true_all = []
+        conf_all = []
 
-                    rgb_file = os.path.join(rgb_dir, '{}_rgb.tif'.format(os.path.basename(i_name)[:-12]))
-                    rgb = ersa_utils.load_file(rgb_file)
-                    bm = 1 - get_blank_regions(rgb)
+        for i_name in conf_files[-1:]:
+            conf_im = ersa_utils.load_file(i_name)
+            gt_file = os.path.join(gt_dir, '{}.tif'.format(os.path.basename(i_name)[:-4]))
+            gt = ersa_utils.load_file(gt_file)
 
-                    conf_im = bm * conf_im
-                    gt = bm * gt
+            rgb_file = os.path.join(rgb_dir, '{}_rgb.tif'.format(os.path.basename(i_name)[:-12]))
+            rgb = ersa_utils.load_file(rgb_file)
+            bm = 1 - get_blank_regions(rgb)
 
-                    # Instantiate the class
-                    ppObj = spClass_confMapToPolygonStructure_v2(iou_mt)
-                    # Map tp objects
-                    ppObj.confidenceImageToObjectStructure(conf_im)
-                    # APPROXIMATE EACH OBJECT WITH POLYGON
-                    ppObj.addPolygonToObjectStructure(conf_im)
-                    gtObj = spClass_confMapToPolygonStructure_v2(iou_mt)
-                    gtObj.confidenceImageToObjectStructure(gt)
-                    gtObj.addPolygonToObjectStructure(gt)
+            conf_im = bm * conf_im
+            gt = bm * gt
 
-                    # link the house
-                    i_coords = np.array(gtObj.objectStructure['iLocation'])
-                    j_coords = np.array(gtObj.objectStructure['jLocation'])
-                    housePixelCoordinates = np.stack([i_coords, j_coords], axis=1)
-                    houseId = np.arange(housePixelCoordinates.shape[0])
-                    ppObj.linkHousesToObjects(housePixelCoordinates, houseId)
+            # Instantiate the class
+            ppObj = spClass_confMapToPolygonStructure_v2(iou_mt)
+            # Map tp objects
+            ppObj.confidenceImageToObjectStructure(conf_im)
+            # APPROXIMATE EACH OBJECT WITH POLYGON
+            ppObj.addPolygonToObjectStructure(conf_im)
 
-                    conf, true = scoring_func2(gtObj, ppObj)
-                    conf_all.append(conf)
-                    true_all.append(true)
+            gtObj = spClass_confMapToPolygonStructure_v2(iou_mt)
+            gtObj.confidenceImageToObjectStructure(gt)
+            gtObj.addPolygonToObjectStructure(gt)
+            gtObj.addCommercialLabelToObjectStructure(gt, commercial=commercial, clear_coords=False)
 
-                p, r, _ = precision_recall_curve(np.concatenate(true_all), np.concatenate(conf_all))
-                plt.plot(r[1:], p[1:], linewidth=3, label=mn)
+            # link the house
+            i_coords = np.array(gtObj.objectStructure['iLocation'])
+            j_coords = np.array(gtObj.objectStructure['jLocation'])
+            housePixelCoordinates = np.stack([i_coords, j_coords], axis=1)
+            houseId = np.arange(housePixelCoordinates.shape[0])
+            ppObj.linkHousesToObjects(housePixelCoordinates, houseId)
 
-            plt.xlim([0, 1])
-            plt.ylim([0, 1])
-            plt.xlabel('recall')
-            plt.ylabel('precision')
-            plt.title('Object-wise PR Curve Comparison')
-            plt.legend()
-            plt.tight_layout()
-            plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_iou_mt{}_commercial.png'.format(iou_mt)))
-            plt.close()
+            conf, true = scoring_func2(gtObj, ppObj, commercial=commercial)
+            conf_all.append(conf)
+            true_all.append(true)
 
-            # print('duration = {}'.format(time.time() - start_time))
-        except IndexError:
-            continue
+        p, r, _ = precision_recall_curve(np.concatenate(true_all), np.concatenate(conf_all))
+        plt.plot(r[1:], p[1:], linewidth=3, label=mn)
+        print(p)
+        print(r)
+
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.xlabel('recall')
+    plt.ylabel('precision')
+    plt.title('Object-wise PR Curve Comparison')
+    plt.legend()
+    plt.tight_layout()
+    #if commercial:
+    #    plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_iou_mt{}_commercial.png'.format(iou_mt)))
+    plt.show()
+
+    # print('duration = {}'.format(time.time() - start_time))

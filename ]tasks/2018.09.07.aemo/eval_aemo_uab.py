@@ -14,7 +14,7 @@ batch_size = 5
 input_size = [572, 572]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
-model_dir = r'/hdd6/Models/aemo/aemo/UnetCrop_aemo_reweight_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32'
+model_dir = r'/hdd6/Models/aemo/aemo/UnetCrop_aemo_reweight_ft_0_PS(572, 572)_BS5_EP30_LR1e-05_DS15_DR0.1_SFN32'
 ds_name = 'aemo'
 img_dir, task_dir = utils.get_task_img_folder()
 SAVE_DIR = os.path.join(task_dir, 'confmap_uab_{}'.format(os.path.basename(model_dir)))
@@ -81,7 +81,7 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
 blCol = uab_collectionFunctions.uabCollection(ds_name)
 blCol.readMetadata()
 file_list, parent_dir = blCol.getAllTileByDirAndExt([1, 2, 3])
-file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(0)
+file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(4)
 idx, file_list = uabCrossValMaker.uabUtilGetFolds(None, file_list, 'tile')
 idx_truth, file_list_truth = uabCrossValMaker.uabUtilGetFolds(None, file_list_truth, 'tile')
 # use first 5 tiles for validation
@@ -94,7 +94,7 @@ img_mean = blCol.getChannelMeans([1, 2, 3])
 X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
 y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
 mode = tf.placeholder(tf.bool, name='mode')
-model = UnetModelCrop({'X':X, 'Y':y}, trainable=mode, input_size=input_size,
+model = UnetModelCrop({'X': X, 'Y': y}, trainable=mode, input_size=input_size,
                       batch_size=batch_size, start_filter_num=32)
 # create graph
 model.create_graph('X', class_num=2)
