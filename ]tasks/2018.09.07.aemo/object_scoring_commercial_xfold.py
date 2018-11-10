@@ -18,14 +18,13 @@ import ersa_utils
 class spClass_confMapToPolygonStructure_v2:
     version = 1
     # ------------ panel params ------------
-    minRegion = 300  # any detected regions must be at least this large
-    maxRegion = 1300
-    minThreshold = 0.2
+    minRegion = 5  # any detected regions must be at least this large
+    minThreshold = 0.5
     # ------------ polygon params ------------
     epsilon = 2
-    linkingRadius = 100
+    linkingRadius = 55
     # ------------ commercial params ------------
-    commercialAreaThreshold = 200
+    commercialAreaThreshold = 400
     commercialPanelDensityThreshold = 0.1  # Any panel that is within a region with panel density above this threshold is labeled as commercial
     commercialNeighborhoodRadius = 50
 
@@ -56,14 +55,14 @@ class spClass_confMapToPolygonStructure_v2:
         imLabel = measure.label(imThresh)
         regProps = measure.regionprops(imLabel, confidenceImage)
         for rp in regProps:
-            if self.minRegion <= rp.area < self.maxRegion and rp.max_intensity >= self.maxThreshold:
+            if rp.area >= self.minRegion and rp.max_intensity >= self.maxThreshold:
                 temp = [*[int(c) for c in rp.centroid], rp.coords, rp.mean_intensity, rp.area, rp.max_intensity, 0]
                 self.objectStructure = self.objectStructure.append(
                     dict(zip(
                         ['iLocation', 'jLocation', 'pixelList', 'confidence', 'area', 'maxIntensity', 'isCommercial'],
                         temp)), ignore_index=True)
 
-    def addCommercialLabelToObjectStructure(self, confidenceImage, return_sum=False):
+    def addCommercialLabelToObjectStructure(self, confidenceImage, commercial, clear_coords=False):
         if not self.objectStructure.empty:
             """ IDENTIFY USING CONNECTED COMPONENT SIZE """
             objAreas = self.objectStructure['area']
@@ -93,8 +92,8 @@ class spClass_confMapToPolygonStructure_v2:
 
             self.objectStructure.isCommercial = isCommercialSize & isCommercialDensity
 
-            if return_sum:
-                non_commercial = self.objectStructure.loc[self.objectStructure['isCommercial'] is False]
+            if clear_coords:
+                self.objectStructure = self.objectStructure.loc[self.objectStructure['isCommercial'] == commercial]
 
     def addPolygonToObjectStructure(self, predIm):
         polygons = [list() for _ in range(self.objectStructure.shape[0])]
@@ -139,38 +138,43 @@ def get_blank_regions(img):
     return blank_mask
 
 
-def scoring_func2(gtObj, ppObj, iou_th=0.5):
+def scoring_func2(gtObj, ppObj, iou_th=0.5, commercial=False):
     conf = []
     true = []
     pl_gt = np.array(gtObj.objectStructure['pixelList'])
     pl_pp = np.array(ppObj.objectStructure['pixelList'])
     pl_pp_cf = np.array(ppObj.objectStructure['confidence'])
+    cm_idc = np.array(gtObj.objectStructure['isCommercial'])
 
     panel_num = pl_gt.shape[0]
     pp_house_id = ppObj.objectStructure['iOut'].tolist()
     for i in range(panel_num):
-        if i in pp_house_id:
-            pp_i = pp_house_id.index(i)
-            inter, union = get_intersection(pl_gt[i], pl_pp[pp_i])
-            iou = inter.shape[0] / union.shape[0]
-            if iou >= iou_th:
-                conf.append(pl_pp_cf[pp_i])
-                true.append(1)
+        if cm_idc[i] == commercial:
+            if i in pp_house_id:
+                pp_i = pp_house_id.index(i)
+                inter, union = get_intersection(pl_gt[i], pl_pp[pp_i])
+                iou = inter.shape[0] / union.shape[0]
+                if iou >= iou_th:
+                    conf.append(pl_pp_cf[pp_i])
+                    true.append(1)
+                else:
+                    conf.append(pl_pp_cf[pp_i])
+                    true.append(0)
             else:
-                conf.append(pl_pp_cf[pp_i])
-                true.append(0)
-        else:
-            conf.append(-1000)
-            true.append(1)
+                conf.append(-1000)
+                true.append(1)
     for i in range(len(pp_house_id)):
         if pp_house_id[i] == -1:
-            true.append(0)
-            conf.append(pl_pp_cf[i])
+            if i < len(cm_idc):
+                if cm_idc[i] == commercial:
+                    true.append(0)
+                    conf.append(pl_pp_cf[i])
     return np.array(conf), np.array(true)
 
 
 if __name__ == '__main__':
     start_time = time.time()
+    commercial = True
 
     img_dir, task_dir = utils.get_task_img_folder()
 
@@ -210,6 +214,7 @@ if __name__ == '__main__':
             gtObj = spClass_confMapToPolygonStructure_v2(iou_mt)
             gtObj.confidenceImageToObjectStructure(gt)
             gtObj.addPolygonToObjectStructure(gt)
+            gtObj.addCommercialLabelToObjectStructure(gt, commercial=commercial, clear_coords=False)
 
             # link the house
             i_coords = np.array(gtObj.objectStructure['iLocation'])
@@ -218,7 +223,7 @@ if __name__ == '__main__':
             houseId = np.arange(housePixelCoordinates.shape[0])
             ppObj.linkHousesToObjects(housePixelCoordinates, houseId)
 
-            conf, true = scoring_func2(gtObj, ppObj)
+            conf, true = scoring_func2(gtObj, ppObj, commercial=commercial)
             conf_all.append(conf)
             true_all.append(true)
 
@@ -229,8 +234,14 @@ if __name__ == '__main__':
     plt.ylim([0, 1])
     plt.xlabel('recall')
     plt.ylabel('precision')
-    plt.title('Object-wise PR Curve Comparison (Commercial)')
+    if commercial:
+        plt.title('Object-wise PR Curve Comparison (Commercial)')
+    else:
+        plt.title('Object-wise PR Curve Comparison (Residential)')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_commercial.png'))
+    if commercial:
+        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_commercial2.png'))
+    else:
+        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_residential2.png'))
     plt.close()

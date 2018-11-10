@@ -25,7 +25,7 @@ class spClass_confMapToPolygonStructure_v2:
     linkingRadius = 55
     # ------------ commercial params ------------
     commercialAreaThreshold = 400
-    commercialPanelDensityThreshold = 0.1
+    commercialPanelDensityThreshold = 0.2  # Any panel that is within a region with panel density above this threshold is labeled as commercial
     commercialNeighborhoodRadius = 50
 
     def __init__(self, mt):
@@ -47,22 +47,6 @@ class spClass_confMapToPolygonStructure_v2:
             img = Image.new('L', (W, H), 0)
             ImageDraw.Draw(img).polygon(poly.ravel().tolist(), outline=1, fill=1)
             polygonImage += np.array(img, dtype=bool)
-        return polygonImage
-
-    def polygonStructureToImage_commercial(self, confidenceImage):  # polygon cords in form of xy
-        H, W = confidenceImage.shape
-        polygonImage = np.zeros((H, W))
-        polygons_commercial = self.objectStructure.loc[self.objectStructure['isCommercial'] == True]['polygon']
-        for poly in polygons_commercial:
-            img = Image.new('L', (W, H), 0)
-            ImageDraw.Draw(img).polygon(poly.ravel().tolist(), outline=1, fill=1)
-            polygonImage += np.array(img)
-
-        polygons_residential = self.objectStructure.loc[self.objectStructure['isCommercial'] == False]['polygon']
-        for poly in polygons_residential:
-            img = Image.new('L', (W, H), 0)
-            ImageDraw.Draw(img).polygon(poly.ravel().tolist(), outline=2, fill=2)
-            polygonImage += np.array(img)
         return polygonImage
 
     """  CREATE REGIONS FROM CONFIDENCE MAPS """
@@ -193,22 +177,22 @@ if __name__ == '__main__':
     commercial = False
 
     img_dir, task_dir = utils.get_task_img_folder()
-    iou_mt = 0.5
 
-    model_dir = ['confmap_uab_UnetCrop_aemo_ft_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
-                 'confmap_uab_UnetCrop_aemo_sc_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
-                 'confmap_uab_UnetCrop_aemo_ft_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
-                 'confmap_uab_UnetCrop_aemo_hd_0_PS(572, 572)_BS5_EP20_LR1e-05_DS10_DR0.1_SFN32'
+    model_dir = ['confmap_uab_UnetCrop_aemo_xfold0_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
+                 'confmap_uab_UnetCrop_aemo_xfold1_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
+                 'confmap_uab_UnetCrop_aemo_xfold2_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
                  ]
-    model_name = ['Raw Finetune 1e-3', 'Raw Scratch 1e-3', 'Hist Finetune 1e-3', 'Hard Sample']
+    model_name = ['Fold 0', 'Fold 1', 'Fold 2']
 
+    true_all = []
+    conf_all = []
+
+    iou_mt = 0.5
     for md, mn in zip(model_dir, model_name):
         conf_dir = os.path.join(task_dir, md)
         gt_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_hist/'
         rgb_dir = r'/home/lab/Documents/bohao/data/aemo'
         conf_files = glob(os.path.join(conf_dir, '*.npy'))
-        true_all = []
-        conf_all = []
 
         for i_name in conf_files:
             conf_im = ersa_utils.load_file(i_name)
@@ -228,7 +212,6 @@ if __name__ == '__main__':
             ppObj.confidenceImageToObjectStructure(conf_im)
             # APPROXIMATE EACH OBJECT WITH POLYGON
             ppObj.addPolygonToObjectStructure(conf_im)
-
             gtObj = spClass_confMapToPolygonStructure_v2(iou_mt)
             gtObj.confidenceImageToObjectStructure(gt)
             gtObj.addPolygonToObjectStructure(gt)
@@ -245,8 +228,8 @@ if __name__ == '__main__':
             conf_all.append(conf)
             true_all.append(true)
 
-        p, r, _ = precision_recall_curve(np.concatenate(true_all), np.concatenate(conf_all))
-        plt.plot(r[1:], p[1:], linewidth=3, label=mn)
+    p, r, _ = precision_recall_curve(np.concatenate(true_all), np.concatenate(conf_all))
+    plt.plot(r[1:], p[1:], linewidth=3)
 
     plt.xlim([0, 1])
     plt.ylim([0, 1])
@@ -256,12 +239,10 @@ if __name__ == '__main__':
         plt.title('Object-wise PR Curve Comparison (Commercial)')
     else:
         plt.title('Object-wise PR Curve Comparison (Residential)')
-    plt.legend()
+    #plt.legend()
     plt.tight_layout()
     if commercial:
-        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_iou_mt{}_commercial2.png'.format(iou_mt)))
+        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_agg_commercial.png'))
     else:
-        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_iou_mt{}_residential2.png'.format(iou_mt)))
-    plt.show()
-
-    # print('duration = {}'.format(time.time() - start_time))
+        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_agg_residential.png'))
+    plt.close()
