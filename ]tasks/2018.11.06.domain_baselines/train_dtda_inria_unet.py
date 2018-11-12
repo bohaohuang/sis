@@ -13,7 +13,7 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet
 
-RUN_ID = 0
+RUN_ID = 1
 BATCH_SIZE = 8
 LEARNING_RATE = 1e-5
 INPUT_SIZE = 572
@@ -83,7 +83,7 @@ def get_pretrained_weights(flags):
                                                   epochs=flags.epochs,
                                                   start_filter_num=flags.sfn)
         model.create_graph('X', class_num=flags.num_classes)
-        train_vars = [v for v in tf.trainable_variables()]
+        train_vars = [v for v in tf.global_variables() if 'global_step' not in v.name]
 
         weight_dict = dict()
 
@@ -182,7 +182,7 @@ def main(flags, weight_dict):
 
     model.train_config('X', 'Y', 'Z', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
                        loss_type='xent', par_dir='domain_baseline', lam=flags.lam)
-    model.load_source_weights(weight_dict)
+    model.load_source_weights(flags.model_dir)
     model.run(train_reader_source=dataReader_source,
               train_reader_target=dataReader_target,
               valid_reader=dataReader_valid,
