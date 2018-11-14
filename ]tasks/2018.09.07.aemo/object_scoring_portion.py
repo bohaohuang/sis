@@ -179,7 +179,7 @@ if __name__ == '__main__':
                  'confmap_uab_UnetCrop_aemo_portion_1_leave_front0.7_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
                  'confmap_uab_UnetCrop_aemo_portion_0_leave_end0.7_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32'
                  ]
-    model_name = ['Raw Finetune', 'First 85%', 'Last 85%', 'First 70%', 'Last 70%']
+    model_name = ['100%', '85% Set1', '85% Set2', '70% Set1', '70% Set2']
 
     iou_mt = 0.5
     for md, mn in zip(model_dir, model_name):
@@ -233,5 +233,5 @@ if __name__ == '__main__':
     plt.title('Object-wise PR Curve Comparison')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_portion.png'))
+    plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_portion_new_label.png'))
     plt.close()

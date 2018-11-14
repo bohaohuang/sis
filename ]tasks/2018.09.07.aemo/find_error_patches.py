@@ -15,7 +15,7 @@ from nn import nn_utils
 from visualize import visualize_utils
 from bohaoCustom import uabMakeNetwork_UNet
 
-gpu = 1
+gpu = -1
 nn_utils.set_gpu(gpu)
 batch_size = 5
 input_size = [572, 572]
@@ -92,10 +92,10 @@ for rgb_name, gt_name in zip(rgb_list, gt_list):
                     if on_target/building_size <= 0.5:
                         flag = True
                         p[np.where(lbl == idx)] = 2
-                        break
+                        #break
 
             if flag:
-                '''file_list = []
+                file_list = []
                 for i in range(3):
                     ersa_utils.save_file(os.path.join(save_dir, '{}_rgb{}.jpg'.format(patch_cnt, i)), patch[:, :, i].
                                          astype(np.uint8))
@@ -103,10 +103,10 @@ for rgb_name, gt_name in zip(rgb_list, gt_list):
                 ersa_utils.save_file(os.path.join(save_dir, '{}_gt.png'.format(patch_cnt)), gt_patch.astype(np.uint8))
                 file_list.append('{}_gt.png'.format(patch_cnt))
                 f.write('{}\n'.format(' '.join(file_list)))
-                patch_cnt += 1'''
-                visualize_utils.compare_two_figure(patch[92:-92, 92:-92, :3].astype(np.uint8), p, show_fig=False)
+                patch_cnt += 1
+                '''visualize_utils.compare_two_figure(patch[92:-92, 92:-92, :3].astype(np.uint8), p, show_fig=False)
                 plt.savefig(os.path.join(save_dir, '{}_gt.png'.format(patch_cnt)))
                 patch_cnt += 1
-                plt.close()
+                plt.close()'''
 
 f.close()

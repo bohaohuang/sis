@@ -110,6 +110,8 @@ def main(flags):
     file_list_train = ersa_utils.load_file(os.path.join(save_dir, 'file_list.txt'))
     file_list_train = [l.strip().split(' ') for l in file_list_train]
 
+    print(file_list_train)
+
     with tf.name_scope('image_loader'):
         # GT has no mean to subtract, append a 0 for block mean
         dataReader_train = uabDataReader.ImageLabelReader([3], [0, 1, 2], save_dir, file_list_train, flags.input_size,

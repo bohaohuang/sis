@@ -87,10 +87,10 @@ if __name__ == '__main__':
     plt.plot(v_list, label='train')
 
     plt.tight_layout()
-    #plt.show()
+    plt.show()
 
     shift_dict = get_shift_vals(act_dict_train, act_dict_valid)
-    path_to_save = os.path.join(task_dir, 'dtda', city_list[city_id], 'shift_dict.pkl')
+    path_to_save = os.path.join(task_dir, 'dtda', city_list[city_id], 'shift_dict2.pkl')
     ersa_utils.save_file(path_to_save, shift_dict)
 
     ##########################################################

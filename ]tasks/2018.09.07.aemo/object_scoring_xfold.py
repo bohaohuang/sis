@@ -179,6 +179,9 @@ if __name__ == '__main__':
                  ]
     model_name = ['Fold 0', 'Fold 1', 'Fold 2']
 
+    true_agg = []
+    conf_agg = []
+
     iou_mt = 0.5
     for md, mn in zip(model_dir, model_name):
         conf_dir = os.path.join(task_dir, md)
@@ -221,8 +224,14 @@ if __name__ == '__main__':
             conf_all.append(conf)
             true_all.append(true)
 
+            conf_agg.append(conf)
+            true_agg.append(true)
+
         p, r, _ = precision_recall_curve(np.concatenate(true_all), np.concatenate(conf_all))
         plt.plot(r[1:], p[1:], linewidth=3, label=mn)
+
+    p, r, _ = precision_recall_curve(np.concatenate(true_agg), np.concatenate(conf_agg))
+    plt.plot(r[1:], p[1:], '--', linewidth=3, label='Aggregate')
 
     plt.xlim([0, 1])
     plt.ylim([0, 1])
@@ -231,5 +240,5 @@ if __name__ == '__main__':
     plt.title('Object-wise PR Curve Comparison')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold.png'))
+    plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_agg_1.png'))
     plt.close()

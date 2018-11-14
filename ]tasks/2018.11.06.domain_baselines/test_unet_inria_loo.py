@@ -32,14 +32,16 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
             for i, F in enumerate(n_filters):
                 net = tf.layers.conv2d(net, F, kernal_size, activation=None, strides=conv_stride,
                                        padding=padding, name='conv_{}'.format(i + 1))
+                if bn:
+                    net = tf.layers.batch_normalization(net, training=training, name='bn_{}'.format(i+1))
                 output_list = []
                 for n_cnt in range(net.shape[-1]):
-                    output_list.append(shift[layer_cnt][0] * (net[:, :, :, n_cnt] - shift[layer_cnt][1]) + shift[layer_cnt][2])
+                    output_list.append(
+                        shift[layer_cnt][0] * (net[:, :, :, n_cnt] - shift[layer_cnt][1]) + shift[layer_cnt][2])
+                        #1 * (net[:, :, :, n_cnt] - 0) + 0)
                     layer_cnt += 1
                 net = tf.stack(output_list, axis=-1)
                 activations.append(net)
-                if bn:
-                    net = tf.layers.batch_normalization(net, training=training, name='bn_{}'.format(i+1))
                 net = activation(net, name='relu_{}'.format(name, i + 1))
                 if dropout is not None:
                     net = tf.layers.dropout(net, rate=self.dropout_rate, training=training,
@@ -122,7 +124,7 @@ if __name__ == '__main__':
 
     img_dir, task_dir = utils.get_task_img_folder()
 
-    for city_id in [0]:
+    for city_id in [1]:
         path_to_save = os.path.join(task_dir, 'dtda', city_list[city_id], 'shift_dict.pkl')
         shift_dict = ersa_utils.load_file(path_to_save)
 
@@ -159,5 +161,5 @@ if __name__ == '__main__':
         # evaluate on tiles
         model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                        input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                       save_result_parent_dir='domain_baseline', ds_name='inria', best_model=False,
+                       save_result_parent_dir='domain_baseline2', ds_name='inria', best_model=False,
                        load_epoch_num=95)

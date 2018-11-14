@@ -15,22 +15,21 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 1
 BATCH_SIZE = 8
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 1e-6
 INPUT_SIZE = 572
 TILE_SIZE = 5000
 EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = 0
-DECAY_STEP = 60
+GPU = 1
+DECAY_STEP = 100
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_aug_leave_{}_{}'
 SFN = 32
 LEAVE_CITY = 0
 LAM = 0.1
-MODEL_DIR = r'/hdd6//Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
-            r'EP100_LR0.0001_DS60_DR0.1_SFN32'
+MODEL_DIR = r'/hdd6//Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
 CITY_LIST = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 WEIGHT_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.11.06.domain_baselines/dtda/{}'
 
@@ -129,13 +128,13 @@ def main(flags, weight_dict):
     img_mean = blCol.getChannelMeans([0, 1, 2])         # get mean of rgb info
 
     # extract patches
-    extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 4], # extract all 4 channels
-                                                    cSize=flags.input_size, # patch size as 572*572
-                                                    numPixOverlap=int(model.get_overlap()/2),  # overlap as 92
-                                                    extSave=['jpg', 'jpg', 'jpg', 'png'], # save rgb files as jpg and gt as png
+    extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 4],
+                                                    cSize=flags.input_size,
+                                                    numPixOverlap=int(model.get_overlap()),
+                                                    extSave=['jpg', 'jpg', 'jpg', 'png'],
                                                     isTrain=True,
                                                     gtInd=3,
-                                                    pad=model.get_overlap()) # pad around the tiles
+                                                    pad=model.get_overlap() // 2)
     patchDir = extrObj.run(blCol)
 
     # make data reader

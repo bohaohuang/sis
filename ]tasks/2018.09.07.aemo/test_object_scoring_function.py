@@ -18,8 +18,8 @@ import ersa_utils
 class spClass_confMapToPolygonStructure_v2:
     version = 1
     # ------------ panel params ------------
-    minRegion = 300  # any detected regions must be at least this large
-    minThreshold = 0.4
+    minRegion = 5  # any detected regions must be at least this large
+    minThreshold = 0.5
     # ------------ polygon params ------------
     epsilon = 2
     linkingRadius = 55
@@ -180,8 +180,13 @@ if __name__ == '__main__':
                  ]
     model_name = ['Raw Finetune 1e-3', 'Raw Scratch 1e-3', 'Hist Finetune 1e-3', 'Hard Sample']
 
-    for iou_mt in tqdm([0.5]):
+    f2s = []
+    largest_recall = []
+
+    for iou_mt in tqdm([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]):
         try:
+            f2s_m = []
+            largest_recall_m = []
             for md, mn in zip(model_dir, model_name):
                 conf_dir = os.path.join(task_dir, md)
                 gt_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_hist/'
@@ -226,6 +231,9 @@ if __name__ == '__main__':
                 p, r, _ = precision_recall_curve(np.concatenate(true_all), np.concatenate(conf_all))
                 plt.plot(r[1:], p[1:], linewidth=3, label=mn)
 
+                f2s_m.append(5 * p[1] * r[1] / (4 * p[1] + r[1]))
+                largest_recall_m.append(r[1])
+
             plt.xlim([0, 1])
             plt.ylim([0, 1])
             plt.xlabel('recall')
@@ -233,9 +241,17 @@ if __name__ == '__main__':
             plt.title('Object-wise PR Curve Comparison')
             plt.legend()
             plt.tight_layout()
-            plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_iou_mt{}_commercial.png'.format(iou_mt)))
+            plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_iou_mt{}_temp.png'.format(iou_mt)))
             plt.close()
+
+            f2s.append(f2s_m)
+            largest_recall.append(largest_recall_m)
 
             # print('duration = {}'.format(time.time() - start_time))
         except IndexError:
             continue
+
+    f2_name = os.path.join(task_dir, 'f2s.npy')
+    lr_name = os.path.join(task_dir, 'lrs.npy')
+    ersa_utils.save_file(f2_name, f2s)
+    ersa_utils.save_file(lr_name, largest_recall)
