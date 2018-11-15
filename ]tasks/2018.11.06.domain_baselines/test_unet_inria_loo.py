@@ -115,7 +115,7 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
 
 if __name__ == '__main__':
     # settings
-    gpu = 0
+    gpu = 1
     batch_size = 1
     input_size = [572, 572]
     tile_size = [5000, 5000]
@@ -124,8 +124,8 @@ if __name__ == '__main__':
 
     img_dir, task_dir = utils.get_task_img_folder()
 
-    for city_id in [1]:
-        path_to_save = os.path.join(task_dir, 'dtda', city_list[city_id], 'shift_dict.pkl')
+    for city_id in [0]:
+        path_to_save = os.path.join(task_dir, 'dtda', city_list[city_id], 'shift_dict2.pkl')
         shift_dict = ersa_utils.load_file(path_to_save)
 
         model_dir = r'/hdd6//Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
@@ -162,4 +162,4 @@ if __name__ == '__main__':
         model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                        input_size, tile_size, batch_size, img_mean, model_dir, gpu,
                        save_result_parent_dir='domain_baseline2', ds_name='inria', best_model=False,
-                       load_epoch_num=95)
+                       load_epoch_num=95, show_figure=False)

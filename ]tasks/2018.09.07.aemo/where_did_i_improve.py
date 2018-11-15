@@ -75,10 +75,10 @@ if __name__ == '__main__':
     bad_th = 20
 
     truth_dir = r'/media/ei-edl01/data/uab_datasets/aemo/data/Original_Tiles'
-    ft_dir = r'/hdd/Results/aemo/uab/UnetCrop_aemo_ft_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32/aemo_hist/pred'
-    cmp_dir = r'/hdd/Results/aemo/unet_aemo_scratch_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1/default/pred1'
+    ft_dir = r'/hdd/Results/aemo/uab/UnetCrop_aemo_ft_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32/aemo/pred'
+    cmp_dir = r'/hdd/Results/aemo/uab/UnetCrop_aemo_hd_0_wf3_PS(572, 572)_BS5_EP20_LR1e-05_DS10_DR0.1_SFN32/aemo/pred'
 
-    img_save_dir = os.path.join(img_dir, 'uab_pred_improves', ft_dir.split('/')[-3])
+    img_save_dir = os.path.join(img_dir, 'uab_pred_improves_reweight', ft_dir.split('/')[-3])
     ersa_utils.make_dir_if_not_exist(img_save_dir)
 
     eval_files = ['_'.join(os.path.basename(f)[:-4].split('_')[:2]) for f in glob(os.path.join(ft_dir, '*.png'))]
@@ -99,6 +99,6 @@ if __name__ == '__main__':
         for patch_cnt in range(len(erp_ft)):
             x, y = erp_ft[patch_cnt, :][:2]
             fig, iou, iou_cmp = make_cmp_plot(rgb, truth, ft, cmp, x, y, window_size, '{}_X{}_Y{}'.format(f, x, y))
-            if iou - iou_cmp >= good_th - bad_th:
+            if iou - iou_cmp >= 10:
                 plt.savefig(os.path.join(img_save_dir, '{}_h{}_w{}.png'.format(f, y, x)))
             plt.close(fig)

@@ -14,7 +14,7 @@ batch_size = 5
 input_size = [572, 572]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
-model_dir = r'/hdd6/Models/aemo/aemo/UnetCrop_aemo_reweight_ft_0_PS(572, 572)_BS5_EP30_LR1e-05_DS15_DR0.1_SFN32'
+model_dir = r'/hdd6/Models/aemo/aemo/UnetCrop_aemo_hd_0_wf4_PS(572, 572)_BS5_EP20_LR1e-05_DS10_DR0.1_SFN32'
 ds_name = 'aemo'
 img_dir, task_dir = utils.get_task_img_folder()
 SAVE_DIR = os.path.join(task_dir, 'confmap_uab_{}'.format(os.path.basename(model_dir)))
@@ -103,4 +103,4 @@ model.create_graph('X', class_num=2)
 model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                input_size, tile_size, batch_size, img_mean, model_dir, gpu,
                save_result_parent_dir='aemo/uab', ds_name=ds_name, best_model=False,
-               load_epoch_num=75)
+               load_epoch_num=15)

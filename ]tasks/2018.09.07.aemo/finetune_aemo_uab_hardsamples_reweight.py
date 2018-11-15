@@ -21,14 +21,39 @@ EPOCHS = 20
 NUM_CLASS = 2
 N_TRAIN = 785
 N_VALID = 395
-GPU = 0
+GPU = 1
 DECAY_STEP = 10
 DECAY_RATE = 0.1
 START_LAYER = 10
-MODEL_NAME = 'aemo_hd_{}'
+MODEL_NAME = 'aemo_hd_{}_wf{}'
 DS_NAME = 'aemo'
 SFN = 32
+WEIGHT_FACTOR = 4
 MODEL_DIR = r'/hdd6/Models/aemo/aemo/UnetCrop_aemo_ft_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32'
+
+
+class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
+    def make_loss(self, y_name, loss_type='xent', **kwargs):
+        with tf.variable_scope('loss'):
+            pred_flat = tf.reshape(self.pred, [-1, self.class_num])
+            _, w, h, _ = self.inputs[y_name].get_shape().as_list()
+            y = tf.image.resize_image_with_crop_or_pad(self.inputs[y_name], w-self.get_overlap(), h-self.get_overlap())
+            y_flat = tf.reshape(tf.squeeze(y, axis=[3]), [-1, ])
+            indices = tf.squeeze(tf.where(tf.less_equal(y_flat, self.class_num)), 1)
+            weight = tf.cast(tf.gather(y_flat, indices), tf.float32)
+            gt = tf.to_int32(weight > 0.5)
+            weight = tf.cast(tf.to_int32(weight > 1) * WEIGHT_FACTOR + 1, dtype=tf.float32)
+            prediction = tf.cast(tf.gather(pred_flat, indices), dtype=tf.float32)
+
+            pred = tf.argmax(prediction, axis=-1, output_type=tf.int32)
+            intersect = tf.cast(tf.reduce_sum(gt * pred), tf.float32)
+            union = tf.cast(tf.reduce_sum(gt), tf.float32) + tf.cast(tf.reduce_sum(pred), tf.float32) \
+                    - tf.cast(tf.reduce_sum(gt * pred), tf.float32)
+            self.loss_iou = tf.convert_to_tensor([intersect, union])
+
+            if loss_type == 'xent':
+                self.loss = tf.reduce_mean(weight *
+                                           tf.nn.sparse_softmax_cross_entropy_with_logits(logits=prediction, labels=gt))
 
 
 def read_flag():
@@ -42,7 +67,8 @@ def read_flag():
     parser.add_argument('--n-train', type=int, default=N_TRAIN, help='# samples per epoch')
     parser.add_argument('--n-valid', type=int, default=N_VALID, help='# patches to valid')
     parser.add_argument('--GPU', type=str, default=GPU, help="GPU used for computation.")
-    parser.add_argument('--decay-step', type=float, default=DECAY_STEP, help='Learning rate decay step in number of epochs.')
+    parser.add_argument('--decay-step', type=float, default=DECAY_STEP,
+                        help='Learning rate decay step in number of epochs.')
     parser.add_argument('--decay-rate', type=float, default=DECAY_RATE, help='Learning rate decay rate')
     parser.add_argument('--model-name', type=str, default=MODEL_NAME, help='Model name')
     parser.add_argument('--run-id', type=str, default=RUN_ID, help='id of this run')
@@ -54,7 +80,7 @@ def read_flag():
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
     flags.tile_size = (flags.tile_size, flags.tile_size)
-    flags.model_name = flags.model_name.format(flags.run_id)
+    flags.model_name = flags.model_name.format(flags.run_id, WEIGHT_FACTOR)
     return flags
 
 
@@ -72,16 +98,16 @@ def main(flags):
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, flags.input_size[0], flags.input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_UNet.UnetModelCrop({'X': X, 'Y': y},
-                                              trainable=mode,
-                                              model_name=flags.model_name,
-                                              input_size=flags.input_size,
-                                              batch_size=flags.batch_size,
-                                              learn_rate=flags.learning_rate,
-                                              decay_step=flags.decay_step,
-                                              decay_rate=flags.decay_rate,
-                                              epochs=flags.epochs,
-                                              start_filter_num=flags.sfn)
+    model = UnetModelCrop({'X': X, 'Y': y},
+                          trainable=mode,
+                          model_name=flags.model_name,
+                          input_size=flags.input_size,
+                          batch_size=flags.batch_size,
+                          learn_rate=flags.learning_rate,
+                          decay_step=flags.decay_step,
+                          decay_rate=flags.decay_rate,
+                          epochs=flags.epochs,
+                          start_filter_num=flags.sfn)
     model.create_graph('X', class_num=flags.num_classes)
 
     # create collection
@@ -97,7 +123,7 @@ def main(flags):
                                                     extSave=['png', 'jpg', 'jpg', 'jpg'],
                                                     isTrain=True,
                                                     gtInd=0,
-                                                    pad=int(model.get_overlap()//2))
+                                                    pad=int(model.get_overlap() // 2))
     patchDir = extrObj.run(blCol)
 
     # make data reader
@@ -106,7 +132,7 @@ def main(flags):
     file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [4, 5])
 
     img_dir, task_dir = utils.get_task_img_folder()
-    save_dir = os.path.join(img_dir, 'hard_samples')
+    save_dir = os.path.join(img_dir, 'hard_samples_reweight')
     file_list_train = ersa_utils.load_file(os.path.join(save_dir, 'file_list.txt'))
     file_list_train = [l.strip().split(' ') for l in file_list_train]
 
@@ -116,11 +142,12 @@ def main(flags):
                                                           flags.tile_size,
                                                           flags.batch_size, dataAug='flip,rotate',
                                                           block_mean=np.append([0], img_mean))
-        
+
         # no augmentation needed for validation
         dataReader_valid = uabDataReader.ImageLabelReader([0], [1, 2, 3], patchDir, file_list_valid, flags.input_size,
                                                           flags.tile_size,
-                                                          flags.batch_size, dataAug=' ', block_mean=np.append([0], img_mean))
+                                                          flags.batch_size, dataAug=' ',
+                                                          block_mean=np.append([0], img_mean))
 
     # train
     start_time = time.time()
@@ -134,17 +161,17 @@ def main(flags):
                            train_var_filter=['layerup{}'.format(i) for i in range(flags.start_layer, 10)])
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
-              pretrained_model_dir=flags.model_dir,   # train from scratch, no need to load pre-trained model
+              pretrained_model_dir=flags.model_dir,  # train from scratch, no need to load pre-trained model
               isTrain=True,
               img_mean=img_mean,
-              verb_step=100,                        # print a message every 100 step(sample)
-              save_epoch=5,                         # save the model every 5 epochs
+              verb_step=100,  # print a message every 100 step(sample)
+              save_epoch=5,  # save the model every 5 epochs
               gpu=GPU,
               tile_size=flags.tile_size,
               patch_size=flags.input_size)
 
     duration = time.time() - start_time
-    print('duration {:.2f} hours'.format(duration/60/60))
+    print('duration {:.2f} hours'.format(duration / 60 / 60))
 
 
 if __name__ == '__main__':

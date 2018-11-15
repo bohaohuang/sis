@@ -11,26 +11,45 @@ from nn import nn_utils
 from bohaoCustom import uabMakeNetwork_UNet
 
 
-class bayes_update:
-    def __init__(self):
-        self.m = 0
-        self.mean = 0
-        self.var = 0
+class StatsRecorder:
+    def __init__(self, data=None):
+        """
+        data: ndarray, shape (nobservations, ndimensions)
+        """
+        if data is not None:
+            data = np.transpose(np.atleast_2d(data))
+            self.mean = data.mean(axis=0)
+            self.std  = data.std(axis=0)
+            self.nobservations = data.shape[0]
+            self.ndimensions   = data.shape[1]
+        else:
+            self.nobservations = 0
 
-    def update(self, d):
-        n = d.shape[0]
-        mu_n = np.mean(d)
-        sig_n = np.var(d)
-        factor_m = self.m / (self.m + n)
-        factor_n = 1 - factor_m
+    def update(self, data):
+        """
+        data: ndarray, shape (nobservations, ndimensions)
+        """
+        if self.nobservations == 0:
+            self.__init__(data)
+        else:
+            data = np.transpose(np.atleast_2d(data))
+            if data.shape[1] != self.ndimensions:
+                raise ValueError("Data dims don't match prev observations.")
 
-        mean_update = factor_m * self.mean + factor_n * mu_n
-        self.var = factor_m * (self.var + self.mean ** 2) + factor_n * (sig_n + mu_n ** 2) - mean_update ** 2
-        self.mean = mean_update
+            newmean = data.mean(axis=0)
+            newstd  = data.std(axis=0)
 
-        self.m += n
+            m = self.nobservations * 1.0
+            n = data.shape[0]
 
-        return np.array([self.mean, self.var])
+            tmp = self.mean
+
+            self.mean = m/(m+n)*tmp + n/(m+n)*newmean
+            self.std  = m/(m+n)*self.std**2 + n/(m+n)*newstd**2 +\
+                        m*n/(m+n)**2 * (tmp - newmean)**2
+            self.std  = np.sqrt(self.std)
+
+            self.nobservations += n
 
 
 class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
@@ -44,7 +63,6 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
             for i, F in enumerate(n_filters):
                 net = tf.layers.conv2d(net, F, kernal_size, activation=None, strides=conv_stride,
                                        padding=padding, name='conv_{}'.format(i + 1))
-                #activations.append(net)
                 if bn:
                     net = tf.layers.batch_normalization(net, training=training, name='bn_{}'.format(i+1))
                 activations.append(net)
@@ -140,8 +158,8 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
                             f_i_t = layer_val[:, :, :, chan_id].flatten()
                             act_name = 'f_{}_{}'.format(layer_id, chan_id)
                             if act_name not in activation_dict:
-                                activation_dict[act_name] = bayes_update()
-                            activation_dict[act_name].update(f_i_t)
+                                activation_dict[act_name] = StatsRecorder()
+                            activation_dict[act_name].update([f_i_t])
 
         save_name = os.path.join(path_to_save, 'activation_list.pkl')
         ersa_utils.save_file(save_name, activation_dict)
@@ -149,7 +167,7 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
 
 if __name__ == '__main__':
     # settings
-    gpu = 0
+    gpu = 1
     batch_size = 1
     input_size = [572, 572]
     tile_size = [5000, 5000]
@@ -158,7 +176,7 @@ if __name__ == '__main__':
 
     img_dir, task_dir = utils.get_task_img_folder()
 
-    for city_id in [2, 3, 4]:
+    for city_id in [0, 1, 2, 3, 4]:
         path_to_save = os.path.join(task_dir, 'dtda2', city_list[city_id], 'valid')
         ersa_utils.make_dir_if_not_exist(path_to_save)
 

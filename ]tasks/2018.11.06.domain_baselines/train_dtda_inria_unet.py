@@ -13,7 +13,7 @@ import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_UNet
 
-RUN_ID = 1
+RUN_ID = 0
 BATCH_SIZE = 8
 LEARNING_RATE = 1e-6
 INPUT_SIZE = 572
@@ -22,10 +22,10 @@ EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = 1
+GPU = 0
 DECAY_STEP = 100
 DECAY_RATE = 0.1
-MODEL_NAME = 'inria_aug_leave_{}_{}'
+MODEL_NAME = 'inria_aug_leave_{}_{}_iid'
 SFN = 32
 LEAVE_CITY = 0
 LAM = 0.1
@@ -100,6 +100,9 @@ def get_pretrained_weights(flags):
 
 
 def main(flags, weight_dict):
+    path_to_save = os.path.join(flags.weight_dir, 'shift_dict.pkl')
+    shift_dict = ersa_utils.load_file(path_to_save)
+
     # make network
     # define place holder
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
@@ -181,7 +184,7 @@ def main(flags, weight_dict):
 
     model.train_config('X', 'Y', 'Z', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
                        loss_type='xent', par_dir='domain_baseline', lam=flags.lam)
-    model.load_source_weights(flags.model_dir)
+    model.load_source_weights(flags.model_dir, shift_dict)
     model.run(train_reader_source=dataReader_source,
               train_reader_target=dataReader_target,
               valid_reader=dataReader_valid,
