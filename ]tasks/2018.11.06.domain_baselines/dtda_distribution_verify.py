@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
     img_dir, task_dir = utils.get_task_img_folder()
     city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-    city_id = 0
+    city_id = 4
 
     path_to_save = os.path.join(task_dir, 'dtda2', city_list[city_id], 'valid')
     save_name = os.path.join(path_to_save, 'activation_list.pkl')

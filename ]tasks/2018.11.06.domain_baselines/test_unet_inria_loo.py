@@ -124,7 +124,7 @@ if __name__ == '__main__':
 
     img_dir, task_dir = utils.get_task_img_folder()
 
-    for city_id in [0]:
+    for city_id in [0, 1, 2, 3, 4]:
         path_to_save = os.path.join(task_dir, 'dtda', city_list[city_id], 'shift_dict2.pkl')
         shift_dict = ersa_utils.load_file(path_to_save)
 

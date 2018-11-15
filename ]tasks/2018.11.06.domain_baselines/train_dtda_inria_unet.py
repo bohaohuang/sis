@@ -23,7 +23,7 @@ NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
 GPU = 0
-DECAY_STEP = 100
+DECAY_STEP = 80
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_aug_leave_{}_{}_iid'
 SFN = 32
@@ -184,7 +184,7 @@ def main(flags, weight_dict):
 
     model.train_config('X', 'Y', 'Z', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
                        loss_type='xent', par_dir='domain_baseline', lam=flags.lam)
-    model.load_source_weights(flags.model_dir, shift_dict)
+    model.load_source_weights(flags.model_dir, shift_dict, gpu=flags.GPU)
     model.run(train_reader_source=dataReader_source,
               train_reader_target=dataReader_target,
               valid_reader=dataReader_valid,
@@ -193,7 +193,7 @@ def main(flags, weight_dict):
               img_mean=img_mean,
               verb_step=100,                    # print a message every 100 step(sample)
               save_epoch=5,                     # save the model every 5 epochs
-              gpu=GPU,
+              gpu=flags.GPU,
               tile_size=flags.tile_size,
               patch_size=flags.input_size)
 
