@@ -125,10 +125,10 @@ if __name__ == '__main__':
     img_dir, task_dir = utils.get_task_img_folder()
 
     for city_id in [0, 1, 2, 3, 4]:
-        path_to_save = os.path.join(task_dir, 'dtda', city_list[city_id], 'shift_dict2.pkl')
+        path_to_save = os.path.join(task_dir, 'dtda', city_list[city_id], 'shift_dict.pkl')
         shift_dict = ersa_utils.load_file(path_to_save)
 
-        model_dir = r'/hdd6//Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
+        model_dir = r'/hdd6/Models/domain_baseline/loo/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
                     r'EP100_LR0.0001_DS60_DR0.1_SFN32'.format(city_id)
 
         tf.reset_default_graph()
@@ -152,13 +152,17 @@ if __name__ == '__main__':
         # make the model
         # define place holder
         X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
+        Z = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='Z')
         y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
         mode = tf.placeholder(tf.bool, name='mode')
-        model = UnetModelCrop({'X': X, 'Y': y}, trainable=mode, input_size=input_size, batch_size=5)
+        #model = UnetModelCrop({'X': X, 'Y': y}, trainable=mode, input_size=input_size, batch_size=5)
+        model = uabMakeNetwork_UNet.UnetModelDTDA({'X': X, 'Z': Z, 'Y': y}, trainable=mode, input_size=input_size, batch_size=5)
         # create graph
-        model.create_graph('X', shift_dict, class_num=2)
+        #model.create_graph('X', shift_dict, class_num=2)
+        model.create_graph('X', 'Z', class_num=2)
 
         # evaluate on tiles
+        model.load_source_weights(model_dir, shift_dict, gpu=gpu)
         model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                        input_size, tile_size, batch_size, img_mean, model_dir, gpu,
                        save_result_parent_dir='domain_baseline2', ds_name='inria', best_model=False,

@@ -184,13 +184,13 @@ if __name__ == '__main__':
 
     print(contours[0].shape, contours[1].shape)'''
 
-    model_dir = ['confmap_uab_UnetCrop_aemo_ft_0_xregion_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
+    model_dir = ['confmap_uab_UnetCrop_aemo_comb_0_xregion_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
                  ]
     model_name = ['Raw Finetune 1e-3']
 
     for md, mn in zip(model_dir, model_name):
         conf_dir = os.path.join(task_dir, md)
-        gt_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_hist/'
+        gt_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_union'
         conf_files = glob(os.path.join(conf_dir, '*.npy'))
         true_all = []
         conf_all = []
@@ -198,7 +198,7 @@ if __name__ == '__main__':
         for i_name in conf_files:
             conf_im = ersa_utils.load_file(i_name)
 
-            gt_file = os.path.join(gt_dir, '{}.tif'.format(os.path.basename(i_name)[:-4]))
+            gt_file = os.path.join(gt_dir, '{}comb.tif'.format(os.path.basename(i_name)[:-8]))
             gt = ersa_utils.load_file(gt_file)
 
             # Instantiate the class
@@ -223,7 +223,7 @@ if __name__ == '__main__':
             true_all.append(true)
 
         p, r, _ = precision_recall_curve(np.concatenate(true_all), np.concatenate(conf_all))
-        plt.plot(r[1:], p[1:], linewidth=3, label=mn)
+        plt.plot(r[1:], p[1:], linewidth=3, label=mn + ' largest recall={:.3f}'.format(r[1]))
 
     plt.xlim([0, 1])
     plt.ylim([0, 1])
@@ -232,7 +232,7 @@ if __name__ == '__main__':
     plt.title('Object-wise PR Curve Comparison')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xregion.png'))
+    plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xregion_comb.png'))
     plt.show()
 
     print('duration = {}'.format(time.time() - start_time))

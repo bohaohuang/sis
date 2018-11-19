@@ -174,20 +174,23 @@ def scoring_func2(gtObj, ppObj, iou_th=0.5, commercial=False):
 
 if __name__ == '__main__':
     start_time = time.time()
-    commercial = True
+    commercial = False
 
     img_dir, task_dir = utils.get_task_img_folder()
 
-    model_dir = ['confmap_uab_UnetCrop_aemo_xfold0_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
-                 'confmap_uab_UnetCrop_aemo_xfold1_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
-                 'confmap_uab_UnetCrop_aemo_xfold2_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
+    model_dir = ['confmap_uab_UnetCrop_aemo_comb_hd_0_wf3_xfold0_PS(572, 572)_BS5_EP20_LR1e-05_DS10_DR0.1_SFN32',
+                 'confmap_uab_UnetCrop_aemo_comb_hd_0_wf3_xfold1_PS(572, 572)_BS5_EP20_LR1e-05_DS10_DR0.1_SFN32',
+                 'confmap_uab_UnetCrop_aemo_comb_hd_0_wf3_xfold2_PS(572, 572)_BS5_EP20_LR1e-05_DS10_DR0.1_SFN32',
                  ]
     model_name = ['Fold 0', 'Fold 1', 'Fold 2']
+
+    true_agg = []
+    conf_agg = []
 
     iou_mt = 0.5
     for md, mn in zip(model_dir, model_name):
         conf_dir = os.path.join(task_dir, md)
-        gt_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_hist/'
+        gt_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_union'
         rgb_dir = r'/home/lab/Documents/bohao/data/aemo'
         conf_files = glob(os.path.join(conf_dir, '*.npy'))
         true_all = []
@@ -195,7 +198,7 @@ if __name__ == '__main__':
 
         for i_name in conf_files:
             conf_im = ersa_utils.load_file(i_name)
-            gt_file = os.path.join(gt_dir, '{}.tif'.format(os.path.basename(i_name)[:-4]))
+            gt_file = os.path.join(gt_dir, '{}comb.tif'.format(os.path.basename(i_name)[:-8]))
             gt = ersa_utils.load_file(gt_file)
 
             rgb_file = os.path.join(rgb_dir, '{}_rgb.tif'.format(os.path.basename(i_name)[:-12]))
@@ -227,21 +230,27 @@ if __name__ == '__main__':
             conf_all.append(conf)
             true_all.append(true)
 
+            conf_agg.append(conf)
+            true_agg.append(true)
+
         p, r, _ = precision_recall_curve(np.concatenate(true_all), np.concatenate(conf_all))
-        plt.plot(r[1:], p[1:], linewidth=3, label=mn)
+        plt.plot(r[1:], p[1:], linewidth=3, label=mn + ' largest recall={:.3f}'.format(r[1]))
+
+    p, r, _ = precision_recall_curve(np.concatenate(true_agg), np.concatenate(conf_agg))
+    plt.plot(r[1:], p[1:], '--', linewidth=3, label='Aggregate' + ' largest recall={:.3f}'.format(r[1]))
 
     plt.xlim([0, 1])
     plt.ylim([0, 1])
     plt.xlabel('recall')
     plt.ylabel('precision')
     if commercial:
-        plt.title('Object-wise PR Curve Comparison (Commercial)')
+        plt.title('Object-wise PR Curve Comparison (Commercial, HSM)')
     else:
-        plt.title('Object-wise PR Curve Comparison (Residential)')
+        plt.title('Object-wise PR Curve Comparison (Residential, HSM)')
     plt.legend()
     plt.tight_layout()
     if commercial:
-        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_commercial2.png'))
+        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_commercial_comb_hsm.png'))
     else:
-        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_residential2.png'))
+        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_residential_comb_hsm.png'))
     plt.close()

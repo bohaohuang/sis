@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from glob import glob
 import utils
 import ersa_utils
 from preprocess import histMatching
@@ -108,7 +109,7 @@ def makeup_aemo_img(img, gt, code):
     return img, gt
 
 
-suffix = 'aemo'
+'''suffix = 'aemo'
 np.random.seed(1004)
 img_dir, task_dir = utils.get_task_img_folder()
 save_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_pad'
@@ -134,6 +135,8 @@ cm.print_meta_data()
 
 aemo_files = cm.load_files(field_name='aus10,aus30,aus50', field_id='', field_ext='.*rgb,.*gt_d255')
 
+print(aemo_files)
+
 code_list = ['02', '6', '46', '6', '0', '8']
 
 for i in range(6):
@@ -145,4 +148,41 @@ for i in range(6):
     save_name = os.path.join(save_dir, os.path.basename(test_file[0]))
     ersa_utils.save_file(save_name, rgb_new)
     save_name = os.path.join(save_dir, os.path.basename(test_file[1]))
-    ersa_utils.save_file(save_name, gt_new)
+    ersa_utils.save_file(save_name, gt_new)'''
+
+'''data_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_union'
+rgb_files = sorted(glob(os.path.join(data_dir, '*rgb.tif')))
+gt_files = sorted(glob(os.path.join(data_dir, '*comb.tif')))
+files = [rgb_files, gt_files]
+files = ersa_utils.rotate_list(files)
+
+print(files)
+
+code_list = ['02', '6', '46', '6', '0', '8']
+save_dir = r'/media/ei-edl01/data/uab_datasets/aemo_comb/data/Original_Tiles'
+
+for i in range(6):
+    test_file = files[i]
+    print('processing {}'.format(test_file[0]))
+    rgb = ersa_utils.load_file(test_file[0])
+    gt = ersa_utils.load_file(test_file[1])
+    rgb_new, gt_new = makeup_aemo_img(rgb, gt, code_list[i])
+    save_name = os.path.join(save_dir, os.path.basename(test_file[0]))
+    ersa_utils.save_file(save_name, rgb_new)
+    save_name = os.path.join(save_dir, os.path.basename(test_file[1]))
+    ersa_utils.save_file(save_name, (gt_new/255).astype(np.uint8))'''
+
+data_dir = r'/media/ei-edl01/data/uab_datasets/aemo_comb/data/Original_Tiles'
+rgb_files = sorted(glob(os.path.join(data_dir, '*rgb.tif')))
+gt_files = sorted(glob(os.path.join(data_dir, '*comb.tif')))
+files = [rgb_files, gt_files]
+files = ersa_utils.rotate_list(files)
+
+from visualize import visualize_utils
+for i in range(6):
+    test_file = files[i]
+    print('processing {}'.format(test_file[0]))
+    rgb = ersa_utils.load_file(test_file[0])
+    gt = ersa_utils.load_file(test_file[1])
+    print(np.unique(gt))
+    visualize_utils.compare_two_figure(rgb, gt)

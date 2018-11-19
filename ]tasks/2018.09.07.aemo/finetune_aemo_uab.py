@@ -11,7 +11,7 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-3
 INPUT_SIZE = 572
 TILE_SIZE = 5000
 EPOCHS = 80
@@ -22,8 +22,8 @@ GPU = 0
 DECAY_STEP = 30
 DECAY_RATE = 0.1
 START_LAYER = 10
-MODEL_NAME = 'aemo_ft_{}'
-DS_NAME = 'aemo_hist'
+MODEL_NAME = 'aemo_comb_{}'
+DS_NAME = 'aemo_comb'
 SFN = 32
 MODEL_DIR = r'/hdd6/Models/spca/UnetCropWeighted_GridChipPretrained6Weighted4_PS(572, 572)_BS5_' \
             r'EP100_LR0.0001_DS50_DR0.1_SFN32'

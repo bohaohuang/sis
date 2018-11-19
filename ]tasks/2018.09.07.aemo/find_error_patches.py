@@ -15,17 +15,17 @@ from nn import nn_utils
 from visualize import visualize_utils
 from bohaoCustom import uabMakeNetwork_UNet
 
-gpu = -1
+gpu = 1
 nn_utils.set_gpu(gpu)
 batch_size = 5
 input_size = [572, 572]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 
-model_dir = r'/hdd6/Models/aemo/aemo/UnetCrop_aemo_ft_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32'
+model_dir = r'/hdd6/Models/aemo/aemo_comb/UnetCrop_aemo_comb_xfold2_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32'
 ds_name = 'aemo'
 img_dir, task_dir = utils.get_task_img_folder()
-save_dir = os.path.join(img_dir, 'hard_samples_reweight')
+save_dir = os.path.join(img_dir, 'hard_samples_reweight_comb_2')
 #save_dir = os.path.join(img_dir, 'hard_samples_demo')
 ersa_utils.make_dir_if_not_exist(save_dir)
 f = open(os.path.join(save_dir, 'file_list.txt'), 'w+')
@@ -98,7 +98,7 @@ for rgb_name, gt_name in zip(rgb_list, gt_list):
                         gt_patch[92:-92, 92:-92] = g
 
             if flag:
-                '''file_list = []
+                file_list = []
                 for i in range(3):
                     ersa_utils.save_file(os.path.join(save_dir, '{}_rgb{}.jpg'.format(patch_cnt, i)), patch[:, :, i].
                                          astype(np.uint8))
@@ -106,12 +106,12 @@ for rgb_name, gt_name in zip(rgb_list, gt_list):
                 ersa_utils.save_file(os.path.join(save_dir, '{}_gt.png'.format(patch_cnt)), gt_patch.astype(np.uint8))
                 file_list.append('{}_gt.png'.format(patch_cnt))
                 f.write('{}\n'.format(' '.join(file_list)))
-                patch_cnt += 1'''
+                patch_cnt += 1
 
-                visualize_utils.compare_two_figure(patch[92:-92, 92:-92, :3].astype(np.uint8), gt_patch, show_fig=False)
+                '''visualize_utils.compare_two_figure(patch[92:-92, 92:-92, :3].astype(np.uint8), gt_patch, show_fig=False)
                 #visualize_utils.compare_two_figure(patch[92:-92, 92:-92, :3].astype(np.uint8), p, show_fig=False)
                 plt.savefig(os.path.join(save_dir, '{}_gt.png'.format(patch_cnt)))
                 patch_cnt += 1
-                plt.close()
+                plt.close()'''
 
 f.close()

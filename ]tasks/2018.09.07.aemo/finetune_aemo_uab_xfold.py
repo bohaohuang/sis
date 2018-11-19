@@ -22,12 +22,12 @@ GPU = 1
 DECAY_STEP = 30
 DECAY_RATE = 0.1
 START_LAYER = 10
-MODEL_NAME = 'aemo_scratch_xfold{}_{}'
-DS_NAME = 'aemo'
+MODEL_NAME = 'aemo_comb_xfold{}_{}'
+DS_NAME = 'aemo_comb'
 SFN = 32
-XFOLD = 0
-MODEL_DIR = None#r'/hdd6/Models/spca/UnetCropWeighted_GridChipPretrained6Weighted4_PS(572, 572)_BS5_' \
-            #r'EP100_LR0.0001_DS50_DR0.1_SFN32'
+XFOLD = 1
+MODEL_DIR = r'/hdd6/Models/spca/UnetCropWeighted_GridChipPretrained6Weighted4_PS(572, 572)_BS5_' \
+            r'EP100_LR0.0001_DS50_DR0.1_SFN32'
 
 
 def read_flag():

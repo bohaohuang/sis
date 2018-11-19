@@ -14,13 +14,17 @@ batch_size = 5
 input_size = [572, 572]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
-model_dir = r'/hdd6/Models/aemo/aemo/UnetCrop_aemo_hd_0_wf4_PS(572, 572)_BS5_EP20_LR1e-05_DS10_DR0.1_SFN32'
-ds_name = 'aemo'
+XFOLD = 2
+model_dir = r'/hdd6/Models/aemo/aemo_comb/UnetCrop_aemo_comb_hd_0_wf3_xfold{}_PS(572, 572)_BS5_EP20_LR1e-05_DS10_DR0.1_SFN32'.format(XFOLD)
+ds_name = 'aemo_comb'
 img_dir, task_dir = utils.get_task_img_folder()
 SAVE_DIR = os.path.join(task_dir, 'confmap_uab_{}'.format(os.path.basename(model_dir)))
 ersa_utils.make_dir_if_not_exist(SAVE_DIR)
 TILE_CNT = 0
-TILE_NAME = ['aus50_0x3179_gt_d255', 'aus50_4808x3179_gt_d255']
+TILE_NAME = ['aus10_0x0_gt_d255', 'aus10_4453x10891_gt_d255',
+             'aus30_4559x10766_gt_d255', 'aus30_13678x10766_gt_d255',
+             'aus50_0x3179_gt_d255', 'aus50_4808x3179_gt_d255']
+TILE_NAME = [TILE_NAME[XFOLD * 2], TILE_NAME[XFOLD * 2 + 1]]
 
 
 class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
@@ -81,12 +85,12 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
 blCol = uab_collectionFunctions.uabCollection(ds_name)
 blCol.readMetadata()
 file_list, parent_dir = blCol.getAllTileByDirAndExt([1, 2, 3])
-file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(4)
+file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(0)
 idx, file_list = uabCrossValMaker.uabUtilGetFolds(None, file_list, 'tile')
 idx_truth, file_list_truth = uabCrossValMaker.uabUtilGetFolds(None, file_list_truth, 'tile')
 # use first 5 tiles for validation
-file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [4, 5])
-file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(idx_truth, file_list_truth, [4, 5])
+file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [XFOLD*2, XFOLD*2+1])
+file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(idx_truth, file_list_truth, [XFOLD*2, XFOLD*2+1])
 img_mean = blCol.getChannelMeans([1, 2, 3])
 
 # make the model
