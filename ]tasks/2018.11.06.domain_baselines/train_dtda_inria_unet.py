@@ -153,9 +153,9 @@ def main(flags, weight_dict):
         for j in range(1, 37):
             if i != flags.leave_city and j > 5:
                 filter_source.append(j * 10 + i)
-            elif i == flags.leave_city and j > 5:
+            elif i == flags.leave_city and j > 8:
                 filter_target.append(j * 10 + i)
-            elif i == flags.leave_city and j <= 5:
+            elif i == flags.leave_city and 5 < j <= 8:
                 filter_valid.append(j * 10 + i)
     # use first city for validation
     file_list_source = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_source)
@@ -183,7 +183,7 @@ def main(flags, weight_dict):
     start_time = time.time()
 
     model.train_config('X', 'Y', 'Z', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
-                       loss_type='xent', par_dir='domain_baseline', lam=flags.lam)
+                       loss_type='xent', par_dir='domain_baseline/contorl_valid', lam=flags.lam)
     model.load_source_weights(flags.model_dir, shift_dict, gpu=flags.GPU)
     model.run(train_reader_source=dataReader_source,
               train_reader_target=dataReader_target,
