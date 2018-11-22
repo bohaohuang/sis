@@ -10,7 +10,7 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 if __name__ == '__main__':
     # settings
-    gpu = 1
+    gpu = 0
     batch_size = 1
     input_size = [572, 572]
     tile_size = [5000, 5000]
@@ -19,12 +19,12 @@ if __name__ == '__main__':
 
     img_dir, task_dir = utils.get_task_img_folder()
 
-    for city_id in [2, 3, 4]:
+    for city_id in [0]:
         path_to_save = os.path.join(task_dir, 'dtda', city_list[city_id], 'shift_dict.pkl')
         shift_dict = ersa_utils.load_file(path_to_save)
 
-        model_dir = r'/hdd6/Models/domain_baseline/UnetDTDA_inria_aug_leave_{}_0_iid_PS(572, 572)_BS8_' \
-                    r'EP100_LR1e-06_DS40.0_DR0.1'.format(city_id)
+        model_dir = r'/hdd6/Models/domain_baseline/contorl_valid/UnetDTDA_inria_aug_leave_{}_0_iid_PS(572, 572)_BS8_' \
+                    r'EP60_LR1e-06_DS40.0_DR0.1'.format(city_id)
 
         tf.reset_default_graph()
 

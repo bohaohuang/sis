@@ -86,7 +86,7 @@ LR = '1e-05'
 
 plt.figure(figsize=(10, 6))
 xtick_list = city_list + ['Overall']
-legend_list = ['LOO', 'IID', 'MMD', 'DIS', 'XRegion']
+legend_list = ['LOO', 'IID', 'DTM', 'MMD', 'DIS', 'XRegion']
 
 city_ious = np.zeros((len(legend_list), 6))
 model_dir_loo = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
@@ -96,15 +96,18 @@ city_ious[0, :] = read_loo_iou(model_dir_loo)
 model_dir_iid = r'/hdd/Results/domain_baseline2/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32/inria'
 city_ious[1, :] = read_loo_iou2(model_dir_iid)
 
+model_dir_iid = r'/hdd/Results/domain_baseline2/UnetDTDA_inria_aug_leave_{}_0_iid_PS(572, 572)_BS8_EP100_LR1e-06_DS40.0_DR0.1/inria'
+city_ious[2, :] = read_loo_iou2(model_dir_iid)
+
 model_dir_mmd = r'/hdd/Results/mmd/UnetCrop_inria_mmd_loo_5050_{}_1_PS(572, 572)_BS5_EP40_LR'+LR+'_DS30_DR0.1_SFN32/inria'
-city_ious[2, :] = read_loo_iou(model_dir_mmd)
+city_ious[3, :] = read_loo_iou(model_dir_mmd)
 
 model_dir_dis = r'/hdd/Results/mmd/UnetCrop_inria_distance_loo_5050_{}_1_PS(572, 572)_BS5_EP40_LR'+LR+'_DS30_DR0.1_SFN32/inria'
-city_ious[3, :] = read_loo_iou(model_dir_dis)
+city_ious[4, :] = read_loo_iou(model_dir_dis)
 
 model_dir_base = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \
                  r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria'
-city_ious[4, :] = read_iou(model_dir_base, target_city=None)
+city_ious[5, :] = read_iou(model_dir_base, target_city=None)
 
 width = 0.15
 X = np.arange(6)
@@ -113,12 +116,12 @@ for plt_cnt in range(len(legend_list)):
             label=legend_list[plt_cnt])
     for cnt, llh in enumerate(city_ious[plt_cnt, :]):
         plt.text(X[cnt] + width * (plt_cnt - 0.5), llh, '{:.1f}'.format(llh), fontsize=6)
-plt.xticks(X + width * 2, xtick_list, fontsize=10)
+plt.xticks(X + width * 2.5, xtick_list, fontsize=10)
 plt.ylim([50, 85])
 plt.xlabel('City Name')
 plt.ylabel('IoUs')
 plt.legend(ncol=len(legend_list))
 plt.title('Performance Comparison (U-Net)')
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'iid_comp.png'))
+plt.savefig(os.path.join(img_dir, 'dtm_iid_comp.png'))
 plt.show()
