@@ -3,6 +3,8 @@ Read all files in transmission line dataset, extract them into patches, add boun
 into tf record file
 """
 
+IS_DCC = True
+
 
 import os
 import io
@@ -13,12 +15,16 @@ from PIL import Image
 from glob import glob
 
 import sys
-sys.path.append(r'/home/lab/Documents/bohao/code/third_party/models/research')
+if not IS_DCC:
+    sys.path.append(r'/home/lab/Documents/bohao/code/third_party/models/research')
+else:
+    sys.path.append(r'/dscrhome/bh163/code/models/research')
+    sys.path.append(r'/dscrhome/bh163/code/ersa')
+
 from object_detection.utils import dataset_util
 
 from natsort import natsorted
 from skimage.draw import polygon
-import utils
 import ersa_utils
 
 PATCH_SIZE = (500, 500)
@@ -142,7 +148,7 @@ def make_dataset(rgb_files, info_dir, store_dir, tf_dir):
 
                 tf_example = create_tf_example(save_name, label, box)
                 if is_val:
-                    writer_train.write(tf_example.SerializeToString())
+                    writer_valid.write(tf_example.SerializeToString())
                 else:
                     writer_valid.write(tf_example.SerializeToString())
 
@@ -193,20 +199,28 @@ def create_tf_example(save_name, label, box):
 
 if __name__ == '__main__':
     # settings
-    data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
     city_list = ['Tucson', 'Colwich', 'Clyde', 'Wilmington']
-    img_dir, task_dir = utils.get_task_img_folder()
-    save_dir = os.path.join(data_dir, 'info')
-    store_dir = os.path.join(data_dir, 'patches')
-    tf_dir = os.path.join(data_dir, 'data')
-    ersa_utils.make_dir_if_not_exist(save_dir)
-    ersa_utils.make_dir_if_not_exist(store_dir)
-    ersa_utils.make_dir_if_not_exist(tf_dir)
+    if not IS_DCC:
+        data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
+        save_dir = os.path.join(data_dir, 'info')
+        store_dir = os.path.join(data_dir, 'patches')
+        tf_dir = os.path.join(data_dir, 'data')
+        ersa_utils.make_dir_if_not_exist(save_dir)
+        ersa_utils.make_dir_if_not_exist(store_dir)
+        ersa_utils.make_dir_if_not_exist(tf_dir)
+    else:
+        data_dir = r'/work/bh163/misc/object_detection'
+        save_dir = os.path.join(data_dir, 'info')
+        store_dir = os.path.join(data_dir, 'patches')
+        tf_dir = os.path.join(data_dir, 'data')
+        ersa_utils.make_dir_if_not_exist(save_dir)
+        ersa_utils.make_dir_if_not_exist(store_dir)
+        ersa_utils.make_dir_if_not_exist(tf_dir)
 
     # get files
     for city in city_list:
         rgb_files = natsorted([a for a in glob(os.path.join(data_dir, 'raw', '*{}*.tif'.format(city)))
                                if 'multiclass' not in a])
-        csv_files = natsorted(glob(os.path.join(data_dir, 'raw', '*{}*.csv'.format(city))))
+        csv_files = natsorted(glob(os.path.join(data_dir, '*{}*.csv'.format(city))))
         write_data_info(rgb_files, csv_files, save_dir)
         make_dataset(rgb_files, save_dir, store_dir, tf_dir)
