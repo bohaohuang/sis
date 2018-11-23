@@ -5,6 +5,7 @@
 ##SBATCH --exclude=dcc-gpu-[31-32]
 ##SBATCH --exclude=dcc-collinslab-gpu-[02,03,04]
 #SBATCH -p collinslab --gres=gpu:1
+export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/models/research:/dscrhome/bh163/code/models/research/slim
 module load Python-GPU/3.6.5
 
 TIME_STAMP=`date +%Y-%m-%d_%H-%M-%S`
