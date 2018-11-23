@@ -3,7 +3,7 @@ Read all files in transmission line dataset, extract them into patches, add boun
 into tf record file
 """
 
-IS_DCC = True
+IS_DCC = False
 
 
 import os
@@ -150,7 +150,7 @@ def make_dataset(rgb_files, info_dir, store_dir, tf_dir):
                 if is_val:
                     writer_valid.write(tf_example.SerializeToString())
                 else:
-                    writer_valid.write(tf_example.SerializeToString())
+                    writer_train.write(tf_example.SerializeToString())
 
     writer_train.close()
     writer_valid.close()
@@ -199,7 +199,6 @@ def create_tf_example(save_name, label, box):
 
 if __name__ == '__main__':
     # settings
-    city_list = ['Tucson', 'Colwich', 'Clyde', 'Wilmington']
     if not IS_DCC:
         data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
         save_dir = os.path.join(data_dir, 'info')
@@ -218,9 +217,8 @@ if __name__ == '__main__':
         ersa_utils.make_dir_if_not_exist(tf_dir)
 
     # get files
-    for city in city_list:
-        rgb_files = natsorted([a for a in glob(os.path.join(data_dir, 'raw', '*{}*.tif'.format(city)))
-                               if 'multiclass' not in a])
-        csv_files = natsorted(glob(os.path.join(data_dir, '*{}*.csv'.format(city))))
-        write_data_info(rgb_files, csv_files, save_dir)
-        make_dataset(rgb_files, save_dir, store_dir, tf_dir)
+    rgb_files = natsorted([a for a in glob(os.path.join(data_dir, 'raw', '*.tif'))
+                           if 'multiclass' not in a])
+    csv_files = natsorted(glob(os.path.join(data_dir, 'raw', '*.csv')))
+    write_data_info(rgb_files, csv_files, save_dir)
+    make_dataset(rgb_files, save_dir, store_dir, tf_dir)
