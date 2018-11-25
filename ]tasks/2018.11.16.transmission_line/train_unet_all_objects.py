@@ -26,13 +26,13 @@ DECAY_RATE = 0.1
 EPOCHS = 100
 BATCH_SIZE = 5
 VAL_MULT = 5
-GPU = 0
+GPU = 1
 N_TRAIN = 8000
 N_VALID = 1000
 VERB_STEP = 50
 SAVE_EPOCH = 5
 LEARN_RATE = 1e-4
-POS_WEIGHT = 0.999
+POS_WEIGHT = 100
 DATA_DIR = r'/media/ei-edl01/data/uab_datasets/infrastructure/data/Original_Tiles'
 
 
