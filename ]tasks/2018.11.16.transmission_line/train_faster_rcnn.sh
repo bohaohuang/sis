@@ -11,6 +11,7 @@ module load Python-GPU/3.6.5
 TIME_STAMP=`date +%Y-%m-%d_%H-%M-%S`
 PIPELIN_CONFIG_PATH=/dscrhome/bh163/code/sis/]tasks/2018.11.16.transmission_line/faster_rcnn.config
 MODEL_DIR=/work/bh163/misc/object_detection/models/faster_rcnn_${TIME_STAMP}
+export CUDA_VISIBLE_DEVICES=0
 python /dscrhome/bh163/code/models/research/object_detection/model_main.py \
     --pipeline_config_path=${PIPELIN_CONFIG_PATH} \
     --model_dir=${MODEL_DIR} \
