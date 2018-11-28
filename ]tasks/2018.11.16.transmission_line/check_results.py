@@ -8,7 +8,7 @@ from collection import collectionMaker
 
 # settings
 ds_name = 'infrastructure'
-pred_dir = r'/hdd/Results/infrastructure/unet_5objs_weight0.999_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1/default/pred'
+pred_dir = r'/hdd/Results/infrastructure/unet_5objs_weight100_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1/default/pred'
 pred_files = sorted(glob(os.path.join(pred_dir, '*.npy')))
 
 # define network

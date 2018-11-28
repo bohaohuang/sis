@@ -13,7 +13,7 @@ from collection import collectionMaker, collectionEditor
 class_num = 2
 suffix = 'infrastructure'
 bs = 1
-gpu = -1
+gpu = 1
 
 class NNEstimatorSegment(processBlock.BasicProcess):
     """
@@ -186,7 +186,7 @@ patch_size = (572, 572)
 model = unet.UNet(class_num, patch_size, suffix=suffix, batch_size=bs)
 overlap = model.get_overlap()
 data_dir = r'/media/ei-edl01/data/uab_datasets/infrastructure/data/Original_Tiles'
-model_dir = r'/hdd6/Models/infrastructure/unet_5objs_weight0.999_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1'
+model_dir = r'/hdd6/Models/infrastructure/unet_5objs_weight100_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1'
 
 cm = collectionMaker.read_collection(raw_data_path=data_dir,
                                      field_name='Tucson,Colwich,Clyde,Wilmington',

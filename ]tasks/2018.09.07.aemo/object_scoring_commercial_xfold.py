@@ -169,6 +169,7 @@ def scoring_func2(gtObj, ppObj, iou_th=0.5, commercial=False):
                 if cm_idc[i] == commercial:
                     true.append(0)
                     conf.append(pl_pp_cf[i])
+
     return np.array(conf), np.array(true)
 
 
@@ -250,7 +251,7 @@ if __name__ == '__main__':
     plt.legend()
     plt.tight_layout()
     if commercial:
-        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_commercial_comb_hsm.png'))
+        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_commercial_comb_hsm2.png'))
     else:
-        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_residential_comb_hsm.png'))
+        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_residential_comb_hsm2.png'))
     plt.close()

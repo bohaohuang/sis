@@ -25,7 +25,7 @@ class spClass_confMapToPolygonStructure_v2:
     linkingRadius = 55
     # ------------ commercial params ------------
     commercialAreaThreshold = 400
-    commercialPanelDensityThreshold = 0.1
+    commercialPanelDensityThreshold = 0.1  # Any panel that is within a region with panel density above this threshold is labeled as commercial
     commercialNeighborhoodRadius = 50
 
     def __init__(self, mt):
@@ -47,22 +47,6 @@ class spClass_confMapToPolygonStructure_v2:
             img = Image.new('L', (W, H), 0)
             ImageDraw.Draw(img).polygon(poly.ravel().tolist(), outline=1, fill=1)
             polygonImage += np.array(img, dtype=bool)
-        return polygonImage
-
-    def polygonStructureToImage_commercial(self, confidenceImage):  # polygon cords in form of xy
-        H, W = confidenceImage.shape
-        polygonImage = np.zeros((H, W))
-        polygons_commercial = self.objectStructure.loc[self.objectStructure['isCommercial'] == True]['polygon']
-        for poly in polygons_commercial:
-            img = Image.new('L', (W, H), 0)
-            ImageDraw.Draw(img).polygon(poly.ravel().tolist(), outline=1, fill=1)
-            polygonImage += np.array(img)
-
-        polygons_residential = self.objectStructure.loc[self.objectStructure['isCommercial'] == False]['polygon']
-        for poly in polygons_residential:
-            img = Image.new('L', (W, H), 0)
-            ImageDraw.Draw(img).polygon(poly.ravel().tolist(), outline=2, fill=2)
-            polygonImage += np.array(img)
         return polygonImage
 
     """  CREATE REGIONS FROM CONFIDENCE MAPS """
@@ -109,7 +93,7 @@ class spClass_confMapToPolygonStructure_v2:
             self.objectStructure.isCommercial = isCommercialSize & isCommercialDensity
 
             if clear_coords:
-                self.objectStructure = self.objectStructure.loc[self.objectStructure['isCommercial'] == commercial]
+                self.objectStructure = self.objectStructure[self.objectStructure['isCommercial'] == commercial]
 
     def addPolygonToObjectStructure(self, predIm):
         polygons = [list() for _ in range(self.objectStructure.shape[0])]
@@ -154,39 +138,36 @@ def get_blank_regions(img):
     return blank_mask
 
 
-def scoring_func2(gtObj, ppObj, iou_th=0.5, commercial=False):
+def scoring_func2(gtObj, ppObj, iou_th=0.5):
     conf = []
     true = []
 
     cm_idc = np.array(gtObj.objectStructure['isCommercial'])
-
-    '''pl_gt = np.array(gtObj.objectStructure['pixelList'])
+    pl_gt = np.array([gtObj.objectStructure['pixelList']])
     pl_pp = np.array(ppObj.objectStructure['pixelList'])
-    pl_pp_cf = np.array(ppObj.objectStructure['confidence'])'''
+    pl_pp_cf = np.array(ppObj.objectStructure['confidence'])
 
     panel_num = pl_gt.shape[0]
     pp_house_id = ppObj.objectStructure['iOut'].tolist()
     for i in range(panel_num):
-        if cm_idc[i] == commercial:
-            if i in pp_house_id:
-                pp_i = pp_house_id.index(i)
-                inter, union = get_intersection(pl_gt[i], pl_pp[pp_i])
-                iou = inter.shape[0] / union.shape[0]
-                if iou >= iou_th:
-                    conf.append(pl_pp_cf[pp_i])
-                    true.append(1)
-                else:
-                    conf.append(pl_pp_cf[pp_i])
-                    true.append(0)
-            else:
-                conf.append(-1000)
+        if i in pp_house_id:
+            pp_i = pp_house_id.index(i)
+            inter, union = get_intersection(pl_gt[i], pl_pp[pp_i])
+            iou = inter.shape[0] / union.shape[0]
+            if iou >= iou_th:
+                conf.append(pl_pp_cf[pp_i])
                 true.append(1)
+            else:
+                conf.append(pl_pp_cf[pp_i])
+                true.append(0)
+        else:
+            conf.append(-1000)
+            true.append(1)
     for i in range(len(pp_house_id)):
         if pp_house_id[i] == -1:
             if i < len(cm_idc):
-                if cm_idc[i] == commercial:
-                    true.append(0)
-                    conf.append(pl_pp_cf[i])
+                true.append(0)
+                conf.append(pl_pp_cf[i])
     return np.array(conf), np.array(true)
 
 
@@ -195,26 +176,29 @@ if __name__ == '__main__':
     commercial = False
 
     img_dir, task_dir = utils.get_task_img_folder()
-    iou_mt = 0.5
 
-    model_dir = ['confmap_uab_UnetCrop_aemo_ft_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
-                 'confmap_uab_UnetCrop_aemo_sc_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
-                 'confmap_uab_UnetCrop_aemo_ft_0_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
-                 'confmap_uab_UnetCrop_aemo_hd_0_PS(572, 572)_BS5_EP20_LR1e-05_DS10_DR0.1_SFN32'
+    model_dir = ['confmap_uab_UnetCrop_aemo_comb_hd_0_wf3_xfold0_PS(572, 572)_BS5_EP20_LR1e-05_DS10_DR0.1_SFN32',
+                 'confmap_uab_UnetCrop_aemo_comb_hd_0_wf3_xfold1_PS(572, 572)_BS5_EP20_LR1e-05_DS10_DR0.1_SFN32',
+                 'confmap_uab_UnetCrop_aemo_comb_hd_0_wf3_xfold2_PS(572, 572)_BS5_EP20_LR1e-05_DS10_DR0.1_SFN32',
                  ]
-    model_name = ['Raw Finetune 1e-3', 'Raw Scratch 1e-3', 'Hist Finetune 1e-3', 'Hard Sample']
+    model_name = ['Fold 0', 'Fold 1', 'Fold 2']
 
+    true_agg = []
+    conf_agg = []
+
+    iou_mt = 0.5
     for md, mn in zip(model_dir, model_name):
         conf_dir = os.path.join(task_dir, md)
-        gt_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_hist/'
+        gt_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_union'
         rgb_dir = r'/home/lab/Documents/bohao/data/aemo'
         conf_files = glob(os.path.join(conf_dir, '*.npy'))
         true_all = []
         conf_all = []
 
         for i_name in conf_files:
+            print('Scoring {}...'.format(i_name))
             conf_im = ersa_utils.load_file(i_name)
-            gt_file = os.path.join(gt_dir, '{}.tif'.format(os.path.basename(i_name)[:-4]))
+            gt_file = os.path.join(gt_dir, '{}comb.tif'.format(os.path.basename(i_name)[:-8]))
             gt = ersa_utils.load_file(gt_file)
 
             rgb_file = os.path.join(rgb_dir, '{}_rgb.tif'.format(os.path.basename(i_name)[:-12]))
@@ -243,27 +227,31 @@ if __name__ == '__main__':
             houseId = np.arange(housePixelCoordinates.shape[0])
             ppObj.linkHousesToObjects(housePixelCoordinates, houseId)
 
-            conf, true = scoring_func2(gtObj, ppObj, commercial=commercial)
+            conf, true = scoring_func2(gtObj, ppObj)
             conf_all.append(conf)
             true_all.append(true)
 
+            conf_agg.append(conf)
+            true_agg.append(true)
+
         p, r, _ = precision_recall_curve(np.concatenate(true_all), np.concatenate(conf_all))
-        plt.plot(r[1:], p[1:], linewidth=3, label=mn)
+        plt.plot(r[1:], p[1:], linewidth=3, label=mn + ' largest recall={:.3f}'.format(r[1]))
+
+    p, r, _ = precision_recall_curve(np.concatenate(true_agg), np.concatenate(conf_agg))
+    plt.plot(r[1:], p[1:], '--', linewidth=3, label='Aggregate' + ' largest recall={:.3f}'.format(r[1]))
 
     plt.xlim([0, 1])
     plt.ylim([0, 1])
     plt.xlabel('recall')
     plt.ylabel('precision')
     if commercial:
-        plt.title('Object-wise PR Curve Comparison (Commercial)')
+        plt.title('Object-wise PR Curve Comparison (Commercial, HSM)')
     else:
-        plt.title('Object-wise PR Curve Comparison (Residential)')
+        plt.title('Object-wise PR Curve Comparison (Residential, HSM)')
     plt.legend()
     plt.tight_layout()
     if commercial:
-        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_iou_mt{}_commercial2.png'.format(iou_mt)))
+        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_commercial_comb_hsm2.png'))
     else:
-        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_iou_mt{}_residential2.png'.format(iou_mt)))
-    plt.show()
-
-    # print('duration = {}'.format(time.time() - start_time))
+        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_residential_comb_hsm2.png'))
+    plt.close()

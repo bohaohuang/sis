@@ -30,7 +30,21 @@ for cnt, mn in enumerate(model_name):
     #plt.savefig(os.path.join(img_dir, '{}_area_vs_iou_stats.png'.format(mn)))
     plt.close()
 
-    a = stats[:, 0]
+    new_H = np.zeros(H.shape[1])
+    r, c = H.shape
+    for i in range(c):
+        if np.sum(H[:, i]) != 0:
+            new_H[i] = np.sum(H[:, i] * y_edges[:-1]) / np.sum(H[:, i])
+
+    plt.plot(y_edges[:-1], new_H, 'o')
+    plt.xlabel('Panel Size')
+    plt.ylabel('mean IoU')
+    plt.title('Region {}'.format(cnt))
+    plt.tight_layout()
+    plt.savefig(os.path.join(img_dir, '{}_area_vs_iou_stats_mean.png'.format(mn)))
+    plt.close()
+
+    '''a = stats[:, 0]
     i = stats[:, 1]
     plt.hist(a[np.where(i < 0.2)], bins=100, range=(0, 1000))
     plt.xlabel('Panel Size')
@@ -39,7 +53,7 @@ for cnt, mn in enumerate(model_name):
     plt.ylim([0, 40])
     plt.tight_layout()
     #plt.savefig(os.path.join(img_dir, '{}_missed_panel_dist.png'.format(mn)))
-    plt.close()
+    plt.close()'''
 
 area = np.concatenate(area)
 ious = np.concatenate(ious)
@@ -56,7 +70,21 @@ plt.tight_layout()
 #plt.savefig(os.path.join(img_dir, 'agg_area_vs_iou_stats.png'))
 plt.close()
 
-plt.hist(area[np.where(ious< 0.2)], bins=100, range=(0, 1000))
+new_H = np.zeros(H.shape[1])
+_, c = H.shape
+for i in range(c):
+    if np.sum(H[:, i]) != 0:
+        new_H[i] = np.sum(H[:, i] * y_edges[:-1]) / np.sum(H[:, i])
+
+plt.plot(y_edges[:-1], new_H, 'o')
+plt.xlabel('Panel Size')
+plt.ylabel('mean IoU')
+plt.title('Aggregate')
+plt.tight_layout()
+plt.savefig(os.path.join(img_dir, 'agg_area_vs_iou_stats_mean.png'))
+plt.close()
+
+'''plt.hist(area[np.where(ious< 0.2)], bins=100, range=(0, 1000))
 plt.xlabel('Panel Size')
 plt.ylabel('Counts')
 plt.title('Missed Panel Size Distribution Aggregate')
@@ -80,4 +108,4 @@ plt.subplot(211)
 plt.bar(np.arange(100), min_size_array)
 plt.subplot(212)
 plt.bar(np.arange(100), max_size_array)
-plt.show()
+plt.show()'''
