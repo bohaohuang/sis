@@ -152,6 +152,9 @@ def scoring_func2(gtObj, ppObj, iou_th=0.5, commercial=False):
         if cm_idc[i] == commercial:
             if i in pp_house_id:
                 pp_i = pp_house_id.index(i)
+                print(pl_gt[i], pl_pp[pp_i])
+                import sys
+                sys.exit()
                 inter, union = get_intersection(pl_gt[i], pl_pp[pp_i])
                 iou = inter.shape[0] / union.shape[0]
                 if iou >= iou_th:
@@ -175,7 +178,7 @@ def scoring_func2(gtObj, ppObj, iou_th=0.5, commercial=False):
 
 if __name__ == '__main__':
     start_time = time.time()
-    commercial = False
+    commercial = True
 
     img_dir, task_dir = utils.get_task_img_folder()
 
@@ -250,8 +253,8 @@ if __name__ == '__main__':
         plt.title('Object-wise PR Curve Comparison (Residential, HSM)')
     plt.legend()
     plt.tight_layout()
-    if commercial:
+    '''if commercial:
         plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_commercial_comb_hsm2.png'))
     else:
-        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_residential_comb_hsm2.png'))
+        plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_residential_comb_hsm2.png'))'''
     plt.close()

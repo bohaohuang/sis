@@ -264,16 +264,21 @@ def draw_plot_func(dictionary, n_classes, window_title, plot_title, x_label, out
   # close the plot
   plt.close()
 
+
 if __name__ == '__main__':
     """
      Create a "tmp_files/" and "results/" directory
     """
+    city_name = 'Colwich'
+    model_name = ''
+    appendix = 'faster_rcnn_' + city_name
+
     import utils
     img_dir, task_dir = utils.get_task_img_folder()
     tmp_files_path = os.path.join(task_dir, "tmp_files")
     if not os.path.exists(tmp_files_path): # if it doesn't exist already
       os.makedirs(tmp_files_path)
-    results_files_path = os.path.join(task_dir, "results")
+    results_files_path = os.path.join(task_dir, "results_{}".format(appendix))
     if os.path.exists(results_files_path): # if it exist already
       # reset the results directory
       shutil.rmtree(results_files_path)
@@ -291,7 +296,9 @@ if __name__ == '__main__':
        Create a list of all the class names present in the ground-truth (gt_classes).
     """
     # get a list with the ground-truth files
-    ground_truth_files_list = glob.glob(os.path.join(task_dir, 'ground-truth', '*.txt'))
+    ground_truth_files_list = [a for a in
+                               glob.glob(os.path.join(task_dir, 'ground-truth{}'.format(model_name), '*.txt'))
+                               if city_name in a]
     if len(ground_truth_files_list) == 0:
       error("Error: No ground-truth files found!")
     ground_truth_files_list.sort()
@@ -303,7 +310,7 @@ if __name__ == '__main__':
       file_id = txt_file.split(".txt",1)[0]
       file_id = os.path.basename(os.path.normpath(file_id))
       # check if there is a correspondent predicted objects file
-      if not os.path.exists(os.path.join(task_dir, 'predicted/') + file_id + ".txt"):
+      if not os.path.exists(os.path.join(task_dir, 'predicted{}'.format(model_name), file_id + ".txt")):
         error_msg = "Error. File not found: predicted/" +  file_id + ".txt\n"
         error_msg += "(You can avoid this error message by running extra/intersect-gt-and-pred.py)"
         error(error_msg)
@@ -380,7 +387,8 @@ if __name__ == '__main__':
        Load each of the predicted files into a temporary ".json" file.
     """
     # get a list with the predicted files
-    predicted_files_list = glob.glob(os.path.join(task_dir, 'predicted', '*.txt'))
+    predicted_files_list = [a for a in glob.glob(os.path.join(task_dir, 'predicted{}'.format(model_name), '*.txt'))
+                            if city_name in a]
     predicted_files_list.sort()
 
     for class_index, class_name in enumerate(gt_classes):
@@ -391,7 +399,7 @@ if __name__ == '__main__':
         file_id = txt_file.split(".txt",1)[0]
         file_id = os.path.basename(os.path.normpath(file_id))
         if class_index == 0:
-          if not os.path.exists(os.path.join(task_dir, 'ground-truth', file_id + ".txt")):
+          if not os.path.exists(os.path.join(task_dir, 'ground-truth{}'.format(model_name), file_id + ".txt")):
             error_msg = "Error. File not found: ground-truth/" +  file_id + ".txt\n"
             error_msg += "(You can avoid this error message by running extra/intersect-gt-and-pred.py)"
             error(error_msg)
