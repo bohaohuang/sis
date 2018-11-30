@@ -13,7 +13,7 @@ RUN_ID = 0
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
 INPUT_SIZE = 572
-EPOCHS = 80
+EPOCHS = 100
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
@@ -23,7 +23,7 @@ DECAY_RATE = 0.1
 START_LAYER = 10
 MODEL_NAME = 'towers_pw{}_{}'
 DS_NAME = 'towers'
-POS_WEIGHT = 100
+POS_WEIGHT = 50
 SFN = 32
 
 
@@ -66,7 +66,7 @@ def read_flag():
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--ds-name', type=str, default=DS_NAME, help='name of the dataset')
     parser.add_argument('--start-layer', type=int, default=START_LAYER, help='start layer to unfreeze')
-    parser.add_argument('--pos-weight', type=float, default=POS_WEIGHT, help='weight for H1 class')
+    parser.add_argument('--pos-weight', type=int, default=POS_WEIGHT, help='weight for H1 class')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
@@ -99,7 +99,7 @@ def main(flags):
     # the original file is in /ei-edl01/data/uab_datasets/inria
     blCol = uab_collectionFunctions.uabCollection(flags.ds_name)
     blCol.readMetadata()
-    img_mean = blCol.getChannelMeans([1, 2, 3])  # get mean of rgb info
+    img_mean = blCol.getChannelMeans([0, 1, 2])  # get mean of rgb info
 
     # extract patches
     extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 3],
@@ -132,7 +132,7 @@ def main(flags):
     start_time = time.time()
 
     model.train_config('X', 'Y', flags.n_train, flags.n_valid, flags.input_size, uabRepoPaths.modelPath,
-                       loss_type='xent', par_dir='aemo/{}'.format(flags.ds_name), pos_weight=flags.pos_weight)
+                       loss_type='xent', par_dir='{}'.format(flags.ds_name), pos_weight=flags.pos_weight)
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,   # train from scratch, no need to load pre-trained model

@@ -152,9 +152,6 @@ def scoring_func2(gtObj, ppObj, iou_th=0.5, commercial=False):
         if cm_idc[i] == commercial:
             if i in pp_house_id:
                 pp_i = pp_house_id.index(i)
-                print(pl_gt[i], pl_pp[pp_i])
-                import sys
-                sys.exit()
                 inter, union = get_intersection(pl_gt[i], pl_pp[pp_i])
                 iou = inter.shape[0] / union.shape[0]
                 if iou >= iou_th:

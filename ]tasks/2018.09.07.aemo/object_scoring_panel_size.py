@@ -60,7 +60,7 @@ class spClass_confMapToPolygonStructure_v2:
                         ['iLocation', 'jLocation', 'pixelList', 'confidence', 'area', 'maxIntensity', 'isCommercial'],
                         temp)), ignore_index=True)
 
-    def addCommercialLabelToObjectStructure(self, confidenceImage, commercial=True, clear_coords=False):
+    def addCommercialLabelToObjectStructure(self, commercial=True, clear_coords=False):
         if not self.objectStructure.empty:
             """ IDENTIFY USING CONNECTED COMPONENT SIZE """
             objAreas = self.objectStructure['area'].values
@@ -121,32 +121,34 @@ def scoring_func2(gtObj, ppObj, iou_th=0.5):
     conf = []
     true = []
 
-    cm_idc = np.array(gtObj.objectStructure['isCommercial'])
     pl_gt = np.array(gtObj.objectStructure['pixelList'])
     pl_pp = np.array(ppObj.objectStructure['pixelList'])
     pl_pp_cf = np.array(ppObj.objectStructure['confidence'])
+    cm_idc = np.array(gtObj.objectStructure['isCommercial'])
 
     panel_num = pl_gt.shape[0]
     pp_house_id = ppObj.objectStructure['iOut'].tolist()
     for i in range(panel_num):
-        if i in pp_house_id:
-            pp_i = pp_house_id.index(i)
-            inter, union = get_intersection(pl_gt[i], pl_pp[pp_i])
-            iou = inter.shape[0] / union.shape[0]
-            if iou >= iou_th:
-                conf.append(pl_pp_cf[pp_i])
-                true.append(1)
+        if cm_idc[i]:
+            if i in pp_house_id:
+                pp_i = pp_house_id.index(i)
+                inter, union = get_intersection(pl_gt[i], pl_pp[pp_i])
+                iou = inter.shape[0] / union.shape[0]
+                if iou >= iou_th:
+                    conf.append(pl_pp_cf[pp_i])
+                    true.append(1)
+                else:
+                    conf.append(pl_pp_cf[pp_i])
+                    true.append(0)
             else:
-                conf.append(pl_pp_cf[pp_i])
-                true.append(0)
-        else:
-            conf.append(-1000)
-            true.append(1)
+                conf.append(-1000)
+                true.append(1)
     for i in range(len(pp_house_id)):
         if pp_house_id[i] == -1:
             if i < len(cm_idc):
-                true.append(0)
-                conf.append(pl_pp_cf[i])
+                if cm_idc[i]:
+                    true.append(0)
+                    conf.append(pl_pp_cf[i])
     return np.array(conf), np.array(true)
 
 
@@ -196,12 +198,11 @@ if __name__ == '__main__':
                 ppObj.confidenceImageToObjectStructure(conf_im)
                 # APPROXIMATE EACH OBJECT WITH POLYGON
                 ppObj.addPolygonToObjectStructure(conf_im)
-                ppObj.addCommercialLabelToObjectStructure(conf_im, clear_coords=True)
 
                 gtObj = spClass_confMapToPolygonStructure_v2(iou_mt, min_th, max_th)
                 gtObj.confidenceImageToObjectStructure(gt)
                 gtObj.addPolygonToObjectStructure(gt)
-                gtObj.addCommercialLabelToObjectStructure(gt, clear_coords=True)
+                gtObj.addCommercialLabelToObjectStructure(clear_coords=False)
 
                 # link the house
                 i_coords = np.array(gtObj.objectStructure['iLocation'])

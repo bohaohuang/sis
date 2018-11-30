@@ -35,7 +35,7 @@ def write_data_info(rgb_files, csv_files, save_dir):
     for rgb_file, csv_file in zip(rgb_files, csv_files):
         print('Processing data {} ...'.format(os.path.basename(rgb_file)[:-3]), end='')
         city_name = os.path.basename(rgb_file[:-4]).split('_')[2]
-        city_id = os.path.basename(rgb_file[:-4]).split('_')[3]
+        city_id = os.path.basename(rgb_file[:-4]).split('_')[-1]
 
         rgb_save_name = '{}{}_RGB.tif'.format(city_name, city_id)
         gt_save_name = '{}{}_GT.png'.format(city_name, city_id)
