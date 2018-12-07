@@ -4,10 +4,7 @@ import time
 import scipy.spatial
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from glob import glob
-from tqdm import tqdm
-from sklearn.metrics import precision_recall_curve
 from PIL import Image, ImageDraw
 from scipy.spatial import KDTree
 from skimage import measure
@@ -242,4 +239,3 @@ if __name__ == '__main__':
             stats = panel_area_vs_iou(gtObj, ppObj)
             save_name = os.path.join(task_dir, '{}_area_vs_iou_stats.npy'.format(mn))
             ersa_utils.save_file(save_name, stats)
-

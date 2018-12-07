@@ -1,3 +1,4 @@
+import os
 import time
 import argparse
 import numpy as np
@@ -21,8 +22,8 @@ GPU = 0
 DECAY_STEP = 60
 DECAY_RATE = 0.1
 START_LAYER = 10
-MODEL_NAME = 'towers_pw{}_{}'
-DS_NAME = 'towers'
+MODEL_NAME = 'lines_pw{}_{}'
+DS_NAME = 'lines'
 POS_WEIGHT = 1
 SFN = 32
 
@@ -47,6 +48,92 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
             if loss_type == 'xent':
                 self.loss = tf.reduce_mean(tf.nn.weighted_cross_entropy_with_logits(
                     logits=prediction[:, 1], targets=tf.cast(gt, tf.float32), pos_weight=kwargs['pos_weight']))
+
+    def train(self, x_name, y_name, n_train, sess, summary_writer, n_valid=1000,
+              train_reader=None, valid_reader=None,
+              image_summary=None, verb_step=100, save_epoch=5,
+              img_mean=np.array((0, 0, 0), dtype=np.float32),
+              continue_dir=None, valid_iou=False):
+        # define summary operations
+        valid_cross_entropy_summary_op = tf.summary.scalar('xent_validation', self.valid_cross_entropy)
+        valid_iou_summary_op = tf.summary.scalar('iou_validation', self.valid_iou)
+        valid_image_summary_op = tf.summary.image('Validation_images_summary', self.valid_images,
+                                                  max_outputs=10)
+
+        if continue_dir is not None and os.path.exists(continue_dir):
+            self.load(continue_dir, sess)
+            gs = sess.run(self.global_step)
+            start_epoch = int(np.ceil(gs/n_train*self.bs))
+            start_step = gs - int(start_epoch*n_train/self.bs)
+        else:
+            start_epoch = 0
+            start_step = 0
+
+        cross_entropy_valid_min = np.inf
+        iou_valid_max = 0
+        for epoch in range(start_epoch, self.epochs):
+            start_time = time.time()
+            for step in range(start_step, n_train, self.bs):
+                X_batch, y_batch = train_reader.readerAction(sess)
+                _, self.global_step_value = sess.run([self.optimizer, self.global_step],
+                                                     feed_dict={self.inputs[x_name]:X_batch,
+                                                                self.inputs[y_name]:y_batch,
+                                                                self.trainable: True})
+                if self.global_step_value % verb_step == 0:
+                    pred_train, step_cross_entropy, step_summary = sess.run([self.pred, self.loss, self.summary],
+                                                                            feed_dict={self.inputs[x_name]: X_batch,
+                                                                                       self.inputs[y_name]: y_batch,
+                                                                                       self.trainable: False})
+                    summary_writer.add_summary(step_summary, self.global_step_value)
+                    print('Epoch {:d} step {:d}\tcross entropy = {:.3f}'.
+                          format(epoch, self.global_step_value, step_cross_entropy))
+            # validation
+            cross_entropy_valid_mean = []
+            iou_valid_mean = np.zeros(2)
+            for step in range(0, n_valid, self.bs):
+                X_batch_val, y_batch_val = valid_reader.readerAction(sess)
+                pred_valid, cross_entropy_valid, iou_valid = sess.run([self.pred, self.loss, self.loss_iou],
+                                                                      feed_dict={self.inputs[x_name]: X_batch_val,
+                                                                                 self.inputs[y_name]: y_batch_val,
+                                                                                 self.trainable: False})
+                cross_entropy_valid_mean.append(cross_entropy_valid)
+                iou_valid_mean += iou_valid
+            cross_entropy_valid_mean = np.mean(cross_entropy_valid_mean)
+            iou_valid_mean = iou_valid_mean[0] / iou_valid_mean[1]
+            duration = time.time() - start_time
+            if valid_iou:
+                print('Validation IoU: {:.3f}, duration: {:.3f}'.format(iou_valid_mean, duration))
+            else:
+                print('Validation cross entropy: {:.3f}, duration: {:.3f}'.format(cross_entropy_valid_mean,
+                                                                                  duration))
+            valid_cross_entropy_summary = sess.run(valid_cross_entropy_summary_op,
+                                                   feed_dict={self.valid_cross_entropy: cross_entropy_valid_mean})
+            valid_iou_summary = sess.run(valid_iou_summary_op,
+                                         feed_dict={self.valid_iou: iou_valid_mean})
+            summary_writer.add_summary(valid_cross_entropy_summary, self.global_step_value)
+            summary_writer.add_summary(valid_iou_summary, self.global_step_value)
+            if valid_iou:
+                if iou_valid_mean > iou_valid_max:
+                    iou_valid_max = iou_valid_mean
+                    saver = tf.train.Saver(var_list=tf.global_variables(), max_to_keep=1)
+                    saver.save(sess, '{}/best_model.ckpt'.format(self.ckdir))
+
+            else:
+                if cross_entropy_valid_mean < cross_entropy_valid_min:
+                    cross_entropy_valid_min = cross_entropy_valid_mean
+                    saver = tf.train.Saver(var_list=tf.global_variables(), max_to_keep=1)
+                    saver.save(sess, '{}/best_model.ckpt'.format(self.ckdir))
+
+            if image_summary is not None:
+                valid_image_summary = sess.run(valid_image_summary_op,
+                                               feed_dict={self.valid_images:
+                                                              image_summary(X_batch_val[:,:,:,1:4], y_batch_val, pred_valid,
+                                                                            img_mean)})
+                summary_writer.add_summary(valid_image_summary, self.global_step_value)
+
+            if epoch % save_epoch == 0:
+                saver = tf.train.Saver(var_list=tf.global_variables(), max_to_keep=1)
+                saver.save(sess, '{}/model_{}.ckpt'.format(self.ckdir, epoch), global_step=self.global_step)
 
 
 def read_flag():
@@ -80,7 +167,7 @@ def main(flags):
 
     # make network
     # define place holder
-    X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
+    X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 4], name='X')
     y = tf.placeholder(tf.int32, shape=[None, flags.input_size[0], flags.input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
     model = UnetModelCrop({'X': X, 'Y': y},
@@ -99,15 +186,16 @@ def main(flags):
     # the original file is in /ei-edl01/data/uab_datasets/inria
     blCol = uab_collectionFunctions.uabCollection(flags.ds_name)
     blCol.readMetadata()
-    img_mean = blCol.getChannelMeans([0, 1, 2])  # get mean of rgb info
+    img_mean = blCol.getChannelMeans([1, 2, 3])  # get mean of rgb info
+    img_mean = np.concatenate([np.array([0]), img_mean])
 
     # extract patches
-    extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 3],
+    extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 3, 4],
                                                     cSize=flags.input_size,
                                                     numPixOverlap=int(model.get_overlap()),
-                                                    extSave=['jpg', 'jpg', 'jpg', 'png'],
+                                                    extSave=['jpg', 'jpg', 'jpg', 'jpg', 'png'],
                                                     isTrain=True,
-                                                    gtInd=3,
+                                                    gtInd=4,
                                                     pad=int(model.get_overlap()//2))
     patchDir = extrObj.run(blCol)
 
@@ -119,12 +207,12 @@ def main(flags):
 
     with tf.name_scope('image_loader'):
         # GT has no mean to subtract, append a 0 for block mean
-        dataReader_train = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_train, flags.input_size,
+        dataReader_train = uabDataReader.ImageLabelReader([4], [0, 1, 2, 3], patchDir, file_list_train, flags.input_size,
                                                           None,
                                                           flags.batch_size, dataAug='flip,rotate',
                                                           block_mean=np.append([0], img_mean))
         # no augmentation needed for validation
-        dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_valid, flags.input_size,
+        dataReader_valid = uabDataReader.ImageLabelReader([4], [0, 1, 2, 3], patchDir, file_list_valid, flags.input_size,
                                                           None,
                                                           flags.batch_size, dataAug=' ', block_mean=np.append([0], img_mean))
 
@@ -137,7 +225,7 @@ def main(flags):
               valid_reader=dataReader_valid,
               pretrained_model_dir=None,   # train from scratch, no need to load pre-trained model
               isTrain=True,
-              img_mean=img_mean,
+              img_mean=img_mean[1:],
               verb_step=100,                        # print a message every 100 step(sample)
               save_epoch=5,                         # save the model every 5 epochs
               gpu=GPU,

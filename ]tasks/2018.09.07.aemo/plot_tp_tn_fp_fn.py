@@ -14,7 +14,9 @@ import ersa_utils
 panel_num = panel_num[:, :len(size_list)+1]'''
 
 img_dir, task_dir = utils.get_task_img_folder()
-size_list = list(range(0, 560, 40))
+size_list = list(range(0, 760, 40)) + list(range(760, 1000, 120))
+step_list = np.concatenate([40 * np.ones(len(list(range(0, 760, 40))), dtype=np.int),
+                            120 * np.ones(len(list(range(760, 1000, 120))), dtype=np.int)])
 
 tn_list = np.zeros((4, len(size_list)))
 fp_list = np.zeros((4, len(size_list)))
@@ -27,26 +29,19 @@ model_dir = ['confmap_uab_UnetCrop_aemo_comb_xfold0_1_PS(572, 572)_BS5_EP80_LR0.
              ]
 
 for cnt, min_th in enumerate(size_list):
-    max_th = min_th + 40
+    max_th = min_th + step_list[cnt]
     save_file_name = os.path.join(task_dir, 'confmat_comb_{}-{}.npy'.format(min_th, max_th))
     conf_mat = ersa_utils.load_file(save_file_name)
     for i in range(4):
         tn_list[i, cnt], fp_list[i, cnt], fn_list[i, cnt], tp_list[i, cnt] = conf_mat[i, :] / np.sum(conf_mat[i, :])
 
-    for i in range(3):
-        pr_save_name = os.path.join(task_dir, '{}_{}-{}_true_pred.npy'.format(model_dir[i], min_th, max_th))
-        true_pred = ersa_utils.load_file(pr_save_name)
-        p, r, th = precision_recall_curve(true_pred[0, :], true_pred[1, :])
-        tn, fp, fn, tp = confusion_matrix(true_pred[0, :], (true_pred[1, :]>0.5).astype(np.int)).ravel()
-        print(fp, fn, tp)
-
-'''tile_list = ['Region 0', 'Region 1', 'Region 2', 'Aggregate']
+tile_list = ['Region 0', 'Region 1', 'Region 2', 'Aggregate']
 colors = ersa_utils.get_default_colors()
 for i in range(4):
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(12, 6))
     ax1 = plt.subplot(211)
     plt.plot(size_list, tp_list[i, :], '-o', color=colors[0], label='TP')
-    plt.xticks(size_list, ['{}~{}'.format(a, a+40) for a in size_list])
+    plt.xticks(size_list, ['{}~\n{}'.format(a, a+40) for a in size_list])
     plt.ylabel('%')
     plt.grid(True)
     plt.title(tile_list[i])
@@ -62,4 +57,5 @@ for i in range(4):
     plt.legend(loc='upper left')
 
     plt.tight_layout()
-    plt.show()'''
+    plt.savefig(os.path.join(img_dir, 'tp_tn_fp_fn_plots_{}.png'.format(tile_list[i])))
+    plt.show()

@@ -17,10 +17,23 @@ color_dict = {'TT': 'b', 'DT': 'r'}
 for rgb_file, csv_file in zip(rgb_files, csv_files):
     npy_file = os.path.basename(rgb_file)[:-3] + 'npy'
 
-    if 'Wilmington' in rgb_file:
+    if 'Clyde' in rgb_file and '3' in rgb_file:
         # load data
         coords = ersa_utils.load_file(os.path.join(save_dir, npy_file))
         rgb = ersa_utils.load_file(rgb_file)
+
+        '''import numpy as np
+        rgb = np.rot90(rgb, k=-1)
+
+        gt_file = rgb_file[:-4] + '_multiclass.tif'
+        gt = ersa_utils.load_file(gt_file)
+        gt = np.rot90(gt, k=-1)
+
+        ersa_utils.save_file(rgb_file, rgb)
+        ersa_utils.save_file(gt_file, gt)
+
+        from visualize import visualize_utils
+        visualize_utils.compare_two_figure(rgb, gt)'''
 
         # plot patch
         for item in coords:

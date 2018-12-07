@@ -269,9 +269,9 @@ if __name__ == '__main__':
     """
      Create a "tmp_files/" and "results/" directory
     """
-    city_name = 'Colwich'
-    model_name = ''
-    appendix = 'faster_rcnn_' + city_name
+    #city_name = 'Clyde'
+    model_name = 'faster_rcnn_2018-12-05_15-25-22'
+    appendix = model_name #+ city_name
 
     import utils
     img_dir, task_dir = utils.get_task_img_folder()
@@ -297,8 +297,8 @@ if __name__ == '__main__':
     """
     # get a list with the ground-truth files
     ground_truth_files_list = [a for a in
-                               glob.glob(os.path.join(task_dir, 'ground-truth{}'.format(model_name), '*.txt'))
-                               if city_name in a]
+                               glob.glob(os.path.join(task_dir, 'ground-truth{}'.format(model_name), '*.txt'))]
+                               #if city_name in a]
     if len(ground_truth_files_list) == 0:
       error("Error: No ground-truth files found!")
     ground_truth_files_list.sort()
@@ -333,6 +333,7 @@ if __name__ == '__main__':
           error_msg += "by running the script \"remove_space.py\" or \"rename_class.py\" in the \"extra/\" folder."
           error(error_msg)
         # check if class is in the ignore list, if yes skip
+        #class_name = 'T'
         if class_name in args.ignore:
           continue
         bbox = left + " " + top + " " + right + " " +bottom
@@ -387,8 +388,8 @@ if __name__ == '__main__':
        Load each of the predicted files into a temporary ".json" file.
     """
     # get a list with the predicted files
-    predicted_files_list = [a for a in glob.glob(os.path.join(task_dir, 'predicted{}'.format(model_name), '*.txt'))
-                            if city_name in a]
+    predicted_files_list = [a for a in glob.glob(os.path.join(task_dir, 'predicted{}'.format(model_name), '*.txt'))]
+                            #if city_name in a]
     predicted_files_list.sort()
 
     for class_index, class_name in enumerate(gt_classes):
@@ -407,6 +408,7 @@ if __name__ == '__main__':
         for line in lines:
           try:
             tmp_class_name, confidence, left, top, right, bottom = line.split()
+            #tmp_class_name = 'T'
           except ValueError:
             error_msg = "Error: File " + txt_file + " in the wrong format.\n"
             error_msg += " Expected: <class_name> <confidence> <left> <top> <right> <bottom>\n"

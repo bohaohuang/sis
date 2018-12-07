@@ -45,7 +45,6 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
         iou_return = {}
         for file_name, file_name_truth in zip(rgb_list, gt_list):
             tile_size = ersa_utils.load_file(os.path.join(rgb_dir[0], file_name[0])).shape[:2]
-            print(file_name)
 
             tile_name = file_name_truth.split('_')[0]
             if verb:
@@ -69,7 +68,7 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
 
             # run the model
             pred = self.run(pretrained_model_dir=model_dir,
-                            valid_reader=rManager,
+                            test_reader=rManager,
                             tile_size=tile_size,
                             patch_size=input_size,
                             gpu=gpu, load_epoch_num=load_epoch_num, best_model=best_model, tile_name=tile_name)
@@ -116,7 +115,6 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
                 file.write('{}'.format(mean_iou))
 
         return iou_return
-
 
     def run(self, train_reader=None, valid_reader=None, test_reader=None, pretrained_model_dir=None, layers2load=None,
             isTrain=False, img_mean=np.array((0, 0, 0), dtype=np.float32), verb_step=100, save_epoch=5, gpu=None,
@@ -183,9 +181,9 @@ img_mean = blCol.getChannelMeans([0, 1, 2])
 
 # make the model
 # define place holder
-for weight in range(50, 500, 50):
-    model_dir = r'/hdd6/Models/aemo/towers/UnetCrop_towers_pw{}.0_0_PS(572, 572)_BS5_' \
-                r'EP80_LR0.0001_DS60_DR0.1_SFN32'.format(weight)
+for weight in [1, 5, 10, 30] + list(range(50, 500, 50)):
+    model_dir = r'/hdd6/Models/towers/UnetCrop_towers_pw{}_0_PS(572, 572)_BS5_' \
+                r'EP100_LR0.0001_DS60_DR0.1_SFN32'.format(weight)
     SAVE_DIR = os.path.join(task_dir, 'confmap_uab_{}'.format(os.path.basename(model_dir)))
     ersa_utils.make_dir_if_not_exist(SAVE_DIR)
     tf.reset_default_graph()
@@ -201,4 +199,4 @@ for weight in range(50, 500, 50):
     model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                    input_size, tile_size, batch_size, img_mean, model_dir, gpu,
                    save_result_parent_dir='towers', ds_name=ds_name, best_model=False,
-                   load_epoch_num=75)
+                   load_epoch_num=95)
