@@ -163,7 +163,8 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
                                                           patch_size,
                                                           [patch_size[0] - pad, patch_size[1] - pad],
                                                           overlap=pad)
-            ersa_utils.save_file(os.path.join(SAVE_DIR, '{}.npy'.format(tile_name)), image_pred[:, :, 1])
+            ersa_utils.save_file(os.path.join(SAVE_DIR, '{}.png'.format(tile_name)),
+                                 (image_pred[:, :, 1] * 255).astype(np.uint8))
             return util_functions.get_pred_labels(image_pred) * truth_val
 
 

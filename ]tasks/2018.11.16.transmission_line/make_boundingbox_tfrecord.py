@@ -3,7 +3,8 @@ Read all files in transmission line dataset, extract them into patches, add boun
 into tf record file
 """
 
-IS_DCC = False
+IS_DCC = True
+CITY_NAME = 'Tucson'
 
 
 import os
@@ -118,9 +119,9 @@ def write_data_info(rgb_files, csv_files, save_dir):
         ersa_utils.save_file(os.path.join(save_dir, save_name), coords)
 
 
-def make_dataset(rgb_files, info_dir, store_dir, tf_dir):
-    writer_train = tf.python_io.TFRecordWriter(os.path.join(tf_dir, 'train.record'))
-    writer_valid = tf.python_io.TFRecordWriter(os.path.join(tf_dir, 'valid.record'))
+def make_dataset(rgb_files, info_dir, store_dir, tf_dir, city_name=''):
+    writer_train = tf.python_io.TFRecordWriter(os.path.join(tf_dir, 'train{}.record'.format(city_name)))
+    writer_valid = tf.python_io.TFRecordWriter(os.path.join(tf_dir, 'valid{}.record'.format(city_name)))
 
     for rgb_file_name in rgb_files:
         file_name = os.path.basename(rgb_file_name[:-4])
@@ -218,7 +219,7 @@ if __name__ == '__main__':
 
     # get files
     rgb_files = natsorted([a for a in glob(os.path.join(data_dir, 'raw', '*.tif'))
-                           if 'multiclass' not in a])
-    csv_files = natsorted(glob(os.path.join(data_dir, 'raw', '*.csv')))
-    write_data_info(rgb_files, csv_files, save_dir)
-    make_dataset(rgb_files, save_dir, store_dir, tf_dir)
+                           if 'multiclass' not in a and CITY_NAME in a])
+    csv_files = natsorted([a for a in glob(os.path.join(data_dir, 'raw', '*.csv')) if CITY_NAME in a])
+    # write_data_info(rgb_files, csv_files, save_dir)
+    make_dataset(rgb_files, save_dir, store_dir, tf_dir, city_name=CITY_NAME)

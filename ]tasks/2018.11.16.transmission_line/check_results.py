@@ -19,7 +19,7 @@ rgb_files = natsorted([a for a in glob(os.path.join(raw_data_dir, '*.tif'))
 gt_files = natsorted([a for a in glob(os.path.join(raw_data_dir, '*.tif'))
                       if 'multiclass' in a])
 
-pred_files = natsorted(glob(os.path.join(conf_dir, '*.npy')))
+pred_files = natsorted(glob(os.path.join(conf_dir, '*.png')))
 for conf_file in pred_files:
     city_with_id = os.path.basename(conf_file)[:-4]
     city_name = ''.join([a for a in city_with_id if not a.isdigit()])
