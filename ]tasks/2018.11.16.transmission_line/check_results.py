@@ -2,28 +2,34 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
+from natsort import natsorted
+import utils
 import ersa_utils
 from visualize import visualize_utils
-from collection import collectionMaker
 
 # settings
-ds_name = 'infrastructure'
-pred_dir = r'/hdd/Results/infrastructure/unet_5objs_weight100_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1/default/pred'
-pred_files = sorted(glob(os.path.join(pred_dir, '*.npy')))
+img_dir, task_dir = utils.get_task_img_folder()
+ds_name = 'lines'
+model_name = 'UnetCrop_lines_pw1_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
+results_dir = os.path.join(r'/hdd/Results', ds_name, model_name, ds_name)
+conf_dir = os.path.join(task_dir, 'confmap_uab_{}'.format(model_name))
+raw_data_dir = r'/home/lab/Documents/bohao/data/transmission_line/raw'
+rgb_files = natsorted([a for a in glob(os.path.join(raw_data_dir, '*.tif'))
+                       if 'multiclass' not in a])
+gt_files = natsorted([a for a in glob(os.path.join(raw_data_dir, '*.tif'))
+                      if 'multiclass' in a])
 
-# define network
-cm = collectionMaker.read_collection(clc_name=ds_name)
-cm.print_meta_data()
-file_list_valid = cm.load_files(field_name='Colwich,Clyde,Wilmington', field_id=','.join(str(i) for i in range(4, 16)),
-                                field_ext='RGB,GT_switch')
-chan_mean = cm.meta_data['chan_mean']
+pred_files = natsorted(glob(os.path.join(conf_dir, '*.npy')))
+for conf_file in pred_files:
+    city_with_id = os.path.basename(conf_file)[:-4]
+    city_name = ''.join([a for a in city_with_id if not a.isdigit()])
+    city_id = ''.join([a for a in city_with_id if a.isdigit()])
 
-for (rgb_name, gt_name), pred_name in zip(file_list_valid, pred_files):
-    rgb, gt, pred = ersa_utils.load_file(rgb_name), ersa_utils.load_file(gt_name), ersa_utils.load_file(pred_name)
+    rgb_file = [a for a in rgb_files if city_name in a and city_id in a][0]
+    gt_file = [a for a in gt_files if city_name in a and city_id in a][0]
 
-    print(os.path.basename(pred_name), np.sum(pred[:, :, 1]), np.min(pred[:, :, 1]), np.sum(pred[:, :, 1]))
-    plt.imshow(pred[:, :, 1])
-    plt.colorbar()
-    plt.tight_layout()
-    plt.show()
-    #visualize_utils.compare_three_figure(rgb, gt, pred[:, :, 1])
+    rgb = ersa_utils.load_file(rgb_file)
+    gt = ersa_utils.load_file(gt_file)
+    conf = ersa_utils.load_file(conf_file)
+
+    visualize_utils.compare_three_figure(rgb, gt, conf)
