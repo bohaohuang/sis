@@ -14,17 +14,18 @@ RUN_ID = 0
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
 INPUT_SIZE = 572
-EPOCHS = 100
+EPOCHS = 50
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 1000
-GPU = 1
-DECAY_STEP = 60
+GPU = 0
+DECAY_STEP = 30
 DECAY_RATE = 0.1
 START_LAYER = 10
-MODEL_NAME = 'lines_pw{}_{}'
-DS_NAME = 'lines'
+MODEL_NAME = 'lines_city{}_pw{}_{}'
+DS_NAME = 'lines_tw1'
 POS_WEIGHT = 5
+LEAVE_CITY = 0
 SFN = 32
 
 
@@ -127,7 +128,7 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
             if image_summary is not None:
                 valid_image_summary = sess.run(valid_image_summary_op,
                                                feed_dict={self.valid_images:
-                                                              image_summary(X_batch_val[:,:,:,1:4], y_batch_val, pred_valid,
+                                                              image_summary(X_batch_val[:,:,:,-3:], y_batch_val, pred_valid,
                                                                             img_mean)})
                 summary_writer.add_summary(valid_image_summary, self.global_step_value)
 
@@ -154,10 +155,11 @@ def read_flag():
     parser.add_argument('--ds-name', type=str, default=DS_NAME, help='name of the dataset')
     parser.add_argument('--start-layer', type=int, default=START_LAYER, help='start layer to unfreeze')
     parser.add_argument('--pos-weight', type=int, default=POS_WEIGHT, help='weight for H1 class')
+    parser.add_argument('--leave-city', type=int, default=LEAVE_CITY, help='city to train')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
-    flags.model_name = flags.model_name.format(flags.pos_weight, flags.run_id)
+    flags.model_name = flags.model_name.format(flags.leave_city, flags.pos_weight, flags.run_id)
     return flags
 
 
@@ -186,37 +188,46 @@ def main(flags):
     # the original file is in /ei-edl01/data/uab_datasets/inria
     blCol = uab_collectionFunctions.uabCollection(flags.ds_name)
     blCol.readMetadata()
-    img_mean = blCol.getChannelMeans([1, 2, 3])  # get mean of rgb info
+    img_mean = blCol.getChannelMeans([2, 3, 4])  # get mean of rgb info
     img_mean = np.concatenate([np.array([0]), img_mean])
 
     # extract patches
     extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 3, 4],
                                                     cSize=flags.input_size,
                                                     numPixOverlap=int(model.get_overlap()),
-                                                    extSave=['jpg', 'jpg', 'jpg', 'jpg', 'png'],
+                                                    extSave=['png', 'jpg', 'jpg', 'jpg', 'jpg'],
                                                     isTrain=True,
                                                     gtInd=4,
                                                     pad=int(model.get_overlap()//2))
     patchDir = extrObj.run(blCol)
 
-    import ersa_utils
-    file_list = ersa_utils.load_file(os.path.join(patchDir, 'fileList.txt'))
-    print(file_list[:5])
-
-    '''# make data reader
+    # make data reader
     # use first 5 tiles for validation
-    idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
-    file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(4, 16)])
-    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [1, 2, 3])
+    idx_city, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'city')
+    idx_tile, _ = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'force_tile')
+    idx = [j * 10 + i for i, j in zip(idx_city, idx_tile)]
+
+    # use first city for validation
+    filter_train = []
+    filter_valid = []
+    for i in range(4):
+        for j in range(1, 20):
+            if i == flags.leave_city and j < 4:
+                filter_valid.append(j * 10 + i)
+            elif i == flags.leave_city and j >= 4:
+                filter_train.append(j * 10 + i)
+    # use first city for validation
+    file_list_train = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_train)
+    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, filter_valid)
 
     with tf.name_scope('image_loader'):
         # GT has no mean to subtract, append a 0 for block mean
-        dataReader_train = uabDataReader.ImageLabelReader([4], [0, 1, 2, 3], patchDir, file_list_train, flags.input_size,
+        dataReader_train = uabDataReader.ImageLabelReader([0], [1, 2, 3, 4], patchDir, file_list_train, flags.input_size,
                                                           None,
                                                           flags.batch_size, dataAug='flip,rotate',
                                                           block_mean=np.append([0], img_mean))
         # no augmentation needed for validation
-        dataReader_valid = uabDataReader.ImageLabelReader([4], [0, 1, 2, 3], patchDir, file_list_valid, flags.input_size,
+        dataReader_valid = uabDataReader.ImageLabelReader([0], [1, 2, 3, 4], patchDir, file_list_valid, flags.input_size,
                                                           None,
                                                           flags.batch_size, dataAug=' ', block_mean=np.append([0], img_mean))
 
@@ -236,7 +247,7 @@ def main(flags):
               patch_size=flags.input_size)
 
     duration = time.time() - start_time
-    print('duration {:.2f} hours'.format(duration/60/60))'''
+    print('duration {:.2f} hours'.format(duration/60/60))
 
 
 if __name__ == '__main__':

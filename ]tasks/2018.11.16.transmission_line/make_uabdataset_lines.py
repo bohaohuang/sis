@@ -9,7 +9,7 @@ import ersa_utils
 
 
 # Settings
-ENCODER = {'DL': 1, 'TL': 1, 'DT': 1, 'TT': 2}
+ENCODER = {'DL': 1, 'TL': 1, 'DT': 1, 'TT': 1}
 
 
 def check_bounds(cc, rr, size_x, size_y):
@@ -74,6 +74,9 @@ def write_data_info(rgb_files, csv_files, save_dir):
         kernel = np.ones((15, 15), np.uint8)
         gt = cv2.dilate(gt, kernel, iterations=1)
 
+        '''from visualize import visualize_utils
+        visualize_utils.compare_figures([rgb, gt, gt_towers], (1, 3), fig_size=(15, 5))'''
+
         ersa_utils.save_file(os.path.join(save_dir, rgb_save_name), rgb)
         ersa_utils.save_file(os.path.join(save_dir, gt_save_name), gt)
         ersa_utils.save_file(os.path.join(save_dir, tw_save_name), gt_towers)
@@ -86,7 +89,7 @@ data_dir = r'/home/lab/Documents/bohao/data/transmission_line/raw'
 rgb_files = natsorted([a for a in glob(os.path.join(data_dir, '*.tif'))
                        if 'multiclass' not in a])
 csv_files = natsorted(glob(os.path.join(data_dir, '*.csv')))
-save_dir = r'/media/ei-edl01/data/uab_datasets/lines/data/Original_Tiles'
+save_dir = r'/media/ei-edl01/data/uab_datasets/lines_tw1/data/Original_Tiles'
 ersa_utils.make_dir_if_not_exist(save_dir)
 
 write_data_info(rgb_files, csv_files, save_dir)

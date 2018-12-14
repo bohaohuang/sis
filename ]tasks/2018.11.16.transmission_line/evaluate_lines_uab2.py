@@ -1,8 +1,11 @@
 import os
 import time
 import imageio
+import skimage.transform
 import numpy as np
 import tensorflow as tf
+from skimage import measure
+from PIL import Image, ImageDraw
 import uabUtilreader
 import utils
 import ersa_utils
@@ -11,15 +14,73 @@ import uabRepoPaths
 import uabDataReader
 import uabCrossValMaker
 import uab_collectionFunctions
+from reader import reader_utils
 from bohaoCustom import uabMakeNetwork_UNet
 
-gpu = 0
-batch_size = 5
-input_size = [572, 572]
-tile_size = [5000, 5000]
-util_functions.tf_warn_level(3)
-ds_name = 'lines'
-img_dir, task_dir = utils.get_task_img_folder()
+
+def get_lines(img, patch_size):
+    img_binary = (img > 0).astype(np.uint8)
+    lbl = measure.label(img_binary)
+    props = measure.regionprops(lbl)
+    vert_list = []
+    # get vertices
+    for rp in props:
+        vert_list.append(rp.centroid)
+
+    # add lines
+    im = Image.new('L', patch_size.tolist())
+    for i in range(len(vert_list)):
+        for j in range(i+1, len(vert_list)):
+            ImageDraw.Draw(im).line((vert_list[i][1], vert_list[i][0],
+                                     vert_list[j][1], vert_list[j][0]), fill=1, width=15)
+    im_lines = (np.array(im, dtype=float) - img.astype(float) > 0).astype(np.uint8)
+    im = (img + im_lines).astype(np.uint8)
+    assert set(np.unique(im).tolist()).issubset({0, 1, 2})
+    return im
+
+
+class myImageLabelReader(uabDataReader.ImageLabelReader):
+    def readFromDiskIteratorTest(self, image_dir, chipFiles, batch_size, tile_dim, patch_size, overlap=0,
+                                 padding=(0, 0)):
+        # this is a iterator for test
+        for row in chipFiles:
+            blockList = []
+            nDims = 0
+            for cnt, file in enumerate(row):
+                if type(image_dir) is list:
+                    img = util_functions.uabUtilAllTypeLoad(os.path.join(image_dir[cnt], file))
+                else:
+                    img = util_functions.uabUtilAllTypeLoad(os.path.join(image_dir, file))
+                if len(img.shape) == 2:
+                    img = np.expand_dims(img, axis=2)
+                nDims += img.shape[2]
+                blockList.append(img)
+            block = np.dstack(blockList).astype(np.float32)
+
+            if not np.all([np.array(tile_dim) == block.shape[:2]]):
+                block = skimage.transform.resize(block, tile_dim, order=0, preserve_range=True, mode='reflect')
+
+            if self.block_mean is not None:
+                block -= self.block_mean
+
+            if (np.array(padding) > 0).any():
+                block = uabUtilreader.pad_block(block, padding)
+                tile_dim = tile_dim + padding * 2
+
+            ind = 0
+            image_batch = np.zeros((batch_size, patch_size[0], patch_size[1], nDims))
+
+            for patch in uabUtilreader.patchify(block, tile_dim, patch_size, overlap=overlap):
+                patch_gt = (patch[:, :, 0] > 0).astype(np.uint8)
+                patch[:, :, 0] = get_lines(patch_gt, np.array(patch_size))
+                image_batch[ind, :, :, :] = patch
+                ind += 1
+                if ind == batch_size:
+                    ind = 0
+                    yield image_batch
+            # yield the last chunk
+            if ind > 0:
+                yield image_batch[:ind, :, :, :]
 
 
 class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
@@ -45,6 +106,7 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
         iou_return = {}
         for file_name, file_name_truth in zip(rgb_list, gt_list):
             tile_size = ersa_utils.load_file(os.path.join(rgb_dir[0], file_name[0])).shape[:2]
+            tile_size = np.array(tile_size) // 2
 
             tile_name = file_name_truth.split('_')[0]
             if verb:
@@ -52,18 +114,11 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
             start_time = time.time()
 
             # prepare the reader
-            reader = uabDataReader.ImageLabelReader(gtInds=[0],
-                                                    dataInds=[0],
-                                                    nChannels=3,
-                                                    parentDir=rgb_dir,
-                                                    chipFiles=[file_name],
-                                                    chip_size=input_size,
-                                                    tile_size=tile_size,
-                                                    batchSize=batch_size,
-                                                    block_mean=img_mean,
-                                                    overlap=self.get_overlap(),
-                                                    padding=np.array((self.get_overlap()/2, self.get_overlap()/2)),
-                                                    isTrain=False)
+            reader = myImageLabelReader(gtInds=[0], dataInds=[0], nChannels=3, parentDir=rgb_dir,
+                                        chipFiles=[file_name], chip_size=input_size, tile_size=tile_size,
+                                        batchSize=batch_size, block_mean=img_mean, overlap=self.get_overlap(),
+                                        padding=np.array((self.get_overlap()/2, self.get_overlap()/2)),
+                                        isTrain=False)
             rManager = reader.readManager
 
             # run the model
@@ -74,6 +129,7 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
                             gpu=gpu, load_epoch_num=load_epoch_num, best_model=best_model, tile_name=tile_name)
 
             truth_label_img = imageio.imread(os.path.join(gt_dir, file_name_truth))
+            truth_label_img = reader_utils.resize_image(truth_label_img, tile_size, preserve_range=True)
             iou = util_functions.iou_metric(truth_label_img, pred, divide_flag=True)
             iou_record.append(iou)
             iou_return[tile_name] = iou
@@ -169,6 +225,14 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
 
 
 # settings
+gpu = 1
+batch_size = 5
+input_size = [572, 572]
+tile_size = [5000, 5000]
+util_functions.tf_warn_level(3)
+ds_name = 'lines'
+img_dir, task_dir = utils.get_task_img_folder()
+
 blCol = uab_collectionFunctions.uabCollection(ds_name)
 blCol.readMetadata()
 file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2, 3])
@@ -180,12 +244,13 @@ file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [1, 2, 
 file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(idx_truth, file_list_truth, [1, 2, 3])
 img_mean = blCol.getChannelMeans([1, 2, 3])
 img_mean = np.concatenate([np.array([0]), img_mean])
+city_id = 3
 
 # make the model
 # define place holder
-for weight in [1, 5, 10, 30, 50, 100]:
-    model_dir = r'/hdd6/Models/lines/UnetCrop_lines_pw{}_0_PS(572, 572)_BS5_' \
-                r'EP100_LR0.0001_DS60_DR0.1_SFN32'.format(weight)
+for weight in [1, 5]:
+    model_dir = r'/hdd6/Models/lines/UnetCrop_lines_city{}_pw{}_0_PS(572, 572)_BS5_' \
+                r'EP100_LR0.0001_DS60_DR0.1_SFN32'.format(city_id, weight)
     SAVE_DIR = os.path.join(task_dir, 'confmap_uab_{}'.format(os.path.basename(model_dir)))
     ersa_utils.make_dir_if_not_exist(SAVE_DIR)
     tf.reset_default_graph()
@@ -201,4 +266,4 @@ for weight in [1, 5, 10, 30, 50, 100]:
     model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
                    input_size, tile_size, batch_size, img_mean, model_dir, gpu,
                    save_result_parent_dir='lines', ds_name=ds_name, best_model=False,
-                   load_epoch_num=95)
+                   load_epoch_num=85)

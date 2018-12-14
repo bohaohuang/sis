@@ -3,8 +3,8 @@ Read all files in transmission line dataset, extract them into patches, add boun
 into tf record file
 """
 
-IS_DCC = True
-CITY_NAME = 'Tucson'
+IS_DCC = False
+CITY_NAME = 'Wilmington'
 
 
 import os
@@ -29,7 +29,7 @@ from skimage.draw import polygon
 import ersa_utils
 
 PATCH_SIZE = (500, 500)
-ENCODER = {'DT': 1, 'TT': 2}
+ENCODER = {'DT': 1, 'TT': 1}
 
 
 def check_bounds(cc, rr, size_x, size_y):

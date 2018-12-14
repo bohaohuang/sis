@@ -9,4 +9,4 @@ module load Python-GPU/3.6.5
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/uab
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/sis
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/ersa
-python train_uab_line_oracle_towers2.py --pos-weight=1 --leave-city=0 --patch-dir=/work/bh163/misc/lines_patches
+python train_uab_line_oracle_towers.py --pos-weight=50 --leave-city=1
