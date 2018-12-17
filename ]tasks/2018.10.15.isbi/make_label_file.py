@@ -40,7 +40,7 @@ def create_polygon_fig(csv_files, patch_size=(300, 300)):
         else:
             gt = np.zeros((patch_size))
 
-        save_name = csv_file[:-3] + 'png'
+        save_name = csv_file[:-7] + 'GT.png'
         ersa_utils.save_file(save_name, gt.astype(np.uint8))
 
 
