@@ -24,7 +24,7 @@ DECAY_RATE = 0.1
 START_LAYER = 10
 MODEL_NAME = 'lines_city{}_pw{}_{}'
 DS_NAME = 'lines_tw1'
-POS_WEIGHT = 5
+POS_WEIGHT = 50
 LEAVE_CITY = 0
 SFN = 32
 

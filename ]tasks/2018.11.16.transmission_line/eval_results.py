@@ -269,8 +269,8 @@ if __name__ == '__main__':
     """
      Create a "tmp_files/" and "results/" directory
     """
-    city_name = 'Wilmington'
-    model_name = 'faster_rcnn_2018-12-10_15-39-00'
+    city_name = 'Tucson'
+    model_name = 'faster_rcnn_2018-12-14_14-18-29'
     appendix = model_name + city_name
 
     import utils

@@ -3,7 +3,7 @@ Read all files in transmission line dataset, extract them into patches, add boun
 into tf record file
 """
 
-IS_DCC = False
+IS_DCC = True
 CITY_NAME = 'Wilmington'
 
 
@@ -29,7 +29,7 @@ from skimage.draw import polygon
 import ersa_utils
 
 PATCH_SIZE = (500, 500)
-ENCODER = {'DT': 1, 'TT': 1}
+ENCODER = {'DT': 1, 'TT': 2, 'T': 1}
 
 
 def check_bounds(cc, rr, size_x, size_y):
@@ -114,14 +114,16 @@ def write_data_info(rgb_files, csv_files, save_dir):
             w_start = coords[h_id_0][w_id_0]['w']
             box = get_bounding_box(y-h_start, x-w_start)
 
-            coords[h_id_0][w_id_0]['label'].append(label)
+            # FIXME only label them as T
+            # coords[h_id_0][w_id_0]['label'].append(label)
+            coords[h_id_0][w_id_0]['label'].append('T')
             coords[h_id_0][w_id_0]['box'].append(box)
         ersa_utils.save_file(os.path.join(save_dir, save_name), coords)
 
 
 def make_dataset(rgb_files, info_dir, store_dir, tf_dir, city_name=''):
-    writer_train = tf.python_io.TFRecordWriter(os.path.join(tf_dir, 'train{}.record'.format(city_name)))
-    writer_valid = tf.python_io.TFRecordWriter(os.path.join(tf_dir, 'valid{}.record'.format(city_name)))
+    writer_train = tf.python_io.TFRecordWriter(os.path.join(tf_dir, 'train_{}.record'.format(city_name)))
+    writer_valid = tf.python_io.TFRecordWriter(os.path.join(tf_dir, 'valid_{}.record'.format(city_name)))
 
     for rgb_file_name in rgb_files:
         file_name = os.path.basename(rgb_file_name[:-4])

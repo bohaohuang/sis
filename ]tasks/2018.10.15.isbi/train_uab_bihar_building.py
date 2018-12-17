@@ -10,23 +10,24 @@ import uabDataReader
 import uabCrossValMaker
 import uab_collectionFunctions
 from reader import reader_utils
-from bohaoCustom import uabMakeNetwork_UNet
+from bohaoCustom import uabMakeNetwork_DeepLabV2
 
-RUN_ID = 0
+RUN_ID = 1
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-5
-INPUT_SIZE = 316
-EPOCHS = 50
+LEARNING_RATE = 1e-8
+INPUT_SIZE = 300
+EPOCHS = 30
 NUM_CLASS = 2
-N_TRAIN = 10
-N_VALID = 2
+N_TRAIN = 200
+N_VALID = 5
 GPU = 0
 DECAY_STEP = 30
-DECAY_RATE = 0.1
+DECAY_RATE = 0.8
 START_LAYER = 10
 MODEL_NAME = 'bihar_building_{}'
 DS_NAME = 'bihar_building'
 SFN = 32
+RES101_DIR = r'/hdd/Models/resnet_v1_101.ckpt'
 
 
 def resize_patches(files, par_dir, patch_size, save_dir):
@@ -36,15 +37,15 @@ def resize_patches(files, par_dir, patch_size, save_dir):
 
     f_name_list = []
     for file in files:
-        r_patch = load_and_resize(par_dir[0], file[0], patch_size, False)
-        g_patch = load_and_resize(par_dir[1], file[1], patch_size, False)
-        b_patch = load_and_resize(par_dir[2], file[2], patch_size, False)
-        gt_patch = load_and_resize(par_dir[3], file[3], patch_size, True)
+        r_patch = load_and_resize(par_dir[0], file[0], patch_size, True).astype(np.uint8)
+        g_patch = load_and_resize(par_dir[1], file[1], patch_size, True).astype(np.uint8)
+        b_patch = load_and_resize(par_dir[2], file[2], patch_size, True).astype(np.uint8)
+        gt_patch = load_and_resize(par_dir[3], file[3], patch_size, True).astype(np.uint8)
 
-        ersa_utils.save_file(os.path.join(save_dir, '{}jpg'.format(file[0][:-3])), r_patch.astype(np.uint8))
-        ersa_utils.save_file(os.path.join(save_dir, '{}jpg'.format(file[1][:-3])), g_patch.astype(np.uint8))
-        ersa_utils.save_file(os.path.join(save_dir, '{}jpg'.format(file[2][:-3])), b_patch.astype(np.uint8))
-        ersa_utils.save_file(os.path.join(save_dir, '{}png'.format(file[3][:-3])), gt_patch.astype(np.uint8))
+        ersa_utils.save_file(os.path.join(save_dir, '{}jpg'.format(file[0][:-3])), r_patch)
+        ersa_utils.save_file(os.path.join(save_dir, '{}jpg'.format(file[1][:-3])), g_patch)
+        ersa_utils.save_file(os.path.join(save_dir, '{}jpg'.format(file[2][:-3])), b_patch)
+        ersa_utils.save_file(os.path.join(save_dir, '{}png'.format(file[3][:-3])), gt_patch)
 
         f_line = '{}jpg {}jpg {}jpg {}png\n'.format(file[0][:-3], file[1][:-3], file[2][:-3], file[3][:-3])
         f_name_list.append(f_line)
@@ -69,6 +70,7 @@ def read_flag():
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--ds-name', type=str, default=DS_NAME, help='name of the dataset')
     parser.add_argument('--start-layer', type=int, default=START_LAYER, help='start layer to unfreeze')
+    parser.add_argument('--res-dir', type=str, default=RES101_DIR, help='path to ckpt of Res101 model')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
@@ -85,16 +87,16 @@ def main(flags):
     X = tf.placeholder(tf.float32, shape=[None, flags.input_size[0], flags.input_size[1], 3], name='X')
     y = tf.placeholder(tf.int32, shape=[None, flags.input_size[0], flags.input_size[1], 1], name='y')
     mode = tf.placeholder(tf.bool, name='mode')
-    model = uabMakeNetwork_UNet.UnetModelCrop({'X': X, 'Y': y},
-                                              trainable=mode,
-                                              model_name=flags.model_name,
-                                              input_size=flags.input_size,
-                                              batch_size=flags.batch_size,
-                                              learn_rate=flags.learning_rate,
-                                              decay_step=flags.decay_step,
-                                              decay_rate=flags.decay_rate,
-                                              epochs=flags.epochs,
-                                              start_filter_num=flags.sfn)
+    model = uabMakeNetwork_DeepLabV2.DeeplabV3({'X': X, 'Y': y},
+                                               trainable=mode,
+                                               model_name=flags.model_name,
+                                               input_size=flags.input_size,
+                                               batch_size=flags.batch_size,
+                                               learn_rate=flags.learning_rate,
+                                               decay_step=flags.decay_step,
+                                               decay_rate=flags.decay_rate,
+                                               epochs=flags.epochs,
+                                               start_filter_num=flags.sfn)
     model.create_graph('X', class_num=flags.num_classes)
 
     # create collection
@@ -102,6 +104,7 @@ def main(flags):
     blCol = uab_collectionFunctions.uabCollection(flags.ds_name)
     blCol.readMetadata()
     img_mean = blCol.getChannelMeans([0, 1, 2])  # get mean of rgb info
+    print(img_mean)
 
     img_dir, task_dir = utils.get_task_img_folder()
     save_dir = os.path.join(task_dir, 'bihar_patches')
@@ -115,9 +118,9 @@ def main(flags):
     # use first 5 tiles for validation
     idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'tile')
     # use first city for validation
-    assert len(file_list) == flags.n_train + flags.n_valid
-    file_list_train = [a for a in file_list[:flags.n_train]]
-    file_list_valid = [a for a in file_list[-flags.n_valid:]]
+    #assert len(file_list) == flags.n_train + flags.n_valid
+    file_list_train = [a for a in file_list[:45]]
+    file_list_valid = [a for a in file_list[-5:]]
 
     with tf.name_scope('image_loader'):
         # GT has no mean to subtract, append a 0 for block mean
@@ -141,7 +144,7 @@ def main(flags):
               isTrain=True,
               img_mean=img_mean,
               verb_step=100,                        # print a message every 100 step(sample)
-              save_epoch=5,                         # save the model every 5 epochs
+              save_epoch=200,                         # save the model every 5 epochs
               gpu=GPU,
               patch_size=flags.input_size)
 

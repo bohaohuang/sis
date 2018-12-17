@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 from glob import glob
+from tqdm import tqdm
 from natsort import natsorted
 from skimage.draw import polygon
 import ersa_utils
@@ -28,7 +29,7 @@ def create_polygon_fig(csv_files, patch_size=(300, 300)):
     :param patch_size: used if the ground truth file is empty
     :return:
     """
-    for csv_file in csv_files:
+    for csv_file in tqdm(csv_files):
         df = pd.read_csv(csv_file)
 
         if not df.empty:
