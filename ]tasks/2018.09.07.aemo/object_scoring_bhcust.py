@@ -197,6 +197,7 @@ class ConfMapObjectScoring:
 
         pl_gt = np.array(obj_struct_gt['pixelList'])
         area_gt = np.array(obj_struct_gt['area'])
+        area_pp = np.array(obj_struct_cm['area'])
         pl_pp = np.array(obj_struct_cm['pixelList'])
         pl_pp_cf = np.array(obj_struct_cm['confidence'])
 
@@ -332,5 +333,5 @@ if __name__ == '__main__':
     plt.title('Object-wise PR Curve Comparison')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_cust.png'))
-    plt.close()
+    #plt.savefig(os.path.join(img_dir, 'pr_cmp_uab_xfold_cust.png'))
+    plt.show()

@@ -15,10 +15,10 @@ from bohaoCustom import uabMakeNetwork_UNet
 
 gpu = 0
 batch_size = 5
-input_size = [572, 572]
+input_size = [1084, 1084]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
-ds_name = 'lines'
+ds_name = 'lines_tw1'
 img_dir, task_dir = utils.get_task_img_folder()
 
 
@@ -171,34 +171,35 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
 # settings
 blCol = uab_collectionFunctions.uabCollection(ds_name)
 blCol.readMetadata()
-file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2, 3])
-file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(4)
+file_list, parent_dir = blCol.getAllTileByDirAndExt([1, 2, 3, 4])
+file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(0)
 idx, file_list = uabCrossValMaker.uabUtilGetFolds(None, file_list, 'force_tile')
 idx_truth, file_list_truth = uabCrossValMaker.uabUtilGetFolds(None, file_list_truth, 'force_tile')
 # use first 5 tiles for validation
 file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [1, 2, 3])
 file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(idx_truth, file_list_truth, [1, 2, 3])
-img_mean = blCol.getChannelMeans([1, 2, 3])
+img_mean = blCol.getChannelMeans([2, 3, 4])
 img_mean = np.concatenate([np.array([0]), img_mean])
 
 # make the model
 # define place holder
-for weight in [1, 5, 10, 30, 50, 100]:
-    model_dir = r'/hdd6/Models/lines/UnetCrop_lines_pw{}_0_PS(572, 572)_BS5_' \
-                r'EP100_LR0.0001_DS60_DR0.1_SFN32'.format(weight)
-    SAVE_DIR = os.path.join(task_dir, 'confmap_uab_{}'.format(os.path.basename(model_dir)))
-    ersa_utils.make_dir_if_not_exist(SAVE_DIR)
-    tf.reset_default_graph()
-    X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 4], name='X')
-    y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
-    mode = tf.placeholder(tf.bool, name='mode')
-    model = UnetModelCrop({'X': X, 'Y': y}, trainable=mode, input_size=input_size,
-                          batch_size=batch_size, start_filter_num=32)
-    # create graph
-    model.create_graph('X', class_num=2)
+for weight in [50]:
+    for city_id in range(4):
+        model_dir = r'/hdd6/Models/lines_tw1/UnetCrop_lines_city{}_pw{}_0_PS(572, 572)_BS5_' \
+                    r'EP50_LR0.0001_DS30_DR0.1_SFN32'.format(city_id, weight)
+        SAVE_DIR = os.path.join(task_dir, 'confmap_uab_{}'.format(os.path.basename(model_dir)))
+        ersa_utils.make_dir_if_not_exist(SAVE_DIR)
+        tf.reset_default_graph()
+        X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 4], name='X')
+        y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
+        mode = tf.placeholder(tf.bool, name='mode')
+        model = UnetModelCrop({'X': X, 'Y': y}, trainable=mode, input_size=input_size,
+                              batch_size=batch_size, start_filter_num=32)
+        # create graph
+        model.create_graph('X', class_num=2)
 
-    # evaluate on tiles
-    model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
-                   input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                   save_result_parent_dir='lines', ds_name=ds_name, best_model=False,
-                   load_epoch_num=95)
+        # evaluate on tiles
+        model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
+                       input_size, tile_size, batch_size, img_mean, model_dir, gpu,
+                       save_result_parent_dir='lines', ds_name=ds_name, best_model=False,
+                       load_epoch_num=45)

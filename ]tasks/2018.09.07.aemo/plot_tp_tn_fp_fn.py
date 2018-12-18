@@ -57,5 +57,5 @@ for i in range(4):
     plt.legend(loc='upper left')
 
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'tp_tn_fp_fn_plots_{}.png'.format(tile_list[i])))
+    #plt.savefig(os.path.join(img_dir, 'tp_tn_fp_fn_plots_{}.png'.format(tile_list[i])))
     plt.show()

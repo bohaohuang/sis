@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     model_name = ['Fold 0', 'Fold 1', 'Fold 2']
 
-    size_ths = [0, 200, 400, 600, 800, 1000, np.inf]
+    size_ths = list(range(0, 1000, 50))
     ious_all = []
     area_all = []
     true_all = [[] for i in range(len(size_ths) - 1)]
@@ -48,6 +48,7 @@ if __name__ == '__main__':
 
         mean_ious = [np.mean(a) for a in mean_ious]
         X = np.arange(len(size_ths) - 1)
+        plt.figure(figsize=(12, 5))
         plt.bar(X, mean_ious)
         plt.xticks(X, ['{:.0f}~{:.0f}'.format(size_ths[a] * 0.09, size_ths[a + 1] * 0.09)
                        for a in range(len(size_ths[:-1]))])
@@ -58,10 +59,10 @@ if __name__ == '__main__':
         plt.ylabel('mean IoU')
         plt.title('Region {}'.format(plt_cnt))
         plt.tight_layout()
-        plt.savefig(os.path.join(img_dir, '{}_mean_iou_bars.png'.format(mn)))
-        plt.close()
+        plt.savefig(os.path.join(img_dir, '{}_mean_iou_bars_thinner.png'.format(mn)))
+        plt.show()
 
-        tp_list = []
+        '''tp_list = []
         fp_list = []
         fn_list = []
         for size_cnt in range(len(size_ths[:-1])):
@@ -84,8 +85,8 @@ if __name__ == '__main__':
         plt.legend()
         plt.title('Region {}'.format(plt_cnt))
         plt.tight_layout()
-        plt.savefig(os.path.join(img_dir, '{}_tp_tn_fp_fn.png'.format(mn)))
-        plt.close()
+        #plt.savefig(os.path.join(img_dir, '{}_tp_tn_fp_fn.png'.format(mn)))
+        plt.show()'''
 
     # aggregate results
     ious_fold = np.concatenate(ious_all)
@@ -101,6 +102,7 @@ if __name__ == '__main__':
 
     mean_ious = [np.mean(a) for a in mean_ious]
     X = np.arange(len(size_ths) - 1)
+    plt.figure(figsize=(12, 5))
     plt.bar(X, mean_ious)
     plt.xticks(X, ['{:.0f}~{:.0f}'.format(size_ths[a] * 0.09, size_ths[a + 1] * 0.09)
                    for a in range(len(size_ths[:-1]))])
@@ -111,10 +113,10 @@ if __name__ == '__main__':
     plt.ylabel('mean IoU')
     plt.title('Aggregate')
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'agg_mean_iou_bars.png'))
-    plt.close()
+    plt.savefig(os.path.join(img_dir, 'agg_mean_iou_bars_thinner.png'))
+    plt.show()
 
-    tp_list = []
+    '''tp_list = []
     fp_list = []
     fn_list = []
     for size_cnt in range(len(size_ths[:-1])):
@@ -137,5 +139,5 @@ if __name__ == '__main__':
     plt.legend()
     plt.title('Aggregate')
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'agg_tp_tn_fp_fn.png'))
-    plt.close()
+    #plt.savefig(os.path.join(img_dir, 'agg_tp_tn_fp_fn.png'))
+    plt.show()'''

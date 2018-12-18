@@ -14,20 +14,20 @@ from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 RUN_ID = 1
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-8
+LEARNING_RATE = 1e-4
 INPUT_SIZE = 300
 EPOCHS = 30
 NUM_CLASS = 2
 N_TRAIN = 200
 N_VALID = 5
-GPU = 0
-DECAY_STEP = 30
+GPU = 1
+DECAY_STEP = 20
 DECAY_RATE = 0.8
 START_LAYER = 10
 MODEL_NAME = 'bihar_building_{}'
 DS_NAME = 'bihar_building'
 SFN = 32
-RES101_DIR = r'/hdd/Models/resnet_v1_101.ckpt'
+RES101_DIR = r'/hdd6/Models/resnet_v1_101.ckpt'
 
 
 def resize_patches(files, par_dir, patch_size, save_dir):
@@ -140,7 +140,7 @@ def main(flags):
                        loss_type='xent', par_dir='{}'.format(flags.ds_name))
     model.run(train_reader=dataReader_train,
               valid_reader=dataReader_valid,
-              pretrained_model_dir=None,   # train from scratch, no need to load pre-trained model
+              pretrained_model_dir=flags.res_dir,   # train from scratch, no need to load pre-trained model
               isTrain=True,
               img_mean=img_mean,
               verb_step=100,                        # print a message every 100 step(sample)
