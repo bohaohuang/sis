@@ -1,6 +1,9 @@
 """
 Read all files in transmission line dataset, extract them into patches, add bounding boxes data to the patch, save them
 into tf record file
+
+Note:
+This file has been modified so that it only predicts class as T
 """
 
 IS_DCC = True
@@ -146,6 +149,7 @@ def make_dataset(rgb_files, info_dir, store_dir, tf_dir, city_name=''):
                 save_name = os.path.join(store_dir, os.path.basename(rgb_file_name[:-4] + '_{}.jpg'.format(patch_cnt)))
                 img = rgb[cell['h']:cell['h']+PATCH_SIZE[0], cell['w']:cell['w']+PATCH_SIZE[1], :]
                 label = cell['label']
+                assert np.unique(label) == ['T'] or label == []
                 box = cell['box']
                 ersa_utils.save_file(save_name, img)
 
@@ -223,5 +227,5 @@ if __name__ == '__main__':
     rgb_files = natsorted([a for a in glob(os.path.join(data_dir, 'raw', '*.tif'))
                            if 'multiclass' not in a and CITY_NAME in a])
     csv_files = natsorted([a for a in glob(os.path.join(data_dir, 'raw', '*.csv')) if CITY_NAME in a])
-    # write_data_info(rgb_files, csv_files, save_dir)
+    write_data_info(rgb_files, csv_files, save_dir)
     make_dataset(rgb_files, save_dir, store_dir, tf_dir, city_name=CITY_NAME)
