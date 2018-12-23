@@ -24,11 +24,11 @@ GPU = 0
 DECAY_STEP = 30
 DECAY_RATE = 0.1
 CITY_NAME = 'dc'
-MODEL_NAME = 'inria_distance_xregion_5050_'+CITY_NAME+'_{}'
+MODEL_NAME = 'inria_distance_xregion_5050_{}_{}'
 SFN = 32
 PRED_MODEL_DIR = r'/hdd6/Models/Inria_decay/UnetCrop_inria_decay_0_PS(572, 572)_BS5_' \
                  r'EP100_LR0.0001_DS60.0_DR0.1_SFN32'
-LLH_FILE_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.08.20.figshare_dataset/unet_loo_distance_target_'+CITY_NAME+'_5050.npy'
+LLH_FILE_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.08.20.figshare_dataset/unet_loo_distance_target_{}_5050.npy'
 
 
 def read_flag():
@@ -53,7 +53,8 @@ def read_flag():
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
     flags.tile_size = (flags.tile_size, flags.tile_size)
-    flags.model_name = flags.model_name.format(flags.run_id)
+    flags.model_name = flags.model_name.format(flags.city_name, flags.run_id)
+    flags.llh_file_dir = flags.llh_file_dir.format(flags.city_name)
     return flags
 
 

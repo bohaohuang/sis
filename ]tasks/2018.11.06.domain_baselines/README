@@ -1,0 +1,10 @@
+# TODO List
+
+# DTDA Baseline Experiments
+## Atlanta
+1. Get layer stats by running [this file](dtda_gaussian_recorder_figshare.py)
+2. Compute shift dictionary 
+
+# MMD&DIS Experiments
+1. Get Distance priors by running [this file](../2018.08.20.figshare_dataset/kernel_dis_matching_aioi.py) or MMD 
+priors by [this file]()

@@ -125,7 +125,8 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
                                                     padding=np.array((self.get_overlap()/2, self.get_overlap()/2)),
                                                     isTrain=False)
             rManager = reader.readManager
-            total_len = np.ceil((tile_size[0] + self.get_overlap()) / (input_size[0] - self.get_overlap())) ** 2
+            total_len = np.ceil((tile_size[0] + self.get_overlap()) / (input_size[0] - self.get_overlap())) * \
+                        np.ceil((tile_size[1] + self.get_overlap()) / (input_size[1] - self.get_overlap()))
             if self.config is None:
                 self.config = tf.ConfigProto(allow_soft_placement=True)
             with tf.Session(config=self.config) as sess:
@@ -149,85 +150,82 @@ class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):
 
 if __name__ == '__main__':
     # settings
-    gpu = 0
+    gpu = 1
     batch_size = 1
     input_size = [572, 572]
-    tile_size = [5000, 5000]
-    city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
+    city_name = 'DC'
     nn_utils.tf_warn_level(3)
+
+    if city_name == 'Atlanta':
+        tile_size = [2000, 3000]
+    elif city_name == 'Austin':
+        tile_size = [2000, 3000]
+    elif city_name == 'DC':
+        tile_size = [2500, 2500]
 
     img_dir, task_dir = utils.get_task_img_folder()
 
-    for city_id in [0]:
-        path_to_save = os.path.join(task_dir, 'dtda_new', city_list[city_id], 'valid')
-        ersa_utils.make_dir_if_not_exist(path_to_save)
+    path_to_save = os.path.join(task_dir, 'dtda_new', city_name, 'valid')
+    ersa_utils.make_dir_if_not_exist(path_to_save)
 
-        model_dir = r'/hdd6//Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
-                    r'EP100_LR0.0001_DS60_DR0.1_SFN32'.format(city_id)
+    model_dir = r'/hdd6/Models/UNET_rand_gird/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \
+                r'EP100_LR0.0001_DS60_DR0.1_SFN32'
 
-        tf.reset_default_graph()
+    tf.reset_default_graph()
 
-        blCol = uab_collectionFunctions.uabCollection('inria')
-        blCol.readMetadata()
-        file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
-        file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(4)
-        idx, file_list = uabCrossValMaker.uabUtilGetFolds(None, file_list, 'force_tile')
-        idx_truth, file_list_truth = uabCrossValMaker.uabUtilGetFolds(None, file_list_truth, 'force_tile')
-        # use first 5 tiles for validation
-        exclude_cities = [city_list[a] for a in range(5) if a != city_id]
-        file_list_valid = uabCrossValMaker.make_file_list_by_key(
-            idx, file_list, [i for i in range(0, 6)],
-            filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'] + exclude_cities)
-        file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(
-            idx_truth, file_list_truth, [i for i in range(0, 6)],
-            filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck']+ exclude_cities)
-        img_mean = blCol.getChannelMeans([0, 1, 2])
+    blCol = uab_collectionFunctions.uabCollection(city_name)
+    blCol.readMetadata()
+    file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
+    file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(3)
+    img_mean = blCol.getChannelMeans([0, 1, 2])
 
-        # make the model
-        # define place holder
-        X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
-        y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
-        mode = tf.placeholder(tf.bool, name='mode')
-        model = UnetModelCrop({'X': X, 'Y': y}, trainable=mode, input_size=input_size, batch_size=5)
-        # create graph
-        model.create_graph('X', class_num=2)
+    # make the model
+    # define place holder
+    X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
+    y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
+    mode = tf.placeholder(tf.bool, name='mode')
+    model = UnetModelCrop({'X': X, 'Y': y}, trainable=mode, input_size=input_size, batch_size=5)
+    # create graph
+    model.create_graph('X', class_num=2)
 
-        # evaluate on tiles
-        '''model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
-                       input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                       save_result_parent_dir='domain_baseline2', ds_name='inria', best_model=False,
-                       load_epoch_num=95)'''
-        model.save_activations(file_list_valid, file_list_valid_truth, parent_dir, img_mean, gpu, model_dir,
-                               path_to_save, input_size, tile_size, batch_size, load_epoch_num=95)
+    # evaluate on tiles
+    model.save_activations(file_list, file_list_truth, parent_dir, img_mean, gpu, model_dir,
+                           path_to_save, input_size, tile_size, batch_size, load_epoch_num=95)
 
-        #########################################################################################################
+    #########################################################################################################
 
-        path_to_save = os.path.join(task_dir, 'dtda_new', city_list[city_id], 'train')
-        ersa_utils.make_dir_if_not_exist(path_to_save)
+    path_to_save = os.path.join(task_dir, 'dtda_new', city_name, 'train')
+    ersa_utils.make_dir_if_not_exist(path_to_save)
 
-        model_dir = r'/hdd6//Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
-                    r'EP100_LR0.0001_DS60_DR0.1_SFN32'.format(city_id)
+    model_dir = r'/hdd6/Models/UNET_rand_gird/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \
+                r'EP100_LR0.0001_DS60_DR0.1_SFN32'
 
-        tf.reset_default_graph()
-        # use first 5 tiles for validation
-        exclude_cities = [city_list[city_id]]
-        file_list_valid = uabCrossValMaker.make_file_list_by_key(
-            idx, file_list, [i for i in range(0, 6)],
-            filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'] + exclude_cities)
-        file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(
-            idx_truth, file_list_truth, [i for i in range(0, 6)],
-            filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'] + exclude_cities)
-        img_mean = blCol.getChannelMeans([0, 1, 2])
+    tf.reset_default_graph()
+    # use first 5 tiles for validation
+    tile_size = [5000, 5000]
+    blCol = uab_collectionFunctions.uabCollection('inria')
+    blCol.readMetadata()
+    file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
+    file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(4)
+    idx, file_list = uabCrossValMaker.uabUtilGetFolds(None, file_list, 'force_tile')
+    idx_truth, file_list_truth = uabCrossValMaker.uabUtilGetFolds(None, file_list_truth, 'force_tile')
+    file_list_valid = uabCrossValMaker.make_file_list_by_key(
+        idx, file_list, [i for i in range(0, 6)],
+        filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
+    file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(
+        idx_truth, file_list_truth, [i for i in range(0, 6)],
+        filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
+    img_mean = blCol.getChannelMeans([0, 1, 2])
 
-        # make the model
-        # define place holder
-        X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
-        y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
-        mode = tf.placeholder(tf.bool, name='mode')
-        model = UnetModelCrop({'X': X, 'Y': y}, trainable=mode, input_size=input_size, batch_size=5)
-        # create graph
-        model.create_graph('X', class_num=2)
+    # make the model
+    # define place holder
+    X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
+    y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
+    mode = tf.placeholder(tf.bool, name='mode')
+    model = UnetModelCrop({'X': X, 'Y': y}, trainable=mode, input_size=input_size, batch_size=5)
+    # create graph
+    model.create_graph('X', class_num=2)
 
-        # evaluate on tiles
-        model.save_activations(file_list_valid, file_list_valid_truth, parent_dir, img_mean, gpu, model_dir,
-                               path_to_save, input_size, tile_size, batch_size, load_epoch_num=95)
+    # evaluate on tiles
+    model.save_activations(file_list_valid, file_list_valid_truth, parent_dir, img_mean, gpu, model_dir,
+                           path_to_save, input_size, tile_size, batch_size, load_epoch_num=95)

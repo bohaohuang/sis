@@ -22,7 +22,7 @@ ds_name = 'lines'
 weight = 50
 city_list = ['Tucson', 'Colwich', 'Clyde', 'Wilmington']
 
-for city_idx in range(len(city_list)):
+for city_idx in range(3, 4):#range(len(city_list)):
     model_name = 'UnetCrop_lines_city{}_pw{}_0_PS(572, 572)_BS5_EP50_LR0.0001_DS30_DR0.1_SFN32'.format(city_idx, weight)
     results_dir = os.path.join(r'/hdd/Results', ds_name, model_name, ds_name+'_tw1', 'pred')
     conf_dir = os.path.join(task_dir, 'confmap_uab_{}'.format(model_name))

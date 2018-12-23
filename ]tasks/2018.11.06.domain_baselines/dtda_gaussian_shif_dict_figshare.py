@@ -132,10 +132,9 @@ if __name__ == '__main__':
     plt.figure(figsize=(10, 12))
 
     img_dir, task_dir = utils.get_task_img_folder()
-    city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-    city_id = 0
+    city_name = 'DC'
 
-    path_to_save = os.path.join(task_dir, 'dtda_new2', city_list[city_id], 'valid')
+    path_to_save = os.path.join(task_dir, 'dtda_new', city_name, 'valid')
     save_name = os.path.join(path_to_save, 'activation_list.pkl')
 
     act_dict_valid = ersa_utils.load_file(save_name)
@@ -143,14 +142,14 @@ if __name__ == '__main__':
     v_list = []
     for act_name, up in act_dict_valid.items():
         m_list.append(up.mean)
-        v_list.append(up.std)
+        v_list.append(up.var)
 
     ax1 = plt.subplot(411)
     plt.plot(m_list, label='valid')
     ax2 = plt.subplot(413, sharex=ax1)
     plt.plot(v_list, label='valid')
 
-    path_to_save = os.path.join(task_dir, 'dtda_new2', city_list[city_id], 'train')
+    path_to_save = os.path.join(task_dir, 'dtda_new', city_name, 'train')
     save_name = os.path.join(path_to_save, 'activation_list.pkl')
 
     act_dict_train = ersa_utils.load_file(save_name)
@@ -158,7 +157,7 @@ if __name__ == '__main__':
     v_list = []
     for act_name, up in act_dict_train.items():
         m_list.append(up.mean)
-        v_list.append(up.std)
+        v_list.append(up.var)
 
     ax3 = plt.subplot(412, sharex=ax1, sharey=ax1)
     plt.plot(m_list, label='train')
@@ -168,40 +167,6 @@ if __name__ == '__main__':
     plt.tight_layout()
     plt.show()
 
-    shift_dict = get_shift_vals3(act_dict_train, act_dict_valid)
-    path_to_save = os.path.join(task_dir, 'dtda_new', city_list[city_id], 'shift_dict.pkl')
+    shift_dict = get_shift_vals(act_dict_train, act_dict_valid)
+    path_to_save = os.path.join(task_dir, 'dtda_new', city_name, 'shift_dict.pkl')
     ersa_utils.save_file(path_to_save, shift_dict)
-
-    ##########################################################
-    '''path_to_save = os.path.join(task_dir, 'dtda', city_list[city_id], 'valid')
-    save_name = os.path.join(path_to_save, 'activation_list.pkl')
-
-    act_dict_valid = ersa_utils.load_file(save_name)
-    m_list = []
-    v_list = []
-    for act_name, up in act_dict_valid.items():
-        m_list.append(up.mean)
-        v_list.append(up.var)
-
-    ax1 = plt.subplot(411)
-    plt.plot(m_list, label='valid')
-    ax2 = plt.subplot(413, sharex=ax1)
-    plt.plot(v_list, label='valid')
-
-    path_to_save = os.path.join(task_dir, 'dtda', city_list[city_id], 'train')
-    save_name = os.path.join(path_to_save, 'activation_list.pkl')
-
-    act_dict_train = ersa_utils.load_file(save_name)
-    m_list = []
-    v_list = []
-    for act_name, up in act_dict_train.items():
-        m_list.append(up.mean)
-        v_list.append(up.var)
-
-    ax3 = plt.subplot(412, sharex=ax1, sharey=ax1)
-    plt.plot(m_list, label='train')
-    ax4 = plt.subplot(414, sharex=ax2, sharey=ax2)
-    plt.plot(v_list, label='train')
-
-    plt.tight_layout()
-    plt.show()'''

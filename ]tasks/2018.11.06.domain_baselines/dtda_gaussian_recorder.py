@@ -176,8 +176,8 @@ if __name__ == '__main__':
 
     img_dir, task_dir = utils.get_task_img_folder()
 
-    for city_id in [0, 1, 2, 3, 4]:
-        path_to_save = os.path.join(task_dir, 'dtda2', city_list[city_id], 'valid')
+    for city_id in [0]:
+        path_to_save = os.path.join(task_dir, 'dtda_new2', city_list[city_id], 'valid')
         ersa_utils.make_dir_if_not_exist(path_to_save)
 
         model_dir = r'/hdd6//Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
@@ -220,7 +220,7 @@ if __name__ == '__main__':
 
         #########################################################################################################
 
-        path_to_save = os.path.join(task_dir, 'dtda2', city_list[city_id], 'train')
+        path_to_save = os.path.join(task_dir, 'dtda_new2', city_list[city_id], 'train')
         ersa_utils.make_dir_if_not_exist(path_to_save)
 
         model_dir = r'/hdd6//Models/Inria_Domain_LOO/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
