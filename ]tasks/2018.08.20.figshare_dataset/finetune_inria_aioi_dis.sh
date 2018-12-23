@@ -10,5 +10,5 @@ export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/uab
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/sis
 export PYTHONPATH=$PYTHONPATH:/dscrhome/bh163/code/ersa
 python finetune_inria_dis_aioi.py --city-name=Arlington \
-                                  --pred-model-dir=/work/bh163/Models/Inria_decay/UnetCrop_inria_decay_0_PS\(572, 572\)_BS5_EP100_LR0.0001_DS60.0_DR0.1_SFN32 \
+                                  --pred-model-dir=/work/bh163/Models/Inria_decay/UnetCrop_inria_decay_0_PS\(572,\ 572\)_BS5_EP100_LR0.0001_DS60.0_DR0.1_SFN32 \
                                   --llh-file-dir=/work/bh163/misc/domain_selection/unet_loo_distance_target_\{\}_5050.npy
