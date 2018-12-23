@@ -49,6 +49,7 @@ def read_flag():
     parser.add_argument('--sfn', type=int, default=SFN, help='filter number of the first layer')
     parser.add_argument('--pred-model-dir', type=str, default=PRED_MODEL_DIR, help='pretrained model dir')
     parser.add_argument('--llh-file-dir', type=str, default=LLH_FILE_DIR, help='weights directory')
+    parser.add_argument('--city-name', type=str, default=CITY_NAME, help='name of the city in AIOI')
 
     flags = parser.parse_args()
     flags.input_size = (flags.input_size, flags.input_size)
