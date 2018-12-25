@@ -283,127 +283,128 @@ def get_shift_vals(act_dict_train, act_dict_valid):
 
 
 if __name__ == '__main__':
-    # Step 1: Record layer stats
+    #for city_name in ['Arlington', 'Atlanta', 'Austin', 'DC', 'NewHaven', 'NewYork', 'SanFrancisco', 'Seekonk']:
+    for city_name in ['Austin', 'DC', 'NewHaven', 'NewYork', 'SanFrancisco', 'Seekonk']:
+        # Step 1: Record layer stats
+        # settings
+        gpu = 1
+        batch_size = 1
+        input_size = [572, 572]
 
-    # settings
-    gpu = 1
-    batch_size = 1
-    input_size = [572, 572]
-    city_name = 'Arlington'
-    nn_utils.tf_warn_level(3)
-    save_folder = 'dtm'
-    model_dir = r'/hdd6/Models/UNET_rand_gird/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \
-                r'EP100_LR0.0001_DS60_DR0.1_SFN32'
+        nn_utils.tf_warn_level(3)
+        save_folder = 'dtm'
+        model_dir = r'/hdd6/Models/UNET_rand_gird/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \
+                    r'EP100_LR0.0001_DS60_DR0.1_SFN32'
 
-    img_dir, task_dir = utils.get_task_img_folder()
+        img_dir, task_dir = utils.get_task_img_folder()
 
-    path_to_save = os.path.join(task_dir, save_folder, city_name, 'valid')
-    ersa_utils.make_dir_if_not_exist(path_to_save)
+        path_to_save = os.path.join(task_dir, save_folder, city_name, 'valid')
+        ersa_utils.make_dir_if_not_exist(path_to_save)
 
-    tf.reset_default_graph()
+        tf.reset_default_graph()
 
-    blCol = uab_collectionFunctions.uabCollection(city_name)
-    blCol.readMetadata()
-    file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
-    file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(3)
-    img_mean = blCol.getChannelMeans([0, 1, 2])
+        blCol = uab_collectionFunctions.uabCollection(city_name)
+        blCol.readMetadata()
+        file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
+        file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(3)
+        img_mean = blCol.getChannelMeans([0, 1, 2])
 
-    # make the model
-    # define place holder
-    X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
-    y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
-    mode = tf.placeholder(tf.bool, name='mode')
-    model = UnetModelCrop({'X': X, 'Y': y}, trainable=mode, input_size=input_size, batch_size=5)
-    # create graph
-    model.create_graph('X', class_num=2)
+        # make the model
+        # define place holder
+        X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
+        y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
+        mode = tf.placeholder(tf.bool, name='mode')
+        model = UnetModelCrop({'X': X, 'Y': y}, trainable=mode, input_size=input_size, batch_size=5)
+        # create graph
+        model.create_graph('X', class_num=2)
 
-    # evaluate on tiles
-    model.save_activations(file_list, file_list_truth, parent_dir, img_mean, gpu, model_dir,
-                           path_to_save, input_size, batch_size, load_epoch_num=95)
+        # evaluate on tiles
+        model.save_activations(file_list, file_list_truth, parent_dir, img_mean, gpu, model_dir,
+                               path_to_save, input_size, batch_size, load_epoch_num=95)
 
-    #########################################################################################################
-    path_to_save = os.path.join(task_dir, save_folder, city_name, 'train')
-    ersa_utils.make_dir_if_not_exist(path_to_save)
+        #########################################################################################################
+        path_to_save = os.path.join(task_dir, save_folder, city_name, 'train')
+        ersa_utils.make_dir_if_not_exist(path_to_save)
 
-    tf.reset_default_graph()
+        tf.reset_default_graph()
 
-    # use first 5 tiles for validation
-    tile_size = [5000, 5000]
-    blCol = uab_collectionFunctions.uabCollection('inria')
-    blCol.readMetadata()
-    file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
-    file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(4)
-    idx, file_list = uabCrossValMaker.uabUtilGetFolds(None, file_list, 'force_tile')
-    idx_truth, file_list_truth = uabCrossValMaker.uabUtilGetFolds(None, file_list_truth, 'force_tile')
-    file_list_valid = uabCrossValMaker.make_file_list_by_key(
-        idx, file_list, [i for i in range(0, 6)],
-        filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
-    file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(
-        idx_truth, file_list_truth, [i for i in range(0, 6)],
-        filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
-    img_mean = blCol.getChannelMeans([0, 1, 2])
+        # use first 5 tiles for validation
+        blCol = uab_collectionFunctions.uabCollection('inria')
+        blCol.readMetadata()
+        file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
+        file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(4)
+        idx, file_list = uabCrossValMaker.uabUtilGetFolds(None, file_list, 'force_tile')
+        idx_truth, file_list_truth = uabCrossValMaker.uabUtilGetFolds(None, file_list_truth, 'force_tile')
+        file_list_valid = uabCrossValMaker.make_file_list_by_key(
+            idx, file_list, [i for i in range(0, 6)],
+            filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
+        file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(
+            idx_truth, file_list_truth, [i for i in range(0, 6)],
+            filter_list=['bellingham', 'bloomington', 'sfo', 'tyrol-e', 'innsbruck'])
+        img_mean = blCol.getChannelMeans([0, 1, 2])
 
-    # make the model
-    # define place holder
-    X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
-    y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
-    mode = tf.placeholder(tf.bool, name='mode')
-    model = UnetModelCrop({'X': X, 'Y': y}, trainable=mode, input_size=input_size, batch_size=5)
-    # create graph
-    model.create_graph('X', class_num=2)
+        # make the model
+        # define place holder
+        X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
+        y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
+        mode = tf.placeholder(tf.bool, name='mode')
+        model = UnetModelCrop({'X': X, 'Y': y}, trainable=mode, input_size=input_size, batch_size=5)
+        # create graph
+        model.create_graph('X', class_num=2)
 
-    # evaluate on tiles
-    model.save_activations(file_list_valid, file_list_valid_truth, parent_dir, img_mean, gpu, model_dir,
-                           path_to_save, input_size, batch_size, load_epoch_num=95)
+        # evaluate on tiles
+        model.save_activations(file_list_valid, file_list_valid_truth, parent_dir, img_mean, gpu, model_dir,
+                               path_to_save, input_size, batch_size, load_epoch_num=95)
 
 
-    # Step 2: create layer shift dict
-    path_to_save = os.path.join(task_dir, save_folder, city_name, 'valid')
-    save_name = os.path.join(path_to_save, 'activation_list.pkl')
+        # Step 2: create layer shift dict
+        path_to_save = os.path.join(task_dir, save_folder, city_name, 'valid')
+        save_name = os.path.join(path_to_save, 'activation_list.pkl')
 
-    act_dict_valid = ersa_utils.load_file(save_name)
-    m_list = []
-    v_list = []
-    for act_name, up in act_dict_valid.items():
-        m_list.append(up.mean)
-        v_list.append(up.var)
+        act_dict_valid = ersa_utils.load_file(save_name)
+        m_list = []
+        v_list = []
+        for act_name, up in act_dict_valid.items():
+            m_list.append(up.mean)
+            v_list.append(up.var)
 
-    path_to_save = os.path.join(task_dir, save_folder, city_name, 'train')
-    save_name = os.path.join(path_to_save, 'activation_list.pkl')
+        path_to_save = os.path.join(task_dir, save_folder, city_name, 'train')
+        save_name = os.path.join(path_to_save, 'activation_list.pkl')
 
-    act_dict_train = ersa_utils.load_file(save_name)
-    m_list = []
-    v_list = []
-    for act_name, up in act_dict_train.items():
-        m_list.append(up.mean)
-        v_list.append(up.var)
+        act_dict_train = ersa_utils.load_file(save_name)
+        m_list = []
+        v_list = []
+        for act_name, up in act_dict_train.items():
+            m_list.append(up.mean)
+            v_list.append(up.var)
 
-    shift_dict = get_shift_vals(act_dict_train, act_dict_valid)
-    path_to_save = os.path.join(task_dir, save_folder, city_name, 'shift_dict.pkl')
-    ersa_utils.save_file(path_to_save, shift_dict)
+        shift_dict = get_shift_vals(act_dict_train, act_dict_valid)
+        path_to_save = os.path.join(task_dir, save_folder, city_name, 'shift_dict.pkl')
+        ersa_utils.save_file(path_to_save, shift_dict)
 
-    # Step 3: evaluate performance on AIOI
-    shift_dict = ersa_utils.load_file(path_to_save)
-    tf.reset_default_graph()
+        # Step 3: evaluate performance on AIOI
+        path_to_save = os.path.join(task_dir, save_folder, city_name, 'shift_dict.pkl')
+        shift_dict = ersa_utils.load_file(path_to_save)
+        tf.reset_default_graph()
 
-    blCol = uab_collectionFunctions.uabCollection(city_name)
-    blCol.readMetadata()
-    file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
-    file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(3)
-    img_mean = blCol.getChannelMeans([0, 1, 2])
+        blCol = uab_collectionFunctions.uabCollection(city_name)
+        blCol.readMetadata()
+        file_list, parent_dir = blCol.getAllTileByDirAndExt([0, 1, 2])
+        file_list_truth, parent_dir_truth = blCol.getAllTileByDirAndExt(3)
+        img_mean = blCol.getChannelMeans([0, 1, 2])
 
-    # make the model
-    # define place holder
-    X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
-    Z = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='Z')
-    y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
-    mode = tf.placeholder(tf.bool, name='mode')
-    model = UnetModelCrop_shiftdict({'X': X, 'Y': y}, trainable=mode, input_size=input_size, batch_size=5)
-    # create graph
-    model.create_graph('X', shift_dict, class_num=2)
+        # make the model
+        # define place holder
+        X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
+        Z = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='Z')
+        y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
+        mode = tf.placeholder(tf.bool, name='mode')
+        model = UnetModelCrop_shiftdict({'X': X, 'Y': y}, trainable=mode, input_size=input_size, batch_size=5)
+        # create graph
+        model.create_graph('X', shift_dict, class_num=2)
 
-    # evaluate on tiles
-    model.evaluate(file_list, file_list_truth, parent_dir, parent_dir_truth,
-                   input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                   save_result_parent_dir='domain_baseline_new', ds_name=city_name, best_model=False,
-                   load_epoch_num=95, show_figure=False)
+        # evaluate on tiles
+        model.evaluate(file_list, file_list_truth, parent_dir, parent_dir_truth,
+                       input_size, None, batch_size, img_mean, model_dir, gpu,
+                       save_result_parent_dir='domain_baseline/iid', ds_name=city_name, best_model=False,
+                       load_epoch_num=95, show_figure=False)
