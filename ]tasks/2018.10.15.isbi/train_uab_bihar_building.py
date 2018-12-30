@@ -12,7 +12,7 @@ import uab_collectionFunctions
 from reader import reader_utils
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
-RUN_ID = 1
+RUN_ID = 2
 BATCH_SIZE = 5
 LEARNING_RATE = 1e-4
 INPUT_SIZE = 300
@@ -119,7 +119,7 @@ def main(flags):
     idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'tile')
     # use first city for validation
     #assert len(file_list) == flags.n_train + flags.n_valid
-    file_list_train = [a for a in file_list[:45]]
+    file_list_train = [a for a in file_list[:52]]
     file_list_valid = [a for a in file_list[-5:]]
 
     with tf.name_scope('image_loader'):

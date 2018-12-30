@@ -70,7 +70,7 @@ img_mean = blCol.getChannelMeans([0, 1, 2])
 
 # make the model
 # define place holder
-model_dir = r'/media/ei-edl01/user/bh163/models/bihar_building'
+model_dir = r'/media/ei-edl01/user/bh163/models/bihar_building2'
 X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
 y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
 mode = tf.placeholder(tf.bool, name='mode')
@@ -81,9 +81,9 @@ model.create_graph('X', class_num=2)
 
 # walk through folders
 data_dir = r'/media/ei-edl01/data/uab_datasets/bihar/patch_for_building_detection'
-# fold_ids = ['c', 'd', 'e', 'g', 'h', 'i', 'j', 'k']
-fold_ids = ['c']
-save_dir = r'/hdd/Sijia/preds/tiles'
+fold_ids = ['c', 'd', 'e', 'g', 'h', 'i', 'j', 'k']
+#fold_ids = ['c']
+save_dir = r'/hdd/Sijia/preds/tiles2'
 for fold_id in fold_ids:
     files = sorted(glob(os.path.join(data_dir, fold_id, '*.tif')))
     save_path = os.path.join(save_dir, fold_id)

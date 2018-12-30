@@ -62,7 +62,7 @@ print(img_mean)
 
 # make the model
 # define place holder
-model_dir = r'/hdd6/Models/bihar_building/DeeplabV3_bihar_building_1_PS(300, 300)_BS5_EP30_LR0.0001_DS20_DR0.8_SFN32'
+model_dir = r'/hdd6/Models/bihar_building/DeeplabV3_bihar_building_2_PS(300, 300)_BS5_EP30_LR0.0001_DS20_DR0.8_SFN32'
 X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
 y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
 mode = tf.placeholder(tf.bool, name='mode')
