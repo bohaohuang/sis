@@ -284,7 +284,7 @@ def get_shift_vals(act_dict_train, act_dict_valid):
 
 if __name__ == '__main__':
     #for city_name in ['Arlington', 'Atlanta', 'Austin', 'DC', 'NewHaven', 'NewYork', 'SanFrancisco', 'Seekonk']:
-    for city_name in ['Austin', 'DC', 'NewHaven', 'NewYork', 'SanFrancisco', 'Seekonk']:
+    for city_name in ['Norfolk']:
         # Step 1: Record layer stats
         # settings
         gpu = 1

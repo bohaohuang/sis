@@ -12,7 +12,8 @@ if __name__ == '__main__':
     gpu = 0
     batch_size = 1
     input_size = [572, 572]
-    for city_name in ['Arlington', 'Atlanta', 'Austin', 'DC', 'NewHaven', 'NewYork', 'SanFrancisco', 'Seekonk']:
+    #for city_name in ['Arlington', 'Atlanta', 'Austin', 'DC', 'NewHaven', 'NewYork', 'SanFrancisco', 'Seekonk']:
+    for city_name in ['Norfolk']:
         tf.reset_default_graph()
 
         blCol = uab_collectionFunctions.uabCollection(city_name)

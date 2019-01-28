@@ -115,8 +115,8 @@ def make_res50_features(model_name, task_dir, city_name, GPU=0, force_run=False)
 
 model_name = 'unet'
 perplex = 25
-city_name = 'Seekonk'
-GPU = 1
+city_name = 'Norfolk'
+GPU = 0
 force_run = False
 
 # 1. make features
@@ -140,3 +140,19 @@ source_feature = select_feature(feature, np.array(idx) >= 6, truth_city, truth_b
 weight = kernel_mean_matching(target_feature, source_feature, kern='rbf', B=1000.0, sigma=21.16)
 save_file_name = os.path.join(task_dir, '{}_target_{}_weight_xregion_building.npy'.format(model_name, city_name))
 np.save(save_file_name, weight)
+
+weight = weight[:, 0]
+
+remake_weight = np.zeros(np.sum(np.array(idx) >= 6))
+tb = [truth_building[i] for i in range(len(truth_building))]
+weight_cnt = 0
+for i in range(remake_weight.shape[0]):
+    if tb[i] == 1:
+        remake_weight[i] = weight[weight_cnt]
+        weight_cnt += 1
+remake_weight = remake_weight / np.sum(remake_weight) / 2
+remake_weight[remake_weight == 0] = 1 / 2 / np.sum(remake_weight == 0)
+
+remake_weight = remake_weight / np.sum(remake_weight)
+print(remake_weight.shape)
+np.save(os.path.join(task_dir, '{}_xregion_mmd_target_{}_5050.npy'.format(model_name, city_name)), remake_weight)

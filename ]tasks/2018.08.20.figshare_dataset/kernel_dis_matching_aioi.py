@@ -128,7 +128,7 @@ model_name = 'unet'
 perplex = 25
 top_cnt = 5
 GPU = 0
-target_city = 'Seekonk'
+target_city = 'Norfolk'
 force_run = False
 
 # 1. make features
@@ -137,7 +137,7 @@ feature_file_name, patch_file_name, ps, patchDir, idx = mrf(model_name, task_dir
 feature = pd.read_csv(feature_file_name, sep=',', header=None).values
 with open(patch_file_name, 'r') as f:
     patch_names = f.readlines()
-target_feature_file_name, _, _, _ = make_res50_features(model_name, task_dir, GPU=GPU, force_run=True)
+target_feature_file_name, _, _, _ = make_res50_features(model_name, task_dir, GPU=GPU, force_run=False)
 target_feature = pd.read_csv(target_feature_file_name, sep=',', header=None).values
 
 # 2. make city and building truth

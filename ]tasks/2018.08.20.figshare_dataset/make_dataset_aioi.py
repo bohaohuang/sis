@@ -61,8 +61,8 @@ def add_lines(img, reader):
 
 if __name__ == '__main__':
     '''resize_dict = {'Arlington': 1, 'Atlanta': 2, 'Austin': 2, 'DC': 2, 'NewHaven': 1,
-                   'NewYork': 2, 'Norfolk': 0.3, 'SanFrancisco': 1, 'Seekonk': 1}'''
-    resize_dict = {'Atlanta': 2}
+                   'NewYork': 2, 'Norfolk': 1, 'SanFrancisco': 1, 'Seekonk': 1}'''
+    resize_dict = {'Norfolk': 1}
     check_result = False
     make_uab = True
 

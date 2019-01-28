@@ -4,7 +4,7 @@ import ersa_utils
 from visualize import visualize_utils
 
 city_id = 'c'
-pred_dir = r'/hdd/Sijia/preds/tiles/{}'.format(city_id)
+pred_dir = r'/hdd/Sijia/preds/tiles2/{}'.format(city_id)
 rgb_dir = r'/media/ei-edl01/data/uab_datasets/bihar/patch_for_building_detection/{}'.format(city_id)
 pred_files = sorted(glob(os.path.join(pred_dir, '*.png')))
 

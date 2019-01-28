@@ -27,10 +27,10 @@ DECAY_STEP = 80
 DECAY_RATE = 0.1
 MODEL_NAME = 'inria_{}_{}_iid'
 SFN = 32
-LEAVE_CITY = 0
+LEAVE_CITY = 6
 LAM = 0.1
 MODEL_DIR = r'/hdd6/Models/UNET_rand_gird/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
-CITY_LIST = ['Arlington', 'Atlanta', 'Austin', 'DC', 'NewHaven', 'NewYork', 'SanFrancisco', 'Seekonk']
+CITY_LIST = ['Arlington', 'Atlanta', 'Austin', 'DC', 'NewHaven', 'NewYork', 'Norfolk', 'SanFrancisco', 'Seekonk']
 WEIGHT_DIR = r'/media/ei-edl01/user/bh163/tasks/2018.11.06.domain_baselines/dtm/{}'
 
 

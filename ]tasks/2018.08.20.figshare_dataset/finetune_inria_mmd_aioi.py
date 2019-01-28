@@ -11,9 +11,9 @@ import uab_DataHandlerFunctions
 from bohaoCustom import uabDataReader
 from bohaoCustom import uabMakeNetwork_UNet
 
-RUN_ID = 1
+RUN_ID = 0
 BATCH_SIZE = 5
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 5e-6
 INPUT_SIZE = 572
 TILE_SIZE = 5000
 EPOCHS = 40
@@ -23,8 +23,8 @@ N_VALID = 1280
 GPU = 0
 DECAY_STEP = 30
 DECAY_RATE = 0.1
-CITY_NAME = 'dc'
-MODEL_NAME = 'inria_mmd_xregion_5050_{}_{}'
+CITY_NAME = 'Arlington'
+MODEL_NAME = 'aioi_mmd_xregion_5050_{}_{}'
 SFN = 32
 PRED_MODEL_DIR = r'/hdd6/Models/Inria_decay/UnetCrop_inria_decay_0_PS(572, 572)_BS5_' \
                  r'EP100_LR0.0001_DS60.0_DR0.1_SFN32'

@@ -94,7 +94,7 @@ def make_res50_features(model_name, task_dir, city_name, GPU=0, force_run=False)
             files = f.readlines()
 
         res50 = keras.applications.resnet50.ResNet50(include_top=True, weights='imagenet')
-        fc2048 = keras.models.Model(inputs=res50.input, outputs=res50.get_layer('flatten_1').output)
+        fc2048 = keras.models.Model(inputs=res50.input, outputs=res50.get_layer('avg_pool').output)
         with open(feature_file_name, 'w+') as f:
             with open(patch_file_name, 'w+') as f2:
                 for file_line in tqdm(files):
@@ -135,6 +135,7 @@ truth_building = make_building_truth(ps, task_dir, model_name, patchDir, patch_n
 # print(mean_dist)
 source_feature = select_feature(feature, np.array(idx) >= 6, truth_city, truth_building,
                                 [i for i in range(5)], True)
-weight = kernel_mean_matching(target_feature, source_feature, kern='rbf', B=1000.0, sigma=21.16)
+print(source_feature.shape, target_feature.shape)
+'''weight = kernel_mean_matching(target_feature, source_feature, kern='rbf', B=1000.0, sigma=21.16)
 save_file_name = os.path.join(task_dir, '{}_target_{}_weight_xregion_building.npy'.format(model_name, city_name))
-np.save(save_file_name, weight)
+np.save(save_file_name, weight)'''
