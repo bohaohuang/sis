@@ -20,11 +20,11 @@ EPOCHS = 40
 NUM_CLASS = 2
 N_TRAIN = 8000
 N_VALID = 0
-GPU = 1
+GPU = 0
 DECAY_STEP = 30
 DECAY_RATE = 0.1
-CITY_NAME = 'Norfolk'
-MODEL_NAME = 'inria_distance_xregion_5050_{}_{}'
+CITY_NAME = 'Arlington'
+MODEL_NAME = 'eval_aioi_dis_xregion_5050_{}_{}'
 SFN = 32
 PRED_MODEL_DIR = r'/hdd6/Models/Inria_decay/UnetCrop_inria_decay_0_PS(572, 572)_BS5_' \
                  r'EP100_LR0.0001_DS60.0_DR0.1_SFN32'
@@ -120,7 +120,25 @@ def main(flags):
         [3], [0, 1, 2], patchDir, file_list_train, flags.input_size, flags.batch_size,
         weight, dataAug='flip,rotate', block_mean=np.append([0], img_mean))
     # no augmentation needed for validation
-    dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_valid, flags.input_size,
+    '''dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir, file_list_valid, flags.input_size,
+                                                      flags.batch_size, dataAug=' ',
+                                                      block_mean=np.append([0], img_mean), batch_code=0)'''
+
+    # AIOI dataset
+    blCol = uab_collectionFunctions.uabCollection(flags.city_name)
+    # extract patches
+    extrObj = uab_DataHandlerFunctions.uabPatchExtr([0, 1, 2, 3],
+                                                    cSize=flags.input_size,
+                                                    numPixOverlap=int(model.get_overlap()),
+                                                    extSave=['jpg', 'jpg', 'jpg', 'png'],
+                                                    isTrain=True,
+                                                    gtInd=3,
+                                                    pad=model.get_overlap() // 2)
+    patchDir_target = extrObj.run(blCol)
+    idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir_target, 'fileList.txt', 'force_tile')
+    file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [i for i in range(5)])
+    dataReader_valid = uabDataReader.ImageLabelReader([3], [0, 1, 2], patchDir_target, file_list_valid,
+                                                      flags.input_size,
                                                       flags.batch_size, dataAug=' ',
                                                       block_mean=np.append([0], img_mean), batch_code=0)
 
