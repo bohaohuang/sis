@@ -10,13 +10,13 @@ if __name__ == '__main__':
     gpu = 1
     batch_size = 1
     input_size = [2044, 2044]
-    #for city_name in ['DC', 'Norfolk']:
-    for city_name in ['Arlington', 'Atlanta', 'Austin', 'DC', 'NewHaven', 'NewYork', 'Norfolk', 'SanFrancisco', 'Seekonk']:
+    for city_name in ['Arlington', 'Austin', 'DC', 'NewHaven', 'NewYork', 'Norfolk', 'SanFrancisco', 'Seekonk']:
+    #for city_name in ['Arlington', 'Atlanta', 'Austin', 'DC', 'NewHaven', 'NewYork', 'Norfolk', 'SanFrancisco', 'Seekonk']:
         #model_dir = r'/hdd6/Models/domain_baseline/dtm/UnetDTDA_inria_{}_0_iid_PS(572, 572)_BS8_' \
         #            r'EP60_LR1e-06_DS80_DR0.1'.format(city_name)
         #model_dir = r'/hdd6/Models/domain_baseline/distance/UnetCrop_inria_distance_xregion_5050_{}_1_PS(572, 572)_BS5_' \
         #            r'EP40_LR1e-05_DS30_DR0.1_SFN32'.format(city_name)
-        model_dir = r'/hdd6/Models/Inria_Domain_Selection/UnetCrop_eval_aioi_dis_xregion_5050_{}_1_PS(572, 572)_BS5_' \
+        model_dir = r'/hdd6/Models/Inria_Domain_Selection/UnetCrop_eval_aioi_mmd_xregion_5050_{}_0_PS(572, 572)_BS5_' \
                     r'EP40_LR5e-05_DS30_DR0.1_SFN32'.format(city_name)
 
         tf.reset_default_graph()
@@ -54,5 +54,5 @@ if __name__ == '__main__':
             # evaluate on tiles
             model.evaluate(file_list, file_list_truth, parent_dir, parent_dir_truth,
                            input_size, None, batch_size, img_mean, model_dir, gpu,
-                           save_result_parent_dir='domain_baseline/dis', ds_name=city_name, best_model=True,
+                           save_result_parent_dir='domain_baseline/mmd', ds_name=city_name, best_model=True,
                            show_figure=False)
