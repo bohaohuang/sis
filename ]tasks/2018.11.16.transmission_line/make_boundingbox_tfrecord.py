@@ -6,7 +6,7 @@ Note:
 This file has been modified so that it only predicts class as T
 """
 
-IS_DCC = True
+IS_DCC = False
 CITY_NAME = 'Wilmington'
 
 
@@ -107,7 +107,7 @@ def get_bounding_box(y, x):
 def write_data_info(rgb_files, csv_files, save_dir):
     for rgb_file, csv_file in zip(rgb_files, csv_files):
         print('Processing data {}'.format(os.path.basename(rgb_file)[:-3]))
-        save_name = os.path.basename(rgb_file)[:-3] + 'npy'
+        save_name = os.path.basename(rgb_file)[:-4] + '.npy'
         rgb = ersa_utils.load_file(rgb_file)
         coords, h_steps, w_steps = extract_grids(rgb, PATCH_SIZE[0], PATCH_SIZE[1])
 
@@ -118,15 +118,15 @@ def write_data_info(rgb_files, csv_files, save_dir):
             box = get_bounding_box(y-h_start, x-w_start)
 
             # FIXME only label them as T
-            # coords[h_id_0][w_id_0]['label'].append(label)
-            coords[h_id_0][w_id_0]['label'].append('T')
+            coords[h_id_0][w_id_0]['label'].append(label)
+            # coords[h_id_0][w_id_0]['label'].append('T')
             coords[h_id_0][w_id_0]['box'].append(box)
         ersa_utils.save_file(os.path.join(save_dir, save_name), coords)
 
 
 def make_dataset(rgb_files, info_dir, store_dir, tf_dir, city_name=''):
-    writer_train = tf.python_io.TFRecordWriter(os.path.join(tf_dir, 'train_{}.record'.format(city_name)))
-    writer_valid = tf.python_io.TFRecordWriter(os.path.join(tf_dir, 'valid_{}.record'.format(city_name)))
+    writer_train = tf.python_io.TFRecordWriter(os.path.join(tf_dir, 'train{}.record'.format(city_name)))
+    writer_valid = tf.python_io.TFRecordWriter(os.path.join(tf_dir, 'valid{}.record'.format(city_name)))
 
     for rgb_file_name in rgb_files:
         file_name = os.path.basename(rgb_file_name[:-4])
@@ -139,7 +139,7 @@ def make_dataset(rgb_files, info_dir, store_dir, tf_dir, city_name=''):
             is_val = False
 
         rgb = ersa_utils.load_file(rgb_file_name)
-        npy_file_name = os.path.join(info_dir, os.path.basename(rgb_file_name[:-3] + 'npy'))
+        npy_file_name = os.path.join(info_dir, os.path.basename(rgb_file_name[:-4] + '.npy'))
         coords = ersa_utils.load_file(npy_file_name)
 
         patch_cnt = 0
@@ -149,7 +149,7 @@ def make_dataset(rgb_files, info_dir, store_dir, tf_dir, city_name=''):
                 save_name = os.path.join(store_dir, os.path.basename(rgb_file_name[:-4] + '_{}.jpg'.format(patch_cnt)))
                 img = rgb[cell['h']:cell['h']+PATCH_SIZE[0], cell['w']:cell['w']+PATCH_SIZE[1], :]
                 label = cell['label']
-                assert np.unique(label) == ['T'] or label == []
+                # assert np.unique(label) == ['DT'] or label == []
                 box = cell['box']
                 ersa_utils.save_file(save_name, img)
 

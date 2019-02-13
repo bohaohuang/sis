@@ -85,13 +85,13 @@ def custom_scoring(pred, gt, confidences):
 
 # settings
 img_dir, task_dir = utils.get_task_img_folder()
-city_id = 0
+city_id = 3
 city_list = ['AZ_Tucson', 'KS_Colwich_Maize', 'NC_Clyde', 'NC_Wilmington']
 data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
 info_dir = os.path.join(data_dir, 'info')
 raw_dir = os.path.join(data_dir, 'raw')
 
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(7, 5))
 for link_r in [3, 33, 50, 167]:  # 10m range
     pred_list_all = []
     gt_list_all = []
@@ -125,7 +125,7 @@ for link_r in [3, 33, 50, 167]:  # 10m range
     step_kwargs = ({'step': 'post'}
                    if 'step' in signature(plt.fill_between).parameters
                    else {})
-    plt.step(recall, precision, alpha=1, where='post', label='Link Radius={}, AP={:.2f}'.format(link_r, ap))
+    plt.step(recall[1:], precision[1:], alpha=1, where='post', label='Link Radius={}, AP={:.2f}'.format(link_r, ap))
     plt.xlabel('Recall')
     plt.ylabel('Precision')
     plt.ylim([0.0, 1.05])
@@ -134,4 +134,5 @@ for link_r in [3, 33, 50, 167]:  # 10m range
 
 plt.legend()
 plt.tight_layout()
+plt.savefig(os.path.join(img_dir, '{}_tile_pr.png'.format(city_list[city_id])))
 plt.show()
