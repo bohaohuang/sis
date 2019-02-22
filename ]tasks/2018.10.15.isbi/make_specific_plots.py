@@ -12,8 +12,8 @@ pred = pd.read_csv(pred_file_name).values
 truth = pd.read_csv(truth_file_name).values
 mse = np.mean(np.square(pred - truth), axis=1)
 
-'''ids = [2238, 1028, 2035, 1214, 2126, 1059]
-p = 60
+ids = [2245, 2829, 2035, 2131, 2133, 2266]
+p = 40
 
 plt.figure(figsize=(10, 8))
 for i in range(6):
@@ -26,10 +26,10 @@ for i in range(6):
     plt.xticks([], [])
     plt.yticks([], [])
 plt.tight_layout()
-plt.savefig(os.path.join(img_dir, 'specific_tsne_p{}.png'.format(p)))
-plt.show()'''
+plt.savefig(os.path.join(img_dir, 'specific_tsne_p{}_2.png'.format(p)))
+plt.show()
 
-sort_idx = np.argsort(mse)[:50]
+'''sort_idx = np.argsort(mse)[:50]
 sort_idx = np.random.permutation(sort_idx)[:12]
 plt.figure(figsize=(10, 6))
 for i in range(12):
@@ -43,4 +43,4 @@ for i in range(12):
     plt.yticks([], [])
 plt.tight_layout()
 plt.savefig(os.path.join(img_dir, 'best_tsne.png'))
-plt.show()
+plt.show()'''

@@ -1,6 +1,6 @@
 import os
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import numpy as np
 import tensorflow as tf
 from glob import glob
@@ -8,9 +8,11 @@ from tqdm import tqdm
 from natsort import natsorted
 import utils
 import ersa_utils
+from nn import nn_utils
 from evaluate_utils import extract_grids, run_inference_for_single_image, get_predict_info
 
 # settings
+nn_utils.tf_warn_level(3)
 img_dir, task_dir = utils.get_task_img_folder()
 task_fold = r'/media/ei-edl01/user/bh163/tasks/2018.11.16.transmission_line'
 data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
@@ -21,13 +23,17 @@ for city_id in range(4):
     patch_size = (500, 500)
 
     # model info
-    model_name = ['faster_rcnn_2019-02-05_19-20-08',
+    model_name = ['faster_rcnn_res50_2019-02-13_16-30-28',
+                  'faster_rcnn_res50_2019-02-13_16-32-30',
+                  'faster_rcnn_res50_2019-02-13_16-33-24',
+                  'faster_rcnn_res50_2019-02-13_16-34-12']
+    '''model_name = ['faster_rcnn_2019-02-05_19-20-08',
                   'faster_rcnn_2019-02-05_19-24-35',
                   'faster_rcnn_2019-02-05_19-49-39',
-                  'faster_rcnn_2019-02-05_20-00-56']
+                  'faster_rcnn_2019-02-05_20-00-56']'''
     model_id = 25000
     pred_dir = 'predicted{}'.format(model_name[city_id])
-    graph_path = r'/home/lab/Documents/bohao/data/transmission_line/' \
+    graph_path = r'/hdd6/Models/transmission_line/' \
                  r'export_model/{}/{}/frozen_inference_graph.pb'.format(model_name[city_id], model_id)
     th = 0.5
 
@@ -47,7 +53,9 @@ for city_id in range(4):
         pred_files = natsorted(glob(os.path.join(task_fold, pred_dir, '*_{}.txt'.format(tile_id))))
         npy_file_name = os.path.join(info_dir, 'USA_{}_{}.npy'.format(city_list[city_id], tile_id))
         coords = ersa_utils.load_file(npy_file_name)
-        text_file_name = os.path.join(task_dir, 'USA_{}_{}.txt'.format(city_list[city_id], tile_id))
+        text_save_dir = os.path.join(task_dir, 'faster_rcnn_res50')
+        ersa_utils.make_dir_if_not_exist(text_save_dir)
+        text_file_name = os.path.join(text_save_dir, 'USA_{}_{}.txt'.format(city_list[city_id], tile_id))
 
         h_steps, w_steps = extract_grids(raw_rgb, patch_size[0], patch_size[1])
         with open(text_file_name, 'w+') as f:

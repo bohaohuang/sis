@@ -24,16 +24,16 @@ def plot_tsne(feature_encode, mse, p, show_id=False):
 
 
 img_dir, task_dir = utils.get_task_img_folder()
-pred_file_name = os.path.join(task_dir, 'predOut_20190211_170250.csv')
-truth_file_name = os.path.join(task_dir, 'truthOut_20190211_170250.csv')
+pred_file_name = os.path.join(task_dir, 'test_pred_20190218_182224.csv')
+truth_file_name = os.path.join(task_dir, 'test_truth.csv')
 
-pred = pd.read_csv(pred_file_name).values
-truth = pd.read_csv(truth_file_name).values
+pred = pd.read_csv(pred_file_name, sep=' ').values
+truth = pd.read_csv(truth_file_name, sep=' ').values
 mse = np.mean(np.square(pred - truth), axis=1)
 
-perplex = 60
-file_name = os.path.join(task_dir, 'dlm_p{}.npy'.format(perplex))
+perplex = 40
+file_name = os.path.join(task_dir, 'dlm_p{}_2.npy'.format(perplex))
 feature_encode = run_tsne(truth, file_name, perplex=perplex, force_run=False)
 plot_tsne(feature_encode, mse, perplex, True)
-#plt.savefig(os.path.join(img_dir, 'dlm_tsne_p{}.png'.format(perplex)))
+# plt.savefig(os.path.join(img_dir, 'dlm_tsne_p{}_2.png'.format(perplex)))
 plt.show()

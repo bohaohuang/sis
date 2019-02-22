@@ -1,5 +1,7 @@
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 from object_detection.utils import ops as utils_ops
 
 
@@ -87,3 +89,112 @@ def get_predict_info(output_dict, patch_size, offset, category_index=('T',), th=
 
         if confidence > th:
             yield left, top, right, bottom, confidence, class_name
+
+
+def get_center_point(ymin, xmin, ymax, xmax):
+    return ((ymin+ymax)/2, (xmin+xmax)/2)
+
+
+def parse_result(output_line):
+    info = output_line.strip().split(' ')
+    class_name = str(info[0])
+    confidence = float(info[1])
+    left = int(info[2])
+    top = int(info[3])
+    right = int(info[4])
+    bottom = int(info[5])
+    return class_name, confidence, left, top, right, bottom
+
+
+def local_maxima_suppression(preds, th=20):
+    center_list = []
+    conf_list = []
+    for line in preds:
+        class_name, confidence, left, top, right, bottom = parse_result(line)
+        y, x = get_center_point(top, left, bottom, right)
+        center_list.append([y, x])
+        conf_list.append(confidence)
+
+    center_list = np.array(center_list)
+    n_samples = center_list.shape[0]
+    dist_mat = np.inf * np.ones((n_samples, n_samples))
+    merge_list = []
+    for i in range(n_samples):
+        for j in range(i+1, n_samples):
+            dist_mat[i, j] = np.sqrt(np.sum(np.square(center_list[i, :] - center_list[j, :])))
+        merge_dist = dist_mat[i, :]
+        merge_candidate = np.where(merge_dist < th)
+        if merge_candidate[0].shape[0] > 0:
+            merge_list.append({i: merge_candidate[0].tolist()})
+
+    remove_idx = []
+    for merge_item in merge_list:
+        center_points = []
+        conf_idx = []
+        for k in merge_item.keys():
+            center_points.append(center_list[k, :])
+            conf_idx.append(k)
+            for v in merge_item[k]:
+                center_points.append(center_list[v, :])
+                conf_idx.append(v)
+        center_points = np.mean(center_points, axis=0)
+
+        confs = [conf_list[a] for a in conf_idx]
+        keep_idx = int(np.argmax(confs))
+        remove_idx.extend([conf_idx[a] for a in range(len(confs)) if a != keep_idx])
+        center_list[keep_idx, :] = center_points
+        conf_list[keep_idx] = max(confs)
+
+    center_list = [center_list[a] for a in range(n_samples) if not a in remove_idx]
+    conf_list = [conf_list[a] for a in range(n_samples) if not a in remove_idx]
+
+    return center_list, conf_list, remove_idx
+
+
+def overlay_rectangle(img, bbox, color='r'):
+    fig, ax = plt.subplots(1)
+    ax.imshow(img)
+    for coord in bbox:
+        rect = patches.Rectangle((coord[0], coord[1]), coord[2]-coord[0], coord[3]-coord[1],
+                                 linewidth=1, edgecolor=color, facecolor='none')
+        ax.add_patch(rect)
+    plt.tight_layout()
+    plt.show()
+
+
+if __name__ == '__main__':
+    import os
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as patches
+    import utils
+    import ersa_utils
+
+    img_dir, task_dir = utils.get_task_img_folder()
+    city_name = 'AZ_Tucson'
+    tile_id = 3
+    data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
+    info_dir = os.path.join(data_dir, 'info')
+    raw_dir = os.path.join(data_dir, 'raw')
+
+    pred_file_name = os.path.join(task_dir, 'USA_{}_{}.txt'.format(city_name, tile_id))
+    preds = ersa_utils.load_file(pred_file_name)
+    raw_rgb = ersa_utils.load_file(os.path.join(raw_dir, 'USA_{}_{}.tif'.format(city_name, tile_id)))
+    csv_file_name = os.path.join(raw_dir, 'USA_{}_{}.csv'.format(city_name, tile_id))
+
+    center_list, conf_list, remove_idx = local_maxima_suppression(preds)
+
+    fig, ax = plt.subplots(1)
+    ax.imshow(raw_rgb)
+    for cnt, line in enumerate(preds):
+        class_name, confidence, left, top, right, bottom = parse_result(line)
+        y, x = get_center_point(top, left, bottom, right)
+        if cnt in remove_idx:
+            rect = patches.Rectangle((left, top), right - left, bottom - top, linewidth=2, edgecolor='r',
+                                     facecolor='none')
+        else:
+            rect = patches.Rectangle((left, top), right - left, bottom - top, linewidth=2, edgecolor='g',
+                                     facecolor='none')
+        ax.add_patch(rect)
+
+    plt.tight_layout()
+    plt.show()
