@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from sklearn.mixture import GaussianMixture
-import utils
+import sis_utils
 import uabCrossValMaker
 import uabPreprocClasses
 import uab_collectionFunctions
@@ -14,7 +14,7 @@ import bohaoCustom.uabPreprocClasses as bPreproc
 # settings
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 blCol = uab_collectionFunctions.uabCollection('inria')
 opDetObj = bPreproc.uabOperTileDivide(255)          # inria GT has value 0 and 255, we map it back to 0 and 1
 # [3] is the channel id of GT

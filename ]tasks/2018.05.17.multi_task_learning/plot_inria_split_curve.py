@@ -3,11 +3,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
-import utils
+import sis_utils
 import util_functions
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 # plot iou and lr training curves
 fields = ['Step', 'Value']

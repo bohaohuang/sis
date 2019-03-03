@@ -4,7 +4,7 @@ import tensorflow as tf
 import numpy as np
 import uabCrossValMaker
 import uab_collectionFunctions
-import utils
+import sis_utils
 from bohaoCustom import uabMakeNetwork_UNet
 
 # settings
@@ -12,7 +12,7 @@ gpu = 1
 batch_size = 1
 input_sizes = [224, 480, 736, 992, 1248, 1504, 1760, 2016, 2272, 2528]
 tile_size = [5000, 5000]
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 for size in [224]:
     start_time = time.time()

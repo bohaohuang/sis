@@ -2,7 +2,7 @@ import os
 import imageio
 import numpy as np
 from tqdm import tqdm
-import utils
+import sis_utils
 import uabUtilreader
 import uabCrossValMaker
 import uab_collectionFunctions
@@ -16,7 +16,7 @@ def center_crop(img, pad):
 # settings
 cnn_name = 'deeplab'
 city_num = 4
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 blCol = uab_collectionFunctions.uabCollection('inria')
 img_mean = blCol.getChannelMeans([0, 1, 2])

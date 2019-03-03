@@ -6,7 +6,7 @@ import matplotlib.patches as patches
 from skimage import measure
 from scipy import ndimage
 from tqdm import tqdm
-import utils
+import sis_utils
 import util_functions
 
 
@@ -96,7 +96,7 @@ def visualize_fn_object(rgb, gt, pred, pred_cmp):
 
 
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 truth_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/Original_Tiles'
 cnn_base_dir = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_leave_{}_0_PS(572, 572)_BS5_' \
               r'EP100_LR0.0001_DS60_DR0.1_SFN32/inria/pred'

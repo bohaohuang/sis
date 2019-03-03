@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from glob import glob
-import utils
+import sis_utils
 import uabRepoPaths
 import util_functions
 from util_functions import add_mask
@@ -33,7 +33,7 @@ batch_size = 5
 input_size = [736, 736]
 tile_size = [2541, 2541]
 util_functions.tf_warn_level(3)
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 if len(reshape_files) == 0:
     files = glob(os.path.join(tile_dir, '*.tif'))

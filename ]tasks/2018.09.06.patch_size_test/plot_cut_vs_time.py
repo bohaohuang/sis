@@ -1,9 +1,9 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 save_file_name_dp = os.path.join(task_dir, 'deeplab_crop_records.npy')
 dp_record = np.load(os.path.join(save_file_name_dp))
 save_file_name_un = os.path.join(task_dir, 'unet_crop_records.npy')

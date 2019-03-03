@@ -2,7 +2,7 @@ import os
 import imageio
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import util_functions
 
 
@@ -70,7 +70,7 @@ top_patch_check = 15
 window_size = 300
 stride = 200
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 truth_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/Original_Tiles'
 cnn_base_dir = r'/hdd/Results/domain_selection/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \

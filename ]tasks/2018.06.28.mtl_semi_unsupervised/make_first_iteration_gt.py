@@ -3,7 +3,7 @@ import imageio
 import numpy as np
 from glob import glob
 from tqdm import tqdm
-import utils
+import sis_utils
 import util_functions
 import uab_collectionFunctions
 import uabUtilreader
@@ -14,7 +14,7 @@ if __name__ == '__main__':
     model_name = 'unet'
     blCol = uab_collectionFunctions.uabCollection('inria')
     img_mean = blCol.getChannelMeans([0, 1, 2])
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     threshold = 0.1
 
     for city_num in tqdm(range(5)):

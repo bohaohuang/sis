@@ -4,7 +4,7 @@ import scipy.signal
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-import utils
+import sis_utils
 
 
 def exponential_smoothing(series, alpha=1):
@@ -54,7 +54,7 @@ def get_error_vs_dist2(error_map, size):
 parent_dir = r'/hdd/Temp/patches'
 input_sizes = [572, 828, 1084, 1340, 1596, 1852, 2092, 2332, 2636]
 error_cnt = []
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 for size in tqdm(input_sizes):
     save_file = os.path.join(task_dir, 'error_array_{}_lmax2.npy'.format(size))

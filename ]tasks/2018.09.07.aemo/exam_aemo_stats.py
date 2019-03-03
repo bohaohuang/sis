@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
 from tqdm import tqdm
-import utils
+import sis_utils
 import ersa_utils
 import processBlock
 from preprocess import histMatching
@@ -12,7 +12,7 @@ from collection import collectionMaker, collectionEditor
 
 suffix = 'aemo_pad'
 np.random.seed(1004)
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 cm = collectionMaker.read_collection(raw_data_path=r'/home/lab/Documents/bohao/data/{}'.format(suffix),
                                      field_name='aus10,aus30,aus50',

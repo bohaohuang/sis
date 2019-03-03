@@ -2,11 +2,11 @@ import os
 import matplotlib.pyplot as plt
 from glob import glob
 from natsort import natsorted
-import utils
+import sis_utils
 import ersa_utils
 from visualize import visualize_utils
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 data_dir = r'/media/ei-edl01/data/uab_datasets/bihar_building/data/Original_Tiles'
 rgb_files = natsorted(glob(os.path.join(data_dir, '*.tif')))

@@ -6,7 +6,7 @@ import numpy as np
 import tensorflow as tf
 import scipy.misc
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
@@ -118,16 +118,16 @@ def test(flags, model_name, save_dir):
                         # run
                         result = model.test('X', sess, iterator_test)
 
-                        pred_label_img = utils.get_output_label(result,
-                                                                (meta_test['dim_image'][0]+184, meta_test['dim_image'][1]+184),
-                                                                flags.input_size,
-                                                                meta_test['colormap'], overlap=184,
-                                                                output_image_dim=meta_test['dim_image'],
-                                                                output_patch_size=(flags.input_size[0]-184, flags.input_size[1]-184),
-                                                                make_map=False)
+                        pred_label_img = sis_utils.get_output_label(result,
+                                                                    (meta_test['dim_image'][0]+184, meta_test['dim_image'][1]+184),
+                                                                    flags.input_size,
+                                                                    meta_test['colormap'], overlap=184,
+                                                                    output_image_dim=meta_test['dim_image'],
+                                                                    output_patch_size=(flags.input_size[0]-184, flags.input_size[1]-184),
+                                                                    make_map=False)
                         # evaluate
                         truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
-                        iou = utils.iou_metric(truth_label_img, pred_label_img*255)
+                        iou = sis_utils.iou_metric(truth_label_img, pred_label_img * 255)
 
                         '''ax1 = plt.subplot(121)
                         ax1.imshow(truth_label_img)
@@ -154,7 +154,7 @@ def test(flags, model_name, save_dir):
 
 if __name__ == '__main__':
     flags = read_flag()
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     iou_record = []
 
     model_names = [#'UnetInria_fr_mean_reduced_appendix_EP-100_DS-60.0_LR-0.0001',

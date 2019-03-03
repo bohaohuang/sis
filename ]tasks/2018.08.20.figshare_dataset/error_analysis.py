@@ -2,7 +2,7 @@ import os
 import imageio
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import util_functions
 
 
@@ -70,7 +70,7 @@ top_patch_check = 15
 window_size = 500
 stride = 200
 city_name = 'atlanta'
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 truth_dir = r'/media/ei-edl01/data/uab_datasets/{}/data/Original_Tiles'.format(city_name)
 if cnn_name == 'unet':

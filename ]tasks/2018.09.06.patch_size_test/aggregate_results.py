@@ -1,10 +1,10 @@
 import os
 import numpy as np
-import utils
+import sis_utils
 import util_functions
 import ersa_utils
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 pred_dir = os.path.join(task_dir, 'spca_patch_test_deeplab')
 city_list = ['Fresno', 'Modesto', 'Stockton']
 

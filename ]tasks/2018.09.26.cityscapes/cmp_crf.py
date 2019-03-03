@@ -2,11 +2,11 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
-import utils
+import sis_utils
 import ersa_utils
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 orig_dir = r'/home/lab/Documents/bohao/code/third_party/models/research/deeplab/datasets/cityscapes/leftImg8bit/val/frankfurt'
 base_dir = r'/home/lab/Documents/bohao/data/deeplab_model/vis/raw_segmentation_results'

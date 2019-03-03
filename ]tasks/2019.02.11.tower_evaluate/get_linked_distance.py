@@ -7,7 +7,7 @@ import matplotlib.patches as patches
 from skimage.draw import polygon
 from sklearn.utils.fixes import signature
 from sklearn.metrics import precision_recall_curve, average_precision_score
-import utils
+import sis_utils
 import ersa_utils
 from evaluate_utils import get_center_point, local_maxima_suppression
 
@@ -51,7 +51,7 @@ def get_linked_dist(pred, gt, link_r):
 
 # settings
 if __name__ == '__main__':
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     link_r = 60
     city_list = ['AZ_Tucson', 'KS_Colwich_Maize', 'NC_Clyde', 'NC_Wilmington']
     data_dir = r'/home/lab/Documents/bohao/data/transmission_line'

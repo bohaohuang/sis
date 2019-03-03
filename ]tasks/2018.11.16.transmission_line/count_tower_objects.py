@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from glob import glob
 from natsort import natsorted
 from skimage import measure
-import utils
+import sis_utils
 import ersa_utils
 
 
@@ -15,7 +15,7 @@ def count_objects(binary_map):
 
 data_dir = r'/home/lab/Documents/bohao/data/transmission_line/raw'
 city_list = ['Tucson', 'Colwich', 'Clyde', 'Wilmington']
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 tower_vals = [3, 1]
 tower_names = ['Transmission_Tower', 'Distribution_Tower']
 total_counts = np.zeros((len(tower_names), len(city_list)))

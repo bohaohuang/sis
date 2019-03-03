@@ -1,9 +1,9 @@
 import os
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import ersa_utils
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 # plot train all curves
 data_type = ['Orig', 'Hist']

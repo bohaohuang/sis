@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-import utils
+import sis_utils
 import bohaoCustom.uabPreprocClasses as bPreproc
 import uabPreprocClasses
 import uab_collectionFunctions
@@ -12,7 +12,7 @@ import uab_DataHandlerFunctions
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 # settings
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 # make network
 input_size = [321, 321]

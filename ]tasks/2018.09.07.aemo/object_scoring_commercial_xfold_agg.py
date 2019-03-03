@@ -11,7 +11,7 @@ from sklearn.metrics import precision_recall_curve
 from PIL import Image, ImageDraw
 from scipy.spatial import KDTree
 from skimage import measure
-import utils
+import sis_utils
 import ersa_utils
 
 
@@ -176,7 +176,7 @@ if __name__ == '__main__':
     start_time = time.time()
     commercial = False
 
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     model_dir = ['confmap_uab_UnetCrop_aemo_xfold0_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',
                  'confmap_uab_UnetCrop_aemo_xfold1_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32',

@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 from glob import glob
 import uabUtilreader
-import utils
+import sis_utils
 import ersa_utils
 import util_functions
 import uabDataReader
@@ -19,7 +19,7 @@ tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 model_dir = r'/hdd6/Models/aemo/aemo_comb/UnetCrop_aemo_0_all_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32'
 ds_name = 'aemo_comb'
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 
 class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):

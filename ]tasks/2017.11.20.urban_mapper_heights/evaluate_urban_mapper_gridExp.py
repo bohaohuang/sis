@@ -1,23 +1,23 @@
 import os
-import utils
+import sis_utils
 import numpy as np
 
 
 def evaluate_results(rsr_data_dir, valid_data_dir, input_size,
                      model_name, num_classes, ckdir, city_name,
                      height_mode, batch_size):
-    result = utils.test_authentic_unet_height(rsr_data_dir,
-                                              valid_data_dir,
-                                              input_size,
-                                              model_name,
-                                              num_classes,
-                                              ckdir,
-                                              city_name,
-                                              batch_size,
-                                              ds_name='urban_mapper',
-                                              height_mode=height_mode,
-                                              GPU='1')
-    _, task_dir = utils.get_task_img_folder()
+    result = sis_utils.test_authentic_unet_height(rsr_data_dir,
+                                                  valid_data_dir,
+                                                  input_size,
+                                                  model_name,
+                                                  num_classes,
+                                                  ckdir,
+                                                  city_name,
+                                                  batch_size,
+                                                  ds_name='urban_mapper',
+                                                  height_mode=height_mode,
+                                                  GPU='1')
+    _, task_dir = sis_utils.get_task_img_folder()
     np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
 
     return result
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     height_mode = 'subtract'
     batch_size = 5
 
-    _, task_dir = utils.get_task_img_folder()
+    _, task_dir = sis_utils.get_task_img_folder()
 
     epochs = 25
     decay_step = 20

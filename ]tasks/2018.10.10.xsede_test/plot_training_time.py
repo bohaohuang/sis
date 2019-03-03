@@ -2,12 +2,12 @@ import os
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 n_train = 8000
 epoch = 100
 resolution = 0.3 * 1e-3
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 time = [17*60*60+19*60+20, 21*60*60+24*60+14, 24*60*60+45*60+53]
 time_inf = [342, 388, 396]

@@ -1,10 +1,10 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import ersa_utils
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 model_name = ['fold_0', 'fold_1', 'fold_2']
 

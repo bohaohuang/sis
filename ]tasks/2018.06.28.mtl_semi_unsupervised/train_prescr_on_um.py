@@ -3,7 +3,7 @@ os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 import keras
 import numpy as np
-import utils
+import sis_utils
 import uabRepoPaths
 import uabCrossValMaker
 import uab_collectionFunctions
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     epoch = 150
     learn_rate = 1e-5
     prescr_name = 'res50'
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     if prescr_name == 'incep':
         center_crop = (299, 299)

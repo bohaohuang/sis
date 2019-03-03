@@ -5,7 +5,7 @@ import scipy.misc
 import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
-import utils
+import sis_utils
 import uabCrossValMaker
 import uabPreprocClasses
 import uab_collectionFunctions
@@ -34,7 +34,7 @@ gpu = 1
 batch_size = 5
 input_size = [256, 256]
 latent_num = 500
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
 os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu)
 

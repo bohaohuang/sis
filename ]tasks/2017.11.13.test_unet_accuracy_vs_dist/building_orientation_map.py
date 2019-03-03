@@ -2,7 +2,7 @@ import os
 import scipy.misc
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 from dataReader import patch_extractor
 
 
@@ -10,7 +10,7 @@ IMG_SAVE_DIR = r'/media/ei-edl01/user/bh163/figs'
 truth_image_dir = r'/media/ei-edl01/data/remote_sensing_data/inria/truth'
 SIZE = 224
 
-save_dir = utils.make_task_img_folder(IMG_SAVE_DIR)
+save_dir = sis_utils.make_task_img_folder(IMG_SAVE_DIR)
 for i in range(5):
     truth_sum = np.zeros((SIZE, SIZE))
 

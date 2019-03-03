@@ -3,7 +3,7 @@ import imageio
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import util_functions
 import uab_collectionFunctions
 from bohaoCustom import uabMakeNetwork_UNet
@@ -56,7 +56,7 @@ def evaluate_on_a_patch(chip_size,
 # prepare data
 blCol = uab_collectionFunctions.uabCollection('inria')
 img_mean = blCol.getChannelMeans([0, 1, 2])
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 large_ious = []
 small_ious = []
 

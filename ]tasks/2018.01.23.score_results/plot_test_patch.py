@@ -1,12 +1,12 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 from matplotlib import rc
 rc('text', usetex=True)
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 save_dir = os.path.join(task_dir, 'train_patch')
 
 plt.rcParams.update({'font.size': 14})

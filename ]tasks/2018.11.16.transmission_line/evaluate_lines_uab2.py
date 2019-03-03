@@ -7,7 +7,7 @@ import tensorflow as tf
 from skimage import measure
 from PIL import Image, ImageDraw
 import uabUtilreader
-import utils
+import sis_utils
 import ersa_utils
 import util_functions
 import uabRepoPaths
@@ -231,7 +231,7 @@ input_size = [572, 572]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 ds_name = 'lines'
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 blCol = uab_collectionFunctions.uabCollection(ds_name)
 blCol.readMetadata()

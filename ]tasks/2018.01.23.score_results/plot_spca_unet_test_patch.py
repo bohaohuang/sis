@@ -1,10 +1,10 @@
 import os
-import utils
+import sis_utils
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 save_dir = os.path.join(task_dir, 'train_patch')
 runs = [0]
 sizes = [572, 828, 1084, 1340, 1596, 1852, 2092, 2332, 2636]

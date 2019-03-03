@@ -4,7 +4,7 @@ import tensorflow as tf
 import numpy as np
 import uabCrossValMaker
 import uab_collectionFunctions
-import utils
+import sis_utils
 from bohaoCustom import uabMakeNetwork_UNet
 
 # settings
@@ -13,7 +13,7 @@ batch_size = 1
 input_sizes = [540]#[508, 540, 572, 620, 684, 796, 1052]
 batch_sizes = [8]
 tile_size = [5000, 5000]
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 for cnt, size in enumerate(input_sizes):

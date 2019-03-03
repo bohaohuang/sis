@@ -2,7 +2,7 @@ import os
 import numpy as np
 from glob import glob
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import ersa_utils
 import object_score
 

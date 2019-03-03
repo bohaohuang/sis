@@ -2,7 +2,7 @@ import os
 import numpy as np
 from glob import glob
 from tqdm import tqdm
-import utils
+import sis_utils
 import ersa_utils
 
 
@@ -25,7 +25,7 @@ def cust_hist_match(dist_s, dist_t, img_s):
 
 
 if __name__ == '__main__':
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     spca_stat_file = os.path.join(task_dir, 'spca_panel_stats.npy')
     spca = ersa_utils.load_file(spca_stat_file)

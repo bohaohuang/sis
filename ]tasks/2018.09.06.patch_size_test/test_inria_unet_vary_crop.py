@@ -3,7 +3,7 @@ import time
 import imageio
 import numpy as np
 import tensorflow as tf
-import utils
+import sis_utils
 import uabRepoPaths
 import uabDataReader
 import uabUtilreader
@@ -229,6 +229,6 @@ for c_cnt, crop in enumerate(crop_list):
     records[0, c_cnt] = m_iou
     records[1, c_cnt] = duration
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 save_file_name = os.path.join(task_dir, 'unet_crop_records.npy')
 np.save(save_file_name, records)

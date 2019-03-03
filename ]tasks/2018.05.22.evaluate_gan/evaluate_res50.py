@@ -9,7 +9,7 @@ import uabPreprocClasses
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from tqdm import tqdm
-import utils
+import sis_utils
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 from bohaoCustom import uabMakeNetwork_UNet
 
@@ -23,7 +23,7 @@ def crop_center(img,cropx,cropy):
 
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 model_name = 'unet'
 
 # make network

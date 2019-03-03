@@ -16,7 +16,7 @@ from make_res50_features import crop_center
 from make_res50_features import make_res50_features as mrf
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
-import utils
+import sis_utils
 
 
 def kernel_mean_matching(X, Z, kern='lin', B=1.0, sigma=1.0, eps=None):
@@ -118,7 +118,7 @@ perplex = 25
 city_name = 'dc'
 
 # 1. make features
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 feature_file_name, patch_file_name, ps, patchDir, idx = mrf(model_name, task_dir, GPU=1, force_run=False)
 feature = pd.read_csv(feature_file_name, sep=',', header=None).values
 with open(patch_file_name, 'r') as f:

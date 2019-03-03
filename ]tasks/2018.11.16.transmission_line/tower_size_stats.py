@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from glob import glob
 from natsort import natsorted
 from skimage.draw import polygon
-import utils
+import sis_utils
 import ersa_utils
 
 
@@ -60,7 +60,7 @@ def get_height_width_list(rgb_files, csv_files, save_dir):
 if __name__ == '__main__':
     data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
     save_dir = os.path.join(data_dir, 'info')
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     rgb_files = natsorted([a for a in glob(os.path.join(data_dir, 'raw', '*.tif'))
                                if 'multiclass' not in a])

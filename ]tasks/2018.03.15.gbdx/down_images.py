@@ -5,7 +5,7 @@ from PIL import Image
 from tqdm import tqdm
 from gbdxtools import Interface
 from gbdxtools import CatalogImage
-import utils
+import sis_utils
 
 
 bboxes = [(-71.99158530555556,
@@ -66,7 +66,7 @@ gbdx = Interface()
 
 [gbdx.ordering.order(imid) for imid in imstocat]  # ORDER IMAGES IF NEEDED
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 # verify polygons
 '''for bb in bboxes:

@@ -3,13 +3,13 @@ import imageio
 import numpy as np
 from glob import glob
 from util_functions import add_mask
-import utils
+import sis_utils
 
 deeplab_pred_dir = r'/hdd/Results/gbdx_cmp/DeeplabV3_res101_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32/sp/pred'
 unet_pred_dir = r'/hdd/Results/gbdx_cmp/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32/sp/pred'
 gt_dir = r'/media/ei-edl01/data/uab_datasets/sp/DATA_BUILDING_AND_PANEL'
 tile_ids = [os.path.basename(a).split('_')[0] for a in glob(os.path.join(gt_dir, '*_GT.png'))]
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 for img_cnt in range(len(tile_ids)):
     img_name = '{}.png'.format(tile_ids[img_cnt])

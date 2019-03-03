@@ -1,11 +1,11 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import ersa_utils
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 step_range = 6
 iou_record_shift_un = np.zeros(step_range-1)
 iou_record_shift_dp = np.zeros(step_range-1)

@@ -2,13 +2,13 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
-import utils
+import sis_utils
 import ersa_utils
 
 data_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_pad'
 tile_ids = ['10', '30', '50']
 color_code = ['r', 'g', 'b']
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 
 plt.figure(figsize=(12, 8))

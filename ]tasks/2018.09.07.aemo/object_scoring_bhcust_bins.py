@@ -2,11 +2,11 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import precision_recall_curve
-import utils
+import sis_utils
 import ersa_utils
 
 if __name__ == '__main__':
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     model_name = ['Fold 0', 'Fold 1', 'Fold 2']
 

@@ -1,12 +1,12 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import ersa_utils
 from visualize import visualize_utils
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 pred_dir = os.path.join(task_dir, 'unet_patch_test_5')
 
 for step_size in range(1, 8):

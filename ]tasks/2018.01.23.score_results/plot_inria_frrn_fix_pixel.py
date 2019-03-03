@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import uabRepoPaths
-import utils
+import sis_utils
 
 run_ids = [0, 1, 2, 3, 4]
 batch_sizes = [10,  8,   7,   6,   5,   4,   3,   2]
@@ -48,7 +48,7 @@ ind = np.arange(len(batch_sizes))
 ax1 = plt.subplot()
 result_mean, result_var, result_up, result_down = get_results('fix_pixel_fix_test')
 ax1.errorbar(patch_sizes, result_mean, yerr=result_var, uplims=result_up, lolims=result_down, label='test size=496')
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 with open(os.path.join(task_dir, 'frrn_inria_fixpixel.npy'), 'wb') as pk:
     pickle.dump([result_mean, result_var, result_up, result_down, batch_sizes, patch_sizes], pk)
 result_mean, result_var, result_up, result_down = get_results('fix_pixel')

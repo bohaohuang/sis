@@ -2,7 +2,7 @@ import os
 import numpy as np
 import tensorflow as tf
 import uabUtilreader
-import utils
+import sis_utils
 import ersa_utils
 import util_functions
 import uabCrossValMaker
@@ -16,7 +16,7 @@ tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 model_dir = r'/hdd6/Models/aemo/aemo_comb/UnetCrop_aemo_comb_0_xregion_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32'
 ds_name = 'aemo_comb'
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 SAVE_DIR = os.path.join(task_dir, 'confmap_uab_{}'.format(os.path.basename(model_dir)))
 ersa_utils.make_dir_if_not_exist(SAVE_DIR)
 TILE_CNT = 0

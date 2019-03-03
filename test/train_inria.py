@@ -3,7 +3,7 @@ import time
 import argparse
 import numpy as np
 import tensorflow as tf
-import utils
+import sis_utils
 from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
@@ -136,7 +136,7 @@ def main(flags):
             train_summary_writer = tf.summary.FileWriter(model.ckdir, sess.graph)
 
             model.train('X', 'Y', flags.epochs, flags.n_train, flags.batch_size, sess, train_summary_writer,
-                        train_reader=reader_train_op, valid_reader=reader_valid_op, image_summary=utils.image_summary)
+                        train_reader=reader_train_op, valid_reader=reader_valid_op, image_summary=sis_utils.image_summary)
         finally:
             coord.request_stop()
             coord.join(threads)

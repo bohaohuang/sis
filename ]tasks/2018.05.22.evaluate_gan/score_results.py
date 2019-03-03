@@ -9,7 +9,7 @@ from sklearn import svm
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.model_selection import KFold
 from sklearn.metrics import roc_curve, auc, confusion_matrix
-import utils
+import sis_utils
 import uabCrossValMaker
 import uabPreprocClasses
 import uab_collectionFunctions
@@ -52,7 +52,7 @@ def plot_confusion_matrix(cm, classes,
     plt.xlabel('Predicted label')
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 blCol = uab_collectionFunctions.uabCollection('inria')
 opDetObj = bPreproc.uabOperTileDivide(255)          # inria GT has value 0 and 255, we map it back to 0 and 1
 # [3] is the channel id of GT

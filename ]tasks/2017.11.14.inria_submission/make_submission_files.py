@@ -7,7 +7,7 @@ import tensorflow as tf
 import shutil
 import scipy.misc
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 from glob import glob
 from network import unet
 from dataReader import image_reader, patch_extractor
@@ -133,8 +133,8 @@ def main(flags):
                 output += raw_pred
 
             # combine results
-            labels_pred = utils.get_pred_labels(output)
-            output_pred = utils.make_output_file(labels_pred, meta_test['colormap'])
+            labels_pred = sis_utils.get_pred_labels(output)
+            output_pred = sis_utils.make_output_file(labels_pred, meta_test['colormap'])
             scipy.misc.imsave(os.path.join(FIG_SAVE_DIR, '{}{}.tif'.format(flags.city_name, tile_num+1)),
                               output_pred)
 

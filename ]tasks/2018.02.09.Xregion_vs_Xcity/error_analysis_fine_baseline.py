@@ -2,7 +2,7 @@ import os
 import imageio
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 from util_functions import add_mask, iou_metric
 
 
@@ -33,7 +33,7 @@ def get_error_mask_img(img, gt, mask):
 
 
 if __name__ == '__main__':
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     #pred_dir_loo = r'/hdd/Results/UnetCrop_inria_aug_leave_1_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32/default/pred'
     #pred_dir_xr = r'/hdd/Results/grid_vs_random/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32/inria/pred'

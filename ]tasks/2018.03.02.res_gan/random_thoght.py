@@ -1,11 +1,11 @@
 import os
 import csv
-import utils
+import sis_utils
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 npy_file_name = os.path.join(task_dir, 'encoded_res50_2.npy')
 city_order = {'aus': 0, 'chi': 1, 'kit': 2, 'tyr': 3, 'vie': 4}
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']

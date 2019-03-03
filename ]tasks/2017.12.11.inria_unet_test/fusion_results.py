@@ -7,7 +7,7 @@ import tensorflow as tf
 import scipy.misc
 import sklearn.metrics
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
@@ -130,13 +130,13 @@ def test_and_save(flags, model_name, save_dir):
                         # run
                         result = model.test('X', sess, iterator_test, soft_pred=True)
 
-                        pred_label_img = utils.get_output_label(result,
-                                                                (meta_test['dim_image'][0]+184, meta_test['dim_image'][1]+184),
-                                                                flags.input_size,
-                                                                meta_test['colormap'], overlap=184,
-                                                                output_image_dim=meta_test['dim_image'],
-                                                                output_patch_size=(flags.input_size[0]-184, flags.input_size[1]-184),
-                                                                make_map=False, soft_pred=True)
+                        pred_label_img = sis_utils.get_output_label(result,
+                                                                    (meta_test['dim_image'][0]+184, meta_test['dim_image'][1]+184),
+                                                                    flags.input_size,
+                                                                    meta_test['colormap'], overlap=184,
+                                                                    output_image_dim=meta_test['dim_image'],
+                                                                    output_patch_size=(flags.input_size[0]-184, flags.input_size[1]-184),
+                                                                    make_map=False, soft_pred=True)
                         file_name = os.path.join(save_path, '{}_{}.npy'.format(city_name, tile_id))
                         np.save(file_name, pred_label_img)
         finally:
@@ -166,11 +166,11 @@ def get_fusion_ious(model_dirs):
                 preds = np.zeros((5000, 5000, 2))
                 for dir in model_dirs:
                     preds += np.load(os.path.join(dir, '{}_{}.npy'.format(city_name, tile_id)))
-                pred_labels = utils.get_pred_labels(preds)
+                pred_labels = sis_utils.get_pred_labels(preds)
 
                 # evaluate
                 truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
-                iou = utils.iou_metric(truth_label_img, pred_labels*255)
+                iou = sis_utils.iou_metric(truth_label_img, pred_labels * 255)
                 iou_record[image_name] = iou
                 print('{}_{}: iou={:.2f}'.format(city_name, tile_id, iou * 100))
 
@@ -222,7 +222,7 @@ def plot_comparison(model_names):
         plt.ylabel('IoU')
         plt.ylim(ymin=ylims[i])
         for r in rect:
-            utils.barplot_autolabel(ax[i], r)
+            sis_utils.barplot_autolabel(ax[i], r)
     ax[0].legend(loc='lower center', bbox_to_anchor=(0.5, 1.1), fancybox=True)
 
     if len(model_names) <= 3:
@@ -250,7 +250,7 @@ def get_diff_ordered(model_name_0, model_name_1):
 
 if __name__ == '__main__':
     flags = read_flag()
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     iou_record = []
 
     model_names = ['UnetInria_fr_mean_reduced_appendix_large_EP-100_DS-60.0_LR-0.0001',

@@ -1,5 +1,5 @@
 import argparse
-import utils
+import sis_utils
 
 TEST_DATA_DIR = 'dcc_inria_valid'
 CITY_NAME = 'austin'
@@ -38,14 +38,14 @@ def read_flag():
 
 
 def main(flags):
-    result = utils.test_unet(flags.rsr_data_dir,
-                             flags.test_data_dir,
-                             flags.input_size,
-                             flags.model_name,
-                             flags.num_classes,
-                             flags.ckdir,
-                             flags.city_name,
-                             flags.batch_size)
+    result = sis_utils.test_unet(flags.rsr_data_dir,
+                                 flags.test_data_dir,
+                                 flags.input_size,
+                                 flags.model_name,
+                                 flags.num_classes,
+                                 flags.ckdir,
+                                 flags.city_name,
+                                 flags.batch_size)
     print(result)
 
 

@@ -2,7 +2,7 @@ import os
 import imageio
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 from util_functions import iou_metric
 
 unet_pred_dir = r'/hdd/Results/grid_vs_random/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32/inria/pred'
@@ -10,7 +10,7 @@ frrn_pred_dir = r'/hdd/Results/grid_vs_random/FRRN_inria_aug_grid_0_PS(224, 224)
 deeplab_pred_dir = r'/hdd/Results/DeeplabV3_res101_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32/default/pred'
 fpn_pred_dir = r'/hdd/Results/FPNRes101_inria_aug_grid_1_PS(224, 224)_BS10_EP100_LR1e-05_DS40_DR0.1_SFN32/default/pred'
 data_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/Original_Tiles'
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 # plot city level score compare
 model_names = ['U-Net', 'FRRN', 'DeepLab V2', 'FPN']

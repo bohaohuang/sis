@@ -7,7 +7,7 @@ from glob import glob
 from tqdm import tqdm
 from scipy import ndimage
 from skimage import measure
-import utils
+import sis_utils
 import ersa_utils
 
 
@@ -63,7 +63,7 @@ def get_object_patch(rgb, gt, gt2show, prefix):
 
 data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
 city_list = ['Tucson', 'Colwich', 'Clyde', 'Wilmington']
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 tower_vals = [3, 1, 5]
 tower_names = ['Transmission_Tower', 'Distribution_Tower', 'Other_Tower']
 

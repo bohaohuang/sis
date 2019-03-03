@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import uabRepoPaths
-import utils
+import sis_utils
 
 run_ids = [0, 1, 2, 3, 4]
 batch_sizes = [10,  9,   8,   7,   6,   5,   4,   3,   2,   1]
@@ -70,7 +70,7 @@ plt.title('Unet on Inria')
 ax1.legend()
 plt.tight_layout()
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 #plt.savefig(os.path.join(img_dir, 'unet_spca_fixpixel.png'))
 #with open(os.path.join(task_dir, 'unet_spca_fixpixel.npy'), 'wb') as pk:
 #    pickle.dump([result_mean, result_var, result_up, result_down, batch_sizes, patch_sizes], pk)

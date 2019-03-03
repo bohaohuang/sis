@@ -166,10 +166,10 @@ if __name__ == '__main__':
     import os
     import matplotlib.pyplot as plt
     import matplotlib.patches as patches
-    import utils
+    import sis_utils
     import ersa_utils
 
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     city_name = 'AZ_Tucson'
     tile_id = 3
     data_dir = r'/home/lab/Documents/bohao/data/transmission_line'

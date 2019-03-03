@@ -3,10 +3,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from glob import glob
-import utils
+import sis_utils
 import util_functions
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 csv_files = glob(os.path.join(task_dir, '*.csv'))
 
 for file in csv_files:

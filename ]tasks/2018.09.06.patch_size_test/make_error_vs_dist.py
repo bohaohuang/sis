@@ -6,7 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from glob import glob
 from tqdm import tqdm
-import utils
+import sis_utils
 
 
 def get_error_vs_dist(model):
@@ -55,7 +55,7 @@ def get_error_vs_dist(model):
     return dist_array[1:-1], error_array[1:-1]
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 nocrop_dist, nocrop_error = get_error_vs_dist('UnetNoCrop')
 crop_dist_2, crop_error_2 = get_error_vs_dist('UnetCrop2')

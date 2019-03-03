@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 loo_dir_deeplab = r'/hdd/Results/DeeplabV3_inria_aug_leave_0_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32/default'
 loo_dir_unet = r'/hdd/Results/UnetCrop_inria_aug_leave_0_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32/default'
@@ -40,7 +40,7 @@ for loo_dir in [pred_dir_xr_deeplab, pred_dir_xr_unet]:
         B_record += B
     baseline.append(A_record/B_record*100)
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 ind = np.arange(6)
 width = 0.35
 scores *= 100

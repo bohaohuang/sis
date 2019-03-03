@@ -2,7 +2,7 @@ import os
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 model_name = ['unet', 'deeplab']
 legend_name = ['U-Net', 'Deeplab-CRF']
@@ -45,6 +45,6 @@ plt.legend(loc='upper right')
 
 plt.xlabel('Patch Size')
 plt.tight_layout()
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 plt.savefig(os.path.join(img_dir, 'inria_fixpixel_all.png'))
 plt.show()

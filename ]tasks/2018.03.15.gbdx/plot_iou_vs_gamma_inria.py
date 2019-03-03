@@ -1,10 +1,10 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import util_functions
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 base_dir = r'/hdd/Results/inria_gamma/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
 ft_dir1 = r'/hdd/Results/inria_gamma/UnetCrop_inria_aug_gamma_0_PS(572, 572)_BS5_EP40_LR1e-05_DS20_DR0.1_SFN32'
 ft_dir2 = r'/hdd/Results/inria_gamma/UnetCrop_inria_aug_gamma_0_PS(572, 572)_BS5_EP40_LR1e-06_DS20_DR0.1_SFN32'

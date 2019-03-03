@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw
 from scipy.spatial import KDTree
 from sklearn.metrics import precision_recall_curve
 from skimage import measure
-import utils
+import sis_utils
 import ersa_utils
 from nn import nn_utils
 
@@ -171,7 +171,7 @@ def scoring_func2(gtObj, ppObj, iou_th=0.5):
 if __name__ == '__main__':
     start_time = time.time()
 
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     '''corner_case = ersa_utils.load_file(os.path.join(img_dir, 'corner_case.png'))
     #corner_case = np.pad(corner_case, ((2, 2), (2, 2)), 'constant')

@@ -6,7 +6,7 @@ import numpy as np
 import uabDataReader
 import uabCrossValMaker
 import uab_collectionFunctions
-import utils
+import sis_utils
 import util_functions
 from bohaoCustom import uabMakeNetwork_UNet
 
@@ -17,7 +17,7 @@ gpu = None
 batch_size = 1
 input_sizes = [572, 828, 1084, 1340, 1596, 1852, 2092, 2332, 2636]
 tile_size = [5000, 5000]
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 img_save_dir = os.path.join(img_dir, 'dist_error')
 if not os.path.exists(img_save_dir):
     os.makedirs(img_save_dir)

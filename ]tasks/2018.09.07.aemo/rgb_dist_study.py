@@ -3,9 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
 import ersa_utils
-import utils
+import sis_utils
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 plt.figure(figsize=(6, 10))
 gammas = ['2p5', '1', '2p5']

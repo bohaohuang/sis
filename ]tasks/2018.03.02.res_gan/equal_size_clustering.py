@@ -3,7 +3,7 @@ import time
 import numpy as np
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 
 class equal_size_clustering(object):
@@ -88,7 +88,7 @@ class equal_size_clustering(object):
 if __name__ == '__main__':
     # read data
     random_seed = 9
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     file_name = os.path.join(task_dir, 'res50_fc1000_inria.csv')
     input_size = 321
     patchDir = r'/hdd/uab_datasets/Results/PatchExtr/inria/chipExtrReg_cSz321x321_pad0'

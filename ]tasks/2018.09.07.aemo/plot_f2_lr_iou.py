@@ -1,9 +1,9 @@
 import os
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import ersa_utils
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 f2_name = os.path.join(task_dir, 'f2s.npy')
 lr_name = os.path.join(task_dir, 'lrs.npy')
 model_name = ['Raw Finetune 1e-3', 'Raw Scratch 1e-3', 'Hist Finetune 1e-3', 'Hard Sample']

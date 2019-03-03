@@ -9,7 +9,7 @@ import skimage.measure
 import scipy.ndimage
 import sklearn.metrics
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
@@ -54,7 +54,7 @@ def read_flag():
 
 def make_pred_map(model_dirs, ids, p_dir):
     model_dirs = [model_dirs[a] for a in ids]
-    _, task_dir = utils.get_task_img_folder(local_dir=True)
+    _, task_dir = sis_utils.get_task_img_folder(local_dir=True)
     task_dir = os.path.join(task_dir, 'fuse_{}_{}'.format(len(model_dirs), '+'.join([str(idx) for idx in ids])))
     if not os.path.exists(task_dir):
         os.makedirs(task_dir)
@@ -78,7 +78,7 @@ def make_pred_map(model_dirs, ids, p_dir):
                 for dir in model_dirs:
                     dir = os.path.join(p_dir, 'temp_save', dir)
                     preds += np.load(os.path.join(dir, '{}_{}.npy'.format(city_name, tile_id)))
-                pred_labels = utils.get_pred_labels(preds)
+                pred_labels = sis_utils.get_pred_labels(preds)
                 scipy.misc.imsave(os.path.join(task_dir, '{}_{}.png'.format(city_name, tile_id)), pred_labels)
 
                 print('{}_{}.png saved in {}'.format(city_name, tile_id, task_dir))
@@ -123,7 +123,7 @@ def test_closing(dir, thresh):
 
                 # evaluate
                 truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
-                iou.append(utils.iou_metric(truth_label_img, pred_labels))
+                iou.append(sis_utils.iou_metric(truth_label_img, pred_labels))
                 print('{}_{} th={} iou={}'.format(city_name, tile_id, thresh, iou[-1]))
 
     print(np.mean(iou))
@@ -131,7 +131,7 @@ def test_closing(dir, thresh):
 
 if __name__ == '__main__':
     flags = read_flag()
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     iou_record = []
 
     model_names = ['UnetInria_fr_mean_reduced_appendix_large_EP-100_DS-60.0_LR-0.0001',

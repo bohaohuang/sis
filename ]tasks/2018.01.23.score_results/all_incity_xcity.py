@@ -4,7 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import uabRepoPaths
-import utils
+import sis_utils
 
 
 def set_box_color(bp, color, c2):
@@ -255,7 +255,7 @@ plt.plot([], c='green', label='high diversity')
 plt.legend(loc='lower right')
 
 plt.tight_layout()
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 plt.savefig(os.path.join(img_dir, 'all_incity_vs_xcity.png'))
 
 plt.show()

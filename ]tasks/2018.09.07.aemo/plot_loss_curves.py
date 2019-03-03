@@ -1,10 +1,10 @@
 import os
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 from ersa_utils import read_tensorboard_csv
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 file_name_temp = 'run_unet_aemo_pad_PS(572, 572)_BS5_EP130_LR0.001_DS100_DR0.1-tag-{}_loss.csv'
 run_type = ['train', 'valid']
 

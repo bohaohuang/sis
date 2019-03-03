@@ -3,14 +3,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rc
-import utils
+import sis_utils
 import util_functions
 
 
 rc('text', usetex=True)
 plt.rcParams.update({'font.size': 14})
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 names = ['run_UnetCrop_spca_aug_focal_valiou_0_g1.0_a0.0005_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32-tag-iou_validation.csv',
          'run_UnetCrop_spca_aug_focal_valiou_0_g2_a0.0005_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32-tag-iou_validation.csv',
          'run_UnetCrop_spca_aug_focal_valiou_0_g5.0_a0.0005_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32-tag-iou_validation.csv',

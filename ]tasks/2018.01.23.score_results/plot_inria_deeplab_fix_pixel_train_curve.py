@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from math import factorial
-import utils
+import sis_utils
 
 
 def exponential_smoothing(series, alpha=0.6):
@@ -40,7 +40,7 @@ batch_sizes = [10,  9,   8,   7,   6,   5,   4,   3,   2,   1]
 patch_sizes = [232, 248, 264, 276, 300, 321, 368, 424, 520, 736]
 fields = ['Step', 'Value']
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 run_record_dir = os.path.join(task_dir, 'deeplab_inria_fix_pixel')
 
 plt.rcParams.update({'font.size': 14})

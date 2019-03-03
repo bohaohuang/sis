@@ -6,7 +6,7 @@ from rdp import rdp
 from glob import glob
 from tqdm import tqdm
 from skimage import measure
-import utils
+import sis_utils
 import ersa_utils
 
 
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     ]
     model_list = ersa_utils.str2list(flags.test_list)
     model_dirs = [model_dirs[x] for x in model_list]
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     for cnt, model_dir in enumerate(model_dirs):
         pred_files = sorted(glob(os.path.join(model_dir, 'inria', 'pred', '*.png')))

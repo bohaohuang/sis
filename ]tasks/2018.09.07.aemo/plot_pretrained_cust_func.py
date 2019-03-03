@@ -2,10 +2,10 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import ersa_utils
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 beta_vals = np.arange(0.5, 1.1, 0.1)
 alpha_vals = np.arange(-20, 21, 1)

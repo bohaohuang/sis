@@ -2,7 +2,7 @@ import os
 import imageio
 import numpy as np
 from tqdm import tqdm
-import utils
+import sis_utils
 
 
 def get_error_mask(pred, gt, truth_val=255):

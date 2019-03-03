@@ -6,7 +6,7 @@ from glob import glob
 from tqdm import tqdm
 from scipy import ndimage
 from skimage import measure
-import utils
+import sis_utils
 import ersa_utils
 
 
@@ -70,7 +70,7 @@ def visualize_fn_object(rgb, gt, title_str):
 spca_dir = r'/media/ei-edl01/data/uab_datasets/spca/data/Original_Tiles'
 aemo_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_pad'
 aemohist_dir = r'/hdd/ersa/preprocess/aemo_pad/hist_matching'
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 spca_files = glob(os.path.join(spca_dir, '*_RGB.jpg'))
 idx = np.random.permutation(20)

@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
 from tqdm import tqdm
-import utils
+import sis_utils
 import ersa_utils
 from collection import collectionMaker
 
@@ -33,7 +33,7 @@ def plot_rgb_hist(rgb_hist):
 
 
 if __name__ == '__main__':
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     save_dir_align = r'/home/lab/Documents/bohao/data/aemo/aemo_align'
 
     # get aemo stats

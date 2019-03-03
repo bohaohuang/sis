@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
 from tqdm import tqdm
-import utils
+import sis_utils
 import ersa_utils
 import processBlock
 from preprocess import patchExtractor
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     tile_size = (5000, 5000)
     np.random.seed(1004)
     gpu = 0
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     use_hist = False
     cm = collectionMaker.read_collection('spca')
     cm.print_meta_data()

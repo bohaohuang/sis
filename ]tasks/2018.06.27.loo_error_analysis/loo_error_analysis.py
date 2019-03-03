@@ -2,7 +2,7 @@ import os
 import imageio
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import util_functions
 
 
@@ -71,7 +71,7 @@ top_patch_check = 15
 window_size = 500
 stride = 200
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 truth_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/Original_Tiles'
 if cnn_name == 'unet':

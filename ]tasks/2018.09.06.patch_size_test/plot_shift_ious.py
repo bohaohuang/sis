@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 
 def get_single_iou(line):
@@ -38,7 +38,7 @@ with open(os.path.join(result_dir, 'result.txt'), 'r') as f:
     results = f.readlines()
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 slide = range(32)
 ious = np.zeros((6, len(slide)))
 

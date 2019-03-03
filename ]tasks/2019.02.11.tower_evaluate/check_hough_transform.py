@@ -2,7 +2,7 @@ import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import ersa_utils
 from evaluate_utils import local_maxima_suppression
 from evaluate_tower_performance import get_center_point, read_polygon_csv_data
@@ -54,7 +54,7 @@ def get_points_between(raw_rgb, point_1, point_2, width=7, tile_min=(0, 0), tile
 
 if __name__ == '__main__':
     # directories
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
     raw_dir = os.path.join(data_dir, 'raw')
     conf_dir = r'/media/ei-edl01/user/bh163/tasks/2018.11.16.transmission_line/' \

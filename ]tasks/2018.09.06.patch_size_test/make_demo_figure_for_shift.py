@@ -2,7 +2,7 @@ import os
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-import ersa_utils, utils
+import ersa_utils, sis_utils
 import uab_collectionFunctions
 from nn import nn_utils
 from bohaoCustom import uabMakeNetwork_UNet
@@ -16,7 +16,7 @@ height = 2200 - 1200
 width = 2300 - 900
 rgb_temp = np.copy(rgb)
 nn_utils.set_gpu(-1)
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 blCol = uab_collectionFunctions.uabCollection('inria')
 img_mean = blCol.getChannelMeans([0, 1, 2])

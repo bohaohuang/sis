@@ -2,9 +2,9 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 pred_file_name = os.path.join(task_dir, 'predOut_20190211_170250.csv')
 truth_file_name = os.path.join(task_dir, 'truthOut_20190211_170250.csv')
 

@@ -4,7 +4,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from glob import glob
 from skimage import measure
-import utils
+import sis_utils
 import ersa_utils
 import uabDataReader
 import uabUtilreader
@@ -24,7 +24,7 @@ util_functions.tf_warn_level(3)
 
 model_dir = r'/hdd6/Models/aemo/aemo_comb/UnetCrop_aemo_comb_xfold2_1_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1_SFN32'
 ds_name = 'aemo'
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 save_dir = os.path.join(img_dir, 'hard_samples_reweight_comb_2')
 #save_dir = os.path.join(img_dir, 'hard_samples_demo')
 ersa_utils.make_dir_if_not_exist(save_dir)

@@ -1,6 +1,6 @@
 import argparse
 import numpy as np
-import utils
+import sis_utils
 
 TEST_DATA_DIR = 'dcc_urban_mapper_valid'
 CITY_NAME = 'JAX,TAM'
@@ -39,15 +39,15 @@ def read_flag():
 
 
 def main(flags):
-    result = utils.test_unet(flags.rsr_data_dir,
-                             flags.test_data_dir,
-                             flags.input_size,
-                             flags.model_name,
-                             flags.num_classes,
-                             flags.ckdir,
-                             flags.city_name,
-                             flags.batch_size,
-                             ds_name='urban_mapper')
+    result = sis_utils.test_unet(flags.rsr_data_dir,
+                                 flags.test_data_dir,
+                                 flags.input_size,
+                                 flags.model_name,
+                                 flags.num_classes,
+                                 flags.ckdir,
+                                 flags.city_name,
+                                 flags.batch_size,
+                                 ds_name='urban_mapper')
 
 if __name__ == '__main__':
     flags = read_flag()

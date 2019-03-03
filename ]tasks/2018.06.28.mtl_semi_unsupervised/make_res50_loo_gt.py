@@ -1,7 +1,7 @@
 import os
 import keras
 import numpy as np
-import utils
+import sis_utils
 from tqdm import tqdm
 import uabCrossValMaker
 import uab_collectionFunctions
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     prescr_name = 'res50'
     blCol = uab_collectionFunctions.uabCollection('inria')
     img_mean = blCol.getChannelMeans([0, 1, 2])
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     if prescr_name == 'incep':
         center_crop = (299, 299)

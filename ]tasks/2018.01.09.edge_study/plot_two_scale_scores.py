@@ -1,9 +1,9 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 data = np.load(os.path.join(task_dir, 'iou_records.npy'))
 large_mean = np.mean(data[0])
 small_mean = np.mean(data[1])

@@ -3,14 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
 from tqdm import tqdm
-import utils
+import sis_utils
 import ersa_utils
 import processBlock
 from preprocess import histMatching
 from collection import collectionMaker, collectionEditor
 
 np.random.seed(1004)
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 # get spca stats
 save_file = os.path.join(task_dir, 'spca_rgb_stats.npy')

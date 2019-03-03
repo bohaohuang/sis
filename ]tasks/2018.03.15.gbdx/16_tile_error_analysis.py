@@ -4,7 +4,7 @@ import numpy as np
 from glob import glob
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 from util_functions import add_mask, iou_metric
 
 
@@ -35,7 +35,7 @@ def get_error_mask_img(img, gt, mask):
 
 
 if __name__ == '__main__':
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     pred_dir_base = r'/hdd/Results/gbdx_cmp/]shared_models/sp/pred'
     gt_dir = r'/media/ei-edl01/data/uab_datasets/sp/DATA_BUILDING_AND_PANEL'

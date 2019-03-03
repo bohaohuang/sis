@@ -273,8 +273,8 @@ if __name__ == '__main__':
     model_name = 'faster_rcnn_res50_2019-02-13_12-51-58'
     appendix = model_name + city_name
 
-    import utils
-    img_dir, task_dir = utils.get_task_img_folder()
+    import sis_utils
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     tmp_files_path = os.path.join(task_dir, "tmp_files")
     if not os.path.exists(tmp_files_path): # if it doesn't exist already
       os.makedirs(tmp_files_path)

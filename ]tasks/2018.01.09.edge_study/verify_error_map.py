@@ -4,9 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from tqdm import tqdm
-import utils
+import sis_utils
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 img_save_dir = os.path.join(img_dir, 'dist_error')
 
 error_cnt = []

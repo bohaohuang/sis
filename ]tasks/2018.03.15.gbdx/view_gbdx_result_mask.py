@@ -2,7 +2,7 @@ import os
 import imageio
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import util_functions
 
 orig_dir = r'/media/ei-edl01/user/as667/BOHAO/gbdx_results'
@@ -12,7 +12,7 @@ tile_id = '104001000832C600_0'
 img_name = os.path.join(rgb_orig_dir, task_id, '{}.tif'.format(tile_id))
 bgt_name = os.path.join(orig_dir, task_id, 'building_{}.tif'.format(tile_id))
 sgt_name = os.path.join(orig_dir, task_id, 'sp_{}.tif'.format(tile_id))
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 img = imageio.imread(img_name)
 bmask = np.copy(img)

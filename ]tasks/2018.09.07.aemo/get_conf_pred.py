@@ -2,7 +2,7 @@ import os
 import time
 import numpy as np
 import tensorflow as tf
-import utils
+import sis_utils
 import ersa_utils
 import processBlock
 from nn import nn_utils, unet
@@ -12,7 +12,7 @@ from collection import collectionMaker, collectionEditor
 
 
 model_dir = r'/hdd6/Models/aemo/new5/unet_aemo_scratch_3_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1'
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 SAVE_DIR = os.path.join(task_dir, 'conf_map_{}'.format(os.path.basename(model_dir)))
 ersa_utils.make_dir_if_not_exist(SAVE_DIR)
 

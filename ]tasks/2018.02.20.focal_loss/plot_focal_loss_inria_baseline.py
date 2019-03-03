@@ -2,10 +2,10 @@ import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import util_functions
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 fields = ['Step', 'Value']
 
 plt.rcParams.update({'font.size': 16})

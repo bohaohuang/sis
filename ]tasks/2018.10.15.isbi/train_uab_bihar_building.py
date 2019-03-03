@@ -3,7 +3,7 @@ import time
 import argparse
 import numpy as np
 import tensorflow as tf
-import utils
+import sis_utils
 import ersa_utils
 import uabRepoPaths
 import uabDataReader
@@ -106,7 +106,7 @@ def main(flags):
     img_mean = blCol.getChannelMeans([0, 1, 2])  # get mean of rgb info
     print(img_mean)
 
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     save_dir = os.path.join(task_dir, 'bihar_patches')
     ersa_utils.make_dir_if_not_exist(save_dir)
     files, par_dir = blCol.getAllTileByDirAndExt([0, 1, 2, 3])

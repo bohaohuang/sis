@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
 from skimage import measure
-import utils
+import sis_utils
 import ersa_utils
 
 
@@ -93,7 +93,7 @@ def create_pred_weight_map(gt_files, save_dir, thresh=200):
 
 
 if __name__ == '__main__':
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     data_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_align'
     rgb_files = sorted(glob(os.path.join(data_dir, '*rgb.tif')))[-2:]
     gt_files = sorted(glob(os.path.join(data_dir, '*d255.tif')))[-2:]

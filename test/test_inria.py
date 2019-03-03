@@ -6,7 +6,7 @@ import numpy as np
 import tensorflow as tf
 import scipy.misc
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
@@ -104,11 +104,11 @@ def main(flags):
                         overlap=0)
                     # run
                     result = model.test('X', sess, iterator_test)
-                    pred_label_img = utils.get_output_label(result, meta_test['dim_image'],
-                                                            flags.input_size, meta_test['colormap'])
+                    pred_label_img = sis_utils.get_output_label(result, meta_test['dim_image'],
+                                                                flags.input_size, meta_test['colormap'])
                     # evaluate
                     truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
-                    iou = utils.iou_metric(truth_label_img, pred_label_img)
+                    iou = sis_utils.iou_metric(truth_label_img, pred_label_img)
 
                     print('{}_{}: iou={:.2f}'.format(city_name, tile_id, iou*100))
         finally:

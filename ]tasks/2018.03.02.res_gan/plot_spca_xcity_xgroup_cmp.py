@@ -2,7 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
-import utils
+import sis_utils
 
 city_dir = r'/hdd/Results/xcity_vs_incity'
 group_dir = r'/hdd/Results/xgroup'
@@ -10,7 +10,7 @@ incity_dir = glob(os.path.join(city_dir, 'DeeplabV3_spca_aug_incity*/'))
 xcity_dir = glob(os.path.join(city_dir, 'DeeplabV3_spca_aug_xcity*/'))
 xgroup_dir = glob(os.path.join(group_dir, 'DeeplabV3_spca_aug_train_deeplab_spca_fileList*/'))
 city_dict = {'Fre': 0, 'Mod': 1, 'Sto': 2}
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 incity_record_a = np.zeros((len(incity_dir), 4))
 incity_record_b = np.zeros((len(incity_dir), 4))

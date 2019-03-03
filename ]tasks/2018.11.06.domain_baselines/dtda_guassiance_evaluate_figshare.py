@@ -2,7 +2,7 @@ import os
 import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
-import utils
+import sis_utils
 import ersa_utils
 import uabDataReader
 import uabCrossValMaker
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     else:
         tile_size = [2000, 3000]
 
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     path_to_save = os.path.join(task_dir, 'dtda_new', city_name, 'shift_dict.pkl')
     shift_dict = ersa_utils.load_file(path_to_save)

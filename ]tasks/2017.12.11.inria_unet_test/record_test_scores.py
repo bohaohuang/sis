@@ -2,10 +2,10 @@ import os
 import operator
 from glob import glob
 import numpy as np
-import utils
+import sis_utils
 
 if __name__ == '__main__':
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     record_files = glob(os.path.join(task_dir, '*.npy'))
     record_files = sorted(record_files)
     record_files = [a for a in record_files if 'CT' not in a]

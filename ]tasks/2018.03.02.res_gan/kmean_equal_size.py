@@ -2,7 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
-import utils
+import sis_utils
 
 
 def show_cluster(data, labels):
@@ -95,7 +95,7 @@ class kmeans_equal(object):
 
 
 if __name__ == '__main__':
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     npy_file_name = os.path.join(task_dir, 'encoded_res50_2.npy')
     feature_encode = np.load(npy_file_name)
     feature_encode = np.array(feature_encode)

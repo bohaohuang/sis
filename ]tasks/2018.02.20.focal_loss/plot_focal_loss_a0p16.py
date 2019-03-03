@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
 from math import factorial
-import utils
+import sis_utils
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     try:
@@ -28,7 +28,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     y = np.concatenate((firstvals, y, lastvals))
     return np.convolve(m[::-1], y, mode='valid')
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 files = glob(os.path.join(task_dir, '*.csv'))
 fields = ['Step', 'Value']
 

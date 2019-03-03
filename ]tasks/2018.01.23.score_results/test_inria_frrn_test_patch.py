@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 import uabCrossValMaker
 import uab_collectionFunctions
-import utils
+import sis_utils
 import util_functions
 from bohaoCustom import uabMakeNetwork_FRRN
 
@@ -13,7 +13,7 @@ gpu = None
 batch_size = 1
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 save_dir = os.path.join(task_dir, 'train_patch')
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)

@@ -1,13 +1,13 @@
 import os
 import numpy as np
 from glob import glob
-import utils
+import sis_utils
 import ersa_utils
 
 data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
 city_list = ['Tucson', 'Colwich', 'Clyde', 'Wilmington']
 save_dir = r'/media/ei-edl01/data/uab_datasets/infrastructure/data/Original_Tiles'
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 '''for city_id in range(4):
     gt_files = sorted(glob(os.path.join(data_dir, '*{}*_multiclass.tif'.format(city_list[city_id]))))

@@ -1,7 +1,7 @@
 import os
 import keras
 import numpy as np
-import utils
+import sis_utils
 import uabCrossValMaker
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     epoch = 10
     learn_rate = 1e-5
     prescr_name = 'incep'
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     if prescr_name == 'incep':
         center_crop = (299, 299)

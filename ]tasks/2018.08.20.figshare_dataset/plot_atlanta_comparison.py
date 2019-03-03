@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import util_functions
 
 
@@ -21,7 +21,7 @@ def read_iou(model_dir):
     return city_iou
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 city_list = ['atlanta1', 'atlanta2', 'atlanta3']
 model_type = 'unet'
 colors = util_functions.get_default_colors()

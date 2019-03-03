@@ -1,13 +1,13 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import uabCrossValMaker
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from bohaoCustom import uabDataReader
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 city_dict = {'austin':0, 'chicago':1, 'kitsap':2, 'tyrol-w':3, 'vienna':4}
 city_alpha = [0.5, 0.2, 0.1, 0.1, 0.1]

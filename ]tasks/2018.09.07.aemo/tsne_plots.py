@@ -2,7 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
-import utils
+import sis_utils
 import ersa_utils
 import processBlock
 
@@ -14,7 +14,7 @@ def get_tsne_features(features, perplex=40, learn_rate=200):
 
 
 # settings
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 show_figure = False
 perplex = 40
 learn_rate = 200

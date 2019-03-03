@@ -7,9 +7,10 @@ import matplotlib.patches as patches
 from skimage.draw import polygon
 from sklearn.utils.fixes import signature
 from sklearn.metrics import precision_recall_curve, average_precision_score
-import utils
+import sis_utils
 import ersa_utils
 from evaluate_utils import get_center_point, local_maxima_suppression
+from post_processing_utils import order_pair
 
 
 def read_polygon_csv_data(csv_file):
@@ -99,6 +100,44 @@ def radius_scoring(pred, gt, confidences, link_r):
     p = tp / (tp + fn)
     r = tp / (tp + fp)
     return 2 * p * r / (p + r), y_true, y_score
+
+
+def link_pred_gt(pred, gt, link_r):
+    # link predictions
+    kdt = scipy.spatial.KDTree(gt)
+    d, linked_results = kdt.query(pred)
+    link_list = [-1 for _ in range(len(pred))]
+
+    for cnt, item in enumerate(linked_results):
+        if d[cnt] > link_r:
+            pass
+        else:
+            link_list[cnt] = int(item)
+    return link_list
+
+
+def grid_score(tower_gt, tower_pred, line_gt, line_pred, link_list):
+    cnt_obj = 0
+    for a in link_list:
+        if a > -1:
+            cnt_obj += 1
+    cnt_pred = 0
+
+    lp = []
+    for cp in line_pred:
+        lp.append(order_pair(*cp))
+    lp = list(set(lp))
+
+    for cp in lp:
+        if (link_list[cp[0]] > -1) and (link_list[cp[1]] > -1):
+            if (link_list[cp[0]], link_list[cp[1]]) in line_gt:
+                cnt_pred += 1
+
+    tp = cnt_obj + cnt_pred
+    n_recall = len(tower_gt) + len(line_gt)
+    n_precision = len(tower_pred) + len(line_pred)
+
+    return tp, n_recall, n_precision
 
 
 def plot_within_model(model_name='faster_rcnn'):
@@ -197,13 +236,151 @@ def plot_across_model(link_r=20, model_names=('faster_rcnn', 'faster_rcnn_res101
     plt.show()
 
 
+def plot_across_model_post(link_r=20, model_names=('faster_rcnn', 'faster_rcnn_res101', 'faster_rcnn_res50')):
+    plt.figure(figsize=(10, 8))
+
+    city_list = ['AZ_Tucson', 'KS_Colwich_Maize', 'NC_Clyde', 'NC_Wilmington']
+    cmap = ersa_utils.get_default_colors()
+    for city_id in range(4):
+        plt.subplot(221 + city_id)
+        for model_cnt, model_name in enumerate(model_names):
+            pred_list_all_orig = []
+            cf_list_all_orig = []
+            pred_list_all = []
+            cf_list_all = []
+            gt_list_all = []
+            for tile_id in [1, 2, 3]:
+                # load data
+                pred_file_name = os.path.join(task_dir, model_name, 'USA_{}_{}.txt'.format(city_list[city_id], tile_id))
+                preds = ersa_utils.load_file(pred_file_name)
+
+                pred_file_name = os.path.join(task_dir, 'post_{}_{}_{}_pred2.npy'.format(model_name, city_id, tile_id))
+                pred_list = ersa_utils.load_file(pred_file_name)
+                pred_file_name = os.path.join(task_dir, 'post_{}_{}_{}_conf2.npy'.format(model_name, city_id, tile_id))
+                cf_list = ersa_utils.load_file(pred_file_name)
+                csv_file_name = os.path.join(raw_dir, 'USA_{}_{}.csv'.format(city_list[city_id], tile_id))
+                gt_list = []
+
+                pred_list_orig = []
+                cf_list_orig = []
+                center_list, conf_list, _ = local_maxima_suppression(preds)
+                for center, conf in zip(center_list, conf_list):
+                    pred_list_orig.append(center.tolist())
+                    cf_list_orig.append(conf)
+
+                for label, bbox in read_polygon_csv_data(csv_file_name):
+                    y, x = get_center_point(*bbox)
+                    gt_list.append([y, x])
+
+                pred_list_all_orig.extend(pred_list_orig)
+                cf_list_all_orig.extend(cf_list_orig)
+                pred_list_all.extend(pred_list)
+                cf_list_all.extend(cf_list)
+                gt_list_all.extend(gt_list)
+
+            f1, y_true, y_score =radius_scoring(pred_list_all_orig, gt_list_all, cf_list_all_orig, link_r)
+            ap = average_precision_score(y_true, y_score)
+            precision, recall, _ = precision_recall_curve(y_true, y_score)
+            plt.step(recall[1:], precision[1:], alpha=1, where='post', linestyle='--',
+                     label='Orig {}, AP={:.2f}'.format(model_name, ap), color=cmap[model_cnt])
+
+            f1, y_true, y_score = radius_scoring(pred_list_all, gt_list_all, cf_list_all, link_r)
+            ap = average_precision_score(y_true, y_score)
+            precision, recall, _ = precision_recall_curve(y_true, y_score)
+            plt.step(recall[1:], precision[1:], alpha=1, where='post',
+                     label='Post {}, AP={:.2f}'.format(model_name, ap), color=cmap[model_cnt])
+
+            plt.xlabel('Recall')
+            plt.ylabel('Precision')
+            plt.ylim([0.0, 1.05])
+            plt.xlim([0.0, 1.0])
+            plt.title('{} Performance Comparison'.format(city_list[city_id]))
+            plt.legend(loc='lower left')
+    plt.tight_layout()
+    # plt.savefig(os.path.join(img_dir, 'cmp_tile_pr_orig_vs_post.png'))
+    plt.show()
+
+
+def plot_across_model_grid(link_r=20, model_names=('faster_rcnn', 'faster_rcnn_res101', 'faster_rcnn_res50')):
+    plt.figure(figsize=(10, 8))
+    model_name_dict = {
+        'faster_rcnn': 'Inception',
+        'faster_rcnn_res101': 'ResNet101',
+        'faster_rcnn_res50': 'ResNet50'
+    }
+
+    city_list = ['AZ_Tucson', 'KS_Colwich_Maize', 'NC_Clyde', 'NC_Wilmington']
+    cmap = ersa_utils.get_default_colors()
+    width = 0.15
+    for city_id in range(4):
+        plt.subplot(221 + city_id)
+        for model_cnt, model_name in enumerate(model_names):
+            tp_all = 0
+            n_recall_all = 0
+            n_precision_all = 0
+
+            for tile_id in [1, 2, 3]:
+                # load data
+                pred_file_name = os.path.join(task_dir, model_name, 'USA_{}_{}.txt'.format(city_list[city_id], tile_id))
+                preds = ersa_utils.load_file(pred_file_name)
+
+                pred_file_name = os.path.join(task_dir, 'post_{}_{}_{}_pred2.npy'.format(model_name, city_id, tile_id))
+                pred_list = ersa_utils.load_file(pred_file_name)
+                pred_file_name = os.path.join(task_dir, 'post_{}_{}_{}_conf2.npy'.format(model_name, city_id, tile_id))
+                cf_list = ersa_utils.load_file(pred_file_name)
+                pred_file_name = os.path.join(task_dir, 'post_{}_{}_{}_conn2.npy'.format(model_name, city_id, tile_id))
+                cp_list = ersa_utils.load_file(pred_file_name)
+                csv_file_name = os.path.join(raw_dir, 'USA_{}_{}.csv'.format(city_list[city_id], tile_id))
+                cp_file_name = os.path.join(task_dir, '{}_{}_cp.npy'.format(city_list[city_id], city_id))
+                connected_pairs = ersa_utils.load_file(cp_file_name)
+
+                tower_gt = []
+                for label, bbox in read_polygon_csv_data(csv_file_name):
+                    y, x = get_center_point(*bbox)
+                    tower_gt.append([y, x])
+
+                pred_list_orig = []
+                center_list, conf_list, _ = local_maxima_suppression(preds)
+                for center, conf in zip(center_list, conf_list):
+                    if conf > 0.5:
+                        pred_list_orig.append(center.tolist())
+
+                link_list = link_pred_gt(pred_list, tower_gt, link_r)
+                tp, n_recall, n_precision = grid_score(tower_gt, pred_list, connected_pairs, cp_list, link_list)
+
+                tp_all += tp
+                n_recall_all += n_recall
+                n_precision_all += n_precision
+
+            recall = tp_all / n_recall_all
+            precision = tp_all / n_precision_all
+
+            X = np.arange(2)
+            plt.bar(X+width*model_cnt, [precision, recall], width=width, color=cmap[model_cnt],
+                    label=model_name_dict[model_name])
+            plt.text(width*model_cnt-0.05, precision, '{:.2f}'.format(precision))
+            plt.text(1+width*model_cnt-0.05, recall, '{:.2f}'.format(recall))
+
+            #plt.xlabel('Recall')
+            plt.xticks(X+width, ['Precision', 'Recall'])
+            plt.ylabel('Score')
+            plt.ylim([0.0, 1])
+            #plt.xlim([0.0, 1.0])
+            plt.title('{} Performance Comparison'.format(city_list[city_id]))
+            plt.legend(loc='upper left', ncol=3, fontsize=9)
+    plt.tight_layout()
+    plt.savefig(os.path.join(img_dir, 'tile_performance_graph.png'))
+    plt.show()
+
+
 # settings
 if __name__ == '__main__':
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
     info_dir = os.path.join(data_dir, 'info')
     raw_dir = os.path.join(data_dir, 'raw')
 
-    plot_across_model()
+    #plot_across_model_post()
     #plot_within_model('faster_rcnn')
+    plot_across_model_grid()

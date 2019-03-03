@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import ersa_utils
 from run_tsne import run_tsne
 
@@ -23,7 +23,7 @@ def plot_tsne(feature_encode, mse, p, show_id=False):
     plt.tight_layout()
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 pred_file_name = os.path.join(task_dir, 'test_pred_20190218_182224.csv')
 truth_file_name = os.path.join(task_dir, 'test_truth.csv')
 

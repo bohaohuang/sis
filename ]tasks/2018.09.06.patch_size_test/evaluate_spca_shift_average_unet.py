@@ -3,7 +3,7 @@ import time
 import imageio
 import numpy as np
 import tensorflow as tf
-import utils
+import sis_utils
 import uabCrossValMaker
 import uabDataReader
 import uabUtilreader
@@ -79,7 +79,7 @@ for slide_step in shift_list:
     util_functions.tf_warn_level(3)
     model_dir = r'/hdd6/Models/UNET_rand_gird/UnetCrop_spca_aug_grid_0_PS(572, 572)_BS5_' \
                            r'EP100_LR0.0001_DS60_DR0.1_SFN32'
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     tf.reset_default_graph()
     blCol = uab_collectionFunctions.uabCollection('spca')

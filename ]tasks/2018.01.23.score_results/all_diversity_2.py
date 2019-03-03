@@ -4,7 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import uabRepoPaths
-import utils
+import sis_utils
 
 
 def set_box_color(bp, color, c2):
@@ -298,7 +298,7 @@ plt.ylabel('IoU')
 plt.title('Overall IoU Comparison D2')
 
 plt.tight_layout()
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 # plt.savefig(os.path.join(img_dir, 'all_diversity.png'))
 
 plt.show()

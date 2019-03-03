@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import ersa_utils
 
 
@@ -37,7 +37,7 @@ def voc_ap(rec, prec):
     return ap, mrec, mpre
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 model_name = 'faster_rcnn_2018-11-29_20-13-13'
 file_name = os.path.join(task_dir, 'results_{}'.format(model_name), 'results.txt')
 results = ersa_utils.load_file(file_name)

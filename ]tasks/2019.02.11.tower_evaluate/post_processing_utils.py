@@ -1,12 +1,22 @@
+import sys
+sys.path.append(r'/home/lab/Documents/bohao/code/third_party/models/research')
+sys.path.append(r'/home/lab/Documents/bohao/code/third_party/models/research/object_detection')
+
 import os
+import cv2
+import copy
 import scipy.spatial
 import numpy as np
 import pandas as pd
+import tensorflow as tf
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from skimage.draw import polygon
 import ersa_utils
 import util_functions
+from nn import nn_utils
+from utils import label_map_util
+from object_detection.utils import ops as utils_ops
 from evaluate_utils import get_center_point, local_maxima_suppression
 
 
@@ -111,7 +121,11 @@ def get_edge_info(centers, conf_map, radius=1500, width=7, tile_min=(0, 0), tile
                                     tile_max=tile_max)
         conf = 0
         for p in points:
-            conf += conf_map[p[0]][p[1]]
+            try:
+                conf += conf_map[p[0]][p[1]]
+            except IndexError:
+                # don't worry, this is because after merging the point could be outside
+                pass
         conf /= len(points)
         line_conf.append(conf)
 
@@ -120,18 +134,19 @@ def get_edge_info(centers, conf_map, radius=1500, width=7, tile_min=(0, 0), tile
     return linked_pairs, dist_list, line_conf
 
 
+def order_pair(p1, p2):
+    if p1 < p2:
+        return p1, p2
+    else:
+        return p2, p1
+
+
 def connect_lines(linked_pairs, line_conf, th, cut_n=2):
     def compute_weight(n):
         return th * (n + 1)
 
     def get_total_connection(cd, pr):
         return len(cd[pr[0]]) + len(cd[pr[1]])
-
-    def order_pair(p1, p2):
-        if p1 < p2:
-            return p1, p2
-        else:
-            return p2, p1
 
     def get_conf(p1, p2):
         return line_conf[linked_pairs.index(order_pair(p1, p2))]
@@ -164,6 +179,27 @@ def connect_lines(linked_pairs, line_conf, th, cut_n=2):
                             pass
 
     return connected_pair
+
+
+def find_close_points(p1, p2, points, th=10):
+    def dist2line(p1, p2, p3):
+        p1, p2, p3 = np.array(p1), np.array(p2), np.array(p3)
+        return np.linalg.norm(np.cross(p2 - p1, p3 - p1))/np.linalg.norm(p2 - p1)
+
+    def is_between(p1, p2, p3):
+        # don't change the order of p3
+        p1, p2, p3 = np.array(p1), np.array(p2), np.array(p3)
+        if 1 - scipy.spatial.distance.cosine((p1 - p3), (p2 - p3)) < 0:
+            return True
+        else:
+            return False
+
+    point_ids = []
+    for cnt, p3 in enumerate(points):
+        if dist2line(p1, p2, p3) < th and is_between(p1, p2, p3):
+            point_ids.append(cnt)
+
+    return point_ids
 
 
 def prune_lines(cps, centers):
@@ -205,7 +241,23 @@ def prune_lines(cps, centers):
                         removed_cps.append(cp2remove)
                         flag = True
                         break
+
     return cps, removed_cps
+
+
+def break_lines(cps, centers):
+    unconverge_flag = True
+    while unconverge_flag:
+        unconverge_flag = False
+        for cp in cps:
+            online_points = find_close_points(centers[cp[0]], centers[cp[1]], centers)
+            if len(online_points) > 0:
+                unconverge_flag = True
+                cps.remove(cp)
+                cps.append((cp[0], online_points[0]))
+                for i in range(len(online_points) - 1):
+                    cps.append((online_points[i], online_points[i+1]))
+                cps.append((online_points[-1], cp[1]))
 
 
 def prune_towers(connected_pairs, tower_pred):
@@ -225,6 +277,17 @@ def add_points(center_points, color='r', size=20, marker='o', alpha=0.5, edgecol
                 edgecolors=edgecolor)
 
 
+def update_connected_pairs(connected_pairs, tower_pred, connected_towers):
+    map_idx = np.arange(len(tower_pred))
+    for a in range(len(tower_pred)):
+        if a not in connected_towers:
+            map_idx[a:] -= 1
+    new_cp = []
+    for cp in connected_pairs:
+        new_cp.append((map_idx[cp[0]], map_idx[cp[1]]))
+    return new_cp
+
+
 def visualize_with_connected_pairs(raw_rgb, center_list, connected_pairs, style='r', add_fig=False):
     if not add_fig:
         plt.figure(figsize=(12, 8))
@@ -239,20 +302,228 @@ def visualize_with_connected_pairs(raw_rgb, center_list, connected_pairs, style=
         plt.show()
 
 
-def visualize_results(dirs, city_id, tile_id, raw_rgb, line_gt, tower_pred, tower_gt, connected_pairs, connected_towers,
-                      unconnected_towers, save_fig=False):
+def visualize_results(img_dir, city_id, tile_id, raw_rgb, line_gt, tower_pred, tower_gt, connected_pairs, connected_towers,
+                      unconnected_towers, save_fig=False, post_str='', close_file=False):
     plt.figure(figsize=(8.5, 8))
+    line_gt = cv2.dilate(line_gt, np.ones((5, 5), np.uint8), iterations=10)
     img_with_line = util_functions.add_mask(raw_rgb, line_gt, [0, 255, 0], 1)
     visualize_with_connected_pairs(img_with_line, tower_pred, connected_pairs, add_fig=True)
     add_points(tower_gt, 'b', marker='s', size=80, alpha=1, edgecolor='k')
-    add_points([tower_pred[a] for a in connected_towers], 'r', marker='o', alpha=1, edgecolor='k')
-    try:
-        add_points([tower_pred[a] for a in unconnected_towers], 'yellow', marker='o', alpha=1, edgecolor='k')
-    except IndexError:
-        print('No more unconnected towers')
+    if connected_towers is not None and unconnected_towers is not None:
+        add_points([tower_pred[a] for a in connected_towers], 'r', marker='o', alpha=1, edgecolor='k')
+        try:
+            add_points([tower_pred[a] for a in unconnected_towers], 'yellow', marker='o', alpha=1, edgecolor='k')
+        except IndexError:
+            print('No more unconnected towers')
+    else:
+        add_points(tower_pred, 'r', marker='o', alpha=1, edgecolor='k')
     plt.axis('off')
     plt.title('{}_{}'.format(city_list[city_id], tile_id))
     plt.tight_layout()
     if save_fig:
-        plt.savefig(os.path.join(dirs['image'], '{}_{}_post_result.png'.format(city_list[city_id], tile_id)))
+        plt.savefig(os.path.join(img_dir, '{}_{}_post_result{}.png'.format(city_list[city_id], tile_id,
+                                                                                 post_str)))
+    if close_file:
+        plt.close()
+    else:
+        plt.show()
+
+
+def probability_hough(raw_rgb, connected_pairs, center_list):
+    line_graph = np.zeros(raw_rgb.shape[:2], np.uint8)
+
+    for cp in connected_pairs:
+        cv2.line(line_graph,
+                 tuple([int(a) for a in center_list[cp[0]]]),
+                 tuple([int(a) for a in center_list[cp[1]]]),
+                 (255,), thickness=5)
+
+    edges = cv2.Canny(line_graph, 50, 150, apertureSize=3)
+    minLineLength = 100
+    maxLineGap = 10
+    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 100, minLineLength, maxLineGap)
+
+    plt.imshow(raw_rgb)
+    print(len(lines))
+    if lines is not None:
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            plt.plot([y1, y2], [x1, x2], 'r')
     plt.show()
+
+
+def linked_length(tower_pred, connected_pairs, dirs, city_id, tile_id, attention_th=2.5):
+    line_length_list = []
+    attention_pair = []
+    for cp in connected_pairs:
+        line_length = np.linalg.norm(tower_pred[cp[0]] - tower_pred[cp[1]])
+        line_length_list.append(line_length)
+
+        '''if line_length > attention_th:
+            attention_pair.append(cp)
+
+            plt.figure(figsize=(8.5, 8))
+            plt.imshow(raw_rgb)
+            add_points(tower_pred, 'b', marker='s', size=80, alpha=1, edgecolor='k')
+            plt.plot([tower_pred[cp[0]][1], tower_pred[cp[1]][1]], [tower_pred[cp[0]][0], tower_pred[cp[1]][0]],
+                     'r', linewidth=5)
+            plt.tight_layout()
+            plt.show()'''
+
+    line_length_list = np.array(line_length_list)
+    std = np.std(line_length_list)
+    mu = np.mean(line_length_list)
+    mal_dist = (line_length_list - mu) / std
+
+    for mal_dist, cp in zip(mal_dist, connected_pairs):
+        if mal_dist > attention_th:
+            attention_pair.append(cp)
+
+    '''plt.hist((np.array(line_length_list)-mu)/std, bins=100)
+    plt.savefig(os.path.join(dirs['image'], '{}_{}_lenhist.png'.format(city_id, tile_id)))
+    plt.close()'''
+
+    return mal_dist.tolist(), attention_pair
+
+
+def get_samples_between(raw_rgb, p1, p2, step, size):
+    p1 = (int(p1[0]), int(p1[1]))
+    p2 = (int(p2[0]), int(p2[1]))
+    y_steps = list(np.linspace(p1[0], p2[0], step, endpoint=False, dtype=int))
+    x_steps = list(np.linspace(p1[1], p2[1], step, endpoint=False, dtype=int))
+
+    for y, x in zip(y_steps[1:], x_steps[1:]):
+        top_left = (y - size[0]//2, x - size[1]//2)
+        sample_patch = raw_rgb[top_left[0]:top_left[0]+size[0], top_left[1]:top_left[1]+size[1], :]
+        yield sample_patch, top_left
+
+
+def towers_online(tower_pred, connected_towers, unconnected_towers, connected_pairs):
+    tower_pred = [(a[0], a[1]) for a in tower_pred]
+    cts = [(tower_pred[a][0], tower_pred[a][1]) for a in connected_towers]
+
+    connected_towers_temp = copy.deepcopy(connected_towers)
+    unconnected_towers_temp = copy.deepcopy(unconnected_towers)
+    connected_pairs_temp = copy.deepcopy(connected_pairs)
+
+    # search for nearby towers of unconnected towers
+    tree =scipy.spatial.KDTree(cts)
+    for ut in unconnected_towers:
+        _, near_id = tree.query((tower_pred[ut][0], tower_pred[ut][1]))
+        origin_id = tower_pred.index(cts[near_id])
+        history_id = -1
+
+        refer_towers = [ut, origin_id]
+        for i in range(3):
+            for cp in connected_pairs:
+                if origin_id in cp and history_id not in cp:
+                    if cp[0] == origin_id:
+                        refer_towers.append(cp[1])
+                        history_id = origin_id
+                        origin_id = cp[1]
+                    else:
+                        refer_towers.append(cp[0])
+                        history_id = origin_id
+                        origin_id = cp[0]
+                    break
+
+        add_flag = False
+        if len(refer_towers) >= 3:
+            # have enough connections
+            for i in range(len(refer_towers) - 2):
+                vec_1 = np.array(tower_pred[refer_towers[i + 1]]) - np.array(tower_pred[refer_towers[i]])
+                vec_2 = np.array(tower_pred[refer_towers[i + 2]]) - np.array(tower_pred[refer_towers[i + 1]])
+
+                angle = np.abs(np.math.atan2(np.linalg.det([vec_1, vec_2]), np.dot(vec_1, vec_2))) / np.pi * 180
+                if angle > 90:
+                    angle = 180 - angle
+
+                if angle > 5:
+                    break
+
+                if i == len(refer_towers) - 3:
+                    add_flag = True
+
+        if add_flag:
+            connected_towers_temp.append(ut)
+            unconnected_towers_temp.remove(ut)
+            connected_pairs_temp.append(order_pair(ut, origin_id))
+
+            '''plt.figure(figsize=(8.5, 8))
+            plt.imshow(raw_rgb)
+            add_points([tower_pred[a] for a in connected_towers], 'b', marker='o', alpha=1, edgecolor='k')
+            add_points([tower_pred[a] for a in refer_towers], 'yellow', marker='s', size=80, alpha=1, edgecolor='k')
+            add_points([tower_pred[ut]], 'r', marker='o', alpha=1, edgecolor='k')
+            plt.tight_layout()
+            plt.show()'''
+
+    return connected_towers_temp, unconnected_towers_temp, connected_pairs_temp
+
+
+def run_inference_for_single_image(image, graph):
+    with graph.as_default():
+        with tf.Session() as sess:
+            # Get handles to input and output tensors
+            ops = tf.get_default_graph().get_operations()
+            all_tensor_names = {output.name for op in ops for output in op.outputs}
+            tensor_dict = {}
+            for key in [
+                'num_detections', 'detection_boxes', 'detection_scores',
+                'detection_classes', 'detection_masks'
+            ]:
+                tensor_name = key + ':0'
+                if tensor_name in all_tensor_names:
+                    tensor_dict[key] = tf.get_default_graph().get_tensor_by_name(
+                        tensor_name)
+            if 'detection_masks' in tensor_dict:
+                # The following processing is only for single image
+                detection_boxes = tf.squeeze(tensor_dict['detection_boxes'], [0])
+                detection_masks = tf.squeeze(tensor_dict['detection_masks'], [0])
+                # Reframe is required to translate mask from box coordinates to image coordinates and fit the image size.
+                real_num_detection = tf.cast(tensor_dict['num_detections'][0], tf.int32)
+                detection_boxes = tf.slice(detection_boxes, [0, 0], [real_num_detection, -1])
+                detection_masks = tf.slice(detection_masks, [0, 0, 0], [real_num_detection, -1, -1])
+                detection_masks_reframed = utils_ops.reframe_box_masks_to_image_masks(
+                    detection_masks, detection_boxes, image.shape[0], image.shape[1])
+                detection_masks_reframed = tf.cast(
+                    tf.greater(detection_masks_reframed, 0.5), tf.uint8)
+                # Follow the convention by adding back the batch dimension
+                tensor_dict['detection_masks'] = tf.expand_dims(
+                    detection_masks_reframed, 0)
+            image_tensor = tf.get_default_graph().get_tensor_by_name('image_tensor:0')
+
+            # Run inference
+            output_dict = sess.run(tensor_dict,
+                                   feed_dict={image_tensor: np.expand_dims(image, 0)})
+
+            # all outputs are float32 numpy arrays, so convert types as appropriate
+            output_dict['num_detections'] = int(output_dict['num_detections'][0])
+            output_dict['detection_classes'] = output_dict[
+                'detection_classes'][0].astype(np.uint8)
+            output_dict['detection_boxes'] = output_dict['detection_boxes'][0]
+            output_dict['detection_scores'] = output_dict['detection_scores'][0]
+            if 'detection_masks' in output_dict:
+                output_dict['detection_masks'] = output_dict['detection_masks'][0]
+    return output_dict
+
+
+def load_model(model_name, model_id, GPU='0'):
+    path_to_frozen_graph = r'/hdd6/Models/transmission_line/' \
+                           r'export_model/{}/{}/frozen_inference_graph.pb'.format(model_name, model_id)
+    path_to_labels = r'/home/lab/Documents/bohao/data/transmission_line/data/label_map_t.pbtxt'
+    os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
+    os.environ['CUDA_VISIBLE_DEVICES'] = str(GPU)
+    nn_utils.tf_warn_level(3)
+
+    # load frozen tf model into memory
+    detection_graph = tf.Graph()
+    with detection_graph.as_default():
+        od_graph_def = tf.GraphDef()
+        with tf.gfile.GFile(path_to_frozen_graph, 'rb') as fid:
+            serialized_graph = fid.read()
+            od_graph_def.ParseFromString(serialized_graph)
+            tf.import_graph_def(od_graph_def, name='')
+
+    # load label map
+    category_index = label_map_util.create_category_index_from_labelmap(path_to_labels, use_display_name=True)
+    return detection_graph, category_index

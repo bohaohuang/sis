@@ -2,7 +2,7 @@ import os
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 
 def plot_patch_effect(res_dir, input_sizes, name, appendix='.npy', savefig=True):
@@ -33,7 +33,7 @@ def plot_patch_effect(res_dir, input_sizes, name, appendix='.npy', savefig=True)
     plt.ylabel('Time:s')
     fig.tight_layout()
     if savefig:
-        img_dir, _ = utils.get_task_img_folder()
+        img_dir, _ = sis_utils.get_task_img_folder()
         plt.savefig(os.path.join(img_dir, 'paper2_{}.png'.format(name)))
     plt.show()
 
@@ -56,7 +56,7 @@ appendix = '_resfcn.npy'
 plot_patch_effect(res_dir, input_sizes, 'ResNet50', appendix)
 
 import imageio
-img_dir, _ = utils.get_task_img_folder()
+img_dir, _ = sis_utils.get_task_img_folder()
 img1 = imageio.imread(os.path.join(img_dir, 'paper2_Unet No Zero Padding.png'))
 img2 = imageio.imread(os.path.join(img_dir, 'paper2_Unet Zero Padding.png'))
 img3 = imageio.imread(os.path.join(img_dir, 'paper2_ResNet50.png'))

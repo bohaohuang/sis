@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import ersa_utils
 
 
@@ -131,7 +131,7 @@ def get_shift_vals3(act_dict_train, act_dict_valid):
 if __name__ == '__main__':
     plt.figure(figsize=(10, 12))
 
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
     city_id = 0
 

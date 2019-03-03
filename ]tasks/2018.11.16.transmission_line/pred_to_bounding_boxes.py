@@ -4,7 +4,7 @@ from glob import glob
 from tqdm import tqdm
 from skimage import measure
 from natsort import natsorted
-import utils
+import sis_utils
 import ersa_utils
 
 
@@ -54,7 +54,7 @@ iou_list = np.zeros(len(weight_range))
 IMAGE_SIZE = (500, 500)
 PATH_TO_TEST_IMAGES_DIR = r'/media/ei-edl01/data/uab_datasets/towers/data/Original_Tiles'
 test_gt = get_test_images(PATH_TO_TEST_IMAGES_DIR)
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 IOU_TH = 0.5
 
 for cnt, weight in enumerate(tqdm(weight_range)):

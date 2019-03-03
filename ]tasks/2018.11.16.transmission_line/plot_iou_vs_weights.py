@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import ersa_utils
 
 task_name = 'lines'
@@ -9,7 +9,7 @@ task_name = 'lines'
 model_dir = r'/hdd/Results/{}'.format(task_name)
 weight_range = [1, 5, 10, 30, 50, 100]
 iou_list = np.zeros(len(weight_range))
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 for cnt, weight in enumerate(weight_range):
     model_name = 'UnetCrop_{}_pw{}_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'.format(task_name, weight)

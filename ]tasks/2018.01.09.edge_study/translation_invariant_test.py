@@ -3,7 +3,7 @@ import imageio
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import util_functions
 import uab_collectionFunctions
 from bohaoCustom import uabMakeNetwork_UNet
@@ -130,7 +130,7 @@ for city in ['austin']:#['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']:
         plt.ylim(660, 0)
 
         plt.tight_layout()
-        img_dir, task_dir = utils.get_task_img_folder()
+        img_dir, task_dir = sis_utils.get_task_img_folder()
         file_name = tile_name.split('_')[0]
         plt.savefig(os.path.join(img_dir, file_name))
         #plt.show()

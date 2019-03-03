@@ -4,7 +4,7 @@ import imageio
 import numpy as np
 import tensorflow as tf
 import uabUtilreader
-import utils
+import sis_utils
 import ersa_utils
 import util_functions
 import uabRepoPaths
@@ -19,7 +19,7 @@ input_size = [1084, 1084]
 tile_size = [5000, 5000]
 util_functions.tf_warn_level(3)
 ds_name = 'lines_tw1'
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 
 class UnetModelCrop(uabMakeNetwork_UNet.UnetModelCrop):

@@ -3,7 +3,7 @@ import scipy.spatial
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import ersa_utils
 from integrate_results_analysis import add_points
 from evaluate_tower_performance import get_center_point, read_polygon_csv_data
@@ -67,7 +67,7 @@ def add_point_if_not_nearby(p1, p2, points, th=20):
 
 if __name__ == '__main__':
     # directories
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
     raw_dir = os.path.join(data_dir, 'raw')
 

@@ -3,12 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
 from tqdm import tqdm
-import utils
+import sis_utils
 import ersa_utils
 import processBlock
 
 np.random.seed(1004)
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 spca_dir = r'/media/ei-edl01/data/uab_datasets/spca/data/Original_Tiles'
 aemo_dir = r'/home/lab/Documents/bohao/data/aemo/aemo_pad'

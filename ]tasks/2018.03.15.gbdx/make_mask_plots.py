@@ -5,7 +5,7 @@ import scipy.misc
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import uabDataReader
 import util_functions
 import uabUtilreader

@@ -2,9 +2,9 @@ import os
 import imageio
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 npy_file_name = os.path.join(task_dir, 'encoded_res50_inria_spca.npy')
 feature_encode, len1, len2 = np.load(npy_file_name)
 

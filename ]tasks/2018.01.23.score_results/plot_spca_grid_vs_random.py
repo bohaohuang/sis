@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import uabRepoPaths
-import utils
+import sis_utils
 
 if __name__ == '__main__':
     file = r'/hdd/Results/grid_vs_random/UnetCrop_spca_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32/spca/result.txt'
@@ -83,7 +83,7 @@ plt.xlabel('City Name')
 plt.ylabel('IoU')
 plt.tight_layout()
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 plt.savefig(os.path.join(img_dir, 'deeplab_grid_vs_random_spca.png'))
 
 plt.show()

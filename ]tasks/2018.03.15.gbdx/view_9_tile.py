@@ -2,9 +2,9 @@ import os
 import imageio
 import scipy.misc
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 tile_id = '945785'
 data_path = r'/media/ei-edl01/user/as667/CT_9tile_trees'

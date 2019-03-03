@@ -2,12 +2,12 @@ import os
 import imageio
 from glob import glob
 from tqdm import tqdm
-import utils
+import sis_utils
 from util_functions import add_mask
 
 
 if __name__ == '__main__':
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     pred_dir_base = r'/hdd/Results/gbdx_cmp/DeeplabV3_res101_inria_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32/sp/pred'
     gt_dir = r'/media/ei-edl01/data/uab_datasets/sp/DATA_BUILDING_AND_PANEL'

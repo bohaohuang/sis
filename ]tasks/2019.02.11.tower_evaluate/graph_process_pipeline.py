@@ -1,5 +1,5 @@
 import os
-import utils
+import sis_utils
 import matplotlib.pyplot as plt
 from sklearn.metrics import precision_recall_curve, average_precision_score
 import ersa_utils
@@ -11,7 +11,7 @@ from evaluate_tower_performance import get_center_point, read_polygon_csv_data
 
 if __name__ == '__main__':
     # directories
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
     raw_dir = os.path.join(data_dir, 'raw')
     conf_dir = r'/media/ei-edl01/user/bh163/tasks/2018.11.16.transmission_line/' \

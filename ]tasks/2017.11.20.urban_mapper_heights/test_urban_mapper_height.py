@@ -2,7 +2,7 @@ import os
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 TEST_DATA_DIR = 'dcc_urban_mapper_height_valid'
 CITY_NAME = 'JAX,TAM'
@@ -41,20 +41,20 @@ def read_flag():
 
 
 def evaluate_results(flags, model_name, height_mode):
-    result = utils.test_authentic_unet_height(flags.rsr_data_dir,
-                                              flags.test_data_dir,
-                                              flags.input_size,
-                                              model_name,
-                                              flags.num_classes,
-                                              flags.ckdir,
-                                              flags.city_name,
-                                              flags.batch_size,
-                                              ds_name='urban_mapper',
-                                              height_mode=height_mode)
+    result = sis_utils.test_authentic_unet_height(flags.rsr_data_dir,
+                                                  flags.test_data_dir,
+                                                  flags.input_size,
+                                                  model_name,
+                                                  flags.num_classes,
+                                                  flags.ckdir,
+                                                  flags.city_name,
+                                                  flags.batch_size,
+                                                  ds_name='urban_mapper',
+                                                  height_mode=height_mode)
 
     print(result)
 
-    _, task_dir = utils.get_task_img_folder()
+    _, task_dir = sis_utils.get_task_img_folder()
     np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
 
 if __name__ == '__main__':

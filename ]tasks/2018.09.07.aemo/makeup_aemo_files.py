@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from glob import glob
-import utils
+import sis_utils
 import ersa_utils
 from preprocess import histMatching
 from collection import collectionMaker, collectionEditor

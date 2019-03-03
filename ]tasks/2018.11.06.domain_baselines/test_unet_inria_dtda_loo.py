@@ -1,6 +1,6 @@
 import os
 import tensorflow as tf
-import utils
+import sis_utils
 import ersa_utils
 import uabCrossValMaker
 import uab_collectionFunctions
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
     nn_utils.tf_warn_level(3)
 
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     for city_id in [0]:
         path_to_save = os.path.join(task_dir, 'dtda', city_list[city_id], 'shift_dict.pkl')

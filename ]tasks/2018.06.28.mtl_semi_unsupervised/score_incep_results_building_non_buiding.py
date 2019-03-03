@@ -11,7 +11,7 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.model_selection import KFold
 from sklearn.metrics import roc_curve, auc, confusion_matrix
 from mpl_toolkits.axes_grid1 import Grid
-import utils
+import sis_utils
 import util_functions
 import uabCrossValMaker
 import uabPreprocClasses
@@ -58,7 +58,7 @@ def plot_confusion_matrix(cm, classes,
 
 
 # settings
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 np.random.seed(1004)
 model_name = 'unet'
 verify = False

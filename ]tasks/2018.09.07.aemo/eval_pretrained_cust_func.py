@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import tensorflow as tf
-import utils
+import sis_utils
 import ersa_utils
 from nn import unet, nn_utils
 from collection import collectionMaker
@@ -13,7 +13,7 @@ suffix = 'aemo_hist'
 bs = 5
 gpu = 1
 model_name = 'unet'
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 cm = collectionMaker.read_collection(raw_data_path=r'/home/lab/Documents/bohao/data/aemo/aemo_hist',
                                      field_name='aus10,aus30,aus50',

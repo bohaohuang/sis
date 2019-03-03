@@ -5,10 +5,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from sklearn.manifold import TSNE
-import utils
+import sis_utils
 
 run_clustering = False
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 npy_file_name = os.path.join(task_dir, 'encoded_res50_2_sp_deeplab.npy')
 city_order = {'Fre': 0, 'Mod': 1, 'Sto': 2}
 city_list = ['Fresno', 'Modesto', 'Stockton']

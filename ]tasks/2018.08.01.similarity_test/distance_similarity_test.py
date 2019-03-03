@@ -1,6 +1,6 @@
 import pandas as pd
 from tqdm import tqdm
-import utils
+import sis_utils
 from make_res50_features import make_res50_features
 from kernel_distance_matching import distance_matching
 from city_building_truth import make_building_truth, make_city_truth
@@ -24,7 +24,7 @@ distance_list = np.zeros(len(city_list))
 delta_list = np.zeros(len(city_list))
 
 for target_city in tqdm(range(5)):
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     feature_file_name, patch_file_name, ps, patchDir, idx = make_res50_features(model_name, task_dir, GPU=0,
                                                                                 force_run=False)
     feature = pd.read_csv(feature_file_name, sep=',', header=None).values

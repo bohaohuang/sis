@@ -12,7 +12,7 @@ import imageio
 import numpy as np
 from glob import glob
 from tqdm import tqdm
-import utils
+import sis_utils
 
 
 def get_city_name_id(file_dir):
@@ -81,7 +81,7 @@ def compute_distance(set_1, set_2, patch_size, patch_num):
 
 
 def compute_distance_tile(set_1, set_2, patch_size, patch_num):
-    _, task_dir = utils.get_task_img_folder()
+    _, task_dir = sis_utils.get_task_img_folder()
     res50 = keras.applications.resnet50.ResNet50(include_top=True, weights='imagenet')
     train_vectors = []
     valid_vectors = []
@@ -166,7 +166,7 @@ for cnt in range(len(val)):
     file_name = os.path.basename(val[sort_idx[cnt]])
     name_id = file_name.split('_')[0]
     file_group_save[cnt // 31].append(name_id)
-_, task_dir = utils.get_task_img_folder()
+_, task_dir = sis_utils.get_task_img_folder()
 np.save(os.path.join(task_dir, 'file_group_austin.npy'), file_group_save)
 
 import matplotlib.pyplot as plt

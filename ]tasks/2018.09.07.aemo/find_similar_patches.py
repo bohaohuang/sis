@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import ersa_utils
 
 
@@ -16,7 +16,7 @@ def crop_center(img, cropx, cropy):
 
 
 # settings
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 show_figure = False
 
 aemo_img_dir = os.path.join(img_dir, 'aemo_patches')

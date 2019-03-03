@@ -2,7 +2,7 @@ import os
 import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
-import utils
+import sis_utils
 import ersa_utils
 import uabDataReader
 import uabCrossValMaker
@@ -174,7 +174,7 @@ if __name__ == '__main__':
     city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
     nn_utils.tf_warn_level(3)
 
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     for city_id in [0]:
         path_to_save = os.path.join(task_dir, 'dtda_new2', city_list[city_id], 'valid')

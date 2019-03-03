@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import uabRepoPaths
-import utils
+import sis_utils
 
 run_ids = [0, 1, 2, 3, 4]
 run_types = ['xcity', 'incity']
@@ -69,7 +69,7 @@ plt.xlabel('City Name')
 plt.ylabel('IoU')
 plt.tight_layout()
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 plt.savefig(os.path.join(img_dir, 'deeplab_xcity_vs_incity.png'))
 
 plt.show()

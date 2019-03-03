@@ -4,7 +4,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from glob import glob
 from natsort import natsorted
-import utils
+import sis_utils
 import ersa_utils
 import uab_collectionFunctions
 from visualize import visualize_utils
@@ -38,7 +38,7 @@ model.create_graph('X', class_num=2)
 rgbs = natsorted(glob(os.path.join(data_dir, '*.tif')))
 gts = natsorted(glob(os.path.join(data_dir, '*.png')))
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 save_dir = os.path.join(img_dir, 'bihar_patch_preds')
 ersa_utils.make_dir_if_not_exist(save_dir)
 

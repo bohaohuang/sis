@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 import scipy.misc
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
@@ -110,15 +110,15 @@ def test_real(flags, patch_size, test_city):
                     # run
                     result = model.test('X', sess, iterator_test)
 
-                    pred_label_img = utils.get_output_label(result,
-                                                            (meta_test['dim_image'][0]+184, meta_test['dim_image'][1]+184),
-                                                            patch_size,
-                                                            meta_test['colormap'], overlap=184,
-                                                            output_image_dim=meta_test['dim_image'],
-                                                            output_patch_size=(patch_size[0]-184, patch_size[1]-184))
+                    pred_label_img = sis_utils.get_output_label(result,
+                                                                (meta_test['dim_image'][0]+184, meta_test['dim_image'][1]+184),
+                                                                patch_size,
+                                                                meta_test['colormap'], overlap=184,
+                                                                output_image_dim=meta_test['dim_image'],
+                                                                output_patch_size=(patch_size[0]-184, patch_size[1]-184))
                     # evaluate
                     truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, label_name))
-                    iou = utils.iou_metric(truth_label_img, pred_label_img)
+                    iou = sis_utils.iou_metric(truth_label_img, pred_label_img)
 
                     print('{}_{}: iou={:.2f}'.format(city_name, tile_id, iou*100))
 
@@ -133,14 +133,14 @@ def test_real(flags, patch_size, test_city):
 
 
 def test_fake(flags, patch_size, test_city):
-    result = utils.test_unet(flags.rsr_data_dir,
-                             flags.test_data_dir,
-                             patch_size,
+    result = sis_utils.test_unet(flags.rsr_data_dir,
+                                 flags.test_data_dir,
+                                 patch_size,
                              'UNET_PS-224__BS-10__E-100__NT-8000__DS-60__CT-__no_random',
-                             flags.num_classes,
+                                 flags.num_classes,
                              r'/home/lab/Documents/bohao/code/sis/test/models/GridExp',
-                             test_city,
-                             flags.batch_size)
+                                 test_city,
+                                 flags.batch_size)
     return result
 
 
@@ -230,11 +230,11 @@ def test_fake_across_city(flags, MODEL_NAME, patch_size):
                 output += raw_pred
 
             # combine results
-            pred_label_img = utils.get_pred_labels(output)
-            output_pred = utils.make_output_file(pred_label_img, meta_test['colormap'])
+            pred_label_img = sis_utils.get_pred_labels(output)
+            output_pred = sis_utils.make_output_file(pred_label_img, meta_test['colormap'])
             # evaluate
             truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, 'inria', 'truth', '{}{}.tif'.format(city, tile_num+1)))
-            iou = utils.iou_metric(truth_label_img, output_pred)
+            iou = sis_utils.iou_metric(truth_label_img, output_pred)
             print('{}_{}: iou={:.2f}'.format(city, tile_id, iou * 100))
 
             result_dict['{}{}'.format(city, tile_id)] = iou
@@ -335,11 +335,11 @@ def test_real_across_city(flags, MODEL_NAME, patch_size):
                 output += raw_pred
 
             # combine results
-            pred_label_img = utils.get_pred_labels(output)
-            output_pred = utils.make_output_file(pred_label_img, meta_test['colormap'])
+            pred_label_img = sis_utils.get_pred_labels(output)
+            output_pred = sis_utils.make_output_file(pred_label_img, meta_test['colormap'])
             # evaluate
             truth_label_img = scipy.misc.imread(os.path.join(flags.rsr_data_dir, 'inria', 'truth', '{}{}.tif'.format(city, tile_num+1)))
-            iou = utils.iou_metric(truth_label_img, output_pred)
+            iou = sis_utils.iou_metric(truth_label_img, output_pred)
             print('{}_{}: iou={:.2f}'.format(city, tile_id, iou * 100))
 
             result_dict['{}{}'.format(city, tile_id)] = iou
@@ -350,7 +350,7 @@ def test_real_across_city(flags, MODEL_NAME, patch_size):
 
 if __name__ == '__main__':
     flags = read_flag()
-    _, task_dir = utils.get_task_img_folder()
+    _, task_dir = sis_utils.get_task_img_folder()
 
     for city in ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']:
         for patch_size in [572, 2636]:
@@ -442,8 +442,8 @@ if __name__ == '__main__':
     plt.ylim(ymin=0.6, ymax=0.8)
     plt.title('U-Net Model Comparison')
     ax.legend((rect1[0], rect2[0]), ('PatchSize: 224/572', 'PatchSize: 2800/2636'))
-    utils.barplot_autolabel(ax, rect1, margin=0.01)
-    utils.barplot_autolabel(ax, rect2, margin=0.01)
+    sis_utils.barplot_autolabel(ax, rect1, margin=0.01)
+    sis_utils.barplot_autolabel(ax, rect2, margin=0.01)
     plt.show()
 
     print(result_mean)

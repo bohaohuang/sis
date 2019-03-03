@@ -14,7 +14,7 @@ import uabCrossValMaker
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from tqdm import tqdm
-import utils
+import sis_utils
 
 
 def crop_center(img,cropx,cropy):
@@ -127,7 +127,7 @@ def check_res50_features(model_name, GPU=0):
 
 
 if __name__ == '__main__':
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     feature_file_name, patch_file_name = \
         make_res50_features('deeplab', task_dir, GPU=0, force_run=False)
 

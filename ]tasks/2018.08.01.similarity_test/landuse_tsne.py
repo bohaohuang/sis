@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-import utils
+import sis_utils
 from run_tsne import run_tsne
 from make_res50_features import crop_center
 
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     import keras
 
     input_size_fit = (224, 224)
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     feature_file_name = os.path.join(task_dir, 'ucmerced_res50_inria.csv')
     patch_file_name = os.path.join(task_dir, 'ucmerced_res50_inria.txt')
     res50 = keras.applications.resnet50.ResNet50(include_top=True, weights='imagenet')

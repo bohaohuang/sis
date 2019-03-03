@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 
 IMG_SAVE_DIR = r'/media/ei-edl01/user/bh163/figs'
@@ -24,6 +24,6 @@ plt.xticks(patch_size[:-1])
 ax.set_xticklabels(patch_size[:-1], rotation=45)
 plt.legend(loc='lower right')
 plt.title('IOU vs Patch Size')
-save_dir = utils.make_task_img_folder(IMG_SAVE_DIR)
+save_dir = sis_utils.make_task_img_folder(IMG_SAVE_DIR)
 plt.savefig(os.path.join(save_dir, 'iou_vs_patch_size.png'))
 plt.show()

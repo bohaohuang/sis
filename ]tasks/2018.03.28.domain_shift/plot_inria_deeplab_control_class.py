@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 base_model_dir = r'/hdd/Results/control_city/DeeplabV3_inria_aug_train_austin_chicago_kitsap_tyrol-w_vienna_' \
                  r'PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
@@ -12,7 +12,7 @@ city_control_model_dir = r'/hdd/Results/control_city/DeeplabV3_inria_aug_train_{
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 city_dict = {'aus': 0, 'chi': 1, 'kit': 2, 'tyr': 3, 'vie': 4}
 plt_legend = ['LOO', 'LH1', 'LH0', 'Base']
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 base_model_result = os.path.join(base_model_dir, 'inria', 'result.txt')
 for city in city_list:

@@ -3,7 +3,7 @@ import time
 import argparse
 import numpy as np
 import tensorflow as tf
-import utils
+import sis_utils
 from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
@@ -87,11 +87,11 @@ def fine_tune_grid_exp(height_mode,
     # get weight
     tf.reset_default_graph()
     if height_mode == 'subtract':
-        kernel = utils.get_unet_first_layer_weight(flags.pre_trained_model, 1)
+        kernel = sis_utils.get_unet_first_layer_weight(flags.pre_trained_model, 1)
     elif height_mode == 'all':
-        kernel = utils.get_unet_first_layer_weight(flags.pre_trained_model, 2)
+        kernel = sis_utils.get_unet_first_layer_weight(flags.pre_trained_model, 2)
     else:
-        kernel = utils.get_unet_first_layer_weight(flags.pre_trained_model, 3)
+        kernel = sis_utils.get_unet_first_layer_weight(flags.pre_trained_model, 3)
     tf.reset_default_graph()
 
     # data prepare step
@@ -166,7 +166,7 @@ def fine_tune_grid_exp(height_mode,
         try:
             train_summary_writer = tf.summary.FileWriter(model.ckdir, sess.graph)
             model.train('X', 'Y', epochs, flags.n_train, flags.batch_size, sess, train_summary_writer,
-                        train_iterator=reader_train_iter, valid_iterator=reader_valid_iter, image_summary=utils.image_summary)
+                        train_iterator=reader_train_iter, valid_iterator=reader_valid_iter, image_summary=sis_utils.image_summary)
         finally:
             coord.request_stop()
             coord.join(threads)
@@ -177,17 +177,17 @@ def fine_tune_grid_exp(height_mode,
 
 
 def evaluate_results(flags, model_name, height_mode):
-    result = utils.test_authentic_unet_height(flags.rsr_data_dir,
-                                              flags.valid_data_dir,
-                                              flags.input_size,
-                                              model_name,
-                                              flags.num_classes,
-                                              flags.ckdir,
-                                              flags.city_name,
-                                              flags.batch_size,
-                                              ds_name='urban_mapper',
-                                              height_mode=height_mode,
-                                              img_mean=IMG_MEAN)
+    result = sis_utils.test_authentic_unet_height(flags.rsr_data_dir,
+                                                  flags.valid_data_dir,
+                                                  flags.input_size,
+                                                  model_name,
+                                                  flags.num_classes,
+                                                  flags.ckdir,
+                                                  flags.city_name,
+                                                  flags.batch_size,
+                                                  ds_name='urban_mapper',
+                                                  height_mode=height_mode,
+                                                  img_mean=IMG_MEAN)
     #_, task_dir = utils.get_task_img_folder()
     #np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
 

@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 
 def sliding_mean(data_array, window=5):
@@ -25,7 +25,7 @@ def exponential_smoothing(series, alpha=0.6):
     return np.array(result)
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 '''file_names = ['run_UnetCrop_inria_aug_incity_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32-tag-xent_validation.csv',
               'run_exp1_UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32-tag-xent_validation.csv',
               'run_UnetCrop_inria_aug_xcity_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32-tag-xent_validation.csv']

@@ -2,7 +2,7 @@ import os
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 TEST_DATA_DIR = 'dcc_urban_mapper_height_valid'
 CITY_NAME = 'JAX,TAM'
@@ -41,19 +41,19 @@ def read_flag():
 
 
 def evaluate_a_result(flags, model_name, input_size):
-    result = utils.test_authentic_unet(flags.rsr_data_dir,
-                             flags.test_data_dir,
-                             input_size,
-                             model_name,
-                             flags.num_classes,
-                             flags.ckdir,
-                             flags.city_name,
-                             flags.batch_size,
-                             ds_name='urban_mapper')
+    result = sis_utils.test_authentic_unet(flags.rsr_data_dir,
+                                           flags.test_data_dir,
+                                           input_size,
+                                           model_name,
+                                           flags.num_classes,
+                                           flags.ckdir,
+                                           flags.city_name,
+                                           flags.batch_size,
+                                           ds_name='urban_mapper')
 
     print(result)
 
-    _, task_dir = utils.get_task_img_folder()
+    _, task_dir = sis_utils.get_task_img_folder()
     np.save(os.path.join(task_dir, '{}_resampled.npy'.format(model_name)), result)
 
 
@@ -61,7 +61,26 @@ def evaluate_results(flags):
     for layer_id in [6, 7, 8, 9]:
         model_name = 'UNET_um_no_random_resampled_{}'.format(layer_id)
 
-        result = utils.test_unet(flags.rsr_data_dir,
+        result = sis_utils.test_unet(flags.rsr_data_dir,
+                                     flags.test_data_dir,
+                                     flags.input_size,
+                                     model_name,
+                                     flags.num_classes,
+                                     flags.ckdir,
+                                     flags.city_name,
+                                     flags.batch_size,
+                                     ds_name='urban_mapper')
+
+        print(result)
+
+        _, task_dir = sis_utils.get_task_img_folder()
+        np.save(os.path.join(task_dir, '{}_resampled.npy'.format(model_name)), result)
+
+
+def evaluate_no_train(flags):
+    model_name = 'UnetInria_no_aug_resampled'
+
+    result = sis_utils.test_unet(flags.rsr_data_dir,
                                  flags.test_data_dir,
                                  flags.input_size,
                                  model_name,
@@ -71,47 +90,28 @@ def evaluate_results(flags):
                                  flags.batch_size,
                                  ds_name='urban_mapper')
 
-        print(result)
-
-        _, task_dir = utils.get_task_img_folder()
-        np.save(os.path.join(task_dir, '{}_resampled.npy'.format(model_name)), result)
-
-
-def evaluate_no_train(flags):
-    model_name = 'UnetInria_no_aug_resampled'
-
-    result = utils.test_unet(flags.rsr_data_dir,
-                             flags.test_data_dir,
-                             flags.input_size,
-                             model_name,
-                             flags.num_classes,
-                             flags.ckdir,
-                             flags.city_name,
-                             flags.batch_size,
-                             ds_name='urban_mapper')
-
     print(result)
 
-    _, task_dir = utils.get_task_img_folder()
+    _, task_dir = sis_utils.get_task_img_folder()
     np.save(os.path.join(task_dir, '{}_resampled.npy'.format(model_name)), result)
 
 
 def evaluate_scratch(flags):
     model_name = 'UNET_um_no_random_scratch'
 
-    result = utils.test_unet(flags.rsr_data_dir,
-                             flags.test_data_dir,
-                             flags.input_size,
-                             model_name,
-                             flags.num_classes,
-                             flags.ckdir,
-                             flags.city_name,
-                             flags.batch_size,
-                             ds_name='urban_mapper')
+    result = sis_utils.test_unet(flags.rsr_data_dir,
+                                 flags.test_data_dir,
+                                 flags.input_size,
+                                 model_name,
+                                 flags.num_classes,
+                                 flags.ckdir,
+                                 flags.city_name,
+                                 flags.batch_size,
+                                 ds_name='urban_mapper')
 
     print(result)
 
-    _, task_dir = utils.get_task_img_folder()
+    _, task_dir = sis_utils.get_task_img_folder()
     np.save(os.path.join(task_dir, '{}.npy'.format(model_name)), result)
 
 
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     #evaluate_no_train(flags)
     #evaluate_scratch(flags)
 
-    _, task_dir = utils.get_task_img_folder()
+    _, task_dir = sis_utils.get_task_img_folder()
 
     #evaluate_a_result(flags, 'UNET_new_um_7', (572, 572))
     result = dict(np.load(os.path.join(task_dir, 'UNET_new_um_7_resampled.npy')).tolist())

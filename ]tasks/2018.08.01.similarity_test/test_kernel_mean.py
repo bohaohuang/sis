@@ -2,13 +2,13 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 from make_res50_features import make_res50_features
 from city_building_truth import make_city_truth
 
 
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 model_name = 'deeplab'
 feature_file_name, patch_file_name, ps, patchDir, idx = make_res50_features(model_name, task_dir, GPU=0,
                                                                             force_run=False)

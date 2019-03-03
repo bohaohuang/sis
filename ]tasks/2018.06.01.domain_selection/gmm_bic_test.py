@@ -6,7 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from sklearn.mixture import GaussianMixture
-import utils
+import sis_utils
 import uabCrossValMaker
 import uabPreprocClasses
 import uab_collectionFunctions
@@ -18,7 +18,7 @@ import bohaoCustom.uabPreprocClasses as bPreproc
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 cnn_name = 'deeplab'
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 save_file_name = os.path.join(task_dir, 'llh_bic_test.npy')
 force_run = False
 test_points = list(range(10, 151, 10)) + list(range(160, 501, 20))

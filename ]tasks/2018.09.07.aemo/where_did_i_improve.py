@@ -3,7 +3,7 @@ import imageio
 import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
-import utils
+import sis_utils
 import ersa_utils
 import util_functions
 from visualize import visualize_utils
@@ -70,7 +70,7 @@ def make_cmp_plot(rgb, truth, ft, cmp, x, y, window_size, city_str):
 if __name__ == '__main__':
     window_size = 200
     stride = 200
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     good_th = 60
     bad_th = 20
 

@@ -2,7 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import uabRepoPaths
-import utils
+import sis_utils
 
 
 def plot_bar(city_res, all_res, xtick_str, title_str, width=0.15):
@@ -43,7 +43,7 @@ def plot_bar2(city_res, all_res, xtick_str, title_str, width=0.15):
     plt.suptitle(title_str)
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 # Inria
 tick_str = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna', 'avg']

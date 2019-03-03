@@ -2,7 +2,7 @@ import os
 import numpy as np
 from glob import glob
 from tqdm import tqdm
-import utils
+import sis_utils
 import ersa_utils
 from collection import collectionMaker
 
@@ -26,7 +26,7 @@ def cust_hist_match(dist_s, dist_t, img_s):
 
 
 if __name__ == '__main__':
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     # get aemo stats
     cm = collectionMaker.read_collection('aemo_pad')

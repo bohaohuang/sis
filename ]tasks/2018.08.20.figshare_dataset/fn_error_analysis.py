@@ -6,7 +6,7 @@ import matplotlib.patches as patches
 from skimage import measure
 from scipy import ndimage
 from tqdm import tqdm
-import utils
+import sis_utils
 import util_functions
 
 
@@ -103,7 +103,7 @@ def visualize_fn_object(rgb, gt, base, pred_1, pred_2, pred_1_title, pred_2_titl
             yield fig, flag, building_size
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 city_name = 'atlanta'
 truth_dir = r'/media/ei-edl01/data/uab_datasets/{}/data/Original_Tiles'.format(city_name)
 base_dir = r'/hdd/Results/kyle/UnetCrop_inria_aug_grid_0_PS(572, 572)_BS5_' \

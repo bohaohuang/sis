@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import uabRepoPaths
-import utils
+import sis_utils
 
 run_ids = [1, 2, 3, 4, 5]
 run_types = ['random', 'grid']
@@ -61,7 +61,7 @@ plt.xlabel('City Name')
 plt.ylabel('IoU')
 plt.tight_layout()
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 plt.savefig(os.path.join(img_dir, 'unet_grid_vs_random_inria_fixed.png'))
 
 plt.show()

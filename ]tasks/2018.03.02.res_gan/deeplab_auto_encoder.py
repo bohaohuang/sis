@@ -2,7 +2,7 @@ import os
 import csv
 import numpy as np
 import tensorflow as tf
-import utils
+import sis_utils
 import uabCrossValMaker
 import uabDataReader
 import uab_collectionFunctions
@@ -14,7 +14,7 @@ batch_size = 1
 input_size = [321, 321]
 tile_size = [5000, 5000]
 test_city = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 tf.reset_default_graph()
 

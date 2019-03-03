@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import uabPreprocClasses
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
@@ -30,7 +30,7 @@ def random_crop(img, crop_x, crop_y):
 
 # settings
 inria_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/Original_Tiles'
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 model_name ='vae'
 city_name = 'austin'
 city_id = 1

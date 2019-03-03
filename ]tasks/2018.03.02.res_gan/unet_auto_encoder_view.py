@@ -5,7 +5,7 @@ import imageio
 import numpy as np
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 run_clustering = False
 npy_file_name = os.path.join(r'/hdd6/temp', 'encoded_uencoder.npy')
@@ -13,7 +13,7 @@ cmap = plt.get_cmap('Set1').colors
 city_order = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 patch_dir = r'/hdd/uab_datasets/Results/PatchExtr/inria/chipExtrReg_cSz572x572_pad184'
 input_size = 572
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 if run_clustering:
     file_name = os.path.join(r'/hdd6/temp', 'encoded_uencoder.csv')

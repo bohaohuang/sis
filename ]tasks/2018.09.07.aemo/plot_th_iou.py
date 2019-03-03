@@ -3,13 +3,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
 from tqdm import tqdm
-import utils
+import sis_utils
 import ersa_utils
 import processBlock
 from nn import nn_utils
 from collection import collectionMaker
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 model_name = 'unet_aemo_hist_0_hist_PS(572, 572)_BS5_EP80_LR0.001_DS30_DR0.1'
 
 

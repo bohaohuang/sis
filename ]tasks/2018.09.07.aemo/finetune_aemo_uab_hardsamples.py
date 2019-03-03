@@ -3,7 +3,7 @@ import time
 import argparse
 import numpy as np
 import tensorflow as tf
-import utils
+import sis_utils
 import ersa_utils
 import uabDataReader
 import uabRepoPaths
@@ -105,7 +105,7 @@ def main(flags):
     idx, file_list = uabCrossValMaker.uabUtilGetFolds(patchDir, 'fileList.txt', 'tile')
     file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [4, 5])
 
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     save_dir = os.path.join(img_dir, 'hard_samples')
     file_list_train = ersa_utils.load_file(os.path.join(save_dir, 'file_list.txt'))
     file_list_train = [l.strip().split(' ') for l in file_list_train]

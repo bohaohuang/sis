@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
 from natsort import natsorted
-import utils
+import sis_utils
 import ersa_utils
 from visualize import visualize_utils
 
@@ -17,7 +17,7 @@ def clean_conf_map(pred):
     return pred
 
 # settings
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 ds_name = 'lines'
 weight = 50
 city_list = ['Tucson', 'Colwich', 'Clyde', 'Wilmington']

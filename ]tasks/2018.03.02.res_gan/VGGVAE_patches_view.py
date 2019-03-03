@@ -5,11 +5,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from sklearn.manifold import TSNE
-import utils
+import sis_utils
 
 run_clustering = True
 model_dir = r'/hdd6/Models/VGGVAE/VGGVAE_inria_z500_0_PS(256, 256)_BS5_EP400_LR1e-05_DS200.0_DR0.5_SFN32'
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 for perplexity in [20, 40, 60]:
     for learning_rate in [200, 400, 600, 800]:

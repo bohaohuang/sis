@@ -2,7 +2,7 @@ import os
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 
 def get_patch_effect(res_dir, file_dir, input_sizes, model_name, appendix='.npy'):

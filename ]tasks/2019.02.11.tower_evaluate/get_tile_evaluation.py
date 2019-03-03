@@ -6,14 +6,14 @@ import tensorflow as tf
 from glob import glob
 from tqdm import tqdm
 from natsort import natsorted
-import utils
+import sis_utils
 import ersa_utils
 from nn import nn_utils
 from evaluate_utils import extract_grids, run_inference_for_single_image, get_predict_info
 
 # settings
 nn_utils.tf_warn_level(3)
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 task_fold = r'/media/ei-edl01/user/bh163/tasks/2018.11.16.transmission_line'
 data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
 info_dir = os.path.join(data_dir, 'info')

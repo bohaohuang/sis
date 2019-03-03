@@ -9,7 +9,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu)
 import imageio
 import numpy as np
 import tensorflow as tf
-import utils
+import sis_utils
 from bohaoCustom import uabMakeNetwork_ALI
 
 
@@ -26,7 +26,7 @@ def make_thumbnail(img_batch):
 batch_size = 100
 input_size = [64, 64]
 input_size_fit = (224, 224)
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 img_temp_dir = os.path.join(img_dir, 'temp')
 if not os.path.exists(img_temp_dir):
     os.makedirs(img_temp_dir)

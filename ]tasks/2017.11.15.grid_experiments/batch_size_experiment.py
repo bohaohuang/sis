@@ -2,7 +2,7 @@ import os
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 TEST_DATA_DIR = 'dcc_inria_valid'
 CITY_NAME = 'austin'
@@ -46,16 +46,16 @@ def get_ious(flags):
         model_name = 'UNET_PS-{}__BS-{}__E-100__NT-8000__DS-60__CT-__no_random'.format(flags.input_size[0], batch_size)
         print(model_name)
 
-        result = utils.test_unet(flags.rsr_data_dir,
-                                 flags.test_data_dir,
-                                 flags.input_size,
-                                 model_name,
-                                 flags.num_classes,
-                                 flags.ckdir,
-                                 flags.city_name,
-                                 flags.batch_size)
+        result = sis_utils.test_unet(flags.rsr_data_dir,
+                                     flags.test_data_dir,
+                                     flags.input_size,
+                                     model_name,
+                                     flags.num_classes,
+                                     flags.ckdir,
+                                     flags.city_name,
+                                     flags.batch_size)
         print(result)
-        _, task_dir = utils.get_task_img_folder()
+        _, task_dir = sis_utils.get_task_img_folder()
         np.save(os.path.join(task_dir, '{}_{}.npy'.format(model_name, flags.input_size)), result)
 
 
@@ -64,16 +64,16 @@ def get_ious_patch_size(flags, patch_size_list):
         model_name = 'UNET_PS-{}__BS-{}__E-100__NT-8000__DS-60__CT-__no_random'.format(patch_size, 1)
         print(model_name)
 
-        result = utils.test_unet(flags.rsr_data_dir,
-                                 flags.test_data_dir,
-                                 (patch_size, patch_size),
-                                 model_name,
-                                 flags.num_classes,
-                                 flags.ckdir,
-                                 flags.city_name,
-                                 flags.batch_size)
+        result = sis_utils.test_unet(flags.rsr_data_dir,
+                                     flags.test_data_dir,
+                                     (patch_size, patch_size),
+                                     model_name,
+                                     flags.num_classes,
+                                     flags.ckdir,
+                                     flags.city_name,
+                                     flags.batch_size)
         print(result)
-        _, task_dir = utils.get_task_img_folder()
+        _, task_dir = sis_utils.get_task_img_folder()
         np.save(os.path.join(task_dir, '{}_{}.npy'.format(model_name, patch_size)), result)
 
 
@@ -82,16 +82,16 @@ def get_ious_psfixed(flags, patch_size_list):
         model_name = 'UNET_PS-224__BS-10__E-100__NT-8000__DS-60__CT-__no_random'
         print(model_name)
 
-        result = utils.test_unet(flags.rsr_data_dir,
-                                 flags.test_data_dir,
-                                 (patch_size, patch_size),
-                                 model_name,
-                                 flags.num_classes,
-                                 flags.ckdir,
-                                 flags.city_name,
-                                 flags.batch_size)
+        result = sis_utils.test_unet(flags.rsr_data_dir,
+                                     flags.test_data_dir,
+                                     (patch_size, patch_size),
+                                     model_name,
+                                     flags.num_classes,
+                                     flags.ckdir,
+                                     flags.city_name,
+                                     flags.batch_size)
         print(result)
-        _, task_dir = utils.get_task_img_folder()
+        _, task_dir = sis_utils.get_task_img_folder()
         np.save(os.path.join(task_dir, '{}_fixed_{}.npy'.format(model_name, patch_size)), result)
 
 
@@ -100,22 +100,22 @@ def get_ious_patch_size_224(flags, patch_size_list):
         model_name = 'UNET_PS-{}__BS-{}__E-100__NT-8000__DS-60__CT-__no_random'.format(patch_size, 1)
         print(model_name)
 
-        result = utils.test_unet(flags.rsr_data_dir,
-                                 flags.test_data_dir,
-                                 (224, 224),
-                                 model_name,
-                                 flags.num_classes,
-                                 flags.ckdir,
-                                 flags.city_name,
-                                 flags.batch_size)
+        result = sis_utils.test_unet(flags.rsr_data_dir,
+                                     flags.test_data_dir,
+                                     (224, 224),
+                                     model_name,
+                                     flags.num_classes,
+                                     flags.ckdir,
+                                     flags.city_name,
+                                     flags.batch_size)
         print(result)
-        _, task_dir = utils.get_task_img_folder()
+        _, task_dir = sis_utils.get_task_img_folder()
         np.save(os.path.join(task_dir, '{}_{}.npy'.format(model_name, 224)), result)
 
 
 if __name__ == '__main__':
     flags = read_flag()
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
     #get_ious(flags)
 
     #patch_size_list = np.array([352, 1632])

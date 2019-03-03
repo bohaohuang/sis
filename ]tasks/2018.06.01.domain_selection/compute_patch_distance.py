@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
 from tqdm import tqdm
-import utils
+import sis_utils
 import uabCrossValMaker
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
@@ -76,7 +76,7 @@ def read_patch_file(patch_list, patch_size, patch_dir):
 
 
 def compute_distance_patch(train_set, patches, patch_size, patch_num, patch_dir):
-    _, task_dir = utils.get_task_img_folder()
+    _, task_dir = sis_utils.get_task_img_folder()
     res50 = keras.applications.resnet50.ResNet50(include_top=True, weights='imagenet')
     fc2048 = keras.models.Model(inputs=res50.input, outputs=res50.get_layer('flatten_1').output)
     train_vectors = []
@@ -130,7 +130,7 @@ def get_patch_prob(train_vec, patch_vec):
 img_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/Original_Tiles'
 rgb_files = glob(os.path.join(img_dir, '*_RGB.tif'))
 train_set, valid_set = seperate_rgb_files(rgb_files)
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 # compute distance patch-wise
 patch_size = 224

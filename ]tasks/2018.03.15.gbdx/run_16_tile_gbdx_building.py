@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from glob import glob
-import utils
+import sis_utils
 import util_functions
 import uabDataReader
 import uabUtilreader
@@ -18,7 +18,7 @@ batch_size = 5
 input_size = [572, 572]
 tile_size = [2541, 2541]
 util_functions.tf_warn_level(3)
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 tile_cnt = 11
 
 tf.reset_default_graph()

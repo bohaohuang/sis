@@ -8,12 +8,12 @@ import tensorflow as tf
 import uab_collectionFunctions
 import uab_DataHandlerFunctions
 from tqdm import tqdm
-import utils
+import sis_utils
 from bohaoCustom import uabMakeNetwork_DeepLabV2
 
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 # make network
 input_size = (321, 321)

@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from mpl_toolkits.axes_grid1 import Grid
 from sklearn.mixture import GaussianMixture
-import utils
+import sis_utils
 import uabCrossValMaker
 import uabPreprocClasses
 import uab_collectionFunctions
@@ -19,7 +19,7 @@ import bohaoCustom.uabPreprocClasses as bPreproc
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 cnn_name = 'deeplab'
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 save_file_name = os.path.join(task_dir, 'llh_l2out_building.npy')
 force_run = True
 n_comp = 70

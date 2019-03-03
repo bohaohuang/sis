@@ -2,7 +2,7 @@ import os
 import numpy as np
 import tensorflow as tf
 import uabUtilreader
-import utils
+import sis_utils
 import ersa_utils
 import util_functions
 import uabCrossValMaker

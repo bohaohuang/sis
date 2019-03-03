@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 
 
 def exponential_smoothing(series, alpha=1):
@@ -13,7 +13,7 @@ def exponential_smoothing(series, alpha=1):
     return np.array(result)
 
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 input_sizes = [508, 540, 572, 620, 684, 796]
 city_dict = {'austin':0, 'chicago':1, 'kitsap':2, 'tyrol-w':3, 'vienna':4}
 res_dir = r'/media/ei-edl01/user/bh163/tasks/2017.12.16.framework_train_cnn'

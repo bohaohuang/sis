@@ -3,7 +3,7 @@ import time
 import imageio
 import numpy as np
 import tensorflow as tf
-import utils
+import sis_utils
 import uabCrossValMaker
 import uabDataReader
 import uabUtilreader
@@ -79,7 +79,7 @@ for slide_step in shift_list:
     util_functions.tf_warn_level(3)
     city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
     model_dir = r'/hdd6/Models/Inria_decay/DeeplabV3_inria_decay_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40.0_DR0.1_SFN32'
-    img_dir, task_dir = utils.get_task_img_folder()
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
     tf.reset_default_graph()
     blCol = uab_collectionFunctions.uabCollection('inria')

@@ -1,10 +1,10 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import util_functions
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 deeplab_dir = r'/hdd/Results/ct_gamma/DeeplabV3_spca_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
 unet_dir = r'/hdd/Results/ct_gamma/UnetCropCV_(FixedRes)CTFinetune+nlayer9_PS(572, 572)_BS5_EP100_LR1e-05_DS50_DR0.1_SFN32'
 

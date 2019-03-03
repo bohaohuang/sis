@@ -2,10 +2,10 @@ import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 import ersa_utils
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 img_name = 'demo_2.jpg'
 
 raw = ersa_utils.load_file(os.path.join(img_dir, img_name))

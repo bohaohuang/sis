@@ -2,7 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, precision_recall_curve
-import utils
+import sis_utils
 import ersa_utils
 
 '''panel_num = np.array([
@@ -13,7 +13,7 @@ import ersa_utils
 ])
 panel_num = panel_num[:, :len(size_list)+1]'''
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 size_list = list(range(0, 760, 40)) + list(range(760, 1000, 120))
 step_list = np.concatenate([40 * np.ones(len(list(range(0, 760, 40))), dtype=np.int),
                             120 * np.ones(len(list(range(760, 1000, 120))), dtype=np.int)])

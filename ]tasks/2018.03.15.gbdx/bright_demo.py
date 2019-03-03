@@ -2,10 +2,10 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
-import utils
+import sis_utils
 
 rc('text', usetex=True)
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 intensity = np.arange(1, 256)
 gamma_range = [0.1, 0.5, 2, 3, 4, 5]

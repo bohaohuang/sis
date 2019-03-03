@@ -3,11 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
 from sklearn.metrics import precision_recall_curve, roc_curve
-import utils
+import sis_utils
 import ersa_utils
 from collection import collectionMaker
 
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 model_name = 'unet_aemo_pad_PS(572, 572)_BS5_EP130_LR0.001_DS100_DR0.1'
 conf_dir = os.path.join(task_dir, 'conf_map_{}'.format(model_name))
 conf_files = sorted(glob(os.path.join(conf_dir, '*.npy')))

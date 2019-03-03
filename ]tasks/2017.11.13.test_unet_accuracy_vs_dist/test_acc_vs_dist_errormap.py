@@ -6,7 +6,7 @@ import numpy as np
 import tensorflow as tf
 import scipy.misc
 import matplotlib.pyplot as plt
-import utils
+import sis_utils
 from network import unet
 from dataReader import image_reader, patch_extractor
 from rsrClassData import rsrClassData
@@ -54,7 +54,7 @@ def evaluate_on_patch(result, label_img, tile_dim, patch_size):
     label_patches = patch_extractor.patchify(label_img_block, tile_dim, patch_size, overlap=0)
     error_map = np.zeros(patch_size)
     for cnt, label in enumerate(label_patches):
-        pred = utils.get_pred_labels(result[cnt, :, :, :])
+        pred = sis_utils.get_pred_labels(result[cnt, :, :, :])
         error_map[np.where(pred != label[:, :, 0])] += 1
     return error_map
 
@@ -161,7 +161,7 @@ def main(flags):
             plt.title('Error VS Dist ({})'.format(city_name))
             plt.xlabel('Dist to center of patch')
             plt.ylabel('#Errors')
-            save_dir = utils.make_task_img_folder(IMG_SAVE_DIR)
+            save_dir = sis_utils.make_task_img_folder(IMG_SAVE_DIR)
             plt.savefig(os.path.join(save_dir, 'M-{}_PS-{}'.format(flags.model_name, flags.input_size[0])),
                         bbox_inches='tight')
             plt.show()

@@ -3,7 +3,7 @@ import imageio
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-import utils
+import sis_utils
 from contour_maker import get_contour
 
 
@@ -19,7 +19,7 @@ city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
 trimap_width = np.arange(1, 21)
 base_err_list = np.zeros(len(trimap_width))
 ugan_err_list = np.zeros(len(trimap_width))
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 
 gt_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/TilePreproc/MultChanOp_chans3_Divide_dF255p000'
 

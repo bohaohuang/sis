@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from tqdm import tqdm
-import utils
+import sis_utils
 import uabCrossValMaker
 
 
@@ -74,7 +74,7 @@ def make_bucket_group(bucket):
 
 # settings
 random_seed = 4
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 file_name = os.path.join(task_dir, 'res50_fc1000_inria.csv')
 input_size = 321
 patchDir = r'/hdd/uab_datasets/Results/PatchExtr/inria/chipExtrReg_cSz321x321_pad0'

@@ -2,7 +2,7 @@ import os
 import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
-import utils
+import sis_utils
 import ersa_utils
 import uab_collectionFunctions
 from collection import collectionMaker as cm
@@ -44,7 +44,7 @@ if __name__ == '__main__':
             tf.reset_default_graph()
             record_matrix = []
 
-            img_dir, task_dir = utils.get_task_img_folder()
+            img_dir, task_dir = sis_utils.get_task_img_folder()
             save_file_name = os.path.join(task_dir, 'corr_{}{}_ps{}_bs{}.npy'.
                                           format(field_name, field_id, patch_size, block_size))
 

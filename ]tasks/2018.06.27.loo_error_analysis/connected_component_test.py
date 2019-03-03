@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage import measure
 from tqdm import tqdm
-import utils
+import sis_utils
 
 
 def get_fn_object(gt, pred):
@@ -25,7 +25,7 @@ top_patch_check = 15
 window_size = 300
 stride = 200
 city_list = ['austin', 'chicago', 'kitsap', 'tyrol-w', 'vienna']
-img_dir, task_dir = utils.get_task_img_folder()
+img_dir, task_dir = sis_utils.get_task_img_folder()
 force_run = False
 
 truth_dir = r'/media/ei-edl01/data/uab_datasets/inria/data/Original_Tiles'
