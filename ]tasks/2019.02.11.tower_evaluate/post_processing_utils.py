@@ -15,7 +15,7 @@ from skimage.draw import polygon
 import ersa_utils
 import util_functions
 from nn import nn_utils
-from utils import label_map_util
+# from utils import label_map_util
 from object_detection.utils import ops as utils_ops
 from evaluate_utils import get_center_point, local_maxima_suppression
 

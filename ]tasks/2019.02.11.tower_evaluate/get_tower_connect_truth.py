@@ -2,14 +2,21 @@ import os
 import numpy as np
 import sis_utils
 from rst_utils import misc_utils
-from post_processing_utils import load_data, order_pair, visualize_results
 from line_length_stats import read_line_csv_data, add_point_if_not_nearby
+from post_processing_utils import order_pair, visualize_results, get_tower_truth_pred
 
 
 def find_point_id(centers, point):
     dist = np.linalg.norm(np.array(centers) - np.array(point), axis=1)
     assert np.min(dist) < 20
     return np.argmin(dist)
+
+
+def load_data(dirs, city_id, tile_id):
+    line_gt = misc_utils.load_file(os.path.join(dirs['line'], '{}{}_GT.png'.format(city_list[city_id].split('_')[1],
+                                                                                   tile_id)))
+    tower_gt = get_tower_truth_pred(dirs, city_id, tile_id)
+    return line_gt, tower_gt
 
 
 if __name__ == '__main__':
@@ -24,19 +31,18 @@ if __name__ == '__main__':
         'line': r'/media/ei-edl01/data/uab_datasets/lines/data/Original_Tiles'
     }
     city_list = ['AZ_Tucson', 'KS_Colwich_Maize', 'NC_Clyde', 'NC_Wilmington']
+    tile_id_list = [12, 15, 8, 12]
 
     # settings
-    model_name = 'faster_rcnn'
     merge_range = 100
 
     for city_id in range(4):
-        for tile_id in [1, 2, 3]:
+        for tile_id in range(1, tile_id_list[city_id]+1):
             print('Evaluating city {} tile {}'.format(city_id, tile_id))
-            save_file_name = os.path.join(dirs['task'], '{}_{}_cp.npy'.format(city_list[city_id], city_id))
+            save_file_name = os.path.join(dirs['task'], '{}_{}_cp.npy'.format(city_list[city_id], tile_id))
 
             # load data
-            preds, raw_rgb, conf_img, line_gt, tower_gt, tower_pred, tower_conf = \
-                load_data(dirs, model_name, city_id, tile_id, merge_range=merge_range)
+            line_gt, tower_gt = load_data(dirs, city_id, tile_id)
 
             # get tower connection info
             connected_pair = []
