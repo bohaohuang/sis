@@ -374,7 +374,7 @@ def plot_across_model_grid(link_r=20, model_names=('faster_rcnn', 'faster_rcnn_r
 
 
 def plot_across_model_grid_with_graph(link_r=20, model_names=('faster_rcnn', 'faster_rcnn_res101', 'faster_rcnn_res50')):
-    plt.figure(figsize=(10, 8))
+    plt.figure(figsize=(14, 8))
     model_name_dict = {
         'faster_rcnn': 'Inception',
         'faster_rcnn_res101': 'ResNet101',
@@ -384,21 +384,23 @@ def plot_across_model_grid_with_graph(link_r=20, model_names=('faster_rcnn', 'fa
     city_list = ['AZ_Tucson', 'KS_Colwich_Maize', 'NC_Clyde', 'NC_Wilmington']
     # cmap = ersa_utils.get_default_colors()
     cmap = plt.get_cmap('tab20')
-    width = 0.15
+    width = 0.1
 
-    model_n_tp = np.zeros((2, len(model_names)))
-    model_n_recall = np.zeros((2, len(model_names)))
-    model_n_precision = np.zeros((2, len(model_names)))
+    model_n_tp = np.zeros((3, len(model_names)))
+    model_n_recall = np.zeros((3, len(model_names)))
+    model_n_precision = np.zeros((3, len(model_names)))
 
     for city_id in range(4):
         plt.subplot(221 + city_id)
         for model_cnt, model_name in enumerate(model_names):
-            tp_all, tp_all_graph = 0, 0
-            n_recall_all, n_recall_all_graph = 0, 0
-            n_precision_all, n_precision_all_graph = 0, 0
+            tp_all, tp_all_graph, tp_all_graph_combine = 0, 0, 0
+            n_recall_all, n_recall_all_graph, n_recall_all_graph_combine = 0, 0, 0
+            n_precision_all, n_precision_all_graph, n_precision_all_graph_combine = 0, 0, 0
 
             for tile_id in [1, 2, 3]:
                 # load data
+                pred_file_name = os.path.join(task_dir, model_name, 'USA_{}_{}.txt'.format(city_list[city_id], tile_id))
+                preds = ersa_utils.load_file(pred_file_name)
                 pred_file_name = os.path.join(task_dir, 'post_{}_{}_{}_pred2.npy'.format(model_name, city_id, tile_id))
                 pred_list = ersa_utils.load_file(pred_file_name)
                 pred_file_name = os.path.join(task_dir, 'post_{}_{}_{}_conn2.npy'.format(model_name, city_id, tile_id))
@@ -409,6 +411,9 @@ def plot_across_model_grid_with_graph(link_r=20, model_names=('faster_rcnn', 'fa
 
                 cp_file_name_graph = os.path.join(task_dir, '{}_graph_rnn_{}_{}_orig.npy'.format(model_name, city_id, tile_id))
                 cp_graph = ersa_utils.load_file(cp_file_name_graph)
+
+                cp_file_name_graph = os.path.join(task_dir, '{}_graph_rnn_{}_{}.npy'.format(model_name, city_id, tile_id))
+                cp_graph_combine = ersa_utils.load_file(cp_file_name_graph)
 
                 tower_gt = []
                 for label, bbox in read_polygon_csv_data(csv_file_name):
@@ -424,6 +429,10 @@ def plot_across_model_grid_with_graph(link_r=20, model_names=('faster_rcnn', 'fa
                 link_list = link_pred_gt(pred_list, tower_gt, link_r)
                 tp, n_recall, n_precision = grid_score(tower_gt, pred_list, connected_pairs, cp_list, link_list)
 
+                tp_graph_combine, n_recall_graph_combine, n_precision_graph_combine = \
+                    grid_score(tower_gt, pred_list, connected_pairs, cp_graph_combine, link_list)
+
+                link_list = link_pred_gt(center_list, tower_gt, link_r)
                 tp_graph, n_recall_graph, n_precision_graph = grid_score(tower_gt, pred_list, connected_pairs, cp_graph,
                                                                          link_list)
 
@@ -433,13 +442,19 @@ def plot_across_model_grid_with_graph(link_r=20, model_names=('faster_rcnn', 'fa
                 tp_all_graph += tp_graph
                 n_recall_all_graph += n_recall_graph
                 n_precision_all_graph += n_precision_graph
+                tp_all_graph_combine += tp_graph_combine
+                n_recall_all_graph_combine += n_recall_graph_combine
+                n_precision_all_graph_combine += n_precision_graph_combine
 
                 model_n_tp[0, model_cnt] += tp
                 model_n_tp[1, model_cnt] += tp_graph
+                model_n_tp[2, model_cnt] += tp_graph_combine
                 model_n_recall[0, model_cnt] += n_recall
                 model_n_recall[1, model_cnt] += n_recall_graph
+                model_n_recall[2, model_cnt] += n_recall_graph_combine
                 model_n_precision[0, model_cnt] += n_precision
                 model_n_precision[1, model_cnt] += n_precision_graph
+                model_n_precision[2, model_cnt] += n_precision_graph_combine
 
             recall = tp_all / n_recall_all
             precision = tp_all / n_precision_all
@@ -447,30 +462,40 @@ def plot_across_model_grid_with_graph(link_r=20, model_names=('faster_rcnn', 'fa
             recall_graph = tp_all_graph / n_recall_all_graph
             precision_graph = tp_all_graph / n_precision_all_graph
             f1_graph = 2 * (precision_graph * recall_graph) / (precision_graph + recall_graph)
+            recall_graph_combine = tp_all_graph_combine / n_recall_all_graph_combine
+            precision_graph_combine = tp_all_graph_combine / n_precision_all_graph_combine
+            f1_graph_combine = 2 * (precision_graph_combine * recall_graph_combine) / (precision_graph_combine + recall_graph_combine)
 
             X = np.arange(2)
-            plt.bar(X+width*(2*model_cnt), [precision, recall], width=width, color=cmap(2*model_cnt),
+            plt.bar(X+width*(3*model_cnt), [precision, recall], width=width, color=cmap(2*model_cnt),
                     label='{} f1={:.2f}'.format(model_name_dict[model_name], f1), edgecolor='k')
-            plt.bar(X+width*(2*model_cnt+1), [precision_graph, recall_graph], width=width, color=cmap(2*model_cnt+1),
-                    label='+GRN f1={:.2f}'.format(f1_graph), edgecolor='k')
-            plt.text(width*(2*model_cnt)-0.06, precision, '{:.2f}'.format(precision), fontsize=8)
-            plt.text(1+width*(2*model_cnt)-0.06, recall, '{:.2f}'.format(recall), fontsize=8)
+            plt.bar(X+width*(3*model_cnt+1), [precision_graph, recall_graph], width=width, color=cmap(2*model_cnt+1),
+                    label='GRN f1={:.2f}'.format(f1_graph), edgecolor='k')
+            plt.bar(X+width*(3*model_cnt+2), [precision_graph_combine, recall_graph_combine], width=width,
+                    color=cmap(2*model_cnt+1), label='Combine f1={:.2f}'.format(f1_graph_combine), edgecolor='k',
+                    hatch='//')
 
-            plt.text(width*(2*model_cnt+1)-0.06, precision_graph, '{:.2f}'.format(precision), fontsize=8)
-            plt.text(1+width*(2*model_cnt+1)-0.06, recall_graph, '{:.2f}'.format(recall), fontsize=8)
+            offset_x = 0.04
+            offset_y = 0.01
+            plt.text(width*(3*model_cnt)-offset_x, precision+offset_y, '{:.2f}'.format(precision), fontsize=8)
+            plt.text(1+width*(3*model_cnt)-offset_x, recall+offset_y, '{:.2f}'.format(recall), fontsize=8)
+            plt.text(width*(3*model_cnt+1)-offset_x, precision_graph+offset_y, '{:.2f}'.format(precision_graph), fontsize=8)
+            plt.text(1+width*(3*model_cnt+1)-offset_x, recall_graph+offset_y, '{:.2f}'.format(recall_graph), fontsize=8)
+            plt.text(width*(3*model_cnt+2)-offset_x, precision_graph_combine+offset_y, '{:.2f}'.format(precision_graph_combine), fontsize=8)
+            plt.text(1+width*(3*model_cnt+2)-offset_x, recall_graph_combine+offset_y, '{:.2f}'.format(recall_graph_combine), fontsize=8)
 
             #plt.xlabel('Recall')
-            plt.xticks(X+width*2.5, ['Precision', 'Recall'])
+            plt.xticks(X+width*4, ['Precision', 'Recall'])
         plt.ylabel('Score')
         plt.ylim([0.0, 1.2])
         #plt.xlim([0.0, 1.0])
         plt.title('{} Performance Comparison'.format(city_list[city_id].split('_')[1]))
         handles, labels = plt.gca().get_legend_handles_labels()
-        order = [0, 2, 4, 1, 3, 5]
+        order = [0, 3, 6, 1, 4, 7, 2, 5, 8]
         plt.legend([handles[idx] for idx in order],[labels[idx] for idx in order],
-                   loc='upper left', ncol=2, fontsize=9)
+                   loc='upper left', ncol=3, fontsize=9)
     plt.tight_layout()
-    # plt.savefig(os.path.join(img_dir, 'tile_performance_graph_rnn.png'))
+    plt.savefig(os.path.join(img_dir, 'tile_performance_graph_rnn.png'))
     plt.show()
 
     recall_overall = model_n_tp / model_n_recall
