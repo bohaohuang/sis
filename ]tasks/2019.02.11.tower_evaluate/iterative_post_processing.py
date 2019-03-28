@@ -26,7 +26,7 @@ if __name__ == '__main__':
     th = 5
     step = 5
     patch_size = (500, 500)
-    model_name = 'faster_rcnn_res50'
+    model_name = 'faster_rcnn'
     '''model_list = [
         '{}_2019-02-05_19-20-08'.format(model_name),
         '{}_2019-02-05_19-24-35'.format(model_name),
@@ -40,10 +40,10 @@ if __name__ == '__main__':
         '{}_2019-02-12_09-36-15'.format(model_name),
     ]'''
     model_list = [
-        '{}_2019-02-13_16-30-28'.format(model_name),
-        '{}_2019-02-13_16-32-30'.format(model_name),
-        '{}_2019-02-13_16-33-24'.format(model_name),
-        '{}_2019-02-13_16-34-12'.format(model_name),
+        '{}_2019-02-08_11-12-07'.format(model_name),
+        '{}_2019-02-08_11-12-07'.format(model_name),
+        '{}_2019-02-08_11-12-07'.format(model_name),
+        '{}_2019-02-08_11-12-07'.format(model_name),
     ]
     model_id = 25000
     gpu = 1
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
             # load data
             preds, raw_rgb, conf_img, line_gt, tower_gt, tower_pred, tower_conf = \
-                load_data(dirs, model_name, city_id, tile_id, merge_range=merge_range)
+                load_data(dirs, model_name+'_all', city_id, tile_id, merge_range=merge_range)
 
             # get line confidences
             connected_pairs, connected_towers, unconnected_towers = None, None, None
@@ -72,8 +72,11 @@ if __name__ == '__main__':
                 connected_towers, unconnected_towers = prune_towers(connected_pairs, tower_pred)
 
                 # search line
-                connected_towers, unconnected_towers, connected_pairs = \
-                    towers_online(tower_pred, connected_towers, unconnected_towers, connected_pairs)
+                try:
+                    connected_towers, unconnected_towers, connected_pairs = \
+                        towers_online(tower_pred, connected_towers, unconnected_towers, connected_pairs)
+                except ValueError:
+                    pass
 
                 # update towers
                 break_lines(connected_pairs, tower_pred)
@@ -114,8 +117,11 @@ if __name__ == '__main__':
             connected_towers, unconnected_towers = prune_towers(connected_pairs, tower_pred)
 
             # search line
-            connected_towers, unconnected_towers, connected_pairs = \
-                towers_online(tower_pred, connected_towers, unconnected_towers, connected_pairs)
+            try:
+                connected_towers, unconnected_towers, connected_pairs = \
+                    towers_online(tower_pred, connected_towers, unconnected_towers, connected_pairs)
+            except ValueError:
+                pass
 
             # update towers
             break_lines(connected_pairs, tower_pred)
@@ -124,13 +130,13 @@ if __name__ == '__main__':
             tower_conf = [tower_conf[a] for a in connected_towers]
 
             assert len(tower_pred) == len(tower_conf)
-            '''save_file_name = os.path.join(task_dir, 'post_{}_{}_{}_pred2.npy'.format(model_name, city_id, tile_id))
+            save_file_name = os.path.join(task_dir, 'overall_post_{}_{}_{}_pred2.npy'.format(model_name, city_id, tile_id))
             ersa_utils.save_file(save_file_name, tower_pred)
-            save_file_name = os.path.join(task_dir, 'post_{}_{}_{}_conf2.npy'.format(model_name, city_id, tile_id))
-            ersa_utils.save_file(save_file_name, tower_conf)'''
-            #save_file_name = os.path.join(task_dir, 'post_{}_{}_{}_conn2.npy'.format(model_name, city_id, tile_id))
-            #ersa_utils.save_file(save_file_name, connected_pairs)
+            save_file_name = os.path.join(task_dir, 'overall_post_{}_{}_{}_conf2.npy'.format(model_name, city_id, tile_id))
+            ersa_utils.save_file(save_file_name, tower_conf)
+            save_file_name = os.path.join(task_dir, 'overall_post_{}_{}_{}_conn2.npy'.format(model_name, city_id, tile_id))
+            ersa_utils.save_file(save_file_name, connected_pairs)
 
             # visualize results
-            visualize_results(dirs['image'], city_id, tile_id, raw_rgb, line_gt, tower_pred, tower_gt, connected_pairs,
-                              connected_towers, unconnected_towers, save_fig=False, post_str='_post', close_file=False)
+            #visualize_results(dirs['image'], city_id, tile_id, raw_rgb, line_gt, tower_pred, tower_gt, connected_pairs,
+            #                  connected_towers, unconnected_towers, save_fig=False, post_str='_post', close_file=False)

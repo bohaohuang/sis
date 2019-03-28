@@ -15,7 +15,6 @@ from skimage.draw import polygon
 import ersa_utils
 import util_functions
 from nn import nn_utils
-# from utils import label_map_util
 from object_detection.utils import ops as utils_ops
 from evaluate_utils import get_center_point, local_maxima_suppression
 
@@ -41,7 +40,8 @@ def read_polygon_csv_data(csv_file):
         label = group['Label'].values[0]
         if group['Type'].values[0] == 'Polygon' and label in encoder:
             x, y = polygon(group['X'].values, group['Y'].values)
-            yield label, get_bounding_box(y, x)
+            if (x != []) and (y != []):
+                yield label, get_bounding_box(y, x)
 
 
 def load_data(dirs, model_name, city_id, tile_id, merge_range=100):
@@ -143,7 +143,7 @@ def order_pair(p1, p2):
 
 def connect_lines(linked_pairs, line_conf, th, cut_n=2):
     def compute_weight(n):
-        return th * (n + 1)
+        return th # th * (n + 1)
 
     def get_total_connection(cd, pr):
         return len(cd[pr[0]]) + len(cd[pr[1]])
@@ -508,6 +508,7 @@ def run_inference_for_single_image(image, graph):
 
 
 def load_model(model_name, model_id, GPU='0'):
+    from utils import label_map_util
     path_to_frozen_graph = r'/hdd6/Models/transmission_line/' \
                            r'export_model/{}/{}/frozen_inference_graph.pb'.format(model_name, model_id)
     path_to_labels = r'/home/lab/Documents/bohao/data/transmission_line/data/label_map_t.pbtxt'

@@ -9,13 +9,14 @@ import cv2 as cv
 import argparse
 
 from shutil import copyfile
+from natsort import natsorted
 from lxml import etree
 from PIL import Image
 from collections import namedtuple, OrderedDict
 
 
 # Construct XML File for each image using information from CSV
-def makeXMLFile(image, csv_file, csv_object_locs, train_image_dir, test_image_dir):
+def makeXMLFile(image, csv_file, csv_object_locs, train_image_dir, test_image_dir, city_name):
   
   annotation = etree.Element('annotation')
 
@@ -99,13 +100,15 @@ def makeXMLFile(image, csv_file, csv_object_locs, train_image_dir, test_image_di
     object.append(bb)
 
     annotation.append(object)
-  
+
+  base_dir = os.path.join(r'/home/lab/Documents/bohao/data/transmission_line', 'yolo')
+
   if train_test == "train":
-    xml_save_path = os.getcwd() + "/labels/train/" + image[:-4] + ".xml"
-    copyfile(os.getcwd() + "/images/all/" + image, train_image_dir + image)
+    xml_save_path = os.path.join(base_dir, "labels/train_{}/".format(city_name) + image[:-4] + ".xml")
+    copyfile(os.path.join(base_dir, "images/all/" + image), train_image_dir + image)
   else:
-    xml_save_path = os.getcwd() + "/labels/test/" + image[:-4] + ".xml"
-    copyfile(os.getcwd() + "/images/all/" + image, test_image_dir + image)
+    xml_save_path = os.path.join(base_dir, "labels/test_{}/".format(city_name) + image[:-4] + ".xml")
+    copyfile(os.path.join(base_dir, "images/all/" + image), test_image_dir + image)
   
   print("Saving xml annotation for " + str(image) + " at " + str(xml_save_path))
   
@@ -113,33 +116,36 @@ def makeXMLFile(image, csv_file, csv_object_locs, train_image_dir, test_image_di
         file.write(etree.tostring(annotation, pretty_print=True))
 
 if __name__ == '__main__':
+  base_dir = os.path.join(r'/home/lab/Documents/bohao/data/transmission_line', 'yolo')
+  city_name = 'Tucson'
   
   # Directory to all imagery.
-  image_dir = os.getcwd() + "/images/all/"
+  image_dir = os.path.join(base_dir, 'images/all/')
   
   # Directory to where training images are stored.
-  train_image_dir = os.getcwd() + "/images/train/"
+  train_image_dir = os.path.join(base_dir, "images/train_{}/".format(city_name))
   
   # Directory to where test images are stored.
-  test_image_dir = os.getcwd() + "/images/test/"
+  test_image_dir = os.path.join(base_dir, "images/test_{}/".format(city_name))
   
   # Directory to where labels (in XML) will be stored.
-  labels_dir = os.getcwd() + "/labels/"
+  labels_dir = os.path.join(base_dir, "csv")
   
   # Path to csv file from which information about training is pulled from.
-  csv_file = pd.read_csv(os.getcwd() + "/labels.csv")
+  csv_file = pd.read_csv(os.path.join(labels_dir, "labels_{}.csv".format(city_name)))
   
   
   images = os.listdir(image_dir)
+  images = natsorted([img for img in images if city_name in img])
+
   filenames = csv_file['filenames'].tolist()
-  filenames = [filename[:-4] + ".jpg" for filename in filenames]
+  filenames = [filename[:-4] + ".png" for filename in filenames]
   
   # Iterate over each image present in the image_dir and generate an XML label if it contains a positive example.
   for index, image in enumerate(images):
     # If the image contains an annotation in the csv file, generate an XML.
     if image in filenames:
       csv_object_locs = csv_file.index[csv_file['filenames'] == image[:-4] + ".png"].tolist()
-      print(image, csv_object_locs)
         
-      makeXMLFile(image, csv_file, csv_object_locs, train_image_dir, test_image_dir)
+      makeXMLFile(image, csv_file, csv_object_locs, train_image_dir, test_image_dir, city_name)
 

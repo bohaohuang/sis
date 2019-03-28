@@ -23,14 +23,19 @@ for city_id in range(4):
     patch_size = (500, 500)
 
     # model info
-    model_name = ['faster_rcnn_res50_2019-02-13_16-30-28',
+    '''model_name = ['faster_rcnn_res50_2019-02-13_16-30-28',
                   'faster_rcnn_res50_2019-02-13_16-32-30',
                   'faster_rcnn_res50_2019-02-13_16-33-24',
-                  'faster_rcnn_res50_2019-02-13_16-34-12']
+                  'faster_rcnn_res50_2019-02-13_16-34-12']'''
     '''model_name = ['faster_rcnn_2019-02-05_19-20-08',
                   'faster_rcnn_2019-02-05_19-24-35',
                   'faster_rcnn_2019-02-05_19-49-39',
                   'faster_rcnn_2019-02-05_20-00-56']'''
+    model_name = ['faster_rcnn_2019-02-08_11-12-07',
+                  'faster_rcnn_2019-02-08_11-12-07',
+                  'faster_rcnn_2019-02-08_11-12-07',
+                  'faster_rcnn_2019-02-08_11-12-07']
+
     model_id = 25000
     pred_dir = 'predicted{}'.format(model_name[city_id])
     graph_path = r'/hdd6/Models/transmission_line/' \
@@ -53,7 +58,7 @@ for city_id in range(4):
         pred_files = natsorted(glob(os.path.join(task_fold, pred_dir, '*_{}.txt'.format(tile_id))))
         npy_file_name = os.path.join(info_dir, 'USA_{}_{}.npy'.format(city_list[city_id], tile_id))
         coords = ersa_utils.load_file(npy_file_name)
-        text_save_dir = os.path.join(task_dir, 'faster_rcnn_res50')
+        text_save_dir = os.path.join(task_dir, 'faster_rcnn_all')
         ersa_utils.make_dir_if_not_exist(text_save_dir)
         text_file_name = os.path.join(text_save_dir, 'USA_{}_{}.txt'.format(city_list[city_id], tile_id))
 
