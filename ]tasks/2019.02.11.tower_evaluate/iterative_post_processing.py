@@ -1,6 +1,6 @@
 import os
 import sis_utils
-import ersa_utils
+from rst_utils import misc_utils
 from evaluate_utils import local_maxima_suppression
 from post_processing_utils import load_data, get_edge_info, connect_lines, prune_lines, prune_towers, \
     visualize_results, towers_online, linked_length, break_lines, get_samples_between, load_model, \
@@ -14,8 +14,8 @@ if __name__ == '__main__':
         'task': task_dir,
         'image': img_dir,
         'raw': r'/home/lab/Documents/bohao/data/transmission_line/raw',
-        'conf': r'/media/ei-edl01/user/bh163/tasks/2018.11.16.transmission_line/'
-                r'confmap_uab_UnetCrop_lines_pw30_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32',
+        'conf': r'/media/ei-edl01/user/bh163/tasks/tasks/confmap_uab_UnetCrop_lines_gt_city{}_pw30_0_PS(572, 572)_'
+                r'BS5_EP50_LR0.0001_DS30_DR0.1_SFN32',
         'line': r'/media/ei-edl01/data/uab_datasets/lines/data/Original_Tiles'
     }
 
@@ -27,11 +27,17 @@ if __name__ == '__main__':
     step = 5
     patch_size = (500, 500)
     model_name = 'faster_rcnn'
-    '''model_list = [
+    model_list = [
         '{}_2019-02-05_19-20-08'.format(model_name),
         '{}_2019-02-05_19-24-35'.format(model_name),
         '{}_2019-02-05_19-49-39'.format(model_name),
         '{}_2019-02-05_20-00-56'.format(model_name),
+    ]
+    '''model_list = [
+        '{}_2019-02-12_09-30-35'.format(model_name),
+        '{}_2019-02-12_09-33-08'.format(model_name),
+        '{}_2019-02-12_09-34-45'.format(model_name),
+        '{}_2019-02-12_09-36-15'.format(model_name),
     ]'''
     '''model_list = [
         '{}_2019-02-12_09-30-35'.format(model_name),
@@ -39,14 +45,8 @@ if __name__ == '__main__':
         '{}_2019-02-12_09-34-45'.format(model_name),
         '{}_2019-02-12_09-36-15'.format(model_name),
     ]'''
-    model_list = [
-        '{}_2019-02-08_11-12-07'.format(model_name),
-        '{}_2019-02-08_11-12-07'.format(model_name),
-        '{}_2019-02-08_11-12-07'.format(model_name),
-        '{}_2019-02-08_11-12-07'.format(model_name),
-    ]
     model_id = 25000
-    gpu = 1
+    gpu = 0
 
     for city_id in range(4):
         detection_graph, category_index = load_model(model_list[city_id], model_id, gpu)
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
             # load data
             preds, raw_rgb, conf_img, line_gt, tower_gt, tower_pred, tower_conf = \
-                load_data(dirs, model_name+'_all', city_id, tile_id, merge_range=merge_range)
+                load_data(dirs, model_name, city_id, tile_id, merge_range=merge_range)
 
             # get line confidences
             connected_pairs, connected_towers, unconnected_towers = None, None, None
@@ -124,19 +124,19 @@ if __name__ == '__main__':
                 pass
 
             # update towers
-            break_lines(connected_pairs, tower_pred)
+            '''break_lines(connected_pairs, tower_pred)
             connected_pairs = update_connected_pairs(connected_pairs, tower_pred, connected_towers)
             tower_pred = [tower_pred[a] for a in connected_towers]
             tower_conf = [tower_conf[a] for a in connected_towers]
 
             assert len(tower_pred) == len(tower_conf)
-            save_file_name = os.path.join(task_dir, 'overall_post_{}_{}_{}_pred2.npy'.format(model_name, city_id, tile_id))
-            ersa_utils.save_file(save_file_name, tower_pred)
-            save_file_name = os.path.join(task_dir, 'overall_post_{}_{}_{}_conf2.npy'.format(model_name, city_id, tile_id))
-            ersa_utils.save_file(save_file_name, tower_conf)
-            save_file_name = os.path.join(task_dir, 'overall_post_{}_{}_{}_conn2.npy'.format(model_name, city_id, tile_id))
-            ersa_utils.save_file(save_file_name, connected_pairs)
+            save_file_name = os.path.join(task_dir, 'post_{}_{}_{}_pred3.npy'.format(model_name, city_id, tile_id))
+            misc_utils.save_file(save_file_name, tower_pred)
+            save_file_name = os.path.join(task_dir, 'post_{}_{}_{}_conf3.npy'.format(model_name, city_id, tile_id))
+            misc_utils.save_file(save_file_name, tower_conf)
+            save_file_name = os.path.join(task_dir, 'post_{}_{}_{}_conn3.npy'.format(model_name, city_id, tile_id))
+            misc_utils.save_file(save_file_name, connected_pairs)'''
 
             # visualize results
-            #visualize_results(dirs['image'], city_id, tile_id, raw_rgb, line_gt, tower_pred, tower_gt, connected_pairs,
-            #                  connected_towers, unconnected_towers, save_fig=False, post_str='_post', close_file=False)
+            visualize_results(dirs['image'], city_id, tile_id, raw_rgb, line_gt, tower_pred, tower_gt, connected_pairs,
+                              connected_towers, unconnected_towers, save_fig=False, post_str='_post', close_file=False)

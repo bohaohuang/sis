@@ -337,9 +337,9 @@ def ablation_tower(model_name, link_r=20):
             # load data
             pred_file_name = os.path.join(task_dir, model_name, 'USA_{}_{}.txt'.format(city_list[city_id], tile_id))
             preds = ersa_utils.load_file(pred_file_name)
-            pred_file_name = os.path.join(task_dir, '_post_{}_{}_{}_pred2.npy'.format(model_name, city_id, tile_id))
+            pred_file_name = os.path.join(task_dir, 'post_{}_{}_{}_pred3.npy'.format(model_name, city_id, tile_id))
             pred_list = ersa_utils.load_file(pred_file_name)
-            pred_file_name = os.path.join(task_dir, 'no_post_{}_{}_{}_conn2.npy'.format(model_name, city_id, tile_id))
+            pred_file_name = os.path.join(task_dir, 'post_{}_{}_{}_conn3.npy'.format(model_name, city_id, tile_id))
             cp_list = ersa_utils.load_file(pred_file_name)
             csv_file_name = os.path.join(raw_dir, 'USA_{}_{}.csv'.format(city_list[city_id], tile_id))
 

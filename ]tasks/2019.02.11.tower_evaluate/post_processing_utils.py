@@ -45,11 +45,12 @@ def read_polygon_csv_data(csv_file):
 
 
 def load_data(dirs, model_name, city_id, tile_id, merge_range=100):
+    conf_dict = {0: 2, 1: 1, 2: 0, 3: 3}
     pred_file_name = os.path.join(dirs['task'], model_name, 'USA_{}_{}.txt'.format(city_list[city_id], tile_id))
     preds = ersa_utils.load_file(pred_file_name)
     raw_rgb = ersa_utils.load_file(os.path.join(dirs['raw'], 'USA_{}_{}.tif'.format(city_list[city_id], tile_id)))
-    conf_img = ersa_utils.load_file(os.path.join(dirs['conf'], '{}{}.png'.format(city_list[city_id].split('_')[1],
-                                                                                 tile_id)))
+    conf_img = ersa_utils.load_file(os.path.join(dirs['conf'].format(conf_dict[city_id]),
+                                                 '{}{}.png'.format(city_list[city_id].split('_')[1], tile_id)))
     line_gt = ersa_utils.load_file(os.path.join(dirs['line'], '{}{}_GT.png'.format(city_list[city_id].split('_')[1],
                                                                                    tile_id)))
     tower_gt = get_tower_truth_pred(dirs, city_id, tile_id)
@@ -305,7 +306,6 @@ def visualize_with_connected_pairs(raw_rgb, center_list, connected_pairs, style=
 def visualize_results(img_dir, city_id, tile_id, raw_rgb, line_gt, tower_pred, tower_gt, connected_pairs, connected_towers,
                       unconnected_towers, save_fig=False, post_str='', close_file=False):
     plt.figure(figsize=(8.5, 8))
-    line_gt = cv2.dilate(line_gt, np.ones((5, 5), np.uint8), iterations=10)
     img_with_line = util_functions.add_mask(raw_rgb, line_gt, [0, 255, 0], 1)
     visualize_with_connected_pairs(img_with_line, tower_pred, connected_pairs, add_fig=True)
     add_points(tower_gt, 'b', marker='s', size=80, alpha=1, edgecolor='k')

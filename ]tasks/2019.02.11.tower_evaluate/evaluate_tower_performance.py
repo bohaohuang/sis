@@ -486,9 +486,9 @@ def plot_across_model_grid_with_graph(link_r=20, model_names=('faster_rcnn', 'fa
                 # load data
                 pred_file_name = os.path.join(task_dir, model_name, 'USA_{}_{}.txt'.format(city_list[city_id], tile_id))
                 preds = ersa_utils.load_file(pred_file_name)
-                pred_file_name = os.path.join(task_dir, 'post_{}_{}_{}_pred2.npy'.format(model_name, city_id, tile_id))
+                pred_file_name = os.path.join(task_dir, 'post_{}_{}_{}_pred3.npy'.format(model_name, city_id, tile_id))
                 pred_list = ersa_utils.load_file(pred_file_name)
-                pred_file_name = os.path.join(task_dir, 'post_{}_{}_{}_conn2.npy'.format(model_name, city_id, tile_id))
+                pred_file_name = os.path.join(task_dir, 'post_{}_{}_{}_conn3.npy'.format(model_name, city_id, tile_id))
                 cp_list = ersa_utils.load_file(pred_file_name)
                 csv_file_name = os.path.join(raw_dir, 'USA_{}_{}.csv'.format(city_list[city_id], tile_id))
                 #cp_file_name = os.path.join(task_dir, '{}_{}_cp.npy'.format(city_list[city_id], city_id))
@@ -497,7 +497,7 @@ def plot_across_model_grid_with_graph(link_r=20, model_names=('faster_rcnn', 'fa
                 cp_file_name_graph = os.path.join(task_dir, '{}_graph_rnn_{}_{}_orig.npy'.format(model_name, city_id, tile_id))
                 cp_graph = ersa_utils.load_file(cp_file_name_graph)
 
-                cp_file_name_graph = os.path.join(task_dir, '{}_graph_rnn_{}_{}.npy'.format(model_name, city_id, tile_id))
+                cp_file_name_graph = os.path.join(task_dir, '{}_graph_rnn_{}_{}_orig_new.npy'.format(model_name, city_id, tile_id))
                 cp_graph_combine = ersa_utils.load_file(cp_file_name_graph)
 
                 tower_gt = []
@@ -582,7 +582,7 @@ def plot_across_model_grid_with_graph(link_r=20, model_names=('faster_rcnn', 'fa
         plt.legend([handles[idx] for idx in order],[labels[idx] for idx in order],
                    loc='upper left', ncol=3, fontsize=9)
     plt.tight_layout()
-    plt.savefig(os.path.join(img_dir, 'tile_performance_graph_rnn_new.png'))
+    # plt.savefig(os.path.join(img_dir, 'tile_performance_graph_rnn_new.png'))
     plt.show()
 
     recall_overall = model_n_tp / model_n_recall
@@ -736,4 +736,4 @@ if __name__ == '__main__':
 
     #plot_across_model_post()
     #plot_within_model('faster_rcnn')
-    plot_across_model_grid_with_graph_all()
+    plot_across_model_grid_with_graph()
