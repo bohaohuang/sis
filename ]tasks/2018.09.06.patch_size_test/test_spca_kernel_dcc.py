@@ -453,7 +453,7 @@ if model_type == 'unet':
     model_dir = r'/hdd6/Models/UNET_rand_gird/UnetCrop_spca_aug_grid_0_PS(572, 572)_BS5_EP100_LR0.0001_DS60_DR0.1_SFN32'
 else:
     patch_size = [832, 1088, 1344, 1600, 1856, 2096, 2640]
-    model_dir = r'/hdd6/Models/DeepLab_rand_grid/DeeplabV3_spca_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
+    model_dir = r'/work/bh163/DeeplabV3_spca_aug_grid_0_PS(321, 321)_BS5_EP100_LR1e-05_DS40_DR0.1_SFN32'
 
 for ps in patch_size:
     input_size = [ps, ps]
