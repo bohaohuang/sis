@@ -66,7 +66,7 @@ if __name__ == '__main__':
 
         plt.plot(patch_sizes[model_name], ious, '-o', label=model_name2show[cnt_m])
 
-    plt.title('Inria->Duke Overhead')
+    plt.title('D1->D3')
     plt.grid()
     plt.ylabel('IoU')
     plt.legend(loc='center right')

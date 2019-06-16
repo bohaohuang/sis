@@ -25,7 +25,7 @@ for cnt_m, model_name in enumerate(['unet', 'deeplab']):
 plt.title('D1')
 plt.grid()
 plt.ylabel('IoU')
-plt.legend(loc='upper left')
+plt.legend(loc='center right', fontsize=10)
 
 dataset = 'spca'
 plt.subplot(212)
@@ -57,7 +57,7 @@ for cnt_m, model_name in enumerate(['unet', 'deeplab']):
 plt.title('D1')
 plt.grid()
 plt.ylabel('Time:s')
-plt.legend()
+plt.legend(loc='lower left', fontsize=10)
 
 dataset = 'spca'
 plt.subplot(212)
