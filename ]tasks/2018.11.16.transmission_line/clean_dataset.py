@@ -18,7 +18,7 @@ from skimage.draw import polygon
 import ersa_utils
 from visualize import visualize_utils
 
-ENCODER = {'DT': 1, 'TT': 2, 'T': 1}
+ENCODER = {'DT': 1, 'TT': 1, 'T': 1, 'L': 2}
 
 
 def read_json(file_name):
@@ -133,7 +133,54 @@ def check_annotations():
             visualize_utils.compare_figures([rgb, gt], (1, 2), fig_size=(12, 5), show_axis=False)
 
 
+def make_groundtruth():
+    data_dir = r'/home/lab/Documents/bohao/data/transmission_line/raw2'
+    csv_files_temp = natsorted(glob(os.path.join(data_dir, '*.csv')))
+    csv_files = []
+    for c in csv_files_temp:
+        if 'NZ' in c:
+            if 'resize' in c:
+                csv_files.append(c)
+        else:
+            csv_files.append(c)
+    rgb_files = natsorted(glob(os.path.join(data_dir, '*.tif')))
+    assert len(csv_files) == len(rgb_files)
+    for cn, rn in zip(csv_files, rgb_files):
+        rgb = ersa_utils.load_file(rn)
+        h, w = rgb.shape[:2]
+        gt = np.zeros((h, w), dtype=np.uint8)
+        for label, y, x in read_polygon_csv_data(cn):
+            gt[y, x] = ENCODER[label]
+        gt_file_name = os.path.join(data_dir, '{}_multiclass.tif'.format(os.path.splitext(os.path.basename(rn))[0]))
+        ersa_utils.save_file(gt_file_name, gt)
+
+
+'''def make_uabdataset():
+    encoder = {'DL': 1, 'TL': 1, 'L': 1}
+    data_dir = r'/home/lab/Documents/bohao/data/transmission_line/raw2'
+    save_dir = r'/media/ei-edl01/data/uab_datasets/lines_v3'
+    csv_files_temp = natsorted(glob(os.path.join(data_dir, '*.csv')))
+    csv_files = []
+    for c in csv_files_temp:
+        if 'NZ' in c:
+            if 'resize' in c:
+                csv_files.append(c)
+        else:
+            csv_files.append(c)
+    rgb_files = natsorted(glob(os.path.join(data_dir, '*.tif')))
+    assert len(csv_files) == len(rgb_files)
+    for cn, rn in zip(csv_files, rgb_files):
+        rgb = ersa_utils.load_file(rn)
+        h, w = rgb.shape[:2]
+        gt = np.zeros((h, w), dtype=np.uint8)
+        for label, y, x in read_polygon_csv_data(cn):
+            gt[y, x] = ENCODER[label]
+        gt_file_name = os.path.join(data_dir, '{}_multiclass.tif'.format(os.path.splitext(os.path.basename(rn))[0]))
+        ersa_utils.save_file(gt_file_name, gt)'''
+
+
 if __name__ == '__main__':
     # clean_artem()
-    clean_dataplus()
+    # clean_dataplus()
     # check_annotations()
+    make_groundtruth()

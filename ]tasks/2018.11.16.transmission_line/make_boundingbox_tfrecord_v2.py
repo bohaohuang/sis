@@ -7,7 +7,7 @@ This file has been modified so that it only predicts class as T
 """
 
 IS_DCC = False
-CITY_NAME = 'NZ'
+CITY_NAME = ''
 
 
 import os
@@ -83,7 +83,7 @@ def get_cell_id(y, x, h_steps, w_steps):
 
 
 def read_polygon_csv_data(csv_file):
-    label_order = ['SS', 'OT', 'DT', 'TT', 'OL', 'DL', 'TL']
+    label_order = ['SS', 'OT', 'DT', 'TT', 'OL', 'DL', 'TL', 'L', 'T']
     df = pd.read_csv(csv_file)
     df['temp_label'] = pd.Categorical(df['Label'], categories=label_order, ordered=True)
     df.sort_values('temp_label', inplace=True, kind='mergesort')
@@ -112,15 +112,18 @@ def write_data_info(rgb_files, csv_files, save_dir):
         coords, h_steps, w_steps = extract_grids(rgb, PATCH_SIZE[0], PATCH_SIZE[1])
 
         for label, y, x in read_polygon_csv_data(csv_file):
-            h_id_0, w_id_0 = get_cell_id(y, x, h_steps, w_steps)
-            h_start = coords[h_id_0][w_id_0]['h']
-            w_start = coords[h_id_0][w_id_0]['w']
-            box = get_bounding_box(y-h_start, x-w_start)
+            if len(x) and len(y):
+                h_id_0, w_id_0 = get_cell_id(y, x, h_steps, w_steps)
+                h_start = coords[h_id_0][w_id_0]['h']
+                w_start = coords[h_id_0][w_id_0]['w']
+                box = get_bounding_box(y-h_start, x-w_start)
 
-            # FIXME only label them as T
-            #coords[h_id_0][w_id_0]['label'].append(label)
-            coords[h_id_0][w_id_0]['label'].append('T')
-            coords[h_id_0][w_id_0]['box'].append(box)
+                # FIXME only label them as T
+                #coords[h_id_0][w_id_0]['label'].append(label)
+                coords[h_id_0][w_id_0]['label'].append('T')
+                coords[h_id_0][w_id_0]['box'].append(box)
+            else:
+                print(csv_file)
         ersa_utils.save_file(os.path.join(save_dir, save_name), coords)
 
 
@@ -154,6 +157,60 @@ def make_dataset(rgb_files, info_dir, store_dir, tf_dir, city_name=''):
                 label = cell['label']
                 # assert np.unique(label) == ['DT'] or label == []
                 box = cell['box']
+
+                '''import matplotlib.pyplot as plt
+                import matplotlib.patches as patches
+                if len(label) > 0:
+                    fig, ax = plt.subplots(1)
+                    ax.imshow(img)
+                    for l, b in zip(label, box):
+                        rect = patches.Rectangle((b[1], b[0]), b[3]-b[1], b[2]-b[0], linewidth=1, edgecolor='r', facecolor='none')
+                        ax.add_patch(rect)
+                    plt.show()'''
+
+                ersa_utils.save_file(save_name, img)
+
+                tf_example = create_tf_example(save_name, label, box)
+                if is_val:
+                    writer_valid.write(tf_example.SerializeToString())
+                else:
+                    writer_train.write(tf_example.SerializeToString())
+
+    writer_train.close()
+    writer_valid.close()
+
+
+def make_dataset_all(rgb_files, info_dir, store_dir, tf_dir):
+    writer_train = tf.python_io.TFRecordWriter(os.path.join(tf_dir, 'train_v2_xcity.record'))
+    writer_valid = tf.python_io.TFRecordWriter(os.path.join(tf_dir, 'valid_v2_xcity.record'))
+
+    for rgb_file_name in rgb_files:
+        file_name = os.path.basename(rgb_file_name[:-4])
+        if 'NZ' not in file_name:
+            city_id = int(file_name.split('_')[-1])
+        else:
+            city_id = int(file_name.split('_')[-2])
+        if city_id <= 3:
+            print('Processing file {} in validation set'.format(file_name))
+            is_val = True
+        else:
+            print('Processing file {} in training set'.format(file_name))
+            is_val = False
+
+        rgb = ersa_utils.load_file(rgb_file_name)
+        npy_file_name = os.path.join(info_dir, os.path.basename(rgb_file_name[:-4] + '.npy'))
+        coords = ersa_utils.load_file(npy_file_name)
+
+        patch_cnt = 0
+        for line in coords:
+            for cell in line:
+                patch_cnt += 1
+                save_name = os.path.join(store_dir, os.path.basename(rgb_file_name[:-4] + '_{}.jpg'.format(patch_cnt)))
+                img = rgb[cell['h']:cell['h']+PATCH_SIZE[0], cell['w']:cell['w']+PATCH_SIZE[1], :3]
+                label = cell['label']
+                # assert np.unique(label) == ['DT'] or label == []
+                box = cell['box']
+
                 ersa_utils.save_file(save_name, img)
 
                 tf_example = create_tf_example(save_name, label, box)
@@ -240,4 +297,4 @@ if __name__ == '__main__':
     print(len(rgb_files), len(csv_files))
 
     write_data_info(rgb_files, csv_files, save_dir)
-    make_dataset(rgb_files, save_dir, store_dir, tf_dir, city_name=CITY_NAME)
+    make_dataset_all(rgb_files, save_dir, store_dir, tf_dir)

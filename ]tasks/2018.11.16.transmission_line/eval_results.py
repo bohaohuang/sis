@@ -269,8 +269,8 @@ if __name__ == '__main__':
     """
      Create a "tmp_files/" and "results/" directory
     """
-    city_name = 'Tucson'
-    model_name = 'ssd_resnet50_2019-03-03_16-36-15'
+    city_name = 'NZ'
+    model_name = 'faster_rcnn_NZ_2019-07-01_18-33-39'
     appendix = model_name + city_name
 
     import sis_utils

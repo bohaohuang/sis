@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-from object_detection.utils import ops as utils_ops
+# from object_detection.utils import ops as utils_ops
 
 
 def extract_grids(img, patch_size_h, patch_size_w):

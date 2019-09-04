@@ -72,7 +72,7 @@ class myImageLabelReader(uabDataReader.ImageLabelReader):
 
             for patch in uabUtilreader.patchify(block, tile_dim, patch_size, overlap=overlap):
                 patch_gt = (patch[:, :, 0] > 0).astype(np.uint8)
-                patch[:, :, 0] = get_lines(patch_gt, np.array(patch_size))
+                # patch[:, :, 0] = get_lines(patch_gt, np.array(patch_size))
                 image_batch[ind, :, :, :] = patch
                 ind += 1
                 if ind == batch_size:
@@ -242,28 +242,25 @@ idx_truth, file_list_truth = uabCrossValMaker.uabUtilGetFolds(None, file_list_tr
 # use first 5 tiles for validation
 file_list_valid = uabCrossValMaker.make_file_list_by_key(idx, file_list, [1, 2, 3])
 file_list_valid_truth = uabCrossValMaker.make_file_list_by_key(idx_truth, file_list_truth, [1, 2, 3])
-img_mean = blCol.getChannelMeans([1, 2, 3])
-img_mean = np.concatenate([np.array([0]), img_mean])
+img_mean = blCol.getChannelMeans([0, 1, 2])
 city_id = 0
 
 # make the model
 # define place holder
-for weight in [1, 5]:
-    model_dir = r'/hdd6/Models/lines/UnetCrop_lines_city{}_pw{}_0_PS(572, 572)_BS5_' \
-                r'EP100_LR0.0001_DS60_DR0.1_SFN32'.format(city_id, weight)
-    SAVE_DIR = os.path.join(task_dir, 'confmap_uab_{}'.format(os.path.basename(model_dir)))
-    ersa_utils.make_dir_if_not_exist(SAVE_DIR)
-    tf.reset_default_graph()
-    X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 4], name='X')
-    y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
-    mode = tf.placeholder(tf.bool, name='mode')
-    model = UnetModelCrop({'X': X, 'Y': y}, trainable=mode, input_size=input_size,
-                          batch_size=batch_size, start_filter_num=32)
-    # create graph
-    model.create_graph('X', class_num=2)
+model_dir = r'/hdd6/Models/lines_v3/UnetCrop_linesv3_city0_pw50_0_PS(572, 572)_BS5_EP100_LR0.0001_DS80_DR0.1_SFN32'
+SAVE_DIR = os.path.join(task_dir, 'confmap_uab_{}'.format(os.path.basename(model_dir)))
+ersa_utils.make_dir_if_not_exist(SAVE_DIR)
+tf.reset_default_graph()
+X = tf.placeholder(tf.float32, shape=[None, input_size[0], input_size[1], 3], name='X')
+y = tf.placeholder(tf.int32, shape=[None, input_size[0], input_size[1], 1], name='y')
+mode = tf.placeholder(tf.bool, name='mode')
+model = UnetModelCrop({'X': X, 'Y': y}, trainable=mode, input_size=input_size,
+                      batch_size=batch_size, start_filter_num=32)
+# create graph
+model.create_graph('X', class_num=2)
 
-    # evaluate on tiles
-    model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
-                   input_size, tile_size, batch_size, img_mean, model_dir, gpu,
-                   save_result_parent_dir='lines', ds_name=ds_name, best_model=False,
-                   load_epoch_num=85)
+# evaluate on tiles
+model.evaluate(file_list_valid, file_list_valid_truth, parent_dir, parent_dir_truth,
+               input_size, tile_size, batch_size, img_mean, model_dir, gpu,
+               save_result_parent_dir='lines', ds_name=ds_name, best_model=False,
+               load_epoch_num=95)

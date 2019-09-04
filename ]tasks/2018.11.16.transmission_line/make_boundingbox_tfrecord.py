@@ -83,7 +83,7 @@ def get_cell_id(y, x, h_steps, w_steps):
 
 
 def read_polygon_csv_data(csv_file):
-    label_order = ['SS', 'OT', 'DT', 'TT', 'OL', 'DL', 'TL']
+    label_order = ['SS', 'OT', 'DT', 'TT', 'OL', 'DL', 'TL', 'T', 'L']
     df = pd.read_csv(csv_file)
     df['temp_label'] = pd.Categorical(df['Label'], categories=label_order, ordered=True)
     df.sort_values('temp_label', inplace=True, kind='mergesort')

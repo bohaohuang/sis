@@ -30,14 +30,14 @@ def find_close_points(p1, p2, points, th=10):
 
 
 def read_line_csv_data(csv_file, centers):
-    label_order = ['SS', 'OT', 'DT', 'TT', 'OL', 'DL', 'TL']
+    label_order = ['SS', 'OT', 'DT', 'TT', 'OL', 'DL', 'TL', 'T', 'L']
     df = pd.read_csv(csv_file)
     df['temp_label'] = pd.Categorical(df['Label'], categories=label_order, ordered=True)
     df.sort_values('temp_label', inplace=True, kind='mergesort')
 
     for name, group in df.groupby('Object', sort=False):
         label = group['Label'].values[0]
-        if group['Type'].values[0] == 'Line' and label in ['TL', 'DL']:
+        if group['Type'].values[0] == 'Line' and label in ['TL', 'DL', 'L']:
             for j in range(group.shape[0] - 1):
                 r0, c0 = int(group['X'].values[j]), int(group['Y'].values[j])
                 r1, c1 = int(group['X'].values[j + 1]), int(group['Y'].values[j + 1])

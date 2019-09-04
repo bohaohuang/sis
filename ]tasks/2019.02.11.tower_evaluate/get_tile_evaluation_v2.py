@@ -16,25 +16,20 @@ nn_utils.tf_warn_level(3)
 img_dir, task_dir = sis_utils.get_task_img_folder()
 task_fold = r'/media/ei-edl01/user/bh163/tasks/2018.11.16.transmission_line'
 data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
-info_dir = os.path.join(data_dir, 'info2')
+info_dir = os.path.join(data_dir, 'info')
 raw_dir = os.path.join(data_dir, 'raw2')
-for city_id in range(4):
+for city_id in range(2):
     city_list = ['AZ_Tucson', 'KS_Colwich_Maize']
     patch_size = (500, 500)
 
     # model info
-    '''model_name = ['faster_rcnn_res50_2019-02-13_16-30-28',
-                  'faster_rcnn_res50_2019-02-13_16-32-30',
-                  'faster_rcnn_res50_2019-02-13_16-33-24',
-                  'faster_rcnn_res50_2019-02-13_16-34-12']'''
-    '''model_name = ['faster_rcnn_2019-02-05_19-20-08',
-                  'faster_rcnn_2019-02-05_19-24-35',
-                  'faster_rcnn_2019-02-05_19-49-39',
-                  'faster_rcnn_2019-02-05_20-00-56']'''
-    model_name = ['faster_rcnn_2019-02-08_11-12-07',
-                  'faster_rcnn_2019-02-08_11-12-07',
-                  'faster_rcnn_2019-02-08_11-12-07',
-                  'faster_rcnn_2019-02-08_11-12-07']
+    '''model_name = ['faster_rcnn_Tucson_2019-06-30_12-51-03',
+                  'faster_rcnn_Colwich_2019-07-01_10-47-22',
+                  ]'''
+    '''model_name = ['faster_rcnn_res101_Tucson_2019-07-03_00-05-04',
+                  'faster_rcnn_res101_Colwich_2019-07-03_00-04-11']'''
+    model_name = ['faster_rcnn_res50_Tucson_2019-07-02_14-53-17',
+                  'faster_rcnn_res50_Colwich_2019-07-02_18-10-38']
 
     model_id = 25000
     pred_dir = 'predicted{}'.format(model_name[city_id])
@@ -58,7 +53,7 @@ for city_id in range(4):
         pred_files = natsorted(glob(os.path.join(task_fold, pred_dir, '*_{}.txt'.format(tile_id))))
         npy_file_name = os.path.join(info_dir, 'USA_{}_{}.npy'.format(city_list[city_id], tile_id))
         coords = ersa_utils.load_file(npy_file_name)
-        text_save_dir = os.path.join(task_dir, 'faster_rcnn_all')
+        text_save_dir = os.path.join(task_dir, 'faster_rcnn_res50_v2')
         ersa_utils.make_dir_if_not_exist(text_save_dir)
         text_file_name = os.path.join(text_save_dir, 'USA_{}_{}.txt'.format(city_list[city_id], tile_id))
 

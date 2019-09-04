@@ -42,8 +42,8 @@ def read_polygon_csv_data(csv_file):
         x_max = np.max(x).astype(int)
         return y_min, x_min, y_max, x_max
 
-    encoder = {'DT': 1, 'TT': 2}
-    label_order = ['SS', 'OT', 'DT', 'TT', 'OL', 'DL', 'TL']
+    encoder = {'DT': 1, 'TT': 2, 'T': 1}
+    label_order = ['SS', 'OT', 'DT', 'TT', 'OL', 'DL', 'TL', 'T', 'L']
     df = pd.read_csv(csv_file)
     df['temp_label'] = pd.Categorical(df['Label'], categories=label_order, ordered=True)
     df.sort_values('temp_label', inplace=True, kind='mergesort')
@@ -52,6 +52,8 @@ def read_polygon_csv_data(csv_file):
         label = group['Label'].values[0]
         if group['Type'].values[0] == 'Polygon' and label in encoder:
             x, y = polygon(group['X'].values, group['Y'].values)
+            if len(x) == 0 or len(y) == 0:
+                continue
             yield label, get_bounding_box(y, x)
 
 

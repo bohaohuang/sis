@@ -726,14 +726,167 @@ def plot_across_model_grid_with_graph_all(link_r=20, model_names=('faster_rcnn',
     print(f1_overall)
 
 
+def plot_across_model_v2(link_r=20, model_names=('faster_rcnn_v2', 'faster_rcnn_res101_v2', 'faster_rcnn_res50_v2')):
+    from glob import glob
+    from natsort import natsorted
+
+    plt.figure(figsize=(14, 8))
+    model_name_dict = {
+        'faster_rcnn_v2': 'Inception',
+        'faster_rcnn_res101_v2': 'ResNet101',
+        'faster_rcnn_res50_v2': 'ResNet50'
+    }
+
+    city_list = ['Tucson', 'Colwich', 'NZ']
+    # cmap = ersa_utils.get_default_colors()
+    cmap = plt.get_cmap('tab20')
+    width = 0.1
+
+    model_n_tp = np.zeros((3, len(model_names)))
+    model_n_recall = np.zeros((3, len(model_names)))
+    model_n_precision = np.zeros((3, len(model_names)))
+
+    for city_id in range(3):
+        plt.subplot(221 + city_id)
+        for model_cnt, model_name in enumerate(model_names):
+            tp_all = 0
+            n_recall_all = 0
+            n_precision_all = 0
+
+            pred_files_1 = natsorted(glob(os.path.join(task_dir, model_name, '*.txt')))
+            csv_files_temp = natsorted(glob(os.path.join(raw_dir, '*.csv')))
+            csv_files = []
+            for f in csv_files_temp:
+                if 'Tucson' in f or 'Colwich' in f or 'NZ' in f:
+                    if '_1_' in f or '_2_' in f or '_3_' in f or '_1.' in f or '_2.' in f or '_3.' in f:
+                        if 'NZ' not in f:
+                            csv_files.append(f)
+                        else:
+                            if 'resize' in f:
+                                csv_files.append(f)
+
+            for pred_file_1, csv_file_name in zip(pred_files_1, csv_files):
+                if city_list[city_id] not in pred_file_1:
+                    continue
+                local_tile_id = int(''.join([a for a in os.path.basename(pred_file_1) if a.isdigit()]))
+                if 'Tucson' in pred_file_1:
+                    local_city_id = 0
+                    pred_file_2 = os.path.join(task_dir, 'post_{}_{}_{}_pred_v2.npy'.format(model_name[:-3], local_city_id, local_tile_id))
+                    conn_file = os.path.join(task_dir,
+                                             'post_{}_{}_{}_conn_v2.npy'.format(model_name[:-3], local_city_id,
+                                                                                     local_tile_id))
+                elif 'Colwich' in pred_file_1:
+                    local_city_id = 1
+                    pred_file_2 = os.path.join(task_dir, 'post_{}_{}_{}_pred_v2.npy'.format(model_name[:-3], local_city_id,
+                                                                                            local_tile_id))
+                    conn_file = os.path.join(task_dir,
+                                             'post_{}_{}_{}_conn_v2.npy'.format(model_name[:-3], local_city_id,
+                                                                                local_tile_id))
+                else:
+                    if 'Dunedin' in pred_file_1:
+                        local_city_id = 0
+                        pred_file_2 = os.path.join(task_dir,
+                                                   'post_{}_NZ_{}_{}_pred_v2.npy'.format(model_name[:-3], local_city_id,
+                                                                                         local_tile_id))
+                        conn_file = os.path.join(task_dir,
+                                                 'post_{}_NZ_{}_{}_conn_v2.npy'.format(model_name[:-3], local_city_id,
+                                                                                       local_tile_id))
+                    elif 'Gisborne' in pred_file_1:
+                        local_city_id = 1
+                        pred_file_2 = os.path.join(task_dir,
+                                                   'post_{}_NZ_{}_{}_pred_v2.npy'.format(model_name[:-3], local_city_id,
+                                                                                         local_tile_id))
+                        conn_file = os.path.join(task_dir,
+                                                 'post_{}_NZ_{}_{}_conn_v2.npy'.format(model_name[:-3], local_city_id,
+                                                                                       local_tile_id))
+                    elif 'Palmerston North' in pred_file_1:
+                        local_city_id = 2
+                        pred_file_2 = os.path.join(task_dir,
+                                                   'post_{}_NZ_{}_{}_pred_v2.npy'.format(model_name[:-3], local_city_id,
+                                                                                         local_tile_id))
+                        conn_file = os.path.join(task_dir,
+                                                 'post_{}_NZ_{}_{}_conn_v2.npy'.format(model_name[:-3], local_city_id,
+                                                                                       local_tile_id))
+                    elif 'Rotorua' in pred_file_1:
+                        local_city_id = 3
+                        pred_file_2 = os.path.join(task_dir,
+                                                   'post_{}_NZ_{}_{}_pred_v2.npy'.format(model_name[:-3], local_city_id,
+                                                                                         local_tile_id))
+                        conn_file = os.path.join(task_dir,
+                                                 'post_{}_NZ_{}_{}_conn_v2.npy'.format(model_name[:-3], local_city_id,
+                                                                                       local_tile_id))
+                    elif 'Tauranga' in pred_file_1:
+                        local_city_id = 4
+                        pred_file_2 = os.path.join(task_dir,
+                                                   'post_{}_NZ_{}_{}_pred_v2.npy'.format(model_name[:-3], local_city_id,
+                                                                                         local_tile_id))
+                        conn_file = os.path.join(task_dir,
+                                                 'post_{}_NZ_{}_{}_conn_v2.npy'.format(model_name[:-3], local_city_id,
+                                                                                       local_tile_id))
+                preds = ersa_utils.load_file(pred_file_1)
+                pred_list = ersa_utils.load_file(pred_file_2)
+                cp_list = ersa_utils.load_file(conn_file)
+                tower_gt = []
+                for label, bbox in read_polygon_csv_data(csv_file_name):
+                    y, x = get_center_point(*bbox)
+                    tower_gt.append([y, x])
+                connected_pairs = read_lines_truth(csv_file_name, tower_gt)
+                pred_list_orig = []
+                center_list, conf_list, _ = local_maxima_suppression(preds)
+                for center, conf in zip(center_list, conf_list):
+                    if conf > 0.8:
+                        pred_list_orig.append(center.tolist())
+                if len(pred_list) == 0:
+                    pred_list = np.array([(0, 0), ])
+                link_list = link_pred_gt(pred_list, tower_gt, link_r)
+                tp, n_recall, n_precision = grid_score(tower_gt, pred_list, connected_pairs, cp_list, link_list)
+
+                tp_all += tp
+                n_recall_all += n_recall
+                n_precision_all += n_precision
+
+                model_n_tp[0, model_cnt] += tp
+                model_n_recall[0, model_cnt] += n_recall
+                model_n_precision[0, model_cnt] += n_precision
+
+            recall = tp_all / n_recall_all
+            precision = tp_all / n_precision_all
+            f1 = 2 * (precision * recall) / ((precision + recall) + 1e-6)
+
+            X = np.arange(2)
+            plt.bar(X+width*(3*model_cnt), [precision, recall], width=width, color=cmap(2*model_cnt),
+                    label='{} f1={:.2f}'.format(model_name_dict[model_name], f1), edgecolor='k')
+
+            offset_x = 0.04
+            offset_y = 0.01
+            plt.text(width*(3*model_cnt)-offset_x, precision+offset_y, '{:.2f}'.format(precision), fontsize=8)
+            plt.text(1+width*(3*model_cnt)-offset_x, recall+offset_y, '{:.2f}'.format(recall), fontsize=8)
+
+            #plt.xlabel('Recall')
+            plt.xticks(X+width*3.5, ['Precision', 'Recall'])
+        plt.ylabel('Score')
+        plt.ylim([0.0, 1.2])
+        plt.legend()
+        plt.title(city_list[city_id])
+    plt.tight_layout()
+    plt.savefig(os.path.join(img_dir, 'fvis_performance_comparison.png'))
+    plt.show()
+
+    recall_overall = model_n_tp / model_n_recall
+    precision_overall = model_n_tp / model_n_precision
+    f1_overall = 2 * (recall_overall * precision_overall) / (recall_overall + precision_overall)
+    print(f1_overall)
+
+
 # settings
 if __name__ == '__main__':
     img_dir, task_dir = sis_utils.get_task_img_folder()
 
     data_dir = r'/home/lab/Documents/bohao/data/transmission_line'
-    info_dir = os.path.join(data_dir, 'info')
-    raw_dir = os.path.join(data_dir, 'raw')
+    info_dir = os.path.join(data_dir, 'info2')
+    raw_dir = os.path.join(data_dir, 'raw2')
 
     #plot_across_model_post()
     #plot_within_model('faster_rcnn')
-    plot_across_model_grid_with_graph()
+    # plot_across_model_grid_with_graph()
+    plot_across_model_v2(link_r=30)

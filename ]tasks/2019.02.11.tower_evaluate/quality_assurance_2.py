@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from natsort import natsorted
 
 # Own modules
+import sis_utils
 import util_functions
 from rst_utils import misc_utils
 from evaluate_tower_performance import link_pred_gt
@@ -21,8 +22,8 @@ from line_length_stats import read_line_csv_data, add_point_if_not_nearby
 from post_processing_utils import read_polygon_csv_data, get_center_point, order_pair, visualize_with_connected_pairs
 
 
-def grid_score(tower_gt, tower_pred, line_gt, line_pred, link_list, type='all'):
-    assert type in ['all', 'tower', 'line']
+def grid_score(tower_gt, tower_pred, line_gt, line_pred, link_list, score_type='all'):
+    assert score_type in ['Graph', 'Tower', 'Line']
 
     cnt_obj = 0
     for a in link_list:
@@ -40,11 +41,11 @@ def grid_score(tower_gt, tower_pred, line_gt, line_pred, link_list, type='all'):
             if (link_list[cp[0]], link_list[cp[1]]) in line_gt:
                 cnt_pred += 1
 
-    if type == 'all':
+    if score_type == 'Graph':
         tp = cnt_obj + cnt_pred
         n_recall = len(tower_gt) + len(line_gt)
         n_precision = len(tower_pred) + len(line_pred)
-    elif type == 'tower':
+    elif score_type == 'Tower':
         tp = cnt_obj
         n_recall = len(tower_gt)
         n_precision = len(tower_pred)
@@ -53,7 +54,6 @@ def grid_score(tower_gt, tower_pred, line_gt, line_pred, link_list, type='all'):
         n_recall = len(line_gt)
         n_precision = len(line_pred)
 
-
     return tp, n_recall, n_precision
 
 
@@ -61,6 +61,19 @@ def find_point_id(centers, point):
     dist = np.linalg.norm(np.array(centers) - np.array(point), axis=1)
     #assert np.min(dist) < 100
     return np.argmin(dist)
+
+def get_city_name(file_name):
+    seps = file_name.split('_')
+    for s in seps:
+        if len(s) > 3:
+            return s
+
+def get_city_id(file_name):
+    seps = file_name.split('_')
+    for s in seps:
+        int_s = ''.join([a for a in s if a.isdigit()])
+        if len(int_s) > 0:
+            return int(int_s)
 
 
 def get_reannotate_results(data_dir):
@@ -71,11 +84,12 @@ def get_annotate_results(re_files, data_dir):
     files = []
     for rf in re_files:
         file_name = os.path.basename(rf)
-        city_name = file_name.split('_')[0]
-        city_id = str(file_name.split('_')[1]).split('.')[0]
+        city_name = get_city_name(file_name)
+        city_id = get_city_id(file_name)
         if city_name == 'Colwich':
             city_name = 'Colwich_Maize'
-        gt_file = glob(os.path.join(data_dir, '*_{}_{}.csv'.format(city_name, city_id)))
+        gt_file = glob(os.path.join(data_dir, '*_{}_{}.csv'.format(city_name, city_id))) + \
+                  glob(os.path.join(data_dir, '*_{}_{}_resize.csv'.format(city_name, city_id)))
         assert len(gt_file) == 1
         files.append(gt_file[0])
     return files
@@ -100,38 +114,42 @@ def read_lines_truth(csv_file_name, tower_gt):
                                                  find_point_id(tower_gt, centers[i + 1])))
             except AssertionError:
                 pass
-            except ValueError:
-                pass
     return connected_pair
 
 
-def check_gt_plot(city_name, city_id, tower_gt, line_gt):
+def check_gt_plot(city_name, city_id, tower_gt, tower_pred):
     if city_name == 'Colwich':
         city_name = 'Colwich_Maize'
-    img_dir = r'/home/lab/Documents/bohao/data/transmission_line/raw'
-    rgb_file = glob(os.path.join(img_dir, '*_{}_{}.tif'.format(city_name, city_id)))
+    if city_name == 'Palmerston North':
+        city_name = 'PalmerstonNorth'
+    rgb_file = os.path.join(r'/media/ei-edl01/data/uab_datasets/lines_v3/data/Original_Tiles',
+                            '{}{}_RGB.tif'.format(city_name, city_id))
 
-    line_gt = misc_utils.load_file(os.path.join(r'/media/ei-edl01/data/uab_datasets/lines/data/Original_Tiles',
-                                                '{}{}_GT.png'.format(city_name, city_id)))
-    line_gt = cv2.dilate(line_gt, np.ones((5, 5), np.uint8), iterations=10)
+    try:
+        line_gt = misc_utils.load_file(os.path.join(r'/media/ei-edl01/data/uab_datasets/lines_v3/data/Original_Tiles',
+                                                    '{}{}_GT.png'.format(city_name, city_id)))
+        line_gt = cv2.dilate(line_gt, np.ones((5, 5), np.uint8), iterations=3)
 
-    plt.figure(figsize=(8, 6))
-    assert len(rgb_file) == 1
-    rgb = misc_utils.load_file(rgb_file[0])
-    rgb = util_functions.add_mask(rgb, line_gt, [0, 255, 0], 1)
-    plt.imshow(rgb)
-    # visualize_with_connected_pairs(rgb, tower_gt, line_gt, style='r', add_fig=True)
-    center_points = np.array(tower_gt)
-    plt.scatter(center_points[:, 1], center_points[:, 0], c='g', s=40, marker='o', alpha=1,
-                edgecolors='k')
-    plt.title('{} {}'.format(city_name, city_id))
-    plt.axis('off')
-    plt.tight_layout()
-    plt.show()
+        plt.figure(figsize=(8, 6))
+        rgb = misc_utils.load_file(rgb_file)
+        rgb = util_functions.add_mask(rgb, line_gt, [0, 255, 0], 1)
+        plt.imshow(rgb)
+        # visualize_with_connected_pairs(rgb, tower_gt, line_gt, style='r', add_fig=True)
+        center_points = np.array(tower_gt)
+        plt.scatter(center_points[:, 1], center_points[:, 0], c='g', s=40, marker='o', alpha=1,
+                    edgecolors='k')
+        pred_points = np.array(tower_pred)
+        # plt.scatter(pred_points[:, 1], pred_points[:, 0], c='r', s=40, marker='o', alpha=1, edgecolors='k')
+        plt.title('{} {}'.format(city_name, city_id))
+        plt.axis('off')
+        plt.tight_layout()
+        plt.show()
+    except:
+        pass
 
 
 def plot_error_bar(city_f1, city_p, city_r, title):
-    city_list = ['Tucson', 'Colwich', 'Clyde', 'Wilmington']
+    city_list = sorted(list(city_f1.keys()))
     f1_list = []
     p_list = []
     r_list = []
@@ -153,11 +171,11 @@ def plot_error_bar(city_f1, city_p, city_r, title):
         r_list.append(np.mean(city_r[city_name]))
         r_yerr_min_list.append(np.mean(city_r[city_name]) - np.min(city_r[city_name]))
         r_yerr_max_list.append(np.max(city_r[city_name]) - np.mean(city_r[city_name]))
-    city_num = len(city_list)
     f1_yerr = np.stack((f1_yerr_min_list, f1_yerr_max_list), axis=0)
     p_yerr = np.stack((p_yerr_min_list, p_yerr_max_list), axis=0)
     r_yerr = np.stack((r_yerr_min_list, r_yerr_max_list), axis=0)
 
+    city_num = len(city_list)
     plt.figure(figsize=(6, 4))
     n = np.arange(city_num)
     width = 0.3
@@ -171,51 +189,55 @@ def plot_error_bar(city_f1, city_p, city_r, title):
     plt.ylim([0, 1])
     plt.title(title)
     plt.tight_layout()
-    plt.show()
+    # plt.show()
 
 
 if __name__ == '__main__':
     # settings
-    data_dir = r'/home/lab/Documents/bohao/data/transmission_line/annotate'
-    gt_dir = r'/home/lab/Documents/bohao/data/transmission_line/raw'
+    data_dir = r'/media/ei-edl01/data/remote_sensing_data/transmission_line/annotation_round1'
+    gt_dir = r'/home/lab/Documents/bohao/data/transmission_line/raw2'
     re_files = get_reannotate_results(data_dir)
     gt_files = get_annotate_results(re_files, gt_dir)
+    img_dir, task_dir = sis_utils.get_task_img_folder()
 
-    city_f1 = {}
-    city_p = {}
-    city_r = {}
+    for score_tpe in ['Tower', 'Line', 'Graph']:
+        city_f1 = {}
+        city_p = {}
+        city_r = {}
 
-    for gt, re in zip(gt_files, re_files):
-        print(gt, re)
+        for gt, re in zip(gt_files, re_files):
+            file_name = os.path.basename(re)
+            city_name = get_city_name(file_name)
+            city_id = get_city_id(file_name)
 
-        '''file_name = os.path.basename(re)
-        city_name = file_name.split('_')[0]
-        city_id = str(file_name.split('_')[1]).split('.')[0]
+            t_gt = read_tower_truth(gt)
+            t_re = read_tower_truth(re)
+            cp_gt = read_lines_truth(gt, t_gt)
+            cp_re = read_lines_truth(re, t_re)
 
-        t_gt = read_tower_truth(gt)
-        t_re = read_tower_truth(re)
-        cp_gt = read_lines_truth(gt, t_gt)
-        cp_re = read_lines_truth(re, t_re)
+            link_list = link_pred_gt(t_re, t_gt, 30)
+            check_gt_plot(city_name, city_id, t_gt, t_re)
+            # if 'Palmerston' in city_name:
+            #     check_gt_plot(city_name, city_id, t_gt, t_re)
 
-        check_gt_plot(city_name, city_id, t_re, cp_re)
+            '''tp, r_d, p_d = grid_score(t_gt, t_re, cp_gt, cp_re, link_list, score_type=score_tpe)
 
-        link_list = link_pred_gt(t_re, t_gt, 20)
+            p = tp / (p_d + 1e-3)
+            r = tp / (r_d + 1e-3)
+            f1 = 2 * (p * r) / (p + r + 1e-3)
 
-        tp, r_d, p_d = grid_score(t_gt, t_re, cp_gt, cp_re, link_list, type='line')
-        p = tp / p_d
-        r = tp / r_d
-        f1 = 2 * (p * r) / (p + r)
+            if city_name not in city_f1:
+                city_f1[city_name] = [f1]
+                city_p[city_name] = [p]
+                city_r[city_name] = [r]
+            else:
+                city_f1[city_name].append(f1)
+                city_p[city_name].append(p)
+                city_r[city_name].append(r)'''
 
-        if city_name not in city_f1:
-            city_f1[city_name] = [f1]
-            city_p[city_name] = [p]
-            city_r[city_name] = [r]
-        else:
-            city_f1[city_name].append(f1)
-            city_p[city_name].append(p)
-            city_r[city_name].append(r)
+            # print('{}_{}: P:{:.2f}, R:{:.2f}, F1:{:.2f}'.format(city_name, city_id, p, r, f1))
 
-        # print('{}_{}: P:{:.2f}, R:{:.2f}, F1:{:.2f}'.format(city_name, city_id, p, r, f1))
-
-    # plot error bar
-    plot_error_bar(city_f1, city_p, city_r, 'Graph Level Comparison')'''
+        # plot error bar
+        #plot_error_bar(city_f1, city_p, city_r, '{} Level Comparison'.format(score_tpe))
+        #plt.savefig(os.path.join(img_dir, 'qa_all_{}.png'.format(score_tpe)))
+        #plt.show()

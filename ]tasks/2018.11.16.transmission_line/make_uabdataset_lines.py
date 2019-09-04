@@ -9,7 +9,7 @@ import ersa_utils
 
 
 # Settings
-ENCODER = {'DL': 1, 'TL': 1, 'DT': 1, 'TT': 1}
+ENCODER = {'DL': 1, 'TL': 1, 'DT': 1, 'TT': 1, 'L': 1, 'T': 1}
 
 
 def check_bounds(cc, rr, size_x, size_y):
@@ -19,7 +19,7 @@ def check_bounds(cc, rr, size_x, size_y):
 
 
 def read_polygon_csv_data(csv_file):
-    label_order = ['SS', 'OT', 'DT', 'TT', 'OL', 'DL', 'TL']
+    label_order = ['SS', 'OT', 'DT', 'TT', 'OL', 'DL', 'TL', 'T', 'L']
     df = pd.read_csv(csv_file)
     df['temp_label'] = pd.Categorical(df['Label'], categories=label_order, ordered=True)
     df.sort_values('temp_label', inplace=True, kind='mergesort')
@@ -36,7 +36,7 @@ def read_polygon_csv_data(csv_file):
 
 
 def read_polygon_csv_data_towers(csv_file):
-    label_order = ['SS', 'OT', 'DT', 'TT', 'OL', 'DL', 'TL']
+    label_order = ['SS', 'OT', 'DT', 'TT', 'OL', 'DL', 'TL', 'T', 'L']
     df = pd.read_csv(csv_file)
     df['temp_label'] = pd.Categorical(df['Label'], categories=label_order, ordered=True)
     df.sort_values('temp_label', inplace=True, kind='mergesort')
@@ -52,8 +52,14 @@ def read_polygon_csv_data_towers(csv_file):
 def write_data_info(rgb_files, csv_files, save_dir):
     for rgb_file, csv_file in zip(rgb_files, csv_files):
         print('Processing data {} ...'.format(os.path.basename(rgb_file)[:-3]), end='')
-        city_name = os.path.basename(rgb_file[:-4]).split('_')[2]
-        city_id = os.path.basename(rgb_file[:-4]).split('_')[-1]
+        if 'NZ' in rgb_file and 'resize' in rgb_file:
+            city_name = os.path.basename(rgb_file[:-4]).split('_')[1]
+            if 'Palmerston North' in city_name:
+                city_name = 'PalmerstonNorth'
+            city_id = os.path.basename(rgb_file[:-4]).split('_')[-2]
+        else:
+            city_name = os.path.basename(rgb_file[:-4]).split('_')[2]
+            city_id = os.path.basename(rgb_file[:-4]).split('_')[-1]
 
         rgb_save_name = '{}{}_RGB.tif'.format(city_name, city_id)
         gt_save_name = '{}{}_GT.png'.format(city_name, city_id)
@@ -65,10 +71,16 @@ def write_data_info(rgb_files, csv_files, save_dir):
         gt_towers = np.zeros((h, w), dtype=np.uint8)
 
         for label, y, x in read_polygon_csv_data(csv_file):
-            gt[x, y] = ENCODER[label]
+            try:
+                gt[x, y] = ENCODER[label]
+            except IndexError:
+                pass
 
         for label, y, x in read_polygon_csv_data_towers(csv_file):
-            gt_towers[y, x] = ENCODER[label]
+            try:
+                gt_towers[y, x] = ENCODER[label]
+            except IndexError:
+                pass
 
         # dilation
         kernel = np.ones((15, 15), np.uint8)
@@ -77,19 +89,27 @@ def write_data_info(rgb_files, csv_files, save_dir):
         '''from visualize import visualize_utils
         visualize_utils.compare_figures([rgb, gt, gt_towers], (1, 3), fig_size=(15, 5))'''
 
-        ersa_utils.save_file(os.path.join(save_dir, rgb_save_name), rgb)
+        ersa_utils.save_file(os.path.join(save_dir, rgb_save_name), rgb[:, :, :3])
         ersa_utils.save_file(os.path.join(save_dir, gt_save_name), gt)
         ersa_utils.save_file(os.path.join(save_dir, tw_save_name), gt_towers)
 
         print('Done!')
 
 
-data_dir = r'/home/lab/Documents/bohao/data/transmission_line/raw'
+data_dir = r'/home/lab/Documents/bohao/data/transmission_line/raw2'
 # get files
 rgb_files = natsorted([a for a in glob(os.path.join(data_dir, '*.tif'))
                        if 'multiclass' not in a])
-csv_files = natsorted(glob(os.path.join(data_dir, '*.csv')))
-save_dir = r'/media/ei-edl01/data/uab_datasets/lines_tw1/data/Original_Tiles'
+# csv_files = natsorted(glob(os.path.join(data_dir, '*.csv')))
+csv_files_temp = natsorted([a for a in glob(os.path.join(data_dir, '*.csv'))])
+csv_files = []
+for c in csv_files_temp:
+    if 'NZ' in c:
+        if 'resize' in c:
+            csv_files.append(c)
+    else:
+        csv_files.append(c)
+save_dir = r'/media/ei-edl01/data/uab_datasets/lines_v3/data/Original_Tiles'
 ersa_utils.make_dir_if_not_exist(save_dir)
 
 write_data_info(rgb_files, csv_files, save_dir)

@@ -20,6 +20,7 @@ from evaluate_utils import get_center_point, local_maxima_suppression
 
 
 city_list = ['AZ_Tucson', 'KS_Colwich_Maize', 'NC_Clyde', 'NC_Wilmington']
+city_list2 = ['Dunedin', 'Gisborne', 'Palmerston North', 'Rotorua', 'Tauranga']
 
 
 def read_polygon_csv_data(csv_file):
@@ -126,6 +127,7 @@ def get_edge_info(centers, conf_map, radius=1500, width=7, tile_min=(0, 0), tile
                 conf += conf_map[p[0]][p[1]]
             except IndexError:
                 # don't worry, this is because after merging the point could be outside
+                # print(p)
                 pass
         conf /= len(points)
         line_conf.append(conf)
@@ -144,7 +146,7 @@ def order_pair(p1, p2):
 
 def connect_lines(linked_pairs, line_conf, th, cut_n=2):
     def compute_weight(n):
-        return th # th * (n + 1)
+        return th * (n + 1)
 
     def get_total_connection(cd, pr):
         return len(cd[pr[0]]) + len(cd[pr[1]])
@@ -312,17 +314,22 @@ def visualize_results(img_dir, city_id, tile_id, raw_rgb, line_gt, tower_pred, t
     if connected_towers is not None and unconnected_towers is not None:
         add_points([tower_pred[a] for a in connected_towers], 'r', marker='o', alpha=1, edgecolor='k')
         try:
-            add_points([tower_pred[a] for a in unconnected_towers], 'yellow', marker='o', alpha=1, edgecolor='k')
+            add_points([tower_pred[a] for a in unconnected_towers], 'r', marker='o', alpha=1, edgecolor='k')
         except IndexError:
             print('No more unconnected towers')
     else:
         add_points(tower_pred, 'r', marker='o', alpha=1, edgecolor='k')
     plt.axis('off')
-    plt.title('{}_{}'.format(city_list[city_id], tile_id))
     plt.tight_layout()
     if save_fig:
-        plt.savefig(os.path.join(img_dir, '{}_{}_post_result{}.png'.format(city_list[city_id], tile_id,
-                                                                                 post_str)))
+        if 'NZ' in post_str:
+            plt.title('{}_{}'.format(city_list2[city_id], tile_id))
+            plt.savefig(os.path.join(img_dir, '{}_{}_post_result{}.png'.format(city_list2[city_id], tile_id,
+                                                                               post_str)))
+        else:
+            plt.title('{}_{}'.format(city_list[city_id], tile_id))
+            plt.savefig(os.path.join(img_dir, '{}_{}_post_result{}.png'.format(city_list[city_id], tile_id,
+                                                                                     post_str)))
     if close_file:
         plt.close()
     else:
